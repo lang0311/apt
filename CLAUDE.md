@@ -16,7 +16,7 @@
 5. 기능 범위가 애매하면 구현 전에 사용자에게 **한 번에 모아서** 묻는다. `docs/07_DECISIONS_AND_OPEN_ITEMS.md`에 이미 정해진 건 다시 묻지 않는다.
 
 ## 확정된 결정 (요약)
-- UI 기준: `design/canonical_user_flow_ui_svgs`(31화면) + `design/ui_additions`(3화면) = **34화면**. 흐름도 `PREVIEWS/canonical_user_flow.jpg`, `canonical_ui_31_screens.jpg`를 **먼저 보고** 해당 SVG를 연다.
+- UI 기준: `design/ui/canonical_user_flow_ui_svgs`(31화면) + `design/ui/ui_additions`(3화면) = **34화면**. 흐름도 `PREVIEWS/canonical_user_flow.jpg`, `canonical_ui_31_screens.jpg`를 **먼저 보고** 해당 SVG를 연다.
 - 로그인: **소셜(카카오/Google/Apple)이 기본**. 이메일 로그인은 **틀만** (`FeatureFlags.emailAuthEnabled=false`, 화면에 진입점 노출 금지, 예외는 간단히).
 - 지도: **네이버 지도** (`© NAVER` 표기 유지).
 - 주 진입 경로는 **릴스 → 공유 → 우리 앱**(Android `ACTION_SEND`, iOS Share Extension). 앱 내 링크 입력 화면은 URL을 알 때 쓰는 **폴백**.
@@ -91,8 +91,8 @@
 ├── CLAUDE.md
 ├── docs/                               ← 이 문서들
 ├── design/
-    ├──ui
-        ├── canonical_user_flow_ui_svgs/    ← 31화면 + PREVIEWS
+│   └── ui/
+│       ├── canonical_user_flow_ui_svgs/    ← 31화면 + PREVIEWS
 │       └── ui_additions/                   ← 추가 3화면
 └── (Flutter 프로젝트: lib/, pubspec.yaml, android/, ios/ …)
 ```
