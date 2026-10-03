@@ -17,6 +17,7 @@ import '../features/auth/presentation/pages/terms_page.dart';
 import '../features/course/presentation/pages/add_places_page.dart';
 import '../features/extraction/presentation/pages/extraction_result_page.dart';
 import '../features/extraction/presentation/pages/link_input_page.dart';
+import '../features/home/presentation/home_page.dart';
 import '../features/place/presentation/place_detail_page.dart';
 import '../features/saved/presentation/pages/collection_detail_page.dart';
 import '../features/saved/domain/saved_models.dart';
@@ -91,10 +92,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, shell) => AppShell(shell: shell),
         branches: [
           StatefulShellBranch(routes: [
-            GoRoute(path: AppRoutes.home, builder: (_, _) => const ComingSoonPage(title: '홈', showBack: false)),
+            GoRoute(path: AppRoutes.home, builder: (_, _) => const HomePage()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: AppRoutes.courses, builder: (_, _) => const ComingSoonPage(title: '코스', showBack: false)),
+            GoRoute(
+              path: AppRoutes.courses,
+              builder: (_, _) => const ComingSoonPage(title: '코스', showBack: false),
+              routes: [
+                GoRoute(path: ':id', builder: (_, _) => const ComingSoonPage(title: '코스 상세')),
+              ],
+            ),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(
