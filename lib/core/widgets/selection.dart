@@ -71,10 +71,11 @@ class RadioDot extends StatelessWidget {
 
 /// 번호 원 (선택 순서, 코스 순번)
 class NumberBadge extends StatelessWidget {
-  const NumberBadge(this.number, {super.key, this.size = 24, this.color = AppColors.primary});
+  const NumberBadge(this.number, {super.key, this.size = 24, this.color = AppColors.primary, this.textColor = Colors.white});
   final int number;
   final double size;
   final Color color;
+  final Color textColor;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +86,7 @@ class NumberBadge extends StatelessWidget {
       decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       child: Text(
         '$number',
-        style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w700, fontSize: size * 0.46),
+        style: AppTypography.caption.copyWith(color: textColor, fontWeight: FontWeight.w700, fontSize: size * 0.46),
       ),
     );
   }
