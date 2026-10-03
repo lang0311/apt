@@ -17,6 +17,7 @@ import '../features/auth/presentation/pages/terms_page.dart';
 import '../features/course/presentation/pages/add_places_page.dart';
 import '../features/course/presentation/pages/ai_recommendation_page.dart';
 import '../features/course/presentation/pages/companion_page.dart';
+import '../features/course/presentation/pages/course_done_page.dart';
 import '../features/course/presentation/pages/course_info_page.dart';
 import '../features/course/presentation/pages/courses_page.dart';
 import '../features/course/presentation/pages/place_selection_page.dart';
@@ -91,7 +92,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.courseNewPlaces, builder: (_, _) => const PlaceSelectionPage()),
       GoRoute(path: AppRoutes.courseNewCompanion, builder: (_, _) => const CompanionPage()),
       GoRoute(path: AppRoutes.courseNewAi, builder: (_, _) => const AiRecommendationPage()),
-      GoRoute(path: '/courses/new/done', builder: (_, _) => const ComingSoonPage(title: '코스 완성')),
+      GoRoute(
+        path: '/courses/new/done',
+        builder: (_, s) => CourseDonePage(courseId: s.uri.queryParameters['id'] ?? ''),
+      ),
       GoRoute(
         path: AppRoutes.pickPlaces,
         builder: (_, s) => AddPlacesPage(args: s.extra as AddPlacesArgs? ?? const AddPlacesArgs()),
