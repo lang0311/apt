@@ -15,6 +15,7 @@ import '../features/auth/presentation/pages/social_login_page.dart';
 import '../features/auth/presentation/pages/splash_page.dart';
 import '../features/auth/presentation/pages/terms_page.dart';
 import '../features/course/presentation/pages/add_places_page.dart';
+import '../features/extraction/presentation/pages/extraction_result_page.dart';
 import '../features/extraction/presentation/pages/link_input_page.dart';
 import '../features/place/presentation/place_detail_page.dart';
 import '../features/saved/presentation/pages/collection_detail_page.dart';
@@ -124,7 +125,13 @@ final routerProvider = Provider<GoRouter>((ref) {
               path: AppRoutes.extract,
               builder: (_, _) => const LinkInputPage(),
               routes: [
-                GoRoute(path: 'result', builder: (_, _) => const ComingSoonPage(title: '추출 결과 확인')),
+                GoRoute(
+                  path: 'result',
+                  builder: (_, s) => ExtractionResultPage(
+                    url: s.uri.queryParameters['url'] ?? '',
+                    fromShare: s.uri.queryParameters['from'] == 'share',
+                  ),
+                ),
               ],
             ),
           ]),
