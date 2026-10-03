@@ -14,6 +14,7 @@ import '../features/auth/presentation/pages/social_auth_error_page.dart';
 import '../features/auth/presentation/pages/social_login_page.dart';
 import '../features/auth/presentation/pages/splash_page.dart';
 import '../features/auth/presentation/pages/terms_page.dart';
+import '../features/saved/presentation/pages/saved_page.dart';
 import 'routes.dart';
 import 'shell/app_shell.dart';
 
@@ -84,7 +85,18 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(path: AppRoutes.courses, builder: (_, _) => const ComingSoonPage(title: '코스', showBack: false)),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: AppRoutes.saved, builder: (_, _) => const ComingSoonPage(title: '저장됨', showBack: false)),
+            GoRoute(
+              path: AppRoutes.saved,
+              builder: (_, _) => const SavedPage(),
+              routes: [
+                GoRoute(
+                  path: 'collections/:id',
+                  builder: (_, _) => const ComingSoonPage(title: '보관함'),
+                ),
+                GoRoute(path: 'map', builder: (_, _) => const ComingSoonPage(title: '지도')),
+              ],
+            ),
+            GoRoute(path: '/places/:id', builder: (_, _) => const ComingSoonPage(title: '장소 상세')),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(path: AppRoutes.extract, builder: (_, _) => const ComingSoonPage(title: '장소 추출', showBack: false)),
