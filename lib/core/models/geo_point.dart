@@ -17,6 +17,13 @@ class GeoBounds {
   final GeoPoint southWest;
   final GeoPoint northEast;
 
+  @override
+  bool operator ==(Object other) =>
+      other is GeoBounds && other.southWest == southWest && other.northEast == northEast;
+
+  @override
+  int get hashCode => Object.hash(southWest, northEast);
+
   bool contains(GeoPoint p) =>
       p.lat >= southWest.lat && p.lat <= northEast.lat && p.lng >= southWest.lng && p.lng <= northEast.lng;
 
