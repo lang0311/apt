@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../app/routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/app_typography.dart';
@@ -14,6 +12,7 @@ import '../../../core/widgets/headers.dart';
 import '../../../core/widgets/overlays.dart';
 import '../../../core/widgets/states.dart';
 import '../../../core/widgets/surfaces.dart';
+import '../../course/presentation/course_draft_controller.dart';
 import '../../saved/presentation/saved_providers.dart';
 import '../../saved/presentation/widgets/collection_picker_sheet.dart';
 import '../domain/place.dart';
@@ -54,7 +53,7 @@ class PlaceDetailPage extends ConsumerWidget {
   }
 }
 
-class _Body extends StatelessWidget {
+class _Body extends ConsumerWidget {
   const _Body({required this.detail});
   final PlaceDetail detail;
 
@@ -71,7 +70,7 @@ class _Body extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final status = [
       if (place.rating != null) '★ ${place.rating!.toStringAsFixed(1)}',
       ?detail.openStatusLabel,
@@ -157,7 +156,7 @@ class _Body extends StatelessWidget {
               child: AppButton.dark(
                 label: '코스 만들기',
                 // 해당 장소를 사전 선택해 코스 만들기 1/4로 (docs/04 §D)
-                onPressed: () => context.push(AppRoutes.courseNewInfo, extra: [place]),
+                onPressed: () => startCourseWizard(context, ref, places: [place]),
               ),
             ),
           ],

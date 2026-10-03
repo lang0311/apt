@@ -16,6 +16,7 @@ import '../../../../core/widgets/inputs.dart';
 import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/states.dart';
 import '../../../../core/widgets/surfaces.dart';
+import '../../../course/presentation/course_draft_controller.dart';
 import '../../../course/presentation/pages/add_places_page.dart';
 import '../../../place/domain/place.dart';
 import '../../domain/saved_models.dart';
@@ -229,7 +230,7 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
             label: '이 보관함으로 코스 만들기',
             // 보관함 장소를 일괄로 불러와 코스 만들기 1/4로 (docs/04 §D)
             onPressed: places.hasValue
-                ? () => context.push(AppRoutes.courseNewInfo, extra: places.value!.map((i) => i.place).toList())
+                ? () => startCourseWizard(context, ref, places: places.value!.map((i) => i.place).toList())
                 : null,
           ),
         ),
