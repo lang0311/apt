@@ -123,13 +123,16 @@ class _CategoryTab extends ConsumerWidget {
           loading: const Padding(padding: AppSpacing.screenPadding, child: SkeletonBox(height: 200, radius: 20)),
           data: (s) => Padding(
             padding: AppSpacing.screenPadding,
-            child: GridView.count(
-              crossAxisCount: 3,
+            child: GridView(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: AppSpacing.sm,
-              crossAxisSpacing: AppSpacing.sm,
-              childAspectRatio: 1.45,
+              // 폭 비율이 아니라 높이를 고정해 작은 기기/큰 글꼴에서도 잘리지 않게
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisSpacing: AppSpacing.sm,
+                crossAxisSpacing: AppSpacing.sm,
+                mainAxisExtent: 96,
+              ),
               children: [
                 CategoryTile(
                   label: '전체',

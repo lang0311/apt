@@ -129,7 +129,13 @@ class AppTextLink extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(label, style: (style ?? AppTypography.label).copyWith(color: color)),
+            Flexible(
+              child: Text(
+                label,
+                style: (style ?? AppTypography.label).copyWith(color: color),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             if (trailingChevron) Icon(Icons.chevron_right_rounded, size: 18, color: color),
           ],
         ),
