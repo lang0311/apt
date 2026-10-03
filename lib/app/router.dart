@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/config/feature_flags.dart';
+import '../core/widgets/coming_soon_page.dart';
 import '../features/auth/domain/auth_models.dart';
 import '../features/auth/presentation/auth_controller.dart';
 import '../features/auth/presentation/pages/account_conflict_page.dart';
@@ -13,25 +14,6 @@ import '../features/auth/presentation/pages/social_auth_error_page.dart';
 import '../features/auth/presentation/pages/social_login_page.dart';
 import '../features/auth/presentation/pages/splash_page.dart';
 import '../features/auth/presentation/pages/terms_page.dart';
-import '../features/course/presentation/pages/add_places_page.dart';
-import '../features/course/presentation/pages/ai_recommendation_page.dart';
-import '../features/course/presentation/pages/companion_page.dart';
-import '../features/course/presentation/pages/course_detail_page.dart';
-import '../features/course/presentation/pages/course_done_page.dart';
-import '../features/course/presentation/pages/course_info_page.dart';
-import '../features/course/presentation/pages/courses_page.dart';
-import '../features/course/presentation/pages/place_selection_page.dart';
-import '../features/extraction/presentation/pages/extraction_result_page.dart';
-import '../features/extraction/presentation/pages/link_input_page.dart';
-import '../features/home/presentation/home_page.dart';
-import '../features/my/presentation/my_page.dart';
-import '../features/party/presentation/invite_accept_page.dart';
-import '../features/place/presentation/place_detail_page.dart';
-import '../features/preference/presentation/preference_page.dart';
-import '../features/saved/domain/saved_models.dart';
-import '../features/saved/presentation/pages/collection_detail_page.dart';
-import '../features/saved/presentation/pages/saved_map_page.dart';
-import '../features/saved/presentation/pages/saved_page.dart';
 import 'routes.dart';
 import 'shell/app_shell.dart';
 
@@ -89,82 +71,26 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.signupTerms, builder: (_, _) => const TermsPage()),
       GoRoute(path: AppRoutes.signupProfile, builder: (_, _) => const ProfileSetupPage()),
       GoRoute(path: AppRoutes.signupDone, builder: (_, _) => const SignupDonePage()),
-      GoRoute(
-        path: AppRoutes.preferences,
-        builder: (_, s) => PreferencePage(onboarding: s.uri.queryParameters['mode'] == 'onboarding'),
-      ),
-      // 코스 만들기 위저드 (진행 바 4/4, 하나의 CourseDraft 공유)
-      GoRoute(path: AppRoutes.courseNewInfo, builder: (_, _) => const CourseInfoPage()),
-      GoRoute(path: AppRoutes.courseNewPlaces, builder: (_, _) => const PlaceSelectionPage()),
-      GoRoute(path: AppRoutes.courseNewCompanion, builder: (_, _) => const CompanionPage()),
-      GoRoute(path: AppRoutes.courseNewAi, builder: (_, _) => const AiRecommendationPage()),
-      GoRoute(
-        path: '/courses/new/done',
-        builder: (_, s) => CourseDonePage(courseId: s.uri.queryParameters['id'] ?? ''),
-      ),
-      GoRoute(
-        path: AppRoutes.pickPlaces,
-        builder: (_, s) => AddPlacesPage(args: s.extra as AddPlacesArgs? ?? const AddPlacesArgs()),
-      ),
-      GoRoute(path: '/invites/:token', builder: (_, s) => InviteAcceptPage(token: s.pathParameters['token']!)),
+      GoRoute(path: AppRoutes.preferences, builder: (_, _) => const ComingSoonPage(title: '취향 설정')),
 
       // ── 하단 탭 5개 (활성 표시는 현재 라우트 기준) ──
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AppShell(shell: shell),
         branches: [
           StatefulShellBranch(routes: [
-            GoRoute(path: AppRoutes.home, builder: (_, _) => const HomePage()),
+            GoRoute(path: AppRoutes.home, builder: (_, _) => const ComingSoonPage(title: '홈', showBack: false)),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(
-              path: AppRoutes.courses,
-              builder: (_, _) => const CoursesPage(),
-              routes: [
-                GoRoute(path: ':id', builder: (_, s) => CourseDetailPage(courseId: s.pathParameters['id']!)),
-              ],
-            ),
+            GoRoute(path: AppRoutes.courses, builder: (_, _) => const ComingSoonPage(title: '코스', showBack: false)),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(
-              path: AppRoutes.saved,
-              builder: (_, _) => const SavedPage(),
-              routes: [
-                GoRoute(
-                  path: 'collections/:id',
-                  builder: (_, s) => CollectionDetailPage(collectionId: s.pathParameters['id']!),
-                ),
-                GoRoute(
-                  path: 'map',
-                  builder: (_, s) {
-                    final q = s.uri.queryParameters;
-                    return SavedMapPage(
-                      mode: q['mode'] == 'collection' ? SavedMapMode.collection : SavedMapMode.category,
-                      initialCategoryKey: q['key'],
-                      initialCollectionId: q['id'],
-                    );
-                  },
-                ),
-              ],
-            ),
-            GoRoute(path: '/places/:id', builder: (_, s) => PlaceDetailPage(placeId: s.pathParameters['id']!)),
+            GoRoute(path: AppRoutes.saved, builder: (_, _) => const ComingSoonPage(title: '저장됨', showBack: false)),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(
-              path: AppRoutes.extract,
-              builder: (_, _) => const LinkInputPage(),
-              routes: [
-                GoRoute(
-                  path: 'result',
-                  builder: (_, s) => ExtractionResultPage(
-                    url: s.uri.queryParameters['url'] ?? '',
-                    fromShare: s.uri.queryParameters['from'] == 'share',
-                  ),
-                ),
-              ],
-            ),
+            GoRoute(path: AppRoutes.extract, builder: (_, _) => const ComingSoonPage(title: '장소 추출', showBack: false)),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: AppRoutes.my, builder: (_, _) => const MyPage()),
+            GoRoute(path: AppRoutes.my, builder: (_, _) => const ComingSoonPage(title: '마이', showBack: false)),
           ]),
         ],
       ),
