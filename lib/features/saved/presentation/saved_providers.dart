@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/repositories.dart';
 import '../../../core/models/geo_point.dart';
+import '../../extraction/presentation/extraction_providers.dart';
+import '../../home/presentation/home_providers.dart';
 import '../../place/domain/place.dart';
 import '../domain/saved_models.dart';
 
@@ -49,4 +51,8 @@ void invalidateSavedData(WidgetRef ref) {
   ref.invalidate(collectionsProvider);
   ref.invalidate(collectionProvider);
   ref.invalidate(placeDetailProvider);
+  // 저장 수가 바뀌면 홈 통계/최근 추출의 저장 상태도 바뀐다
+  ref.invalidate(homeStatsProvider);
+  ref.invalidate(recentExtractionsProvider);
+  ref.invalidate(trendingPlacesProvider);
 }
