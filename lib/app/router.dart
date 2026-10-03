@@ -17,6 +17,8 @@ import '../features/auth/presentation/pages/terms_page.dart';
 import '../features/course/presentation/pages/add_places_page.dart';
 import '../features/place/presentation/place_detail_page.dart';
 import '../features/saved/presentation/pages/collection_detail_page.dart';
+import '../features/saved/domain/saved_models.dart';
+import '../features/saved/presentation/pages/saved_map_page.dart';
 import '../features/saved/presentation/pages/saved_page.dart';
 import 'routes.dart';
 import 'shell/app_shell.dart';
@@ -101,7 +103,17 @@ final routerProvider = Provider<GoRouter>((ref) {
                   path: 'collections/:id',
                   builder: (_, s) => CollectionDetailPage(collectionId: s.pathParameters['id']!),
                 ),
-                GoRoute(path: 'map', builder: (_, _) => const ComingSoonPage(title: '지도')),
+                GoRoute(
+                  path: 'map',
+                  builder: (_, s) {
+                    final q = s.uri.queryParameters;
+                    return SavedMapPage(
+                      mode: q['mode'] == 'collection' ? SavedMapMode.collection : SavedMapMode.category,
+                      initialCategoryKey: q['key'],
+                      initialCollectionId: q['id'],
+                    );
+                  },
+                ),
               ],
             ),
             GoRoute(path: '/places/:id', builder: (_, s) => PlaceDetailPage(placeId: s.pathParameters['id']!)),

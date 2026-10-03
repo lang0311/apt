@@ -107,6 +107,13 @@ class _PreviewMapState extends State<_PreviewMap> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _reportBounds());
   }
 
+  @override
+  void didUpdateWidget(covariant _PreviewMap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 마커가 바뀌면(필터 변경) 보이는 영역을 다시 알린다 — 실제 지도의 카메라 이동에 해당
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reportBounds());
+  }
+
   void _reportBounds() {
     final b = _bounds;
     if (!mounted || b == null || widget.onCameraIdle == null) return;
