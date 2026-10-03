@@ -15,6 +15,7 @@ import '../features/auth/presentation/pages/social_login_page.dart';
 import '../features/auth/presentation/pages/splash_page.dart';
 import '../features/auth/presentation/pages/terms_page.dart';
 import '../features/course/presentation/pages/add_places_page.dart';
+import '../features/course/presentation/pages/companion_page.dart';
 import '../features/course/presentation/pages/course_info_page.dart';
 import '../features/course/presentation/pages/courses_page.dart';
 import '../features/course/presentation/pages/place_selection_page.dart';
@@ -87,7 +88,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       // 코스 만들기 위저드 (진행 바 4/4, 하나의 CourseDraft 공유)
       GoRoute(path: AppRoutes.courseNewInfo, builder: (_, _) => const CourseInfoPage()),
       GoRoute(path: AppRoutes.courseNewPlaces, builder: (_, _) => const PlaceSelectionPage()),
-      GoRoute(path: AppRoutes.courseNewCompanion, builder: (_, _) => const ComingSoonPage(title: '동행 설정')),
+      GoRoute(path: AppRoutes.courseNewCompanion, builder: (_, _) => const CompanionPage()),
+      GoRoute(path: AppRoutes.courseNewAi, builder: (_, _) => const ComingSoonPage(title: 'AI 코스 추천')),
       GoRoute(
         path: AppRoutes.pickPlaces,
         builder: (_, s) => AddPlacesPage(args: s.extra as AddPlacesArgs? ?? const AddPlacesArgs()),
