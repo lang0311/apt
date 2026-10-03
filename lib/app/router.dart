@@ -14,6 +14,7 @@ import '../features/auth/presentation/pages/social_auth_error_page.dart';
 import '../features/auth/presentation/pages/social_login_page.dart';
 import '../features/auth/presentation/pages/splash_page.dart';
 import '../features/auth/presentation/pages/terms_page.dart';
+import '../features/place/presentation/place_detail_page.dart';
 import '../features/saved/presentation/pages/saved_page.dart';
 import 'routes.dart';
 import 'shell/app_shell.dart';
@@ -73,6 +74,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.signupProfile, builder: (_, _) => const ProfileSetupPage()),
       GoRoute(path: AppRoutes.signupDone, builder: (_, _) => const SignupDonePage()),
       GoRoute(path: AppRoutes.preferences, builder: (_, _) => const ComingSoonPage(title: '취향 설정')),
+      GoRoute(path: AppRoutes.courseNewInfo, builder: (_, _) => const ComingSoonPage(title: '코스 만들기')),
 
       // ── 하단 탭 5개 (활성 표시는 현재 라우트 기준) ──
       StatefulShellRoute.indexedStack(
@@ -96,7 +98,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                 GoRoute(path: 'map', builder: (_, _) => const ComingSoonPage(title: '지도')),
               ],
             ),
-            GoRoute(path: '/places/:id', builder: (_, _) => const ComingSoonPage(title: '장소 상세')),
+            GoRoute(path: '/places/:id', builder: (_, s) => PlaceDetailPage(placeId: s.pathParameters['id']!)),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(path: AppRoutes.extract, builder: (_, _) => const ComingSoonPage(title: '장소 추출', showBack: false)),
