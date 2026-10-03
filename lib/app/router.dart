@@ -17,6 +17,7 @@ import '../features/auth/presentation/pages/terms_page.dart';
 import '../features/course/presentation/pages/add_places_page.dart';
 import '../features/course/presentation/pages/ai_recommendation_page.dart';
 import '../features/course/presentation/pages/companion_page.dart';
+import '../features/course/presentation/pages/course_detail_page.dart';
 import '../features/course/presentation/pages/course_done_page.dart';
 import '../features/course/presentation/pages/course_info_page.dart';
 import '../features/course/presentation/pages/courses_page.dart';
@@ -113,7 +114,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               path: AppRoutes.courses,
               builder: (_, _) => const CoursesPage(),
               routes: [
-                GoRoute(path: ':id', builder: (_, _) => const ComingSoonPage(title: '코스 상세')),
+                GoRoute(path: ':id', builder: (_, s) => CourseDetailPage(courseId: s.pathParameters['id']!)),
               ],
             ),
           ]),
