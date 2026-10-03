@@ -15,6 +15,7 @@ import '../features/auth/presentation/pages/social_login_page.dart';
 import '../features/auth/presentation/pages/splash_page.dart';
 import '../features/auth/presentation/pages/terms_page.dart';
 import '../features/course/presentation/pages/add_places_page.dart';
+import '../features/course/presentation/pages/courses_page.dart';
 import '../features/extraction/presentation/pages/extraction_result_page.dart';
 import '../features/extraction/presentation/pages/link_input_page.dart';
 import '../features/home/presentation/home_page.dart';
@@ -97,7 +98,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(routes: [
             GoRoute(
               path: AppRoutes.courses,
-              builder: (_, _) => const ComingSoonPage(title: '코스', showBack: false),
+              builder: (_, _) => const CoursesPage(),
               routes: [
                 GoRoute(path: ':id', builder: (_, _) => const ComingSoonPage(title: '코스 상세')),
               ],
