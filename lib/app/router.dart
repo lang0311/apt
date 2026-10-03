@@ -28,6 +28,7 @@ import '../features/home/presentation/home_page.dart';
 import '../features/party/presentation/invite_accept_page.dart';
 import '../features/place/presentation/place_detail_page.dart';
 import '../features/saved/presentation/pages/collection_detail_page.dart';
+import '../features/preference/presentation/preference_page.dart';
 import '../features/saved/domain/saved_models.dart';
 import '../features/saved/presentation/pages/saved_map_page.dart';
 import '../features/saved/presentation/pages/saved_page.dart';
@@ -88,7 +89,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.signupTerms, builder: (_, _) => const TermsPage()),
       GoRoute(path: AppRoutes.signupProfile, builder: (_, _) => const ProfileSetupPage()),
       GoRoute(path: AppRoutes.signupDone, builder: (_, _) => const SignupDonePage()),
-      GoRoute(path: AppRoutes.preferences, builder: (_, _) => const ComingSoonPage(title: '취향 설정')),
+      GoRoute(
+        path: AppRoutes.preferences,
+        builder: (_, s) => PreferencePage(onboarding: s.uri.queryParameters['mode'] == 'onboarding'),
+      ),
       // 코스 만들기 위저드 (진행 바 4/4, 하나의 CourseDraft 공유)
       GoRoute(path: AppRoutes.courseNewInfo, builder: (_, _) => const CourseInfoPage()),
       GoRoute(path: AppRoutes.courseNewPlaces, builder: (_, _) => const PlaceSelectionPage()),
