@@ -15,6 +15,7 @@ import '../features/auth/presentation/pages/social_login_page.dart';
 import '../features/auth/presentation/pages/splash_page.dart';
 import '../features/auth/presentation/pages/terms_page.dart';
 import '../features/course/presentation/pages/add_places_page.dart';
+import '../features/course/presentation/pages/course_info_page.dart';
 import '../features/course/presentation/pages/courses_page.dart';
 import '../features/extraction/presentation/pages/extraction_result_page.dart';
 import '../features/extraction/presentation/pages/link_input_page.dart';
@@ -82,7 +83,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.signupProfile, builder: (_, _) => const ProfileSetupPage()),
       GoRoute(path: AppRoutes.signupDone, builder: (_, _) => const SignupDonePage()),
       GoRoute(path: AppRoutes.preferences, builder: (_, _) => const ComingSoonPage(title: '취향 설정')),
-      GoRoute(path: AppRoutes.courseNewInfo, builder: (_, _) => const ComingSoonPage(title: '코스 만들기')),
+      // 코스 만들기 위저드 (진행 바 4/4, 하나의 CourseDraft 공유)
+      GoRoute(path: AppRoutes.courseNewInfo, builder: (_, _) => const CourseInfoPage()),
+      GoRoute(path: AppRoutes.courseNewPlaces, builder: (_, _) => const ComingSoonPage(title: '저장한 장소 선택')),
       GoRoute(
         path: AppRoutes.pickPlaces,
         builder: (_, s) => AddPlacesPage(args: s.extra as AddPlacesArgs? ?? const AddPlacesArgs()),
