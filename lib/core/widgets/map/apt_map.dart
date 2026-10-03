@@ -43,6 +43,7 @@ class AptMap extends StatelessWidget {
     this.onCameraIdle,
     this.selectedId,
     this.bottomPadding = 0,
+    this.topPadding = 0,
   });
 
   final List<MapMarker> markers;
@@ -58,6 +59,9 @@ class AptMap extends StatelessWidget {
   /// 하단 시트에 가려지는 높이 (마커 배치 시 제외)
   final double bottomPadding;
 
+  /// 상단 검색바·칩에 가려지는 높이 (마커 배치 시 제외)
+  final double topPadding;
+
   @override
   Widget build(BuildContext context) {
     if (Env.naverMapClientId.isNotEmpty) {
@@ -70,6 +74,7 @@ class AptMap extends StatelessWidget {
       onCameraIdle: onCameraIdle,
       selectedId: selectedId,
       bottomPadding: bottomPadding,
+      topPadding: topPadding,
     );
   }
 }
@@ -83,6 +88,7 @@ class _PreviewMap extends StatefulWidget {
     required this.onCameraIdle,
     required this.selectedId,
     required this.bottomPadding,
+    required this.topPadding,
   });
 
   final List<MapMarker> markers;
@@ -91,6 +97,7 @@ class _PreviewMap extends StatefulWidget {
   final ValueChanged<GeoBounds>? onCameraIdle;
   final String? selectedId;
   final double bottomPadding;
+  final double topPadding;
 
   @override
   State<_PreviewMap> createState() => _PreviewMapState();
@@ -99,7 +106,27 @@ class _PreviewMap extends StatefulWidget {
 class _PreviewMapState extends State<_PreviewMap> {
   GeoBounds? _reported;
 
-  GeoBounds? get _bounds => GeoBounds.around([...widget.markers.map((m) => m.point), ...widget.route]);
+  /// 보이는 영역. 멀리 떨어진 장소(다른 지역) 하나 때문에 나머지가 한 점으로 뭉치지 않도록
+  /// 중앙값에서 크게 벗어난 점은 제외한다 — 실제 지도의 "초기 카메라가 밀집 지역을 비춤"에 해당.
+  GeoBounds? get _bounds {
+    final points = [...widget.markers.map((m) => m.point), ...widget.route];
+    if (points.length < 3) return GeoBounds.around(points);
+    double median(List<double> v) => (v..sort())[v.length ~/ 2];
+    final mLat = median(points.map((p) => p.lat).toList());
+    final mLng = median(points.map((p) => p.lng).toList());
+    double dist(GeoPoint p) => math.max((p.lat - mLat).abs(), (p.lng - mLng).abs());
+    final limit = math.max(0.03, median(points.map(dist).toList()) * 4);
+    return GeoBounds.around(points.where((p) => dist(p) <= limit));
+  }
+
+  bool _visible(GeoBounds? b, GeoPoint p) {
+    if (b == null) return true;
+    const e = 1e-9;
+    return p.lat >= b.southWest.lat - e &&
+        p.lat <= b.northEast.lat + e &&
+        p.lng >= b.southWest.lng - e &&
+        p.lng <= b.northEast.lng + e;
+  }
 
   @override
   void initState() {
@@ -130,9 +157,11 @@ class _PreviewMapState extends State<_PreviewMap> {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, c) {
       final size = Size(c.maxWidth, c.maxHeight);
-      final usable = Rect.fromLTRB(44, 64, size.width - 44, math.max(110, size.height - widget.bottomPadding - 44));
-      final project = _projector(usable);
-      final routeOffsets = widget.route.map(project).toList();
+      final top = widget.topPadding + 44;
+      final usable = Rect.fromLTRB(44, top, size.width - 44, math.max(top + 60, size.height - widget.bottomPadding - 44));
+      final bounds = _bounds;
+      final project = _projector(usable, bounds);
+      final routeOffsets = widget.route.where((p) => _visible(bounds, p)).map(project).toList();
 
       return ClipRect(
         child: Stack(
@@ -141,7 +170,7 @@ class _PreviewMapState extends State<_PreviewMap> {
             if (routeOffsets.length > 1)
               Positioned.fill(child: CustomPaint(painter: _RoutePainter(routeOffsets))),
             for (final m in widget.markers)
-              _positioned(project(m.point), m),
+              if (_visible(bounds, m.point)) _positioned(project(m.point), m),
             Positioned(
               right: 10,
               bottom: widget.bottomPadding + 8,
@@ -153,8 +182,7 @@ class _PreviewMapState extends State<_PreviewMap> {
     });
   }
 
-  Offset Function(GeoPoint) _projector(Rect area) {
-    final b = _bounds;
+  Offset Function(GeoPoint) _projector(Rect area, GeoBounds? b) {
     if (b == null) return (_) => area.center;
     final latSpan = math.max(b.northEast.lat - b.southWest.lat, 0.002);
     final lngSpan = math.max(b.northEast.lng - b.southWest.lng, 0.002);

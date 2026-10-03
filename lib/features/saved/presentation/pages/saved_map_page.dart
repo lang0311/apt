@@ -105,6 +105,8 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
                 markers: markers,
                 selectedId: _selectedId,
                 bottomPadding: c.maxHeight * sheetMin,
+                // 상단 검색바 + 기준 카드 + 칩 영역
+                topPadding: MediaQuery.paddingOf(context).top + 170,
                 onCameraIdle: _onCameraIdle,
                 onMarkerTap: (m) => setState(() => _selectedId = m.id),
               ),

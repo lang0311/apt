@@ -161,13 +161,22 @@ class RecentExtractionCard extends StatelessWidget {
                   children: [
                     Expanded(child: TagWrap(p.keywords, max: 3)),
                     const SizedBox(width: AppSpacing.xs),
-                    AppButton(
-                      label: p.isSaved ? '저장됨' : '저장하기',
-                      variant: p.isSaved ? AppButtonVariant.soft : AppButtonVariant.outline,
-                      expand: false,
-                      height: 34,
-                      onPressed: p.isSaved ? null : onSave,
-                    ),
+                    // 저장됨은 상태 표시(비활성 버튼처럼 흐리게 보이지 않게), 저장하기만 버튼
+                    p.isSaved
+                        ? Container(
+                            height: 34,
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(AppRadius.sm)),
+                            child: Text('저장됨', style: AppTypography.label.copyWith(color: AppColors.primary)),
+                          )
+                        : AppButton(
+                            label: '저장하기',
+                            variant: AppButtonVariant.soft,
+                            expand: false,
+                            height: 34,
+                            onPressed: onSave,
+                          ),
                   ],
                 ),
               ],
