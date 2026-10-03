@@ -25,6 +25,7 @@ import '../features/course/presentation/pages/place_selection_page.dart';
 import '../features/extraction/presentation/pages/extraction_result_page.dart';
 import '../features/extraction/presentation/pages/link_input_page.dart';
 import '../features/home/presentation/home_page.dart';
+import '../features/party/presentation/invite_accept_page.dart';
 import '../features/place/presentation/place_detail_page.dart';
 import '../features/saved/presentation/pages/collection_detail_page.dart';
 import '../features/saved/domain/saved_models.dart';
@@ -97,6 +98,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/courses/new/done',
         builder: (_, s) => CourseDonePage(courseId: s.uri.queryParameters['id'] ?? ''),
       ),
+      GoRoute(path: '/invites/:token', builder: (_, s) => InviteAcceptPage(token: s.pathParameters['token']!)),
       GoRoute(
         path: AppRoutes.pickPlaces,
         builder: (_, s) => AddPlacesPage(args: s.extra as AddPlacesArgs? ?? const AddPlacesArgs()),
