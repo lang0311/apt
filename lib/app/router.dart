@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/config/feature_flags.dart';
-import '../core/widgets/coming_soon_page.dart';
 import '../features/auth/domain/auth_models.dart';
 import '../features/auth/presentation/auth_controller.dart';
 import '../features/auth/presentation/pages/account_conflict_page.dart';
@@ -25,6 +24,7 @@ import '../features/course/presentation/pages/place_selection_page.dart';
 import '../features/extraction/presentation/pages/extraction_result_page.dart';
 import '../features/extraction/presentation/pages/link_input_page.dart';
 import '../features/home/presentation/home_page.dart';
+import '../features/my/presentation/my_page.dart';
 import '../features/party/presentation/invite_accept_page.dart';
 import '../features/place/presentation/place_detail_page.dart';
 import '../features/saved/presentation/pages/collection_detail_page.dart';
@@ -164,7 +164,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: AppRoutes.my, builder: (_, _) => const ComingSoonPage(title: '마이', showBack: false)),
+            GoRoute(path: AppRoutes.my, builder: (_, _) => const MyPage()),
           ]),
         ],
       ),
