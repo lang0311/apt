@@ -36,18 +36,7 @@ class PreviewMap extends StatefulWidget {
 class _PreviewMapState extends State<PreviewMap> {
   GeoBounds? _reported;
 
-  /// 보이는 영역. 멀리 떨어진 장소(다른 지역) 하나 때문에 나머지가 한 점으로 뭉치지 않도록
-  /// 중앙값에서 크게 벗어난 점은 제외한다 — 실제 지도의 "초기 카메라가 밀집 지역을 비춤"에 해당.
-  GeoBounds? get _bounds {
-    final points = [...widget.markers.map((m) => m.point), ...widget.route];
-    if (points.length < 3) return GeoBounds.around(points);
-    double median(List<double> v) => (v..sort())[v.length ~/ 2];
-    final mLat = median(points.map((p) => p.lat).toList());
-    final mLng = median(points.map((p) => p.lng).toList());
-    double dist(GeoPoint p) => math.max((p.lat - mLat).abs(), (p.lng - mLng).abs());
-    final limit = math.max(0.03, median(points.map(dist).toList()) * 4);
-    return GeoBounds.around(points.where((p) => dist(p) <= limit));
-  }
+  GeoBounds? get _bounds => focusBounds([...widget.markers.map((m) => m.point), ...widget.route]);
 
   bool _visible(GeoBounds? b, GeoPoint p) {
     if (b == null) return true;

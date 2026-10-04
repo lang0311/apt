@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../models/geo_point.dart';
@@ -25,6 +27,18 @@ class MapMarker {
   final String? label;
   final IconData? icon;
   final Color? color;
+}
+
+/// 처음 보여줄 영역. 멀리 떨어진 장소(다른 지역) 하나 때문에 나머지가 한 점으로 뭉치지 않도록
+/// 중앙값에서 크게 벗어난 점은 제외한다 (지도를 움직이면 제외된 장소도 보인다).
+GeoBounds? focusBounds(List<GeoPoint> points) {
+  if (points.length < 3) return GeoBounds.around(points);
+  double median(List<double> v) => (v..sort())[v.length ~/ 2];
+  final mLat = median(points.map((p) => p.lat).toList());
+  final mLng = median(points.map((p) => p.lng).toList());
+  double dist(GeoPoint p) => math.max((p.lat - mLat).abs(), (p.lng - mLng).abs());
+  final limit = math.max(0.03, median(points.map(dist).toList()) * 4);
+  return GeoBounds.around(points.where((p) => dist(p) <= limit));
 }
 
 /// 화면이 지도에 명령할 때 쓴다 (내 위치 등). 실제 SDK 지도가 붙어 있을 때만 동작한다.

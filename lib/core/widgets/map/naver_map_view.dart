@@ -78,15 +78,15 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   @override
   Widget build(BuildContext context) {
-    final initial = GeoBounds.around([...widget.markers.map((m) => m.point), ...widget.route]);
+    final initial = focusBounds([...widget.markers.map((m) => m.point), ...widget.route]);
     return NaverMap(
       options: NaverMapViewOptions(
         initialCameraPosition: NCameraPosition(
           target: initial == null ? _seoulCityHall : _latLng(_center(initial)),
           zoom: 14,
         ),
+        // 로고·축척·카메라 중심이 상단 칩/하단 시트에 가려지지 않게 한다 (logoMargin은 이 안쪽 기준)
         contentPadding: _contentPadding,
-        logoMargin: EdgeInsets.only(left: 8, bottom: widget.bottomPadding + 8),
         locale: const Locale('ko'),
         indoorEnable: false,
         // 지도 기본 심볼(가게 이름 등) 탭은 우리 화면 동작이 없으므로 소비만 한다.
@@ -168,7 +168,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     _fittedIds = ids;
 
     final points = [...widget.markers.map((m) => m.point), ...widget.route];
-    final bounds = GeoBounds.around(points)!;
+    final bounds = focusBounds(points)!;
     const edge = 56.0;
     await c.updateCamera(points.length == 1
         ? NCameraUpdate.scrollAndZoomTo(target: _latLng(points.first), zoom: 15)
