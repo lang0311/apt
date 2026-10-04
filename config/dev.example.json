@@ -1,0 +1,7 @@
+{
+  "USE_MOCK": "true",
+  "NAVER_MAP_CLIENT_ID": "",
+  "KAKAO_NATIVE_APP_KEY": "",
+  "GOOGLE_SERVER_CLIENT_ID": "",
+  "GOOGLE_IOS_CLIENT_ID": ""
+}

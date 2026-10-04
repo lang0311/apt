@@ -38,6 +38,11 @@ class ServerFailure extends AppFailure {
   const ServerFailure([super.message = '일시적인 오류가 발생했어요. 잠시 후 다시 시도해주세요.']);
 }
 
+/// 소셜 SDK 로그인 실패 (취소 제외 — 취소는 null로 표현한다). 설정 오류·네트워크 등.
+class SocialSdkFailure extends AppFailure {
+  const SocialSdkFailure([super.message = '로그인 중 문제가 생겼어요. 잠시 후 다시 시도해주세요.']);
+}
+
 /// API 명세가 아직 없어 실서버 연동이 구현되지 않은 경우.
 class NotImplementedFailure extends AppFailure {
   const NotImplementedFailure(String feature) : super('$feature 기능은 아직 준비 중이에요.');

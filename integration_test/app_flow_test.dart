@@ -3,6 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 
+import 'package:apt/app/routes.dart';
+import 'package:apt/features/auth/domain/auth_models.dart';
+
 import 'helpers.dart';
 
 /// 실제 기기/에뮬레이터에서 Mock 데이터로 주요 사용자 흐름을 끝까지 실행한다.
@@ -29,9 +32,18 @@ void main() {
     expectNoErrors(tester);
   });
 
-  testWidgets('B. 계정 충돌(Apple) → 기존 계정과 연결 → 홈', (tester) async {
+  testWidgets('B. 계정 충돌 → 기존 계정과 연결 → 홈', (tester) async {
     await launchApp(tester);
-    await tapText(tester, 'Apple로 계속하기');
+    // Apple 버튼은 기본 숨김(FeatureFlags.appleAuthEnabled) → 충돌 응답을 받은 상황을 라우터로 흉내낸다
+    expect(find.text('Apple로 계속하기'), findsNothing);
+    GoRouter.of(tester.element(find.text('Google로 계속하기'))).push(
+      AppRoutes.loginConflict,
+      extra: const AccountConflict(
+        maskedEmail: 'jis***@gmail.com',
+        existingMethodLabel: '이메일로 가입한 계정',
+        provider: SocialProvider.google,
+      ),
+    );
     await waitFor(tester, find.text('이미 가입된 이메일이에요'));
     await tapText(tester, '기존 계정과 연결하기');
     await waitFor(tester, find.text('최근 추출한 장소'));

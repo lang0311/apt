@@ -68,7 +68,8 @@ class _SocialLoginPageState extends ConsumerState<SocialLoginPage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 48),
-                    for (final p in SocialProvider.values) ...[
+                    for (final p in SocialProvider.values)
+                      if (p != SocialProvider.apple || FeatureFlags.appleAuthEnabled) ...[
                       SocialLoginButton(
                         provider: p,
                         loading: _loading == p,

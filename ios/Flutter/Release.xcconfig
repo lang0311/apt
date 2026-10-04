@@ -1,1 +1,3 @@
 #include "Generated.xcconfig"
+// 키 값 (gitignore). 예시: Secrets.xcconfig.example
+#include? "Secrets.xcconfig"

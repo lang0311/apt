@@ -5,7 +5,7 @@ import '../../../dev/mock/mock_store.dart';
 import '../domain/auth_models.dart';
 import '../domain/auth_repository.dart';
 
-/// Mock 소셜 SDK. 항상 토큰을 돌려준다.
+/// Mock 소셜 SDK. 항상 토큰을 돌려준다. 키가 없는 공급자는 [SdkSocialAuthProvider]가 이것으로 대체한다.
 class MockSocialAuthProvider implements SocialAuthProvider {
   @override
   Future<String?> authenticate(SocialProvider provider) async => 'mock-${provider.name}-token';
@@ -14,7 +14,7 @@ class MockSocialAuthProvider implements SocialAuthProvider {
 /// Mock 인증. 흐름 확인용으로 공급자별 결과를 다르게 준다.
 /// - 카카오: 신규 회원 → 약관/프로필
 /// - Google: 기존 회원 → 홈
-/// - Apple: 동일 이메일 기존 계정 → 계정 충돌(#5)
+/// - Apple: 동일 이메일 기존 계정 → 계정 충돌(#5) (Apple 버튼은 FeatureFlags.appleAuthEnabled일 때만 보임)
 /// - MOCK_SCENARIO=error: 소셜 인증 오류(#6)
 class MockAuthRepository implements AuthRepository {
   MockAuthRepository(this._store, this._social);
@@ -28,9 +28,9 @@ class MockAuthRepository implements AuthRepository {
 
   @override
   Future<SignInResult> signInWithSocial(SocialProvider provider) async {
-    final token = await _social.authenticate(provider);
-    if (token == null) return const SignInCancelled();
     try {
+      final token = await _social.authenticate(provider);
+      if (token == null) return const SignInCancelled();
       return await _store.behavior.mutate<SignInResult>(() => switch (provider) {
             SocialProvider.kakao => const NeedsSignup(suggestedNickname: '여행하는 지상'),
             SocialProvider.google => const SignedIn(_user),

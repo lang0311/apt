@@ -5,6 +5,7 @@ import '../../core/network/api_client.dart';
 import '../../core/storage/token_storage.dart';
 import '../../dev/mock/mock_store.dart';
 import '../../features/auth/data/auth_repositories.dart';
+import '../../features/auth/data/social_auth_sdk.dart';
 import '../../features/auth/domain/auth_repository.dart';
 import '../../features/course/data/course_repositories.dart';
 import '../../features/course/domain/course_repository.dart';
@@ -27,9 +28,9 @@ import '../../features/saved/domain/saved_repository.dart';
 /// Repository 주입. `--dart-define=USE_MOCK=false`면 Api* 구현을 사용한다.
 /// API 명세 수령 후에는 Api* 클래스만 채우면 되고, 화면/Provider 코드는 바뀌지 않는다.
 
+/// 키가 있는 공급자만 실제 SDK, 나머지는 Mock SDK. 서버 토큰 교환은 [authRepositoryProvider]가 결정한다.
 final socialAuthProvider = Provider<SocialAuthProvider>(
-  // NEEDS: 소셜 SDK 키 발급 후 실제 SDK 구현으로 교체
-  (ref) => MockSocialAuthProvider(),
+  (ref) => SdkSocialAuthProvider(fallback: MockSocialAuthProvider()),
 );
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) => Env.useMock
