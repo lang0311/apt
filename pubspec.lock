@@ -176,6 +176,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_naver_map:
+    dependency: "direct main"
+    description:
+      name: flutter_naver_map
+      sha256: "5d76331cc9f5c678adfda7089834b99d0377fd365e7c144da9784b876ceed36e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.4"
   flutter_riverpod:
     dependency: "direct main"
     description:
