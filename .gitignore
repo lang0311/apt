@@ -48,3 +48,6 @@ app.*.map.json
 /config/*.json
 !/config/*.example.json
 /ios/Flutter/Secrets.xcconfig
+
+# 개발 일지 생성 도구
+/tools/devlog/node_modules/

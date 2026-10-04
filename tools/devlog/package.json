@@ -1,0 +1,11 @@
+{
+  "name": "apt-devlog",
+  "private": true,
+  "description": "개발 일지(.docx) 생성기 — 앱 의존성과 무관한 문서 도구",
+  "scripts": {
+    "build": "node build_devlog.js"
+  },
+  "dependencies": {
+    "docx": "^9.8.1"
+  }
+}
