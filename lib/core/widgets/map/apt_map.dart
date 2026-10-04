@@ -27,6 +27,23 @@ class MapMarker {
   final Color? color;
 }
 
+/// 화면이 지도에 명령할 때 쓴다 (내 위치 등). 실제 SDK 지도가 붙어 있을 때만 동작한다.
+class AptMapController {
+  VoidCallback? _showMyLocation;
+
+  /// AptMap 내부용: 실제 지도 구현이 명령을 받을 함수를 연결/해제한다.
+  void attach(VoidCallback? showMyLocation) => _showMyLocation = showMyLocation;
+
+  /// 내 위치로 이동해 따라간다 (권한이 없으면 SDK가 요청한다).
+  /// 실제 지도가 아니면(미리보기 — 키 없음/인증 실패) false.
+  bool showMyLocation() {
+    final f = _showMyLocation;
+    if (f == null) return false;
+    f();
+    return true;
+  }
+}
+
 /// 공통 지도 위젯. 네이버 지도(확정, docs/02 §6)를 감싼다.
 ///
 /// SDK가 초기화되어 있으면([NaverMapSdk.ready]) [NaverMapView], 아니면(클라이언트 ID 없음·
@@ -41,6 +58,8 @@ class AptMap extends StatelessWidget {
     this.selectedId,
     this.bottomPadding = 0,
     this.topPadding = 0,
+    this.controller,
+    this.onLocationPermissionDenied,
   });
 
   final List<MapMarker> markers;
@@ -59,6 +78,11 @@ class AptMap extends StatelessWidget {
   /// 상단 검색바·칩에 가려지는 높이 (마커 배치 시 제외)
   final double topPadding;
 
+  final AptMapController? controller;
+
+  /// 위치 권한 거부. `forever`면 앱 설정에서 직접 허용해야 한다.
+  final ValueChanged<bool>? onLocationPermissionDenied;
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
@@ -72,6 +96,8 @@ class AptMap extends StatelessWidget {
               selectedId: selectedId,
               bottomPadding: bottomPadding,
               topPadding: topPadding,
+              controller: controller,
+              onLocationPermissionDenied: onLocationPermissionDenied,
             )
           : PreviewMap(
               markers: markers,

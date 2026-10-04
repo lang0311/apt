@@ -22,6 +22,8 @@ class NaverMapView extends StatefulWidget {
     required this.selectedId,
     required this.bottomPadding,
     required this.topPadding,
+    this.controller,
+    this.onLocationPermissionDenied,
   });
 
   final List<MapMarker> markers;
@@ -31,6 +33,8 @@ class NaverMapView extends StatefulWidget {
   final String? selectedId;
   final double bottomPadding;
   final double topPadding;
+  final AptMapController? controller;
+  final ValueChanged<bool>? onLocationPermissionDenied;
 
   @override
   State<NaverMapView> createState() => _NaverMapViewState();
@@ -49,8 +53,24 @@ class _NaverMapViewState extends State<NaverMapView> {
   EdgeInsets get _contentPadding => EdgeInsets.only(top: widget.topPadding, bottom: widget.bottomPadding);
 
   @override
+  void initState() {
+    super.initState();
+    widget.controller?.attach(_showMyLocation);
+  }
+
+  @override
+  void dispose() {
+    widget.controller?.attach(null);
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(covariant NaverMapView old) {
     super.didUpdateWidget(old);
+    if (old.controller != widget.controller) {
+      old.controller?.attach(null);
+      widget.controller?.attach(_showMyLocation);
+    }
     if (old.markers != widget.markers || old.route != widget.route || old.selectedId != widget.selectedId) {
       _sync();
     }
@@ -74,10 +94,23 @@ class _NaverMapViewState extends State<NaverMapView> {
       ),
       onMapReady: (c) {
         _controller = c;
+        // SDK 기본 트래커: 권한 요청 → 현재 위치 → 위치 오버레이. 거부 결과만 화면에 알린다.
+        c.setMyLocationTracker(NDefaultMyLocationTracker(
+          onPermissionDenied: (forever) => widget.onLocationPermissionDenied?.call(forever),
+        ));
         _sync();
       },
       onCameraIdle: widget.onCameraIdle == null ? null : _reportBounds,
     );
+  }
+
+  /// 내 위치로 이동해 따라간다. 사용자가 지도를 움직이면 SDK가 따라가기를 풀어준다.
+  void _showMyLocation() {
+    final c = _controller;
+    if (c == null) return;
+    // 같은 모드로는 다시 시작하지 않으므로(거부 후 재시도·재중심) 한 번 끄고 켠다.
+    c.setLocationTrackingMode(NLocationTrackingMode.none);
+    c.setLocationTrackingMode(NLocationTrackingMode.follow);
   }
 
   Future<void> _reportBounds() async {

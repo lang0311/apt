@@ -44,6 +44,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
   SavedSort _sort = SavedSort.nearest;
   bool _autoSearch = true;
   GeoBounds? _bounds;
+  final _map = AptMapController();
   String? _selectedId;
   Timer? _debounce;
   final _sheet = DraggableScrollableController();
@@ -109,6 +110,11 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
                 topPadding: MediaQuery.paddingOf(context).top + 170,
                 onCameraIdle: _onCameraIdle,
                 onMarkerTap: (m) => setState(() => _selectedId = m.id),
+                controller: _map,
+                onLocationPermissionDenied: (forever) => showAppSnackBar(
+                  context,
+                  forever ? '설정 > 앱 > 권한에서 위치를 허용해주세요.' : '위치 권한을 허용하면 내 주변 장소를 볼 수 있어요.',
+                ),
               ),
             ),
             SafeArea(child: _topOverlay()),
@@ -119,8 +125,10 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
                 icon: Icons.my_location_rounded,
                 size: 48,
                 tooltip: '내 위치',
-                // NEEDS: 위치 권한/현재 위치 패키지 도입 (권한 거부 상태 포함)
-                onPressed: () => showAppSnackBar(context, '내 위치 기능은 준비 중이에요.'),
+                onPressed: () {
+                  // 미리보기 지도(지도 키 없음·인증 실패)에서는 위치를 보여줄 수 없다.
+                  if (!_map.showMyLocation()) showAppSnackBar(context, '지도 연동 후 내 위치를 볼 수 있어요.');
+                },
               ),
             ),
             DraggableScrollableSheet(
