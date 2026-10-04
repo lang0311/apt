@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
+            VALUE "CompanyName", "com.teamjkk" "\0"
             VALUE "FileDescription", "apt" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "apt" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.teamjkk. All rights reserved." "\0"
             VALUE "OriginalFilename", "apt.exe" "\0"
             VALUE "ProductName", "apt" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

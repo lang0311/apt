@@ -1,4 +1,4 @@
-package com.example.apt
+package com.teamjkk.apt
 
 import android.content.Intent
 import io.flutter.embedding.android.FlutterActivity
