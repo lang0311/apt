@@ -34,6 +34,7 @@
 | 화면 연결, 네비게이션, 사용자 흐름 | `docs/04_UX_FLOWS.md` |
 | **특정 화면 구현** (라우트·UI·데이터·상태) | `docs/05_SCREEN_SPEC.md` + 해당 SVG |
 | API 연동, Mock, 백엔드에 요청할 것 | `docs/06_API_INTEGRATION.md` |
+| API 명세 초안/변경 확인 | `docs/API/` (엑셀 등). **API 작업 전 매번 열어 06·현재 코드와 달라진 점을 확인** |
 | 막혔을 때, 정해진 것/가정/미해결 확인 | `docs/07_DECISIONS_AND_OPEN_ITEMS.md` |
 | 문서 인덱스 | `docs/README.md` |
 문서와 API 명세가 **충돌하면 임의로 한쪽을 택하지 말고** 충돌 지점을 명시해 보고한다. 문서끼리 충돌하면 번호가 큰 쪽(최신 결정은 07)을 확인한다.
@@ -41,7 +42,7 @@
 ## 작업 시작 절차 (코드 수정 전)
 1. 레포 트리, Flutter/Dart 버전, `pubspec.yaml` 확인
 2. 기존 화면/라우터/상태관리/API 클라이언트/모델/에셋 확인
-3. API 명세 확인 (없으면 `NEEDS BACKEND`)
+3. API 명세 확인: `docs/API/` 폴더의 파일(엑셀 등)이 **추가·수정됐는지 확인**하고, 변동이 있으면 06·Repository와 비교해 차이를 보고 (없으면 `NEEDS BACKEND`). 현재 명세는 **방향만 나온 초안**(응답 형식 없음)이라 필드를 추측해 DTO를 만들지 않는다
 4. 현재 구현과 docs의 차이를 `IMPLEMENTED / PARTIAL / NOT IMPLEMENTED / NEEDS BACKEND`로 분류해 보고
 5. 구현 범위를 사용자와 확인 후 작업
 

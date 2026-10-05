@@ -13,6 +13,7 @@
 | [04_UX_FLOWS.md](04_UX_FLOWS.md) | 사용자 흐름: 인증 · 공유 추출 · 저장 · 코스 루프 · 파티 · 취향 | 화면 연결/네비게이션 구현 시 |
 | [05_SCREEN_SPEC.md](05_SCREEN_SPEC.md) | 화면 34개 명세 (라우트 · UI · 데이터 · 상태) | 화면 단위 구현 시 |
 | [06_API_INTEGRATION.md](06_API_INTEGRATION.md) | 백엔드 연동 원칙 · 필요 데이터 목록 · Mock 전략 | API 연동/백엔드 협의 시 |
+| [API/](API/) | 백엔드 API 명세 초안 (엑셀). 아직 응답 형식 없음 — **변동 여부를 매번 확인** | API 연동/백엔드 협의 시 |
 | [07_DECISIONS_AND_OPEN_ITEMS.md](07_DECISIONS_AND_OPEN_ITEMS.md) | 확정 사항 로그 · 가정 · 미해결 항목 | 막혔을 때 / 범위 확인 시 |
 | [08_DEV_LOG.docx](08_DEV_LOG.docx) | 개발 일지: 단계별 작업 · 발생한 문제 · 해결 방법 (생성: `tools/devlog`) | 진행 상황 공유 / 보고 시 |
 

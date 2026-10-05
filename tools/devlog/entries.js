@@ -422,4 +422,44 @@ module.exports = [
     decisions: ['단계가 끝날 때마다 entries.js에 추가하고 .docx를 다시 생성해 함께 커밋', '비밀 값은 일지에 적지 않음'],
     pending: [],
   },
+  {
+    id: 16,
+    title: 'API 명세 초안 검토 · VS Code 실행 설정',
+    date: '2026-10-05',
+    status: '완료',
+    commits: [],
+    goal: '백엔드가 공유한 API 초안(docs/API/API 정리.xlsx)을 앱 구조와 비교하고, VS Code 디버그 실행에서 네이버 지도가 안 뜨는 문제를 고친다.',
+    work: [
+      'API 초안 16개(장소 7·유저 6·코스 3, /api/v1) 검토: 응답 형식이 없는 방향 수준 초안 → 현재 Repository 구조로 대부분 흡수 가능, 코드 수정 없음',
+      'CLAUDE.md·docs/README.md·docs/06에 "API 작업 전 docs/API/ 변동 확인" 규칙 추가',
+      '.vscode/launch.json 추가: F5 실행 시 --dart-define-from-file=config/dev.json 주입',
+    ],
+    problems: [
+      {
+        problem: 'VS Code에서 F5로 에뮬레이터 디버깅 시 네이버 지도 대신 미리보기 지도가 뜸',
+        cause: 'launch.json이 없어 dart-define 없이 실행 → NAVER_MAP_CLIENT_ID가 빈 값 → SDK 초기화를 건너뜀',
+        solution: 'launch.json의 toolArgs로 config/dev.json 주입',
+        status: '해결',
+      },
+      {
+        problem: '공유 링크 API가 추출과 저장(listId)을 한 번에 처리 → 후보 선택·보관함 선택 흐름과 충돌',
+        cause: '서버 초안의 흐름이 시안(#11–#13)과 다름',
+        solution: '추출(미리보기)과 저장 분리, 또는 listId 없는 추출 허용을 백엔드에 요청',
+        status: '결정 대기',
+      },
+      {
+        problem: '장소 저장 시 listId 하나만 받음 → 보관함 없이 저장·다중 보관함과 충돌',
+        cause: '서버 초안의 보관함 모델이 확정 결정(07)과 다름',
+        solution: '여러 보관함은 앱에서 반복 호출로 처리 가능, 보관함 없는 저장·저장 해제·소속 변경 API는 백엔드에 요청',
+        status: '결정 대기',
+      },
+    ],
+    decisions: ['API 초안은 확정 스펙이 아니므로 DTO/mapper는 응답 형식 수령 후 작성 (필드 추측 금지)'],
+    pending: [
+      '유저 검색·팔로우·공개 보관함(초안에만 있음, 시안 없음)을 앱 범위에 넣을지',
+      '/places/nearby가 내 저장 장소 대상인지 전체 장소 대상인지 (거리·가까운 순과 연관)',
+      '기능별 Mock/실서버 전환 (스펙 일부 확정 시)',
+      'NEEDS BACKEND: 인증·AI 추천·파티·취향·홈 통계·카테고리 API는 초안에 없음',
+    ],
+  },
 ];

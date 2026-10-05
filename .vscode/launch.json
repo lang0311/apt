@@ -1,0 +1,22 @@
+{
+    // F5 디버그 실행 시 config/dev.json의 키(NAVER_MAP_CLIENT_ID 등)를 --dart-define으로 주입한다.
+    // config/dev.json은 gitignore 대상 — 없으면 config/dev.example.json을 복사해 만든다.
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "apt (dev)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "toolArgs": ["--dart-define-from-file=config/dev.json"]
+        },
+        {
+            "name": "apt (dev, profile)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "program": "lib/main.dart",
+            "toolArgs": ["--dart-define-from-file=config/dev.json"]
+        }
+    ]
+}
