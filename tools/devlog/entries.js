@@ -433,6 +433,7 @@ module.exports = [
       'API 초안 16개(장소 7·유저 6·코스 3, /api/v1) 검토: 응답 형식이 없는 방향 수준 초안 → 현재 Repository 구조로 대부분 흡수 가능, 코드 수정 없음',
       'CLAUDE.md·docs/README.md·docs/06에 "API 작업 전 docs/API/ 변동 확인" 규칙 추가',
       '.vscode/launch.json 추가: F5 실행 시 --dart-define-from-file=config/dev.json 주입',
+      'API 초안 엑셀(docs/API/API 정리.xlsx) 레포에 추가, 오래된 사본 docs/CLAUDE.md 삭제 (루트 CLAUDE.md만 사용)',
     ],
     problems: [
       {
