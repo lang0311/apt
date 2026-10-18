@@ -463,4 +463,49 @@ module.exports = [
       'NEEDS BACKEND: 인증·AI 추천·파티·취향·홈 통계·카테고리 API는 초안에 없음',
     ],
   },
+  {
+    id: 17,
+    title: '소셜 로그인 실제 키 연결 · 출시 순서 결정',
+    date: '2026-10-19',
+    status: '완료',
+    commits: [],
+    goal: '카카오·Google 개발자 콘솔에 앱을 등록해 실제 SDK 로그인을 확인하고, 출시 순서와 Apple 로그인 시점을 정한다.',
+    work: [
+      '카카오 디벨로퍼스 앱 등록: Android(com.teamjkk.apt + 디버그 키 해시)·iOS 플랫폼, 카카오 로그인 활성화, 닉네임·프로필 사진 선택 동의',
+      'Google Cloud 프로젝트 + OAuth 동의 화면(외부, 테스트 사용자) + 웹 클라이언트(서버 검증용) + Android 클라이언트(패키지명 + SHA-1)',
+      '네이티브 앱 키·웹 클라이언트 ID를 config/dev.json에 입력 (gitignore, 코드 변경 없음)',
+      'Play 스토어 이미지 에뮬레이터에서 카카오(웹 로그인)·Google 실제 로그인 성공 확인',
+      'docs/07에 D11(Play 먼저 출시, Apple 로그인은 App Store 출시 시점)과 소셜 키·릴리스 키 등록 항목 추가',
+    ],
+    problems: [
+      {
+        problem: '에뮬레이터 설치 실패 INSTALL_FAILED_INSUFFICIENT_STORAGE',
+        cause: '에뮬레이터 저장 공간 부족',
+        solution: 'flutter run이 기존 앱을 지우고 다시 설치해 해결 (연습용 앱 정리 권장)',
+        status: '해결',
+      },
+      {
+        problem: '카카오는 로그인할 때마다 약관·프로필 화면, Google은 약관 없이 바로 홈',
+        cause: '서버 교환이 Mock: 카카오=신규, Google=기존으로 고정, 가입 기록·세션을 저장하지 않음',
+        solution: '현재로선 정상. 실제 신규/기존 판별과 로그인 유지는 서버 연동 후 확인 (NEEDS BACKEND)',
+        status: '결정 대기',
+      },
+      {
+        problem: '카카오 로그인 탭을 닫기만 해도 "로그인할 수 없어요" 오류 화면이 뜸, 오류 화면 뒤로가기 아이콘이 안쪽으로 치우침',
+        cause: '확인 필요',
+        solution: '취소는 로그인 화면에 머무르도록 바꿀지 사용자 결정 대기',
+        status: '결정 대기',
+      },
+    ],
+    decisions: [
+      '출시는 Google Play 먼저, Apple 로그인은 App Store 출시 시점에 유료 멤버십과 함께 켬 (가이드라인 4.8)',
+      '콘솔은 우선 개인 계정으로 등록, 출시 시 팀 계정으로 소유권 이전 (앱을 새로 만들면 카카오 사용자 ID가 바뀌므로 이전 기능 사용)',
+      '앱에 넣는 Google 값은 Android가 아니라 웹 클라이언트 ID, Secret·Admin 키는 앱에 넣지 않음',
+    ],
+    pending: [
+      '백엔드와: 카카오 검증 방식(accessToken/idToken), 이메일 동의항목 필요 여부, 웹 클라이언트 ID 공유, 로그인 API 명세',
+      'Play 출시 전: 릴리스 키스토어·Play 앱 서명 키의 SHA-1/키 해시 추가 등록, OAuth 동의 화면 프로덕션 전환',
+      '실제 서버처럼 동작하는 Mock(가입 기록·세션 유지)으로 바꿀지',
+    ],
+  },
 ];
