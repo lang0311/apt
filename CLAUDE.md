@@ -36,6 +36,7 @@
 | API 연동, Mock, 백엔드에 요청할 것 | `docs/06_API_INTEGRATION.md` |
 | API 명세 초안/변경 확인 | `docs/API/` (엑셀 등). **API 작업 전 매번 열어 06·현재 코드와 달라진 점을 확인** |
 | 막혔을 때, 정해진 것/가정/미해결 확인 | `docs/07_DECISIONS_AND_OPEN_ITEMS.md` |
+| 커밋 전 (메시지 형식 `type: 상세 내용`, 커밋 금지 항목) | `docs/09_COMMIT_CONVENTION.md` |
 | 문서 인덱스 | `docs/README.md` |
 문서와 API 명세가 **충돌하면 임의로 한쪽을 택하지 말고** 충돌 지점을 명시해 보고한다. 문서끼리 충돌하면 번호가 큰 쪽(최신 결정은 07)을 확인한다.
 
