@@ -1,0 +1,7 @@
+# 팀 레포 mobile/에 반영할 때(git archive) 빠지는 파일 — 개인 레포에만 둔다
+/tools/devlog/ export-ignore
+/tools/sync_team.sh export-ignore
+/docs/08_DEV_LOG.docx export-ignore
+/.agents/ export-ignore
+/skills-lock.json export-ignore
+/.gitattributes export-ignore
