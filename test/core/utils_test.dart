@@ -1,3 +1,4 @@
+import 'package:apt/core/models/geo_point.dart';
 import 'package:apt/core/utils/formatters.dart';
 import 'package:apt/core/utils/instagram_url.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +47,24 @@ void main() {
       final now = DateTime(2026, 10, 4, 12);
       expect(formatRelative(now.subtract(const Duration(days: 2)), now: now), '2일 전');
       expect(formatRelative(now.subtract(const Duration(minutes: 5)), now: now), '5분 전');
+    });
+  });
+
+  group('GeoPoint/GeoBounds', () {
+    test('직선거리 (서울시청 → 강남역 약 8.8km)', () {
+      const cityHall = GeoPoint(37.5666, 126.9784);
+      const gangnam = GeoPoint(37.4979, 127.0276);
+      expect(cityHall.distanceTo(gangnam), closeTo(8800, 200));
+      expect(cityHall.distanceTo(cityHall), 0);
+    });
+
+    test('영역을 덮는 원: 중심에서 모서리까지', () {
+      const b = GeoBounds(southWest: GeoPoint(37.50, 127.00), northEast: GeoPoint(37.52, 127.02));
+      expect(b.center.lat, closeTo(37.51, 1e-9));
+      expect(b.center.lng, closeTo(127.01, 1e-9));
+      expect(b.radiusMeters, closeTo(b.center.distanceTo(b.southWest), 1));
+      // 영역 안 어느 점이든 원 안에 있다
+      expect(b.center.distanceTo(const GeoPoint(37.50, 127.02)), lessThanOrEqualTo(b.radiusMeters + 1));
     });
   });
 }

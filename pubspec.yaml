@@ -44,6 +44,7 @@ dependencies:
   flutter_naver_map: ^1.4.4
   kakao_flutter_sdk_user: ^1.10.0
   google_sign_in: ^7.2.0
+  geolocator: ^14.0.2
 
 dev_dependencies:
   flutter_test:
