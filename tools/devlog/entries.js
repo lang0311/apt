@@ -566,7 +566,7 @@ module.exports = [
     title: '에뮬레이터 저장 공간 문제 해결 · 저장 지도 위치 기능 검증',
     date: '2026-10-19',
     status: '완료',
-    commits: [],
+    commits: ['a078175'],
     goal: '18단계에서 설치 실패로 못 한 저장 지도 위치·카메라 동작을 에뮬레이터에서 확인한다.',
     work: [
       '원인 진단: Medium_Phone_API_36.1(Play 스토어 이미지)의 /data 5.8GB 중 476MB만 남음. Play가 자동 업데이트한 구글 앱 25개 코드(약 2.5GB), 연습 앱 3개, 이전 apt 설치본이 차지',
@@ -590,7 +590,7 @@ module.exports = [
       },
     ],
     decisions: [
-      '에뮬레이터 기본 AVD는 Pixel_6_Pro. Play 의존 기능이 생기면 데이터 파티션을 넉넉히 잡은 Play 이미지 AVD를 새로 만든다',
+      '에뮬레이터 기본 AVD는 Pixel_6_Pro (D14). Play 의존 기능이 생기면 데이터 파티션을 넉넉히 잡은 Play 이미지 AVD를 새로 만든다',
     ],
     pending: [
       '실기기 확인 (마커 앵커·탭, 실제 위치, 대략적 위치 표시)',

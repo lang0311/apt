@@ -17,6 +17,7 @@
 | D11 | (2026-10-19) 출시는 **Google Play 먼저**. 로그인은 카카오·Google만 켜고 Apple은 `FeatureFlags.appleAuthEnabled=false`로 숨긴 채 유지. App Store 출시 시점에 유료 멤버십 가입과 함께 Apple 로그인을 켠다 (가이드라인 4.8: 외부 소셜 로그인만 있으면 거절 가능성 높음 → 서버에 Apple identityToken 검증·탈퇴 시 revoke 필요) | 02 §4 |
 | D12 | (2026-10-19) 백엔드 자료가 서로 다르면 **`docs/API/API 정리.xlsx`(API 명세)를 우선**한다. DB 명세(`졸프 db.xlsx`, 레포 미포함)는 참고용 | 06 |
 | D13 | (2026-10-19) 저장됨(카테고리) 지도는 **내 위치에서 시작**한다 (저장 장소가 전국에 흩어지면 전체 맞춤이 의미 없음). 위치를 모르면 저장 장소가 몰린 곳, **보관함 지도는 보관함 장소에 맞춤**. 위치 권한은 지도 진입 시 요청하고 거부해도 지도는 그대로 쓴다(거리·가까운 순만 빠짐). 위치는 `geolocator`로 받는다(대략적 위치 허용) | 02 §6, 05 #18·#19 |
+| D14 | (2026-10-19) 에뮬레이터 확인은 **`Pixel_6_Pro` AVD**(google_apis, Play 스토어 없음)를 기본으로 쓴다. `Medium_Phone_API_36.1`(Play 스토어 이미지)은 Play 자동 업데이트로 /data가 차서 APK 설치가 안 됨. Play 의존 기능(인앱 결제·Play Integrity 등)이 생기면 데이터 파티션을 넉넉히(16GB 이상) 잡은 Play 이미지 AVD를 새로 만든다. 위치는 `geo fix`가 반영되지 않아 테스트 위치 제공자로 넣는다(`adb shell appops set com.android.shell android:mock_location allow` → `cmd location providers set-test-provider-location`) | 08 (19단계) |
 
 ## 2. 내가(작성자가) 둔 가정 — 틀렸으면 알려주세요
 
@@ -74,3 +75,4 @@
 | 2026-10-03 | 최초 작성: 31개 화면 기준 문서화, 결정 D1–D10 반영, 화면 3개 추가(이메일 로그인 2, 취향 설정 1), 문서 세분화 |
 | 2026-10-19 | D11 추가(Play 먼저 출시, Apple 로그인은 App Store 출시 시점), 소셜 키 발급 주체·릴리스 키 등록 항목 추가 |
 | 2026-10-19 | D12(API 명세 우선)·D13(저장 지도 카메라·위치 권한) 추가, 가정 A11·A12(nearby) 추가 |
+| 2026-10-19 | D14(에뮬레이터 기본 AVD는 Pixel_6_Pro) 추가 |
