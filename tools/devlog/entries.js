@@ -508,4 +508,57 @@ module.exports = [
       '실제 서버처럼 동작하는 Mock(가입 기록·세션 유지)으로 바꿀지',
     ],
   },
+  {
+    id: 18,
+    title: '저장됨 지도: nearby API 기준 조회 · 내 위치에서 시작',
+    date: '2026-10-19',
+    status: '진행 중',
+    commits: ['980e111', '7f38e9a', '0b0a0e1'],
+    goal: 'API 초안의 /places/nearby(중심+반경)에 맞춰 저장 지도 조회를 바꾸고, 14단계에서 대기하던 위치 권한·카메라 동작을 정해 구현한다.',
+    work: [
+      '백엔드 자료 우선순위 결정: API 정리.xlsx > DB 명세 (D12)',
+      'geolocator 도입: LocationService(권한 확인·요청, 정확/대략적 위치 모두 허용, 시간 초과 시 마지막 위치), myLocationProvider',
+      'SavedRepository.fetchSavedPlacesInBounds → fetchSavedPlacesNearby. 보이는 영역을 덮는 원으로 호출 후 화면 밖 제외, 내 위치 기준 직선거리·가까운 순은 앱에서 계산',
+      'AptMapController에 moveTo/fitTo/showLocationDot 추가, SDK 기본 위치 추적기 제거 (위치 오버레이에 직접 점 표시)',
+      '카테고리 지도는 내 위치에서 시작(모르면 저장 장소가 몰린 곳), 보관함 지도는 보관함 장소에 맞춤 (D13)',
+      '근처 저장 장소 0곳이면 빈 상태 + [저장한 장소 전체 보기], 위치가 없으면 가까운 순 숨김, 내 위치 버튼 실패 사유별 안내([설정 열기])',
+      '테스트: 거리·반경 유틸, nearby Provider(화면 밖 제외·거리 정렬·위치 유지), 저장 지도 위치 허용/거부/영구 거부 위젯 테스트 (전체 85개 통과)',
+    ],
+    problems: [
+      {
+        problem: '저장 장소가 전국에 흩어져 있으면 카메라를 어디에 둘지',
+        cause: '전체 맞춤은 한반도 전체가 보여 의미 없음, 몰린 곳 맞춤도 사용자가 보려는 곳이라는 보장 없음',
+        solution: 'API도 내 위치 중심(nearby)이라 카테고리 지도는 내 위치에서 시작. 목적별 보관함 지도는 보관함 장소에 맞춤',
+        status: '해결',
+      },
+      {
+        problem: '대략적 위치만 허용하면 내 위치가 안 뜸 (14단계)',
+        cause: 'SDK 기본 추적기가 FINE 권한만 확인',
+        solution: 'geolocator로 권한·위치를 직접 받고 위치 오버레이에 점만 표시',
+        status: '해결 (실기기 확인 필요)',
+      },
+      {
+        problem: 'dart format이 관계없는 파일 10개 이상의 줄바꿈을 바꿈',
+        cause: '레포가 dart format 스타일을 쓰지 않음',
+        solution: '포맷 변경을 모두 되돌리고 기존 스타일로 필요한 줄만 수정',
+        status: '해결',
+      },
+      {
+        problem: '에뮬레이터 설치 실패 (Requested internal only, but not enough space / INSUFFICIENT_STORAGE)',
+        cause: '에뮬레이터 /data 여유 470MB, 디버그 APK 260MB·release 89MB도 설치 불가',
+        solution: '앱 삭제·에뮬레이터 초기화는 사용자 확인 후 진행',
+        status: '결정 대기',
+      },
+    ],
+    decisions: [
+      '백엔드 자료 충돌 시 API 명세 우선, DB 명세는 참고 (D12)',
+      'nearby는 로그인 사용자의 저장 장소만, 거리·필터·페이징은 서버가 주지 않는다고 가정 (A11·A12)',
+      '저장 지도 카메라·위치 권한 시점 (D13), 권한 사전 설명 화면은 만들지 않음 (OS 권한 창만)',
+    ],
+    pending: [
+      '에뮬레이터·실기기 확인: 진입 시 권한 요청, 허용 시 내 위치로 이동·점 표시, 대략적 위치, 거부 시 몰린 곳, 근처 0곳 빈 상태, 보관함 지도 맞춤',
+      'NEEDS BACKEND: nearby 응답 형식, 반경 상한·개수 제한, bbox 조회 지원 여부',
+      'Mock 일반 목록(fetchSavedPlaces)의 가짜 거리 정리 (자동 검색을 끄면 보임)',
+    ],
+  },
 ];
