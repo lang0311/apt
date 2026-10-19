@@ -41,20 +41,38 @@ GeoBounds? focusBounds(List<GeoPoint> points) {
   return GeoBounds.around(points.where((p) => dist(p) <= limit));
 }
 
-/// 화면이 지도에 명령할 때 쓴다 (내 위치 등). 실제 SDK 지도가 붙어 있을 때만 동작한다.
+/// [AptMapController]가 명령을 전달하는 대상. 실제 지도 구현(AptMap 내부)만 구현한다.
+abstract interface class AptMapCommands {
+  void moveTo(GeoPoint target, {double zoom});
+  void fitTo(List<GeoPoint> points);
+
+  /// 내 위치 점(위치 오버레이). null이면 숨긴다. 카메라는 움직이지 않는다.
+  void showLocationDot(GeoPoint? point);
+}
+
+/// 화면이 지도에 명령할 때 쓴다 (카메라 이동, 내 위치 점). 실제 SDK 지도가 붙어 있을 때만 동작하고,
+/// 미리보기 지도(키 없음·인증 실패)면 false를 돌려준다. 지도가 준비되기 전 명령은 준비 후 적용된다.
 class AptMapController {
-  VoidCallback? _showMyLocation;
+  AptMapCommands? _target;
 
-  /// AptMap 내부용: 실제 지도 구현이 명령을 받을 함수를 연결/해제한다.
-  void attach(VoidCallback? showMyLocation) => _showMyLocation = showMyLocation;
+  /// AptMap 내부용: 실제 지도 구현을 연결/해제한다.
+  void attach(AptMapCommands? target) => _target = target;
 
-  /// 내 위치로 이동해 따라간다 (권한이 없으면 SDK가 요청한다).
-  /// 실제 지도가 아니면(미리보기 — 키 없음/인증 실패) false.
-  bool showMyLocation() {
-    final f = _showMyLocation;
-    if (f == null) return false;
-    f();
-    return true;
+  bool moveTo(GeoPoint target, {double zoom = 15}) {
+    _target?.moveTo(target, zoom: zoom);
+    return _target != null;
+  }
+
+  /// 멀리 떨어진 장소는 빼고([focusBounds]) 나머지가 보이게 맞춘다.
+  bool fitTo(List<GeoPoint> points) {
+    if (points.isEmpty) return false;
+    _target?.fitTo(points);
+    return _target != null;
+  }
+
+  bool showLocationDot(GeoPoint? point) {
+    _target?.showLocationDot(point);
+    return _target != null;
   }
 }
 
@@ -73,7 +91,7 @@ class AptMap extends StatelessWidget {
     this.bottomPadding = 0,
     this.topPadding = 0,
     this.controller,
-    this.onLocationPermissionDenied,
+    this.fitMarkersOnLoad = true,
   });
 
   final List<MapMarker> markers;
@@ -94,8 +112,9 @@ class AptMap extends StatelessWidget {
 
   final AptMapController? controller;
 
-  /// 위치 권한 거부. `forever`면 앱 설정에서 직접 허용해야 한다.
-  final ValueChanged<bool>? onLocationPermissionDenied;
+  /// 처음 마커가 생기면 전체가 보이게 맞출지. false면 화면이 [controller]로 카메라를 정한다
+  /// (저장됨 지도: 내 위치에서 시작).
+  final bool fitMarkersOnLoad;
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +130,7 @@ class AptMap extends StatelessWidget {
               bottomPadding: bottomPadding,
               topPadding: topPadding,
               controller: controller,
-              onLocationPermissionDenied: onLocationPermissionDenied,
+              fitMarkersOnLoad: fitMarkersOnLoad,
             )
           : PreviewMap(
               markers: markers,

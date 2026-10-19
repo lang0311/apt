@@ -8,6 +8,7 @@ import '../../../../app/routes.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../core/location/location_service.dart';
 import '../../../../core/models/geo_point.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_network_image.dart';
@@ -24,7 +25,8 @@ import '../widgets/category_style.dart';
 import '../widgets/place_list_tile.dart';
 
 /// #18 카테고리 기준 지도 / #19 보관함 기준 지도·목록
-/// 지도 이동 → debounce → 보이는 영역(bbox)의 저장 장소로 목록 갱신.
+/// 지도 이동 → debounce → 보이는 영역을 덮는 원으로 nearby 조회 → 목록 갱신.
+/// 카메라: 카테고리 지도는 내 위치에서 시작(모르면 저장 장소가 몰린 곳), 보관함 지도는 보관함 장소에 맞춘다.
 class SavedMapPage extends ConsumerStatefulWidget {
   const SavedMapPage({super.key, required this.mode, this.initialCategoryKey, this.initialCollectionId});
 
@@ -48,15 +50,75 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
   String? _selectedId;
   Timer? _debounce;
   final _sheet = DraggableScrollableController();
+  bool _cameraPlaced = false;
+  List<GeoPoint> _markerPoints = const [];
 
   bool get _isCollection => widget.mode == SavedMapMode.collection;
+
+  bool get _hasLocation => ref.read(myLocationProvider)?.point != null;
+
+  /// 내 위치를 모르면 '가까운 순'을 쓸 수 없다 → 최근 순
+  SavedSort get _effectiveSort => _sort == SavedSort.nearest && !_hasLocation ? SavedSort.recent : _sort;
 
   SavedPlaceQuery get _query => SavedPlaceQuery(
         categoryKey: _isCollection ? null : _categoryKey,
         collectionId: _isCollection ? _collectionId : null,
         keyword: _keyword.isEmpty ? null : _keyword,
-        sort: _isCollection ? _sort : SavedSort.recent,
+        sort: _isCollection ? _effectiveSort : SavedSort.recent,
       );
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(_locateOnEnter);
+  }
+
+  /// 지도에 들어오면 위치 권한을 묻는다. 거부해도 지도는 그대로 쓸 수 있고 거리·가까운 순만 빠진다.
+  Future<void> _locateOnEnter() async {
+    await ref.read(myLocationProvider.notifier).locate();
+    if (!mounted) return;
+    _map.showLocationDot(ref.read(myLocationProvider)?.point);
+    _placeCamera();
+  }
+
+  /// 카테고리 지도의 첫 카메라 (한 번만). 내 위치를 알면 내 위치, 모르면 저장 장소가 몰린 곳.
+  /// 저장 장소가 전국에 흩어져 있으면 전체 맞춤은 의미가 없어서 내 위치를 우선한다.
+  /// 보관함 지도는 AptMap 기본 동작(보관함 장소에 맞춤)을 쓴다.
+  void _placeCamera() {
+    if (_isCollection || _cameraPlaced) return;
+    final location = ref.read(myLocationProvider);
+    if (location == null) return; // 아직 위치를 묻는 중
+    final me = location.point;
+    if (me != null) {
+      _cameraPlaced = _map.moveTo(me, zoom: 14);
+    } else if (_markerPoints.isNotEmpty) {
+      _cameraPlaced = _map.fitTo(_markerPoints);
+    }
+  }
+
+  Future<void> _goToMyLocation() async {
+    final result = await ref.read(myLocationProvider.notifier).locate();
+    if (!mounted) return;
+    final me = ref.read(myLocationProvider)?.point;
+    if (me == null) return _locationFailed(result.status);
+    _map.showLocationDot(me);
+    // 미리보기 지도(지도 키 없음·인증 실패)에서는 위치를 보여줄 수 없다.
+    if (!_map.moveTo(me)) showAppSnackBar(context, '지도 연동 후 내 위치를 볼 수 있어요.');
+  }
+
+  void _locationFailed(LocationStatus status) {
+    void openSettings() => ref.read(locationServiceProvider).openSettings(status);
+    switch (status) {
+      case LocationStatus.deniedForever:
+        showAppSnackBar(context, '설정에서 위치 권한을 허용해주세요.', actionLabel: '설정 열기', onAction: openSettings);
+      case LocationStatus.serviceOff:
+        showAppSnackBar(context, '기기의 위치 서비스를 켜주세요.', actionLabel: '설정 열기', onAction: openSettings);
+      case LocationStatus.denied:
+        showAppSnackBar(context, '위치 권한을 허용하면 내 주변 장소를 볼 수 있어요.');
+      case LocationStatus.granted || LocationStatus.unavailable:
+        showAppSnackBar(context, '현재 위치를 확인하지 못했어요. 잠시 후 다시 시도해주세요.');
+    }
+  }
 
   @override
   void dispose() {
@@ -81,8 +143,14 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
       if (first != null) _collectionId = first.id;
     }
 
+    // 위치를 얻거나 잃으면 정렬('가까운 순')과 거리 표시가 바뀐다
+    ref.watch(myLocationProvider);
+    ref.listen(savedPlacesProvider(_query), (_, next) {
+      if (next.hasValue) _placeCamera();
+    });
+
     final all = ref.watch(savedPlacesProvider(_query));
-    final visible = _autoSearch && _bounds != null ? ref.watch(savedPlacesInBoundsProvider(MapQuery(_bounds!, _query))) : all;
+    final visible =_autoSearch && _bounds != null ? ref.watch(savedPlacesInBoundsProvider(MapQuery(_bounds!, _query))) : all;
     final markers = [
       for (final i in all.value ?? const <SavedPlaceItem>[])
         if (i.place.location != null)
@@ -95,6 +163,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
             label: i.place.id == _selectedId ? i.place.name : null,
           ),
     ];
+    _markerPoints = [for (final m in markers) m.point];
 
     return Scaffold(
       body: LayoutBuilder(builder: (context, c) {
@@ -111,10 +180,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
                 onCameraIdle: _onCameraIdle,
                 onMarkerTap: (m) => setState(() => _selectedId = m.id),
                 controller: _map,
-                onLocationPermissionDenied: (forever) => showAppSnackBar(
-                  context,
-                  forever ? '설정 > 앱 > 권한에서 위치를 허용해주세요.' : '위치 권한을 허용하면 내 주변 장소를 볼 수 있어요.',
-                ),
+                fitMarkersOnLoad: _isCollection,
               ),
             ),
             SafeArea(child: _topOverlay()),
@@ -125,10 +191,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
                 icon: Icons.my_location_rounded,
                 size: 48,
                 tooltip: '내 위치',
-                onPressed: () {
-                  // 미리보기 지도(지도 키 없음·인증 실패)에서는 위치를 보여줄 수 없다.
-                  if (!_map.showMyLocation()) showAppSnackBar(context, '지도 연동 후 내 위치를 볼 수 있어요.');
-                },
+                onPressed: _goToMyLocation,
               ),
             ),
             DraggableScrollableSheet(
@@ -282,20 +345,28 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
           ),
         ),
         _visibleState(visible) ??
-            SizedBox(
-              height: 112,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: AppSpacing.screenPadding,
-                itemCount: list.length,
-                separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
-                itemBuilder: (_, i) => _MapPlaceCard(
-                  item: list[i],
-                  selected: list[i].place.id == _selectedId,
-                  onTap: () => context.push(AppRoutes.place(list[i].place.id)),
-                ),
-              ),
-            ),
+            (list.isEmpty
+                ? AppEmptyState(
+                    compact: true,
+                    icon: Icons.location_off_outlined,
+                    title: '이 근처에 저장한 장소가 없어요',
+                    actionLabel: _markerPoints.isEmpty ? null : '저장한 장소 전체 보기',
+                    onAction: () => _map.fitTo(_markerPoints),
+                  )
+                : SizedBox(
+                    height: 112,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: AppSpacing.screenPadding,
+                      itemCount: list.length,
+                      separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
+                      itemBuilder: (_, i) => _MapPlaceCard(
+                        item: list[i],
+                        selected: list[i].place.id == _selectedId,
+                        onTap: () => context.push(AppRoutes.place(list[i].place.id)),
+                      ),
+                    ),
+                  )),
         Padding(
           padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.md, AppSpacing.screenH, 0),
           child: Text('지도를 움직이면 이 지역의 저장 장소가 갱신돼요.', style: AppTypography.caption),
@@ -328,13 +399,18 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
           title: current?.name ?? '내 보관함',
           subtitle: '보관함 ${current?.placeCount ?? 0}곳 중 지도에 보이는 ${visible.value?.length ?? 0}곳',
           trailing: AppButton(
-            label: '${_sort.label} ▾',
+            label: '${_effectiveSort.label} ▾',
             variant: AppButtonVariant.soft,
             expand: false,
             height: 40,
             onPressed: () => showActionSheet(context, title: '정렬', actions: [
               for (final s in SavedSort.values)
-                SheetAction(label: s.label, icon: s == _sort ? Icons.check_rounded : Icons.sort_rounded, onTap: () => setState(() => _sort = s)),
+                if (s != SavedSort.nearest || _hasLocation)
+                  SheetAction(
+                    label: s.label,
+                    icon: s == _effectiveSort ? Icons.check_rounded : Icons.sort_rounded,
+                    onTap: () => setState(() => _sort = s),
+                  ),
             ]),
           ),
         ),
@@ -460,7 +536,13 @@ class _MapPlaceCard extends StatelessWidget {
                       Text(p.name, style: AppTypography.cardTitle, maxLines: 1, overflow: TextOverflow.ellipsis),
                       const SizedBox(height: 2),
                       Text(
-                        [p.categoryLabel, if (item.walkMinutes != null) '도보 ${item.walkMinutes}분'].join(' · '),
+                        [
+                          p.categoryLabel,
+                          if (item.walkMinutes != null)
+                            '도보 ${item.walkMinutes}분'
+                          else if (item.distanceMeters != null)
+                            formatDistance(item.distanceMeters!),
+                        ].join(' · '),
                         style: AppTypography.caption,
                       ),
                       const SizedBox(height: 4),
