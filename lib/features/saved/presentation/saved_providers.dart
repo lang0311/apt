@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/repositories.dart';
+import '../../../core/location/location_service.dart';
 import '../../../core/models/geo_point.dart';
 import '../../extraction/presentation/extraction_providers.dart';
 import '../../home/presentation/home_providers.dart';
@@ -27,9 +28,22 @@ class MapQuery {
   int get hashCode => Object.hash(bounds, query);
 }
 
-final savedPlacesInBoundsProvider = FutureProvider.autoDispose.family<List<SavedPlaceItem>, MapQuery>(
-  (ref, q) => ref.watch(savedRepositoryProvider).fetchSavedPlacesInBounds(q.bounds, q.query),
-);
+/// 지도에 보이는 저장 장소. 보이는 영역을 덮는 원(중심 → 모서리)으로 nearby를 부르고,
+/// 원 안이지만 화면 밖인 장소는 뺀다. 거리는 서버가 주지 않으므로 내 위치에서 직선거리로 계산한다.
+final savedPlacesInBoundsProvider = FutureProvider.autoDispose.family<List<SavedPlaceItem>, MapQuery>((ref, q) async {
+  final b = q.bounds;
+  final me = ref.watch(myLocationProvider)?.point;
+  final items = await ref.watch(savedRepositoryProvider).fetchSavedPlacesNearby(b.center, b.radiusMeters.ceil(), q.query);
+  final visible = [
+    for (final i in items)
+      if (i.place.location != null && b.contains(i.place.location!))
+        me == null ? i : SavedPlaceItem(place: i.place, distanceMeters: me.distanceTo(i.place.location!).round()),
+  ];
+  if (q.query.sort == SavedSort.nearest && me != null) {
+    visible.sort((a, c) => a.distanceMeters!.compareTo(c.distanceMeters!));
+  }
+  return visible;
+});
 
 final collectionsProvider = FutureProvider.autoDispose<List<PlaceCollection>>(
   (ref) => ref.watch(savedRepositoryProvider).fetchCollections(),

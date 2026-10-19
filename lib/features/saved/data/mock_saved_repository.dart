@@ -56,9 +56,14 @@ class MockSavedRepository implements SavedRepository {
       _store.behavior.query(() => _filter(query), empty: () => const []);
 
   @override
-  Future<List<SavedPlaceItem>> fetchSavedPlacesInBounds(GeoBounds bounds, SavedPlaceQuery query) =>
+  Future<List<SavedPlaceItem>> fetchSavedPlacesNearby(GeoPoint center, int radiusMeters, SavedPlaceQuery query) =>
       _store.behavior.query(
-        () => _filter(query).where((i) => i.place.location != null && bounds.contains(i.place.location!)).toList(),
+        // 서버가 거리를 주지 않는다는 가정이라 거리 없이 장소만 돌려준다.
+        () => [
+          for (final i in _filter(query))
+            if (i.place.location != null && center.distanceTo(i.place.location!) <= radiusMeters)
+              SavedPlaceItem(place: i.place),
+        ],
         empty: () => const [],
         latency: const Duration(milliseconds: 300),
       );

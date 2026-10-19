@@ -5,7 +5,7 @@ import '../domain/saved_models.dart';
 import '../domain/saved_repository.dart';
 
 /// 실서버 구현 자리. API 명세 수령 후 DTO + mapper를 `dto/`에 추가하고 여기서 호출한다.
-// NEEDS BACKEND: 보관함·카테고리·저장 장소 API (다대다, 페이지네이션, bbox 조회)
+// NEEDS BACKEND: 보관함·카테고리·저장 장소 API (다대다, 페이지네이션, nearby 응답 형식)
 class ApiSavedRepository implements SavedRepository {
   ApiSavedRepository(this._client);
   // ignore: unused_field
@@ -17,8 +17,10 @@ class ApiSavedRepository implements SavedRepository {
   Future<SavedSummary> fetchSummary() async => throw _f;
   @override
   Future<List<SavedPlaceItem>> fetchSavedPlaces(SavedPlaceQuery query) async => throw _f;
+  // GET /api/v1/places/nearby?lat&lng&radius → 받은 목록에 query(카테고리·보관함·검색어)를 적용한다.
   @override
-  Future<List<SavedPlaceItem>> fetchSavedPlacesInBounds(GeoBounds bounds, SavedPlaceQuery query) async => throw _f;
+  Future<List<SavedPlaceItem>> fetchSavedPlacesNearby(GeoPoint center, int radiusMeters, SavedPlaceQuery query) async =>
+      throw _f;
   @override
   Future<List<PlaceCollection>> fetchCollections() async => throw _f;
   @override

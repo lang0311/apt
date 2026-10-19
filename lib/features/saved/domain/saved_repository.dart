@@ -6,8 +6,12 @@ abstract interface class SavedRepository {
 
   Future<List<SavedPlaceItem>> fetchSavedPlaces(SavedPlaceQuery query);
 
-  /// viewport(bbox) 기반 조회. 클러스터링 지원 여부는 서버 확인 필요 (NEEDS BACKEND).
-  Future<List<SavedPlaceItem>> fetchSavedPlacesInBounds(GeoBounds bounds, SavedPlaceQuery query);
+  /// `GET /api/v1/places/nearby` (lat, lng, radius m) — 로그인 사용자의 저장 장소 중 [center]에서
+  /// [radiusMeters] 안에 있는 것.
+  /// 가정 (docs/API 초안 기준, 2026-10-19): 서버는 거리·카테고리/보관함 필터·페이징을 주지 않는다.
+  /// 그래서 [query] 필터는 구현체가 응답에 적용하고, 내 위치 기준 거리는 화면 쪽에서 계산한다.
+  /// NEEDS BACKEND: 응답 형식, 반경 최대값·결과 개수 제한.
+  Future<List<SavedPlaceItem>> fetchSavedPlacesNearby(GeoPoint center, int radiusMeters, SavedPlaceQuery query);
 
   Future<List<PlaceCollection>> fetchCollections();
 
