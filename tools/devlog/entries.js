@@ -598,4 +598,41 @@ module.exports = [
       '참고: 위치를 받기 전 첫 화면에 Mock 고정 문구 "도보 5분"이 잠깐 보이고, 먼 거리는 "9073.5km"처럼 소수점까지 표시됨',
     ],
   },
+  {
+    id: 20,
+    title: '팀 레포 통합 준비 · AI 서버 API 분석',
+    date: '2026-10-19',
+    status: '진행 중',
+    commits: [],
+    goal: '앱 레포를 AI·백엔드와 같이 쓰는 팀 레포(jim-min/Agentic-Personal-Travelassistant)의 mobile/ 폴더로 커밋 기록째 합칠 준비를 한다.',
+    work: [
+      '통합 테스트 A–J 10개 Pixel_6_Pro에서 재실행 → 전부 통과',
+      '팀 레포 구조 확인(읽기 전용): FastAPI AI 서버(api.py, src/), Vite 웹 데모(frontend/) → 앱은 mobile/에 넣기로 제안',
+      'AI 서버 API(/health, /places/search, /recommend)를 앱 CourseRepository·백엔드 명세와 비교 분석',
+      '임시 복사본에서 git subtree add --prefix=mobile 모의 실행: 앱 커밋 기록·작성 시각 그대로 유지, 겹치는 파일 없음, 커밋 기록에 키 없음 확인',
+      '.gitignore에 !data/, !.vscode/ 추가 (현재 앱 레포에서는 효과 없음, 합친 뒤 mobile/ 안에서만 적용)',
+    ],
+    problems: [
+      {
+        problem: '팀 루트 .gitignore의 data/, .vscode/가 mobile/ 안까지 적용됨',
+        cause: '앞에 /가 없는 패턴은 모든 깊이의 같은 이름 폴더에 적용 → lib/features/*/data/, .vscode/launch.json이 무시 대상',
+        solution: '앱 .gitignore(합친 뒤 mobile/.gitignore)에서 !data/, !.vscode/로 무시 해제. 팀 루트 파일은 수정하지 않음. 모의 실행에서 무시되는 관리 파일 13개 → 0개, data/ 새 파일 정상 인식 확인',
+        status: '해결',
+      },
+      {
+        problem: '장소 ID 체계가 AI 서버(카카오 ID), 백엔드 명세(googlePlaceId), 앱(네이버 지도)으로 서로 다름',
+        cause: '세 역할이 각자 지도·장소 API를 고름',
+        solution: '팀 공통 장소 식별자와 추천 호출 경로(앱 → 백엔드 → AI 제안)를 팀에서 정하도록 보고',
+        status: '결정 대기',
+      },
+    ],
+    decisions: [
+      '통합 방식: git subtree add로 커밋 기록째 mobile/에 합치고, 브랜치 push 후 PR로 올린다 (팀 레포 main 직접 push 안 함)',
+    ],
+    pending: [
+      '팀 레포에 subtree add·브랜치 push·PR (사용자 허락 후)',
+      '합친 뒤 작업 흐름(팀 레포 mobile/에서 개발 vs 앱 레포 유지) 결정',
+      'AI 서버 API와 앱 입력·출력 차이(area, 분위기·날짜, 제외 목록, 이동 정보, 최대 6곳, 600초 대기) 팀 합의',
+    ],
+  },
 ];

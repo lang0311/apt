@@ -51,3 +51,8 @@ app.*.map.json
 
 # 개발 일지 생성 도구
 /tools/devlog/node_modules/
+
+# 팀 레포(jim-min/Agentic-Personal-Travelassistant)의 mobile/로 합쳤을 때
+# 팀 루트 .gitignore의 data/, .vscode/ 무시 해제 (lib/features/*/data/, launch.json)
+!data/
+!.vscode/
