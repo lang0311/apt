@@ -602,8 +602,8 @@ module.exports = [
     id: 20,
     title: '팀 레포 통합 준비 · AI 서버 API 분석',
     date: '2026-10-19',
-    status: '진행 중',
-    commits: [],
+    status: '완료',
+    commits: ['9a3da56', 'fbcfafa'],
     goal: '앱 레포를 AI·백엔드와 같이 쓰는 팀 레포(jim-min/Agentic-Personal-Travelassistant)의 mobile/ 폴더로 커밋 기록째 합칠 준비를 한다.',
     work: [
       '통합 테스트 A–J 10개 Pixel_6_Pro에서 재실행 → 전부 통과',
@@ -611,6 +611,9 @@ module.exports = [
       'AI 서버 API(/health, /places/search, /recommend)를 앱 CourseRepository·백엔드 명세와 비교 분석',
       '임시 복사본에서 git subtree add --prefix=mobile 모의 실행: 앱 커밋 기록·작성 시각 그대로 유지, 겹치는 파일 없음, 커밋 기록에 키 없음 확인',
       '.gitignore에 !data/, !.vscode/ 추가 (현재 앱 레포에서는 효과 없음, 합친 뒤 mobile/ 안에서만 적용)',
+      '팀 레포 main에 앱을 커밋 하나(add: mobile/ 추가, 팀 레포 277c5af)로 반영: git archive로 커밋된 파일만 뽑아 mobile/에 넣음. 파일 280개, mobile/ 밖 변경 0개, 키 파일 없음 확인',
+      '개발 일지·.agents/(에이전트 스킬)·skills-lock.json은 팀 레포에서 제외. 팀 레포 커밋에는 Claude Co-Authored-By를 넣지 않음',
+      '이후 방식: 개발·커밋은 개인 레포, 큰 기능 단위로 팀 레포 mobile/에 반영. 반영 스크립트 tools/sync_team.sh와 .gitattributes(export-ignore) 추가',
     ],
     problems: [
       {
@@ -627,11 +630,13 @@ module.exports = [
       },
     ],
     decisions: [
-      '통합 방식: git subtree add로 커밋 기록째 mobile/에 합치고, 브랜치 push 후 PR로 올린다 (팀 레포 main 직접 push 안 함)',
+      '통합 방식: 커밋 기록 없이 커밋 하나로 팀 레포 main에 mobile/ 추가 (PR·브랜치 없음). 옛 커밋 번호는 개인 레포에서 찾는다',
+      '개발은 개인 레포 lang0311/apt에서 계속하고, 큰 기능 추가·수정·개선마다 팀 레포 mobile/에 한 번에 반영 (mobile/dev 브랜치는 만들지 않음)',
+      '팀 레포 mobile/은 직접 수정하지 않음. 반영은 sync_team.sh로 스테이징 후 확인받고 커밋·push',
     ],
     pending: [
-      '팀 레포에 subtree add·브랜치 push·PR (사용자 허락 후)',
-      '합친 뒤 작업 흐름(팀 레포 mobile/에서 개발 vs 앱 레포 유지) 결정',
+      '팀 레포 mobile/에 문서 3개(.gitignore, docs/README.md, docs/09) 정리분 반영 대기 (스테이징만 됨)',
+      '팀원에게 mobile/은 개인 레포에서 반영되는 폴더라 직접 수정하지 말라고 공유',
       'AI 서버 API와 앱 입력·출력 차이(area, 분위기·날짜, 제외 목록, 이동 정보, 최대 6곳, 600초 대기) 팀 합의',
     ],
   },
