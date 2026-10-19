@@ -546,8 +546,8 @@ module.exports = [
       {
         problem: '에뮬레이터 설치 실패 (Requested internal only, but not enough space / INSUFFICIENT_STORAGE)',
         cause: '에뮬레이터 /data 여유 470MB, 디버그 APK 260MB·release 89MB도 설치 불가',
-        solution: '앱 삭제·에뮬레이터 초기화는 사용자 확인 후 진행',
-        status: '결정 대기',
+        solution: '삭제·초기화 대신 여유 공간이 있는 Pixel_6_Pro AVD로 전환 (19단계)',
+        status: '해결',
       },
     ],
     decisions: [
@@ -556,9 +556,46 @@ module.exports = [
       '저장 지도 카메라·위치 권한 시점 (D13), 권한 사전 설명 화면은 만들지 않음 (OS 권한 창만)',
     ],
     pending: [
-      '에뮬레이터·실기기 확인: 진입 시 권한 요청, 허용 시 내 위치로 이동·점 표시, 대략적 위치, 거부 시 몰린 곳, 근처 0곳 빈 상태, 보관함 지도 맞춤',
+      '실기기 확인: 진입 시 권한 요청, 허용 시 내 위치로 이동·점 표시, 대략적 위치, 거부 시 몰린 곳, 근처 0곳 빈 상태, 보관함 지도 맞춤 (에뮬레이터는 19단계에서 확인)',
       'NEEDS BACKEND: nearby 응답 형식, 반경 상한·개수 제한, bbox 조회 지원 여부',
       'Mock 일반 목록(fetchSavedPlaces)의 가짜 거리 정리 (자동 검색을 끄면 보임)',
+    ],
+  },
+  {
+    id: 19,
+    title: '에뮬레이터 저장 공간 문제 해결 · 저장 지도 위치 기능 검증',
+    date: '2026-10-19',
+    status: '완료',
+    commits: [],
+    goal: '18단계에서 설치 실패로 못 한 저장 지도 위치·카메라 동작을 에뮬레이터에서 확인한다.',
+    work: [
+      '원인 진단: Medium_Phone_API_36.1(Play 스토어 이미지)의 /data 5.8GB 중 476MB만 남음. Play가 자동 업데이트한 구글 앱 25개 코드(약 2.5GB), 연습 앱 3개, 이전 apt 설치본이 차지',
+      '에뮬레이터를 Pixel_6_Pro(google_apis, 여유 3.4GB)로 전환. 앞으로 에뮬레이터 확인은 이 AVD 사용',
+      '에뮬레이터 위치 주입: geo fix가 반영되지 않아 shell에 mock_location을 허용하고 테스트 위치 제공자(gps·network·fused)로 좌표 설정',
+      '확인(정상): 진입 시 권한 요청 / 정확한 위치 허용 → 내 위치로 이동·점·거리 / 대략적 위치 → 흐린 위치로 이동·점 / 거부 → 저장 장소가 몰린 곳·거리 숨김 / 재거부(영구) → 안내 + [설정 열기]로 앱 정보 이동 / 근처 0곳 빈 상태 + [저장한 장소 전체 보기] / 보관함 지도 맞춤',
+      '버그 수정: 보관함 지도에서 보관함 칩을 바꿔도 카메라가 그대로라 새 보관함 장소가 화면 밖에 있음 → 보관함을 바꾸면 그 보관함 장소에 다시 맞춤',
+    ],
+    problems: [
+      {
+        problem: '보관함 지도에서 다른 보관함을 고르면 장소가 지도에 안 보임 ("보관함 2곳 중 지도에 보이는 1곳")',
+        cause: 'NaverMapView는 viewport 기반 화면에서 첫 로드에만 마커에 맞추고, 칩 전환은 조회 영역만 비움',
+        solution: 'SavedMapPage에서 보관함 전환 후 데이터가 오면 fitTo로 다시 맞춤 (공통 지도 위젯은 그대로)',
+        status: '해결',
+      },
+      {
+        problem: '에뮬레이터 geo fix 좌표가 기기 위치에 반영되지 않음',
+        cause: '이 AVD에서 GNSS 위치가 갱신되지 않음 (기본 Googleplex 좌표 유지)',
+        solution: 'adb shell appops로 mock_location 허용 후 cmd location providers set-test-provider-location 사용',
+        status: '해결 (테스트 방법)',
+      },
+    ],
+    decisions: [
+      '에뮬레이터 기본 AVD는 Pixel_6_Pro. Play 의존 기능이 생기면 데이터 파티션을 넉넉히 잡은 Play 이미지 AVD를 새로 만든다',
+    ],
+    pending: [
+      '실기기 확인 (마커 앵커·탭, 실제 위치, 대략적 위치 표시)',
+      '참고: Mock 인증은 세션을 복원하지 않아 앱 재시작 시 로그인이 풀림 (실 API 저장소는 토큰 복원)',
+      '참고: 위치를 받기 전 첫 화면에 Mock 고정 문구 "도보 5분"이 잠깐 보이고, 먼 거리는 "9073.5km"처럼 소수점까지 표시됨',
     ],
   },
 ];

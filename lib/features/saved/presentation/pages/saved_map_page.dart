@@ -51,6 +51,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
   Timer? _debounce;
   final _sheet = DraggableScrollableController();
   bool _cameraPlaced = false;
+  bool _fitOnNextData = false;
   List<GeoPoint> _markerPoints = const [];
 
   bool get _isCollection => widget.mode == SavedMapMode.collection;
@@ -94,6 +95,23 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
     } else if (_markerPoints.isNotEmpty) {
       _cameraPlaced = _map.fitTo(_markerPoints);
     }
+  }
+
+  /// 보관함을 바꾸면 그 보관함 장소에 다시 맞춘다. (AptMap은 viewport 기반 화면에서 첫 로드에만 맞춘다)
+  void _selectCollection(String id) {
+    setState(() {
+      _collectionId = id;
+      _bounds = null;
+      _fitOnNextData = true;
+    });
+    // 이미 받아 둔 보관함이면 listen이 다시 불리지 않으므로 다음 프레임에 직접 맞춘다.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _fitCollectionIfPending());
+  }
+
+  void _fitCollectionIfPending() {
+    if (!mounted || !_fitOnNextData || !ref.read(savedPlacesProvider(_query)).hasValue) return;
+    _fitOnNextData = false;
+    if (_markerPoints.isNotEmpty) _map.fitTo(_markerPoints);
   }
 
   Future<void> _goToMyLocation() async {
@@ -146,7 +164,10 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
     // 위치를 얻거나 잃으면 정렬('가까운 순')과 거리 표시가 바뀐다
     ref.watch(myLocationProvider);
     ref.listen(savedPlacesProvider(_query), (_, next) {
-      if (next.hasValue) _placeCamera();
+      if (!next.hasValue) return;
+      _placeCamera();
+      // 마커(_markerPoints)는 다음 build에서 바뀌므로 그 뒤에 맞춘다.
+      WidgetsBinding.instance.addPostFrameCallback((_) => _fitCollectionIfPending());
     });
 
     final all = ref.watch(savedPlacesProvider(_query));
@@ -269,10 +290,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
                         trailingCount: c.placeCount,
                         selected: c.id == _collectionId,
                         selectedColor: AppColors.ink,
-                        onTap: () => setState(() {
-                          _collectionId = c.id;
-                          _bounds = null;
-                        }),
+                        onTap: () => _selectCollection(c.id),
                       ),
                   ]
                 : [
