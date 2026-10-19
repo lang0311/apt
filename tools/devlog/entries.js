@@ -640,4 +640,43 @@ module.exports = [
       'AI 서버 API와 앱 입력·출력 차이(area, 분위기·날짜, 제외 목록, 이동 정보, 최대 6곳, 600초 대기) 팀 합의',
     ],
   },
+  {
+    id: 21,
+    title: '시안 대비 에뮬레이터 화면 점검 · 버그 3건 수정',
+    date: '2026-10-20',
+    status: '완료',
+    commits: [],
+    goal: '34개 시안과 에뮬레이터(Pixel_6_Pro) 화면을 나란히 비교해 어긋난 곳을 찾는다.',
+    work: [
+      '시안 SVG를 Chrome headless로 PNG 변환, 에뮬레이터 캡처와 좌우 비교 이미지 생성 (28개 화면 비교)',
+      '비교 못 한 화면: 계정 충돌·소셜 인증 오류(Mock에선 숨긴 Apple로만 진입), 코스 빈 상태(Mock에 코스 있음), 초대 수락(딥링크 미설정), 이메일 로그인 2개(플래그로 숨김)',
+      '버그 수정 3건 (아래), flutter analyze 0건, 테스트 85개 통과, 에뮬레이터에서 수정 확인',
+    ],
+    problems: [
+      {
+        problem: '동선 지도(AI 추천·코스 완성·코스 상세)에 번호 핀과 경로선이 하나도 안 보임',
+        cause: 'NPathOverlay coords에 lazy Iterable을 넘김 → SDK 직렬화 예외 → 같은 addOverlayAll 배치의 마커까지 추가 실패',
+        solution: 'naver_map_view.dart에서 coords를 toList()로 넘김',
+        status: '해결',
+      },
+      {
+        problem: '약관 동의·프로필 설정·코스 2/4 장소 선택에서 제목 블록이 가운데로 밀림',
+        cause: '부모 Column 기본 crossAxisAlignment(center) 때문에 제목 Column이 내용 폭으로 줄어 가운데 배치',
+        solution: 'AuthHeader가 폭을 채우도록 하고, 장소 선택 화면 Column은 stretch',
+        status: '해결',
+      },
+      {
+        problem: '보관함 상세 목록에 "한식 · 한식"처럼 카테고리가 두 번 표시',
+        cause: '첫 키워드가 카테고리와 같은 경우를 거르지 않음',
+        solution: '카테고리와 다른 첫 키워드만 표시',
+        status: '해결',
+      },
+    ],
+    decisions: [],
+    pending: [
+      '시안과 다른 곳 결정 대기: 지도 화면 필터 버튼, 홈 통계 카드 배치, 코스 1/4 AI 안내 카드 색(시안 파랑/앱 주황), 새 보관함 만들기 + 아이콘, 카드 ⋯ 메뉴, 약관 항목 › 와 줄 간격',
+      '디자인 언어 전반 개선안과 전/후 시안 제작 (요청됨, 대기)',
+      '참고: 장소 선택 지도 타일이 늦게 뜸(수 초)',
+    ],
+  },
 ];

@@ -161,7 +161,8 @@ class _NaverMapViewState extends State<NaverMapView> implements AptMapCommands {
     if (widget.route.length > 1) {
       overlays.add(NPathOverlay(
         id: 'route',
-        coords: widget.route.map(_latLng),
+        // SDK가 List만 직렬화한다 (lazy Iterable이면 예외 → 같은 배치의 마커까지 안 그려짐)
+        coords: widget.route.map(_latLng).toList(),
         width: 5,
         color: AppColors.primary,
         outlineWidth: 0,

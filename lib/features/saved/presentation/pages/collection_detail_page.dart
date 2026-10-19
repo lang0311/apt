@@ -212,7 +212,8 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
                           showBookmark: false,
                           subtitle: [
                             item.place.categoryLabel,
-                            if (item.place.keywords.isNotEmpty) item.place.keywords.first,
+                            // 카테고리와 같은 키워드는 건너뛴다 ("한식 · 한식" 방지)
+                            ?item.place.keywords.where((k) => k != item.place.categoryLabel).firstOrNull,
                             if (item.place.rating != null) '★ ${item.place.rating!.toStringAsFixed(1)}',
                           ].join(' · '),
                           footer: const SizedBox.shrink(),

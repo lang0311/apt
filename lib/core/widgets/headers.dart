@@ -98,33 +98,37 @@ class AuthHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.xs, AppSpacing.xs, AppSpacing.screenH, AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (showBack)
-            IconButton(
-              onPressed: onBack ?? () => _defaultBack(context),
-              icon: const Icon(Icons.chevron_left_rounded, size: 32, color: AppColors.textPrimary),
-              tooltip: '뒤로',
-            )
-          else
-            const SizedBox(height: 48),
-          Padding(
-            padding: const EdgeInsets.only(left: AppSpacing.sm),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: AppTypography.display),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 6),
-                  Text(subtitle!, style: AppTypography.body),
+    // 부모 Column이 가운데 정렬이어도 왼쪽에 붙도록 폭을 채운다
+    return SizedBox(
+      width: double.infinity,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(AppSpacing.xs, AppSpacing.xs, AppSpacing.screenH, AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (showBack)
+              IconButton(
+                onPressed: onBack ?? () => _defaultBack(context),
+                icon: const Icon(Icons.chevron_left_rounded, size: 32, color: AppColors.textPrimary),
+                tooltip: '뒤로',
+              )
+            else
+              const SizedBox(height: 48),
+            Padding(
+              padding: const EdgeInsets.only(left: AppSpacing.sm),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: AppTypography.display),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 6),
+                    Text(subtitle!, style: AppTypography.body),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

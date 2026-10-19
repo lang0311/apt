@@ -23,6 +23,7 @@ class PlaceSelectionPage extends ConsumerWidget {
     return Scaffold(
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const StepHeader(title: '저장한 장소 선택', step: 2),
             Padding(
