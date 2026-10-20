@@ -12,7 +12,7 @@ import '../../../../core/widgets/surfaces.dart';
 import '../../../course/domain/course_models.dart';
 import '../../../extraction/domain/extraction_models.dart';
 import '../../../place/domain/place.dart';
-import '../../../saved/presentation/widgets/category_style.dart';
+import '../../../saved/presentation/widgets/place_image.dart';
 
 /// 홈 맨 위 카드 공통 테두리 (surface + border, radius 20)
 BoxDecoration _topCardDecoration() => BoxDecoration(
@@ -360,7 +360,7 @@ class RecentSavedStrip extends StatelessWidget {
             place: item.place,
             width: _w,
             height: _h,
-            caption: _savedAgo(item.extractedAt),
+            caption: formatRecentDate(item.extractedAt),
             onTap: () => context.push(AppRoutes.place(item.place.id)),
           );
         },
@@ -368,10 +368,6 @@ class RecentSavedStrip extends StatelessWidget {
     );
   }
 }
-
-/// 저장한 시점: 일주일 안은 'n일 전', 그보다 오래면 '10월 12일'
-String _savedAgo(DateTime at) =>
-    DateTime.now().difference(at).inDays < 7 ? formatRelative(at) : '${at.month}월 ${at.day}일';
 
 /// 이런 코스는 어때요? (서버 추천 코스, 가로 카드)
 class SuggestedCourseStrip extends StatelessWidget {
@@ -547,41 +543,6 @@ class _PhotoTile extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// 장소 사진. 사진이 없으면 카테고리 색 칸 + 아이콘으로 같은 크기를 유지한다.
-class PlaceImage extends StatelessWidget {
-  const PlaceImage({
-    super.key,
-    required this.place,
-    required this.width,
-    required this.height,
-    this.radius = AppRadius.thumb,
-    this.iconSize = 22,
-    this.iconAlignment = Alignment.center,
-  });
-
-  final Place place;
-  final double width;
-  final double height;
-  final double radius;
-  final double iconSize;
-  final Alignment iconAlignment;
-
-  @override
-  Widget build(BuildContext context) {
-    if (place.imageUrl != null && place.imageUrl!.isNotEmpty) {
-      return AppNetworkImage(url: place.imageUrl, width: width, height: height, radius: radius);
-    }
-    final style = CategoryStyle.of(place.categoryKey);
-    return Container(
-      width: width,
-      height: height,
-      alignment: iconAlignment,
-      decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(radius)),
-      child: Icon(style.icon, size: iconSize, color: style.color),
     );
   }
 }

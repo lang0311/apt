@@ -45,6 +45,16 @@ final savedPlacesInBoundsProvider = FutureProvider.autoDispose.family<List<Saved
   return visible;
 });
 
+/// 저장됨 카테고리 필터(대분류 키, null=전체). 탭을 바꾸거나 상세에 다녀와도 유지하고, 앱을 다시 켜면 풀린다.
+final savedCategoryFilterProvider = NotifierProvider<SavedCategoryFilter, String?>(SavedCategoryFilter.new);
+
+class SavedCategoryFilter extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void select(String? categoryKey) => state = categoryKey;
+}
+
 final collectionsProvider = FutureProvider.autoDispose<List<PlaceCollection>>(
   (ref) => ref.watch(savedRepositoryProvider).fetchCollections(),
 );

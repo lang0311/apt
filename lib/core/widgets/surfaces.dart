@@ -7,11 +7,14 @@ import '../../app/theme/app_typography.dart';
 /// 섹션 묶음 (surface + border 1px, radius 20). 제목은 컨테이너 안에 둔다.
 /// [child]는 좌우 여백 없이 받는다 — 가로 스크롤 목록이 컨테이너 끝까지 닿게 하고, 여백은 child가 정한다.
 class SectionCard extends StatelessWidget {
-  const SectionCard({super.key, required this.title, required this.child, this.actionLabel, this.onAction});
+  const SectionCard({super.key, required this.title, required this.child, this.actionLabel, this.onAction, this.trailing});
 
   final String title;
   final String? actionLabel;
   final VoidCallback? onAction;
+
+  /// 제목 줄 오른쪽 위젯 (예: 필터, '+ 새 보관함'). [actionLabel]보다 우선한다.
+  final Widget? trailing;
   final Widget child;
 
   static const innerPadding = AppSpacing.md;
@@ -30,7 +33,7 @@ class SectionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(innerPadding, 0, AppSpacing.xxs, AppSpacing.xxs),
+            padding: EdgeInsets.fromLTRB(innerPadding, 0, trailing != null ? AppSpacing.xs : AppSpacing.xxs, AppSpacing.xxs),
             child: Row(
               children: [
                 // 오른쪽 버튼이 없어도 제목 줄 높이(44)를 같게 유지한다
@@ -43,7 +46,9 @@ class SectionCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (actionLabel != null)
+                if (trailing != null)
+                  trailing!
+                else if (actionLabel != null)
                   TextButton(
                     onPressed: onAction,
                     style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary, minimumSize: const Size(44, 44)),

@@ -10,6 +10,9 @@ enum SegmentedStyle {
 
   /// 분리된 pill, 선택=primary 채움 (코스 목록, 동행 설정)
   pills,
+
+  /// 글자 + 밑줄, 선택=남색 굵은 글자 + 2px 밑줄 (저장됨, 2026-10-20)
+  underline,
 }
 
 class SegmentedTabs extends StatelessWidget {
@@ -31,7 +34,43 @@ class SegmentedTabs extends StatelessWidget {
     return switch (style) {
       SegmentedStyle.track => _track(),
       SegmentedStyle.pills => _pills(),
+      SegmentedStyle.underline => _underline(),
     };
+  }
+
+  Widget _underline() {
+    return DecoratedBox(
+      decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.border))),
+      child: Row(
+        children: [
+          for (var i = 0; i < labels.length; i++)
+            Semantics(
+              selected: i == selectedIndex,
+              button: true,
+              child: InkWell(
+                onTap: () => onChanged(i),
+                child: Container(
+                  height: 44,
+                  margin: EdgeInsets.only(right: i == labels.length - 1 ? 0 : AppSpacing.lg),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: i == selectedIndex ? AppColors.ink : Colors.transparent, width: 2),
+                    ),
+                  ),
+                  child: Text(
+                    labels[i],
+                    style: AppTypography.bodyStrong.copyWith(
+                      color: i == selectedIndex ? AppColors.ink : AppColors.textSecondary,
+                      fontWeight: i == selectedIndex ? FontWeight.w800 : FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   Widget _track() {

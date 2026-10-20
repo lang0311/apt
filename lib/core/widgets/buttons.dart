@@ -177,38 +177,3 @@ class AppIconBox extends StatelessWidget {
     return tooltip == null ? box : Tooltip(message: tooltip!, child: box);
   }
 }
-
-/// 플로팅 다크 pill 버튼 — "지도에서 보기"
-class FloatingPillButton extends StatelessWidget {
-  const FloatingPillButton({super.key, required this.label, required this.icon, required this.onPressed});
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(borderRadius: AppRadius.pillAll, boxShadow: AppShadow.floating),
-      child: Material(
-        color: AppColors.ink,
-        borderRadius: AppRadius.pillAll,
-        child: InkWell(
-          borderRadius: AppRadius.pillAll,
-          onTap: onPressed,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, color: Colors.white, size: 22),
-                const SizedBox(width: 10),
-                Text(label, style: AppTypography.button.copyWith(color: Colors.white)),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
