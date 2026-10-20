@@ -173,7 +173,7 @@ class _PickerField extends StatelessWidget {
               Expanded(
                 child: Text(
                   value ?? hint,
-                  style: value == null ? AppTypography.bodyStrong.copyWith(color: AppColors.textHint) : AppTypography.bodyStrong,
+                  style: value == null ? AppTypography.bodyStrong.copyWith(color: AppColors.textSecondary) : AppTypography.bodyStrong,
                 ),
               ),
               const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),

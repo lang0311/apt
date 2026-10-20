@@ -97,7 +97,7 @@ class _LinkInputPageState extends State<LinkInputPage> {
                         AppTextField(
                           controller: _url,
                           label: '인스타그램 링크',
-                          hint: 'https://www.instagram.com/...',
+                          hint: '인스타그램 링크를 붙여넣어 주세요',
                           prefixIcon: Icons.link_rounded,
                           keyboardType: TextInputType.url,
                           textInputAction: TextInputAction.go,

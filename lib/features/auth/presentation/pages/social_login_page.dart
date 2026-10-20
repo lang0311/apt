@@ -89,7 +89,7 @@ class _SocialLoginPageState extends ConsumerState<SocialLoginPage> {
                       padding: const EdgeInsets.only(top: AppSpacing.xl, bottom: AppSpacing.lg),
                       child: Text(
                         '계속하면 서비스 이용약관 및 개인정보 처리방침에\n동의하는 것으로 간주됩니다.',
-                        style: AppTypography.caption.copyWith(color: AppColors.textHint, height: 1.6),
+                        style: AppTypography.caption.copyWith(color: AppColors.textSecondary, height: 1.6),
                         textAlign: TextAlign.center,
                       ),
                     ),
