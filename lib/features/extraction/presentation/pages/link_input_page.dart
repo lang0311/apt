@@ -68,7 +68,7 @@ class _LinkInputPageState extends State<LinkInputPage> {
             Expanded(
               child: ListView(
                 children: [
-                  const PageTitleHeader(title: '장소 추출', subtitle: '마음에 든 공간, 링크 하나로 저장하세요.'),
+                  const PageTitleHeader(title: '장소 추출'),
                   Padding(
                     padding: AppSpacing.screenPadding,
                     child: Column(

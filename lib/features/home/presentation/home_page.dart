@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
-import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
-import '../../../app/theme/app_typography.dart';
 import '../../../core/widgets/buttons.dart';
 import '../../../core/widgets/headers.dart';
 import '../../../core/widgets/overlays.dart';
@@ -146,46 +144,14 @@ class HomePage extends ConsumerWidget {
 class _Greeting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.md, AppSpacing.screenH, AppSpacing.md),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('홈', style: AppTypography.cardTitle),
-                const SizedBox(height: 4),
-                Text.rich(
-                  TextSpan(
-                    style: AppTypography.display,
-                    children: [
-                      const TextSpan(text: '오늘은 '),
-                      TextSpan(
-                        text: '어디로',
-                        style: AppTypography.display.copyWith(
-                          color: AppColors.primary,
-                          backgroundColor: AppColors.primarySoft,
-                        ),
-                      ),
-                      const TextSpan(text: ' 떠날까요?'),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text('마음에 담아둔 장소가, 오늘의 여행이 되도록.', style: AppTypography.body),
-              ],
-            ),
-          ),
-          AppIconBox(
-            icon: Icons.notifications_none_rounded,
-            size: 44,
-            tooltip: '알림',
-            // 알림 화면은 디자인 없음 (docs/07 §3)
-            onPressed: () => showAppSnackBar(context, '알림은 준비 중이에요.'),
-          ),
-        ],
+    return PageTitleHeader(
+      title: '홈',
+      trailing: AppIconBox(
+        icon: Icons.notifications_none_rounded,
+        size: 44,
+        tooltip: '알림',
+        // 알림 화면은 디자인 없음 (docs/07 §3)
+        onPressed: () => showAppSnackBar(context, '알림은 준비 중이에요.'),
       ),
     );
   }

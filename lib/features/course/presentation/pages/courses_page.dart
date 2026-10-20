@@ -54,7 +54,6 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
             children: [
               PageTitleHeader(
                 title: '코스',
-                subtitle: isEmpty ? '좋아하는 장소로 나만의 하루를 완성해요.' : '소중한 여행을 더 특별하게',
                 trailing: isEmpty
                     ? null
                     : AppIconBox(icon: Icons.add_rounded, size: 44, tooltip: '코스 만들기', onPressed: () => startCourseWizard(context, ref)),

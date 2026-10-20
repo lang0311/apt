@@ -28,7 +28,8 @@ class PageTitleHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.md, AppSpacing.screenH, AppSpacing.md),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        // 제목 한 줄만 있으면 오른쪽 버튼과 가운데를 맞춘다
+        crossAxisAlignment: subtitle == null && overline == null ? CrossAxisAlignment.center : CrossAxisAlignment.start,
         children: [
           Expanded(
             child: Column(

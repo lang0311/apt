@@ -56,7 +56,6 @@ class _SavedPageState extends ConsumerState<SavedPage> {
                 children: [
                   PageTitleHeader(
                     title: '저장됨',
-                    subtitle: '가고 싶은 장소를 한곳에 모아보세요.',
                     trailing: _tab == 1
                         ? AppIconBox(icon: Icons.add_rounded, size: 44, tooltip: '새 보관함 만들기', onPressed: _createCollection)
                         : null,
