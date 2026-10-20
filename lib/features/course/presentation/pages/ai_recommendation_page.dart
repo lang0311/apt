@@ -261,7 +261,7 @@ class _StopRow extends StatelessWidget {
                 Text(
                   subtitle,
                   style: AppTypography.caption.copyWith(
-                    color: stop.isAi ? AppColors.ai : null,
+                    color: stop.isAi ? AppColors.aiText : null,
                     fontWeight: stop.isAi ? FontWeight.w700 : null,
                   ),
                   maxLines: 1,

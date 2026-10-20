@@ -25,6 +25,9 @@ abstract final class AppColors {
   static const ai = Color(0xFFF39A45);
   static const aiSoft = Color(0xFFFFF1E4);
 
+  /// AI 추천 이유처럼 읽어야 하는 글자에 쓴다. `ai`는 글자 대비가 2.21:1이라 문장에는 쓰지 않는다.
+  static const aiText = Color(0xFFA85400);
+
   static const danger = Color(0xFFF0645A);
   static const dangerSoft = Color(0xFFFDECEB);
   static const success = Color(0xFF16A07D);
