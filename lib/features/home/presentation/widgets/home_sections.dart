@@ -6,110 +6,152 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
-import '../../../../core/utils/instagram_url.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/buttons.dart';
-import '../../../../core/widgets/chips.dart';
 import '../../../../core/widgets/surfaces.dart';
 import '../../../course/domain/course_models.dart';
 import '../../../extraction/domain/extraction_models.dart';
 import '../../../place/domain/place.dart';
-import '../../domain/home_models.dart';
+import '../../../saved/presentation/widgets/category_style.dart';
 
-/// 통계 3타일 (저장된 장소 · 진행 중인 코스 · 최근 추출) — 각 탭으로 이동
-class HomeStatsCard extends StatelessWidget {
-  const HomeStatsCard({super.key, required this.stats});
-  final HomeStats stats;
+/// 홈 맨 위 카드 공통 테두리 (surface + border, radius 20)
+BoxDecoration _topCardDecoration() => BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: AppRadius.cardAll,
+      border: Border.all(color: AppColors.border),
+    );
+
+/// ① 처음 써요 — 공유로 저장하는 3단계 + 링크 붙여넣기
+class HomeStartGuide extends StatelessWidget {
+  const HomeStartGuide({super.key, required this.onPasteLink});
+  final VoidCallback onPasteLink;
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.xs),
-      child: IntrinsicHeight(
-        child: Row(
-          children: [
-            Expanded(
-              child: _Stat(
-                icon: Icons.bookmark_border_rounded,
-                color: AppColors.primary,
-                background: AppColors.primarySoft,
-                label: '저장된 장소',
-                value: stats.savedPlaceCount,
-                onTap: () => context.go(AppRoutes.saved),
-              ),
-            ),
-            const VerticalDivider(width: 1),
-            Expanded(
-              child: _Stat(
-                icon: Icons.map_outlined,
-                color: AppColors.success,
-                background: AppColors.successSoft,
-                label: '진행 중인 코스',
-                value: stats.activeCourseCount,
-                onTap: () => context.go(AppRoutes.courses),
-              ),
-            ),
-            const VerticalDivider(width: 1),
-            Expanded(
-              child: _Stat(
-                icon: Icons.link_rounded,
-                color: AppColors.extract,
-                background: AppColors.extractSoft,
-                label: '최근 추출',
-                value: stats.recentExtractionCount,
-                caption: stats.recentExtractionPeriodLabel,
-                onTap: () => context.go(AppRoutes.extract),
-              ),
-            ),
-          ],
-        ),
+    return Container(
+      decoration: _topCardDecoration(),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('릴스에서 본 곳을 저장해 보세요', style: AppTypography.cardTitle),
+          const SizedBox(height: AppSpacing.xxs),
+          Text('저장한 곳으로 AI가 하루 코스를 이어 드려요.', style: AppTypography.meta),
+          const SizedBox(height: AppSpacing.sm),
+          const Row(
+            children: [
+              Expanded(child: _GuideStep(icon: Icons.more_vert_rounded, label: '릴스에서\n⋯ 누르기')),
+              SizedBox(width: AppSpacing.xs),
+              Expanded(child: _GuideStep(icon: Icons.ios_share_rounded, label: '공유\n누르기')),
+              SizedBox(width: AppSpacing.xs),
+              Expanded(child: _GuideStep(appMark: true, label: 'APT\n고르기')),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          AppButton(
+            label: '링크 붙여넣기',
+            icon: Icons.link_rounded,
+            variant: AppButtonVariant.white,
+            height: 44,
+            onPressed: onPasteLink,
+          ),
+        ],
       ),
     );
   }
 }
 
-class _Stat extends StatelessWidget {
-  const _Stat({
-    required this.icon,
-    required this.color,
-    required this.background,
-    required this.label,
-    required this.value,
-    required this.onTap,
-    this.caption,
-  });
-
-  final IconData icon;
-  final Color color;
-  final Color background;
+class _GuideStep extends StatelessWidget {
+  const _GuideStep({this.icon, this.appMark = false, required this.label});
+  final IconData? icon;
+  final bool appMark;
   final String label;
-  final int value;
-  final String? caption;
-  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: '$label $value',
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs, horizontal: AppSpacing.xxs),
+      decoration: BoxDecoration(color: AppColors.surfaceRaised, borderRadius: BorderRadius.circular(AppRadius.sm)),
+      child: Column(
+        children: [
+          Container(
+            width: 30,
+            height: 30,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: appMark ? AppColors.ink : AppColors.surface,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: appMark
+                ? Text('APT', style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 10))
+                : Icon(icon, size: 18, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: AppSpacing.xxs),
+          Text(label, style: AppTypography.caption, textAlign: TextAlign.center),
+        ],
+      ),
+    );
+  }
+}
+
+/// ② 새로 저장한 곳이 있을 때만 뜨는 한 줄 제안. 카드를 누르면 그 장소들로 코스 만들기, X로 닫는다.
+class NewSavesNudge extends StatelessWidget {
+  const NewSavesNudge({super.key, required this.items, required this.onTap, required this.onClose});
+  final List<RecentExtraction> items;
+  final VoidCallback onTap;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final thumbs = items.take(3).toList();
+    return Material(
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.cardAll, side: const BorderSide(color: AppColors.border)),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.sm, AppSpacing.xxs, AppSpacing.sm),
+          child: Row(
             children: [
-              IconCircle(icon: icon, size: 34, color: color, background: background),
-              const SizedBox(height: AppSpacing.xs),
-              Text(label, style: AppTypography.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700), maxLines: 1),
-              Row(
-                children: [
-                  Text('$value', style: AppTypography.statNumber),
-                  const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
-                ],
+              SizedBox(
+                width: 36.0 + 20 * (thumbs.length - 1),
+                height: 36,
+                child: Stack(
+                  children: [
+                    for (var i = 0; i < thumbs.length; i++)
+                      Positioned(
+                        left: 20.0 * i,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12)),
+                          child: PlaceImage(place: thumbs[i].place, width: 32, height: 32, radius: 10, iconSize: 16),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-              if (caption != null) Text(caption!, style: AppTypography.caption),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('최근 ${items.length}곳을 저장했어요', style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(
+                      '코스로 만들어 볼까요? ›',
+                      style: AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: onClose,
+                tooltip: '제안 닫기',
+                icon: const Icon(Icons.close_rounded, size: 20, color: AppColors.textSecondary),
+                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+              ),
             ],
           ),
         ),
@@ -118,169 +160,428 @@ class _Stat extends StatelessWidget {
   }
 }
 
-/// 최근 추출한 장소 카드
-class RecentExtractionCard extends StatelessWidget {
-  const RecentExtractionCard({super.key, required this.item, required this.onSave});
-  final RecentExtraction item;
-  final VoidCallback onSave;
+/// ③ 다가오는 코스 / ④ 오늘 코스. D-day(또는 '오늘')만 크게, 이름과 '날짜 · 장소 수', 대표 사진 1장.
+class HomeCourseCard extends StatelessWidget {
+  const HomeCourseCard({
+    super.key,
+    required this.course,
+    required this.isToday,
+    required this.moreCount,
+    required this.onOpen,
+    required this.onMore,
+  });
+
+  final CourseSummary course;
+  final bool isToday;
+  final int moreCount;
+  final VoidCallback onOpen;
+  final VoidCallback onMore;
 
   @override
   Widget build(BuildContext context) {
-    final p = item.place;
-    return AppCard(
-      onTap: () => context.push(AppRoutes.place(p.id)),
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      child: Row(
+    final date = course.date;
+    final meta = '${date == null ? '날짜 미정' : formatMonthDayWeekday(date)} · ${course.placeCount}곳';
+    final big = AppTypography.title.copyWith(fontSize: 22, fontWeight: FontWeight.w800, height: 1.1);
+
+    return Material(
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.cardAll, side: const BorderSide(color: AppColors.border)),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          AppNetworkImage(url: p.imageUrl, width: 84, height: 84, radius: 14),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.camera_alt_outlined, size: 14, color: Color(0xFFC13584)),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        InstagramUrl.shortLabel(item.sourceUrl, maxLength: 22),
-                        style: AppTypography.caption,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Text('${formatRelative(item.extractedAt)} 추출', style: AppTypography.caption),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(p.name, style: AppTypography.cardTitle, maxLines: 1, overflow: TextOverflow.ellipsis),
-                Text(p.address, style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Expanded(child: TagWrap(p.keywords, max: 3)),
-                    const SizedBox(width: AppSpacing.xs),
-                    // 저장됨은 상태 표시(비활성 버튼처럼 흐리게 보이지 않게), 저장하기만 버튼
-                    p.isSaved
-                        ? Container(
-                            height: 34,
-                            padding: const EdgeInsets.symmetric(horizontal: 14),
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(AppRadius.sm)),
-                            child: Text('저장됨', style: AppTypography.label.copyWith(color: AppColors.primary)),
+          InkWell(
+            onTap: onOpen,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.md, 14, 14, 14),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (isToday)
+                          Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(color: AppColors.success, shape: BoxShape.circle),
+                              ),
+                              const SizedBox(width: 6),
+                              Text('오늘', style: big.copyWith(color: AppColors.primary)),
+                            ],
                           )
-                        : AppButton(
-                            label: '저장하기',
-                            variant: AppButtonVariant.soft,
-                            expand: false,
-                            height: 34,
-                            onPressed: onSave,
+                        else
+                          Text(
+                            date == null ? '날짜 미정' : ddayLabel(date),
+                            style: date == null ? big.copyWith(fontSize: 18, color: AppColors.textSecondary) : big.copyWith(color: AppColors.primary),
                           ),
-                  ],
-                ),
-              ],
+                        const SizedBox(height: 6),
+                        Text(course.title, style: AppTypography.cardTitle, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        const SizedBox(height: 2),
+                        Text(meta, style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  AppNetworkImage(url: course.thumbnailUrl, width: 60, height: 60, radius: AppRadius.thumb, placeholderIcon: Icons.route_rounded),
+                ],
+              ),
             ),
           ),
+          if (isToday)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, 14, 14),
+              child: AppButton(label: '코스 보기', height: 44, onPressed: onOpen),
+            )
+          else if (moreCount > 0) ...[
+            const Divider(height: 1, color: AppColors.border),
+            InkWell(
+              onTap: onMore,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, 14, AppSpacing.sm),
+                child: Row(
+                  children: [
+                    Text('다가오는 코스 $moreCount개 더 보기', style: AppTypography.meta),
+                    const Spacer(),
+                    const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textSecondary),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-/// 지금 뜨는 장소 (가로 카드)
-class TrendingPlaceCard extends StatelessWidget {
-  const TrendingPlaceCard({super.key, required this.place});
-  final Place place;
+/// 할 일 한 줄 (장소 저장 · 코스 만들기). 코스가 있을 때(③④)만 보여 준다.
+class HomeQuickActions extends StatelessWidget {
+  const HomeQuickActions({super.key, required this.onSavePlace, required this.onNewCourse});
+  final VoidCallback onSavePlace;
+  final VoidCallback onNewCourse;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 148,
-      child: AppCard(
-        onTap: () => context.push(AppRoutes.place(place.id)),
-        padding: const EdgeInsets.all(AppSpacing.xs),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
+    return Row(
+      children: [
+        Expanded(
+          child: _QuickAction(
+            icon: Icons.link_rounded,
+            label: '장소 저장',
+            iconColor: AppColors.primary,
+            iconBackground: AppColors.primarySoft,
+            onTap: onSavePlace,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.xs),
+        Expanded(
+          child: _QuickAction(
+            icon: Icons.route_rounded,
+            label: '코스 만들기',
+            iconColor: Colors.white,
+            iconBackground: AppColors.ink,
+            onTap: onNewCourse,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _QuickAction extends StatelessWidget {
+  const _QuickAction({
+    required this.icon,
+    required this.label,
+    required this.iconColor,
+    required this.iconBackground,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color iconColor;
+  final Color iconBackground;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.thumb), side: const BorderSide(color: AppColors.border)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          height: 52,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            child: Row(
               children: [
-                AppNetworkImage(url: place.imageUrl, width: double.infinity, height: 92, radius: 14),
-                Positioned(
-                  top: 6,
-                  right: 6,
-                  child: Icon(
-                    place.isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-                    color: Colors.white,
-                    shadows: const [Shadow(color: Color(0x6614223A), blurRadius: 6)],
-                  ),
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(color: iconBackground, borderRadius: BorderRadius.circular(10)),
+                  child: Icon(icon, size: 17, color: iconColor),
                 ),
+                const SizedBox(width: AppSpacing.xs),
+                Flexible(child: Text(label, style: AppTypography.label, maxLines: 1, overflow: TextOverflow.ellipsis)),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, AppSpacing.xs, 4, 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(place.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
-                  Text(place.displayArea, style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Container(width: 7, height: 7, decoration: const BoxDecoration(color: AppColors.ai, shape: BoxShape.circle)),
-                      const SizedBox(width: 5),
-                      // 트렌디함은 서버(LLM) 판단 → AI 강조색 사용
-                      Text('지금 인기', style: AppTypography.caption.copyWith(color: AppColors.ai, fontWeight: FontWeight.w700)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// 내 코스 바로가기
-class ActiveCourseCard extends StatelessWidget {
-  const ActiveCourseCard({super.key, required this.course});
-  final CourseSummary course;
+/// 최근 저장한 곳 (가로 사진 줄). 출처 계정 이름은 응답에 없어 저장한 시점을 보여 준다.
+class RecentSavedStrip extends StatelessWidget {
+  const RecentSavedStrip({super.key, required this.items});
+  final List<RecentExtraction> items;
+
+  static const _w = 96.0;
+  static const _h = 128.0;
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      onTap: () => context.push(AppRoutes.course(course.id)),
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      child: Row(
-        children: [
-          AppNetworkImage(url: course.thumbnailUrl, width: 84, height: 84, radius: 14),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(course.title, style: AppTypography.cardTitle, maxLines: 1, overflow: TextOverflow.ellipsis),
-                const SizedBox(height: 2),
-                Text(
-                  ['장소 ${course.placeCount}곳', if (course.date != null) formatDate(course.date!)].join(' · '),
-                  style: AppTypography.meta,
+    return SizedBox(
+      height: _h,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
+        itemCount: items.length,
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
+        itemBuilder: (_, i) {
+          final item = items[i];
+          return _PhotoTile(
+            place: item.place,
+            width: _w,
+            height: _h,
+            caption: _savedAgo(item.extractedAt),
+            onTap: () => context.push(AppRoutes.place(item.place.id)),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// 저장한 시점: 일주일 안은 'n일 전', 그보다 오래면 '10월 12일'
+String _savedAgo(DateTime at) =>
+    DateTime.now().difference(at).inDays < 7 ? formatRelative(at) : '${at.month}월 ${at.day}일';
+
+/// 이런 코스는 어때요? (서버 추천 코스, 가로 카드)
+class SuggestedCourseStrip extends StatelessWidget {
+  const SuggestedCourseStrip({super.key, required this.courses, required this.onTap});
+  final List<SuggestedCourse> courses;
+  final ValueChanged<SuggestedCourse> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 158,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
+        itemCount: courses.length,
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
+        itemBuilder: (_, i) {
+          final c = courses[i];
+          return SizedBox(
+            width: 200,
+            child: Material(
+              color: AppColors.surfaceRaised,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: AppColors.border)),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () => onTap(c),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppNetworkImage(url: c.imageUrl, width: 200, height: 96, radius: 0, placeholderIcon: Icons.route_rounded),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(10, AppSpacing.xs, 10, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(c.title, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text(
+                            ['${c.placeCount}곳', if (c.durationLabel != null) c.durationLabel!].join(' · '),
+                            style: AppTypography.caption,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 6),
-                TagWrap(course.tags, max: 3),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// 지금 뜨는 장소 (2×2 사진 타일). 저장 여부는 북마크 표시로만 보여 준다.
+class TrendingPlaceGrid extends StatelessWidget {
+  const TrendingPlaceGrid({super.key, required this.places});
+  final List<Place> places;
+
+  @override
+  Widget build(BuildContext context) {
+    final shown = places.take(4).toList();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
+      child: LayoutBuilder(
+        builder: (context, box) {
+          final size = (box.maxWidth - AppSpacing.xs) / 2;
+          return Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            children: [
+              for (final p in shown)
+                _PhotoTile(
+                  place: p,
+                  width: size,
+                  height: size,
+                  caption: p.categoryLabel,
+                  saved: p.isSaved,
+                  onTap: () => context.push(AppRoutes.place(p.id)),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// 사진 타일: 사진이 있으면 아래쪽 어둡게 + 흰 글자, 없으면 카테고리 색 칸 + 아이콘 + 진한 글자.
+class _PhotoTile extends StatelessWidget {
+  const _PhotoTile({
+    required this.place,
+    required this.width,
+    required this.height,
+    required this.caption,
+    required this.onTap,
+    this.saved,
+  });
+
+  final Place place;
+  final double width;
+  final double height;
+  final String caption;
+  final VoidCallback onTap;
+
+  /// null이면 북마크 표시를 하지 않는다
+  final bool? saved;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasImage = place.imageUrl != null && place.imageUrl!.isNotEmpty;
+    final fg = hasImage ? Colors.white : AppColors.textPrimary;
+    return Semantics(
+      button: true,
+      label: '${place.name}, $caption',
+      child: GestureDetector(
+        onTap: onTap,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.thumb),
+          child: SizedBox(
+            width: width,
+            height: height,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                PlaceImage(place: place, width: width, height: height, radius: 0, iconSize: 26, iconAlignment: const Alignment(0, -0.25)),
+                if (hasImage)
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: [0.45, 1],
+                        colors: [Color(0x0014223A), Color(0xB314223A)],
+                      ),
+                    ),
+                  ),
+                if (saved != null)
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: Container(
+                      width: 26,
+                      height: 26,
+                      decoration: BoxDecoration(color: const Color(0x7314223A), borderRadius: BorderRadius.circular(9)),
+                      child: Icon(saved! ? Icons.bookmark_rounded : Icons.bookmark_border_rounded, size: 15, color: Colors.white),
+                    ),
+                  ),
+                Positioned(
+                  left: 8,
+                  right: 6,
+                  bottom: 7,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        place.name,
+                        style: AppTypography.label.copyWith(color: fg, fontSize: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        caption,
+                        style: AppTypography.caption.copyWith(color: hasImage ? Colors.white.withValues(alpha: 0.88) : AppColors.textSecondary, fontSize: 10),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-          AppButton(
-            label: '이어보기',
-            variant: AppButtonVariant.soft,
-            expand: false,
-            height: 40,
-            onPressed: () => context.push(AppRoutes.course(course.id)),
-          ),
-        ],
+        ),
       ),
+    );
+  }
+}
+
+/// 장소 사진. 사진이 없으면 카테고리 색 칸 + 아이콘으로 같은 크기를 유지한다.
+class PlaceImage extends StatelessWidget {
+  const PlaceImage({
+    super.key,
+    required this.place,
+    required this.width,
+    required this.height,
+    this.radius = AppRadius.thumb,
+    this.iconSize = 22,
+    this.iconAlignment = Alignment.center,
+  });
+
+  final Place place;
+  final double width;
+  final double height;
+  final double radius;
+  final double iconSize;
+  final Alignment iconAlignment;
+
+  @override
+  Widget build(BuildContext context) {
+    if (place.imageUrl != null && place.imageUrl!.isNotEmpty) {
+      return AppNetworkImage(url: place.imageUrl, width: width, height: height, radius: radius);
+    }
+    final style = CategoryStyle.of(place.categoryKey);
+    return Container(
+      width: width,
+      height: height,
+      alignment: iconAlignment,
+      decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(radius)),
+      child: Icon(style.icon, size: iconSize, color: style.color),
     );
   }
 }

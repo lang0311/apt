@@ -42,8 +42,9 @@
 | `textSecondary` | `#5F6E86` (2026-10-20 변경, 시안 `#7B8AA3`는 대비 3.50:1로 미달 → 흰 배경 5.17:1) | 설명, 메타 |
 | `textHint` | `#98A3B5` | 장식용 아이콘만 (2.55:1이라 글자에는 쓰지 않음). placeholder·미선택 안내 글자는 `textSecondary` (2026-10-20) |
 | `ink` | `#0E1E33` | 다크 버튼, 상태바 아일랜드 |
-| `bg` | `#F6F8FC` / `#F7F9FC` | 화면 배경 |
-| `surface` | `#FFFFFF` | 카드, 입력, 탭바 |
+| `bg` | `#EEF1F5` (2026-10-20 변경, 시안 `#F6F8FC`는 흰 카드와 거의 구분되지 않음) | 화면 배경, 탭 화면 상단바 |
+| `surface` | `#F9FAFC` (2026-10-20 변경, 시안 `#FFFFFF`) | 섹션 묶음·카드·입력·탭바. 카드는 `border` 1px로 경계를 잡는다(그림자 없음) |
+| `surfaceRaised` | `#FFFFFF` | `surface` 카드 **안**에 놓이는 카드 (2026-10-20) |
 | `border` | `#E4EAF3` | 입력/칩 테두리 |
 | `controlBorder` | `#8B97AB` | 체크박스·라디오 **미선택 테두리**(두께 1.6, 흰 배경 약 3:1). 고를 수 없는 항목은 `border` 유지 (2026-10-20) |
 | `divider` | `#E9EEF5` / `#DCE4F0` | 구분선, 비활성 진행 바 |
@@ -74,7 +75,8 @@
 | 좌우 여백 | 20 (일부 24) |
 | 입력 필드 | 높이 52–54, radius 15, 흰 배경 + `border` |
 | 주 버튼 | 높이 52–54, radius 15–17 |
-| 카드 | radius 18–22, 흰 배경 (그림자 거의 없음) |
+| 카드 | radius 18–22, `surface`(#F9FAFC) + `border` 1px, 그림자 없음 (2026-10-20) |
+| 섹션 묶음 | `SectionCard`: 제목을 컨테이너 안에 두는 섹션 카드. 탭 화면 본문은 바깥 여백 12 · 카드 사이 10 · 안쪽 16 (2026-10-20, 홈부터) |
 | 칩 | 높이 32, radius 16(풀 라운드), 선택=primary 채움 / 비선택=흰+border |
 | 썸네일 | radius 13–16 |
 | 뒤로가기 버튼 | 36×36, radius 12, 흰 배경 |
@@ -88,6 +90,7 @@
 ## 4. 공통 컴포넌트
 
 **기본**: `AppPrimaryButton` `AppDarkButton` `AppOutlineButton` `AppTextButton` `AppIconButton(back)` `AppTextField(+error)` `AppChip(선택/비선택)` `AppSwitch` `AppBottomSheet` `AppModal` `AppEmptyState` `AppErrorState` `AppLoading` `AppSnackBar`
+**섹션·사진**: `SectionCard`(섹션 컨테이너) `PlaceImage`(사진 없으면 카테고리 색 칸 + 아이콘, 같은 크기 유지)
 **도메인**: `SocialLoginButton` `SegmentedTabs` `CategoryTile` `CollectionCard(콜라주 썸네일)` `PlaceListTile` `PlaceCardSmall` `ExtractedPlaceCard` `CourseCard` `StatTile` `StepHeader(뒤로+타이틀+n/4)` `StepProgressBar` `CoursePlaceRow(번호·드래그·⋮)` `AiBadge(✦)` `PartyAvatarStack` `RouteSegmentChip(도보/버스 N분)` `PreferenceChipGroup` `AppBottomNav`
 **지도**: `AptMap` `MapPin(번호/선택/AI/내 위치)` `MapBottomSheet`
 
@@ -111,7 +114,7 @@
 
 이번에 추가한 화면 3개(07, 08, 34)가 따른 규칙. 앞으로도 동일하게 적용한다.
 
-1. 배경 `#F6F8FC`, 카드/입력은 흰색, 구분은 얇은 `border`
+1. 배경 `#EEF1F5`, 카드/입력은 회백색 `#F9FAFC` + 얇은 `border`, 카드 안의 카드는 흰색 (2026-10-20)
 2. 서브 화면 헤더 = **36×36 흰 뒤로 버튼 + 20px 타이틀** (위저드는 우측 `n/4`)
 3. 인증/설정류 첫 화면은 **큰 제목(25/800) + 설명(11) + 입력들**, 주 버튼은 **하단 고정 (y≈664–706, 높이 52)**
 4. 선택형 항목은 **32px 풀 라운드 칩**, 그룹 라벨은 12/700 + 오른쪽 보조 힌트
@@ -119,4 +122,5 @@
 6. 정보 안내 카드는 `primarySoft` 배경 또는 흰 카드 + 작은 아이콘 원
 7. AI 관련은 항상 `ai` 주황 + ✦
 8. 하단 탭 화면(홈·코스·저장됨·추출·마이) 헤더는 **큰 제목 + 오른쪽 버튼만** 둔다. 정보 없는 분위기 부제는 쓰지 않는다 (2026-10-20, 07 D16)
-8. 문구는 해요체, 짧고 행동 중심 ("~해주세요", "~할 수 있어요")
+9. 강조는 카드마다 한 곳만(예: 코스 카드는 D-day만 크게). 숫자 통계 타일은 쓰지 않는다 (2026-10-20, 07 D20)
+10. 문구는 해요체, 짧고 행동 중심 ("~해주세요", "~할 수 있어요")

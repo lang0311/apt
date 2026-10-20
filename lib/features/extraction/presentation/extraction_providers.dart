@@ -8,7 +8,7 @@ final extractionProvider = FutureProvider.autoDispose.family<ExtractionResult, S
   (ref, url) => ref.watch(extractionRepositoryProvider).extract(url),
 );
 
-/// 홈 "최근 추출한 장소"
+/// 홈 "최근 저장한 곳" 사진 줄 · 새 저장 제안
 final recentExtractionsProvider = FutureProvider.autoDispose<List<RecentExtraction>>(
-  (ref) => ref.watch(extractionRepositoryProvider).fetchRecent(),
+  (ref) => ref.watch(extractionRepositoryProvider).fetchRecent(limit: 10),
 );

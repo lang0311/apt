@@ -13,8 +13,10 @@ abstract final class AppColors {
 
   static const ink = Color(0xFF14223A);
 
-  static const bg = Color(0xFFF6F8FC);
-  static const surface = Color(0xFFFFFFFF);
+  /// 밝기 3단계로 층을 나눈다(그림자 없음): 배경 `bg` → 섹션·카드 `surface`(+ `border` 1px) → 그 안의 카드 `surfaceRaised`.
+  static const bg = Color(0xFFEEF1F5);
+  static const surface = Color(0xFFF9FAFC);
+  static const surfaceRaised = Color(0xFFFFFFFF);
   static const surfaceMuted = Color(0xFFEEF2F8);
 
   static const border = Color(0xFFE4EAF3);

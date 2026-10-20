@@ -48,7 +48,13 @@ class MockCourseRepository implements CourseRepository {
 
   @override
   Future<List<CourseSummary>> fetchActiveCourses() => _store.behavior.query(
-        () => [for (final c in _newestFirst.take(1)) _summary(c)],
+        // 홈 맨 위 코스 카드용: 오늘 이후(오늘 포함) 날짜의 코스를 가까운 순으로. 서버 정의는 NEEDS BACKEND.
+        () {
+          final today = DateUtils.dateOnly(DateTime.now());
+          final list = [for (final c in _store.courses.values) if (c.date == null || !c.date!.isBefore(today)) c]
+            ..sort((a, b) => (a.date ?? DateTime(9999)).compareTo(b.date ?? DateTime(9999)));
+          return [for (final c in list) _summary(c)];
+        },
         empty: () => const [],
       );
 

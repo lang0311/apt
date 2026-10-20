@@ -4,7 +4,62 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 
-/// 흰 카드 (radius 20, 그림자 없음)
+/// 섹션 묶음 (surface + border 1px, radius 20). 제목은 컨테이너 안에 둔다.
+/// [child]는 좌우 여백 없이 받는다 — 가로 스크롤 목록이 컨테이너 끝까지 닿게 하고, 여백은 child가 정한다.
+class SectionCard extends StatelessWidget {
+  const SectionCard({super.key, required this.title, required this.child, this.actionLabel, this.onAction});
+
+  final String title;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final Widget child;
+
+  static const innerPadding = AppSpacing.md;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: AppRadius.cardAll,
+        border: Border.all(color: AppColors.border),
+      ),
+      padding: const EdgeInsets.fromLTRB(0, AppSpacing.xs, 0, AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(innerPadding, 0, AppSpacing.xxs, AppSpacing.xxs),
+            child: Row(
+              children: [
+                // 오른쪽 버튼이 없어도 제목 줄 높이(44)를 같게 유지한다
+                Expanded(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 44),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Semantics(header: true, child: Text(title, style: AppTypography.cardTitle)),
+                    ),
+                  ),
+                ),
+                if (actionLabel != null)
+                  TextButton(
+                    onPressed: onAction,
+                    style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary, minimumSize: const Size(44, 44)),
+                    child: Text(actionLabel!, style: AppTypography.meta),
+                  ),
+              ],
+            ),
+          ),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+/// 카드 (surface, radius 20, border 1px, 그림자 없음)
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
@@ -27,7 +82,7 @@ class AppCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(radius),
-      side: borderColor == null ? BorderSide.none : BorderSide(color: borderColor!, width: 1.4),
+      side: borderColor == null ? const BorderSide(color: AppColors.border) : BorderSide(color: borderColor!, width: 1.4),
     );
     return Material(
       color: color,

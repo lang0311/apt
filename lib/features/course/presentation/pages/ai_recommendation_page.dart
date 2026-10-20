@@ -18,6 +18,7 @@ import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/staged_loading.dart';
 import '../../../../core/widgets/states.dart';
 import '../../../../core/widgets/surfaces.dart';
+import '../../../home/presentation/home_providers.dart';
 import '../../../place/domain/place.dart';
 import '../../domain/course_models.dart';
 import '../course_draft_controller.dart';
@@ -103,6 +104,8 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
       } else {
         final course = await repo.createCourse(draft: draft, stops: stops);
         invalidateCourseData(ref);
+        // 코스를 만들었으면 지금까지 저장한 곳은 홈 제안에서 뺀다
+        ref.read(homeNudgeSeenAtProvider.notifier).markSeen();
         if (mounted) context.go(AppRoutes.courseNewDone(course.id));
       }
     } catch (e) {

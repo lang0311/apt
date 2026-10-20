@@ -37,16 +37,18 @@ class MockExtractionRepository implements ExtractionRepository {
   @override
   Future<List<RecentExtraction>> fetchRecent({int limit = 2}) => _store.behavior.query(
         () => [
-          RecentExtraction(
-            place: _store.placeWithSaved('p1'),
-            sourceUrl: 'https://www.instagram.com/p/C3k9xYzAbcD/',
-            extractedAt: DateTime.now().subtract(const Duration(days: 2)),
-          ),
-          RecentExtraction(
-            place: _store.placeWithSaved('p4'),
-            sourceUrl: 'https://www.instagram.com/reel/DA7mNpQrStU/',
-            extractedAt: DateTime.now().subtract(const Duration(days: 3)),
-          ),
+          for (final (id, url, days) in const [
+            ('p1', 'https://www.instagram.com/p/C3k9xYzAbcD/', 2),
+            ('p4', 'https://www.instagram.com/reel/DA7mNpQrStU/', 3),
+            ('p9', 'https://www.instagram.com/reel/DB1aBcDeFgH/', 5),
+            ('p2', 'https://www.instagram.com/p/C9zYxWvUtSr/', 8),
+            ('p5', 'https://www.instagram.com/reel/DC4kLmNoPqR/', 12),
+          ])
+            RecentExtraction(
+              place: _store.placeWithSaved(id),
+              sourceUrl: url,
+              extractedAt: DateTime.now().subtract(Duration(days: days)),
+            ),
         ].take(limit).toList(),
         empty: () => const [],
       );
