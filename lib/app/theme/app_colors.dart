@@ -8,7 +8,7 @@ abstract final class AppColors {
   static const primarySoftStrong = Color(0xFFDCE8FF);
 
   static const textPrimary = Color(0xFF132238);
-  static const textSecondary = Color(0xFF7B8AA3);
+  static const textSecondary = Color(0xFF5F6E86);
   static const textHint = Color(0xFF98A3B5);
 
   static const ink = Color(0xFF14223A);

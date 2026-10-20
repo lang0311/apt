@@ -39,7 +39,7 @@
 | `primary` | `#246BFD` | 주 버튼, 활성 탭/칩, 링크 |
 | `primarySoft` | `#EDF3FF` / `#EAF1FF` / `#EBF2FF` | 강조 배경, 아이콘 원, 안내 카드 |
 | `textPrimary` | `#132238` (`#17243A`, `#102033`) | 제목, 본문 |
-| `textSecondary` | `#7B8AA3` (`#7B879B`, `#71819B`) | 설명, 메타 |
+| `textSecondary` | `#5F6E86` (2026-10-20 변경, 시안 `#7B8AA3`는 대비 3.50:1로 미달 → 흰 배경 5.17:1) | 설명, 메타 |
 | `textHint` | `#98A3B5` | placeholder |
 | `ink` | `#0E1E33` | 다크 버튼, 상태바 아일랜드 |
 | `bg` | `#F6F8FC` / `#F7F9FC` | 화면 배경 |
