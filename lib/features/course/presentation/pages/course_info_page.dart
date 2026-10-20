@@ -16,8 +16,9 @@ import '../../../../core/widgets/states.dart';
 import '../../../../core/widgets/surfaces.dart';
 import '../course_draft_controller.dart';
 import '../course_providers.dart';
+import '../widgets/course_when_sheet.dart';
 
-/// #23 코스 기본 정보 (1/4): 이름 · 날짜 · 시작 시간 · 분위기
+/// #23 코스 기본 정보 (1/4): 이름 · 언제(날짜+시작 시간) · 분위기
 class CourseInfoPage extends ConsumerStatefulWidget {
   const CourseInfoPage({super.key});
 
@@ -36,26 +37,10 @@ class _CourseInfoPageState extends ConsumerState<CourseInfoPage> {
 
   CourseDraftController get _draft => ref.read(courseDraftProvider.notifier);
 
-  Future<void> _pickDate() async {
-    final now = DateTime.now();
-    final current = ref.read(courseDraftProvider).date;
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: current ?? now,
-      firstDate: DateTime(now.year, now.month, now.day),
-      lastDate: now.add(const Duration(days: 365 * 2)),
-      helpText: '여행 날짜',
-    );
-    if (picked != null) _draft.update((d) => d.copyWith(date: picked));
-  }
-
-  Future<void> _pickTime() async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: ref.read(courseDraftProvider).startTime ?? const TimeOfDay(hour: 11, minute: 0),
-      helpText: '시작 시간',
-    );
-    if (picked != null) _draft.update((d) => d.copyWith(startTime: picked));
+  Future<void> _pickWhen() async {
+    final draft = ref.read(courseDraftProvider);
+    final picked = await showCourseWhenSheet(context, date: draft.date, time: draft.startTime);
+    if (picked != null) _draft.update((d) => d.copyWith(date: picked.date, startTime: picked.time));
   }
 
   @override
@@ -86,20 +71,14 @@ class _CourseInfoPageState extends ConsumerState<CourseInfoPage> {
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   _PickerField(
-                    label: '여행 날짜',
+                    label: '언제 떠나요',
                     icon: Icons.calendar_today_outlined,
                     // 기간(여러 날) 여행은 정책/디자인 확정 후 지원
-                    value: draft.date == null ? null : '${formatDate(draft.date!)} · 하루',
-                    hint: '날짜를 선택해주세요',
-                    onTap: _pickDate,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  _PickerField(
-                    label: '시작 시간',
-                    icon: Icons.schedule_rounded,
-                    value: draft.startTime == null ? null : formatTimeOfDay(draft.startTime!),
-                    hint: '시간을 선택해주세요',
-                    onTap: _pickTime,
+                    value: draft.date == null || draft.startTime == null
+                        ? null
+                        : '${formatMonthDayWeekday(draft.date!)} · ${formatTimeOfDay(draft.startTime!)}',
+                    hint: '날짜와 시작 시간을 골라 주세요',
+                    onTap: _pickWhen,
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   Text('여행 분위기', style: AppTypography.label),

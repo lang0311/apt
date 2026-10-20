@@ -5,6 +5,14 @@ String _two(int v) => v.toString().padLeft(2, '0');
 /// 2026. 10. 12
 String formatDate(DateTime d) => '${d.year}. ${_two(d.month)}. ${_two(d.day)}';
 
+const _weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+
+/// 월 화 … 일 (DateTime.weekday 1–7)
+String weekdayLabel(DateTime d) => _weekdays[d.weekday - 1];
+
+/// 10월 21일 (수)
+String formatMonthDayWeekday(DateTime d) => '${d.month}월 ${d.day}일 (${weekdayLabel(d)})';
+
 /// 오전 11:00
 String formatTimeOfDay(TimeOfDay t) {
   final period = t.hour < 12 ? '오전' : '오후';

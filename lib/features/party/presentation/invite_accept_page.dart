@@ -184,7 +184,7 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
                         Expanded(child: Text('내 저장 장소와 취향을 추천에 반영', style: AppTypography.label)),
                         Icon(
                           _sharePreferences ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                          color: _sharePreferences ? AppColors.primary : AppColors.textHint,
+                          color: _sharePreferences ? AppColors.primary : AppColors.controlBorder,
                         ),
                       ],
                     ),

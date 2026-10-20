@@ -18,9 +18,9 @@ class CircleCheck extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: checked ? AppColors.primary : AppColors.surface,
-        border: Border.all(color: checked ? AppColors.primary : AppColors.border, width: 1.4),
+        border: Border.all(color: checked ? AppColors.primary : AppColors.controlBorder, width: 1.6),
       ),
-      child: Icon(Icons.check_rounded, size: size * 0.7, color: checked ? Colors.white : AppColors.textHint),
+      child: checked ? Icon(Icons.check_rounded, size: size * 0.7, color: Colors.white) : null,
     );
   }
 }
@@ -40,7 +40,7 @@ class SquareCheck extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(size * 0.3),
         color: checked ? AppColors.primary : AppColors.surface,
-        border: Border.all(color: checked ? AppColors.primary : AppColors.border, width: 1.4),
+        border: Border.all(color: checked ? AppColors.primary : AppColors.controlBorder, width: 1.6),
       ),
       child: checked ? Icon(Icons.check_rounded, size: size * 0.75, color: Colors.white) : null,
     );
@@ -62,7 +62,11 @@ class RadioDot extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: selected ? AppColors.primary : (enabled ? AppColors.surface : AppColors.surfaceMuted),
-        border: Border.all(color: selected ? AppColors.primary : AppColors.textHint, width: 1.4),
+        border: Border.all(
+          // 고를 수 없는 항목(이미 저장됨)은 누를 수 있어 보이지 않게 연한 테두리
+          color: selected ? AppColors.primary : (enabled ? AppColors.controlBorder : AppColors.border),
+          width: 1.6,
+        ),
       ),
       child: selected ? Icon(Icons.check_rounded, size: size * 0.7, color: Colors.white) : null,
     );

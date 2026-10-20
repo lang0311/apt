@@ -14,6 +14,18 @@ abstract final class AppTheme {
         primary: AppColors.primary,
         error: AppColors.danger,
         surface: AppColors.surface,
+        // fromSeed가 만드는 분홍(tertiary)·연보라(surfaceContainer)가 기본 위젯에 드러나지 않게 앱 색으로 고정
+        secondaryContainer: AppColors.primarySoft,
+        onSecondaryContainer: AppColors.primary,
+        tertiary: AppColors.primary,
+        onTertiary: Colors.white,
+        tertiaryContainer: AppColors.primarySoft,
+        onTertiaryContainer: AppColors.primary,
+        surfaceContainerLowest: AppColors.surface,
+        surfaceContainerLow: AppColors.surface,
+        surfaceContainer: AppColors.surface,
+        surfaceContainerHigh: AppColors.surface,
+        surfaceContainerHighest: AppColors.surfaceMuted,
       ),
       scaffoldBackgroundColor: AppColors.bg,
     );
@@ -49,6 +61,32 @@ abstract final class AppTheme {
         trackColor: WidgetStateProperty.resolveWith(
           (s) => s.contains(WidgetState.selected) ? AppColors.primary : AppColors.progressInactive,
         ),
+      ),
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        headerForegroundColor: AppColors.textPrimary,
+        dividerColor: AppColors.divider,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.cardAll),
+      ),
+      timePickerTheme: TimePickerThemeData(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.cardAll),
+        dayPeriodColor: WidgetStateColor.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? AppColors.primarySoft : AppColors.surface,
+        ),
+        dayPeriodTextColor: WidgetStateColor.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? AppColors.primary : AppColors.textSecondary,
+        ),
+        dayPeriodBorderSide: const BorderSide(color: AppColors.border),
+        hourMinuteColor: WidgetStateColor.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? AppColors.primarySoft : AppColors.surfaceMuted,
+        ),
+        hourMinuteTextColor: WidgetStateColor.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? AppColors.primary : AppColors.textPrimary,
+        ),
+        dialBackgroundColor: AppColors.surfaceMuted,
+        dialHandColor: AppColors.primary,
       ),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: AppColors.primary),
       splashFactory: InkSparkle.splashFactory,

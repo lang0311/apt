@@ -123,8 +123,10 @@ class _TermsList extends StatelessWidget {
               for (final t in items)
                 InkWell(
                   onTap: () => onChanged(agreed.contains(t.id) ? ({...agreed}..remove(t.id)) : {...agreed, t.id}),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                  child: Container(
+                    // › 버튼(48) 유무와 관계없이 모든 행 높이를 같게 맞춘다
+                    constraints: const BoxConstraints(minHeight: 56),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xxs),
                     child: Row(
                       children: [
                         CircleCheck(checked: agreed.contains(t.id)),

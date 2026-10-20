@@ -18,6 +18,9 @@ abstract final class AppColors {
   static const surfaceMuted = Color(0xFFEEF2F8);
 
   static const border = Color(0xFFE4EAF3);
+
+  /// 체크박스·라디오 미선택 테두리. `border`는 1.21:1이라 선택 컨트롤에는 이 색을 쓴다(약 3:1).
+  static const controlBorder = Color(0xFF8B97AB);
   static const divider = Color(0xFFE9EEF5);
   static const progressInactive = Color(0xFFDCE4F0);
 

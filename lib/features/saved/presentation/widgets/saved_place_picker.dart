@@ -222,7 +222,7 @@ class _PickRow extends StatelessWidget {
                     : Container(
                         width: 26,
                         height: 26,
-                        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.border, width: 1.4)),
+                        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.controlBorder, width: 1.6)),
                       ),
                 PickerSelectionStyle.checkbox => SquareCheck(checked: selected),
               },
