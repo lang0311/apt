@@ -64,6 +64,26 @@ class SectionCard extends StatelessWidget {
   }
 }
 
+/// SectionCard 안의 행 목록. 행 사이에만 구분선을 넣고, 선은 사진 오른쪽(왼쪽 [indent])부터 시작한다.
+class DividedRows extends StatelessWidget {
+  const DividedRows({super.key, required this.children, this.indent = 88});
+  final List<Widget> children;
+  final double indent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < children.length; i++) ...[
+          if (i > 0) Divider(height: 1, thickness: 1, indent: indent, color: AppColors.divider),
+          children[i],
+        ],
+      ],
+    );
+  }
+}
+
 /// 카드 (surface, radius 20, border 1px, 그림자 없음)
 class AppCard extends StatelessWidget {
   const AppCard({

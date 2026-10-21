@@ -86,9 +86,8 @@ class CourseSummary {
     this.thumbnailUrl,
     this.isParty = false,
     this.memberCount = 1,
-    this.statusLabel,
+    this.memberNames = const [],
     this.tags = const [],
-    this.bookmarked = false,
   });
 
   final String id;
@@ -100,10 +99,9 @@ class CourseSummary {
   final bool isParty;
   final int memberCount;
 
-  /// 예: "함께 계획 중" (서버 상태 문구)
-  final String? statusLabel;
+  /// 파티원 이름 (나 포함, 서버 순서). NEEDS BACKEND: 목록 summary에 이름이 오는지
+  final List<String> memberNames;
   final List<String> tags;
-  final bool bookmarked;
 }
 
 /// "이런 코스는 어때요?" (서버 추천 코스)

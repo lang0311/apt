@@ -11,26 +11,6 @@ import '../../domain/saved_models.dart';
 import 'category_style.dart';
 import 'place_image.dart';
 
-/// SectionCard 안의 행 목록. 행 사이에만 구분선을 넣고, 선은 사진 오른쪽(왼쪽 [indent])부터 시작한다.
-class DividedRows extends StatelessWidget {
-  const DividedRows({super.key, required this.children, this.indent = 88});
-  final List<Widget> children;
-  final double indent;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (var i = 0; i < children.length; i++) ...[
-          if (i > 0) Divider(height: 1, thickness: 1, indent: indent, color: AppColors.divider),
-          children[i],
-        ],
-      ],
-    );
-  }
-}
-
 /// 저장 장소 한 행: 사진 56 · 이름 · '카테고리 · 동네' · ★평점/@출처(둘 다 없으면 줄째 생략)
 class SavedPlaceRow extends StatelessWidget {
   const SavedPlaceRow({super.key, required this.place, required this.onTap});

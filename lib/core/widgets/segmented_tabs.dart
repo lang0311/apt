@@ -22,9 +22,13 @@ class SegmentedTabs extends StatelessWidget {
     required this.selectedIndex,
     required this.onChanged,
     this.style = SegmentedStyle.track,
+    this.counts,
   });
 
   final List<String> labels;
+
+  /// 밑줄 탭 이름 옆 개수 (서버 목록 길이). null이면 표시하지 않는다.
+  final List<int?>? counts;
   final int selectedIndex;
   final ValueChanged<int> onChanged;
   final SegmentedStyle style;
@@ -58,8 +62,15 @@ class SegmentedTabs extends StatelessWidget {
                       bottom: BorderSide(color: i == selectedIndex ? AppColors.ink : Colors.transparent, width: 2),
                     ),
                   ),
-                  child: Text(
-                    labels[i],
+                  child: Text.rich(
+                    TextSpan(children: [
+                      TextSpan(text: labels[i]),
+                      if (counts?[i] != null)
+                        TextSpan(
+                          text: ' ${counts![i]}',
+                          style: const TextStyle(color: AppColors.textTertiary, fontWeight: FontWeight.w600),
+                        ),
+                    ]),
                     style: AppTypography.bodyStrong.copyWith(
                       color: i == selectedIndex ? AppColors.ink : AppColors.textSecondary,
                       fontWeight: i == selectedIndex ? FontWeight.w800 : FontWeight.w600,

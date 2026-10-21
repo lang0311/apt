@@ -125,7 +125,7 @@ class MockStore {
         ]),
         totalDuration: const Duration(hours: 5),
       ),
-      meta: const CourseSummaryMeta(region: '제주', tags: ['바다'], status: '함께 계획 중'),
+      meta: const CourseSummaryMeta(region: '제주', tags: ['바다'], memberNames: ['나', '민지', '랑이']),
     );
   }
 
@@ -137,10 +137,10 @@ class MockStore {
 
 /// Mock 전용 코스 목록 메타 (서버 summary 흉내)
 class CourseSummaryMeta {
-  const CourseSummaryMeta({this.region, this.tags = const [], this.status});
+  const CourseSummaryMeta({this.region, this.tags = const [], this.memberNames = const []});
   final String? region;
   final List<String> tags;
-  final String? status;
+  final List<String> memberNames;
 }
 
 final mockStoreProvider = Provider<MockStore>((ref) => MockStore());

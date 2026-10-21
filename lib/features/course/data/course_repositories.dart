@@ -23,7 +23,7 @@ class MockCourseRepository implements CourseRepository {
       thumbnailUrl: c.stops.isEmpty ? null : c.stops.first.place.imageUrl,
       isParty: c.isParty,
       memberCount: c.memberCount,
-      statusLabel: meta?.status,
+      memberNames: meta?.memberNames ?? const [],
       tags: meta?.tags ?? const [],
     );
   }
@@ -124,7 +124,7 @@ class MockCourseRepository implements CourseRepository {
         _store.courseCreatedAt[id] = DateTime.now();
         _store.courseMeta[id] = CourseSummaryMeta(
           region: stops.isEmpty ? null : stops.first.place.displayArea.split(' ').first,
-          status: course.isParty ? '함께 계획 중' : null,
+          memberNames: course.isParty ? const ['나', '민지', '랑이'] : const [],
         );
         return course;
       });
