@@ -119,7 +119,7 @@ void main() {
     expectNoErrors(tester);
   });
 
-  testWidgets('G. 코스 만들기: 1/4 → 2/4 → 3/4(함께) → 4/4 → 다른 추천 → 완성 → 상세', (tester) async {
+  testWidgets('G. 코스 만들기: 1/4 → 2/4(함께) → 3/4 → 4/4 → 다른 추천 → 완성 → 상세', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '코스');
     await waitFor(tester, find.text('내 코스'));
@@ -134,15 +134,9 @@ void main() {
     await tapText(tester, '시간을 선택해주세요');
     await tapText(tester, '확인', scroll: false);
     await tapText(tester, '산책');
-    await tapText(tester, '다음: 저장한 장소 선택');
+    await tapText(tester, '다음: 동행 설정');
 
     // 2/4
-    await waitFor(tester, find.text('코스에 넣을 장소를 골라주세요'));
-    await tapText(tester, '카페 온더뷰');
-    await tapText(tester, '연남식당');
-    await tapText(tester, '선택한 장소로 계속하기 (2)');
-
-    // 3/4
     await waitFor(tester, find.text('이번 코스는 누구와 함께하나요?'));
     await tapText(tester, '함께 갈게요');
     await waitFor(tester, find.text('현재 3명'));
@@ -151,7 +145,13 @@ void main() {
     await tapText(tester, '초대 링크 복사');
     await expectSnack(tester, '초대 링크를 복사했어요.');
     await tapText(tester, '닫기', scroll: false);
-    await tapText(tester, '다음: 파티 취향 AI 추천');
+    await tapText(tester, '다음: 저장한 장소 선택');
+
+    // 3/4
+    await waitFor(tester, find.text('코스에 넣을 장소를 골라주세요'));
+    await tapText(tester, '카페 온더뷰');
+    await tapText(tester, '연남식당');
+    await tapText(tester, '선택한 장소로 계속하기 (2)');
 
     // 4/4
     await waitFor(tester, find.text('추천 동선'), timeout: const Duration(seconds: 20));

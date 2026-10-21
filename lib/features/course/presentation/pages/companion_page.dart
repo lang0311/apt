@@ -18,14 +18,11 @@ import '../../../../core/widgets/surfaces.dart';
 import '../../../party/presentation/party_providers.dart';
 import '../../../party/presentation/widgets/invite_modal.dart';
 import '../../../party/presentation/widgets/party_avatar_stack.dart';
-import '../../../place/domain/place.dart';
 import '../../../preference/presentation/preference_providers.dart';
 import '../../domain/course_models.dart';
 import '../course_draft_controller.dart';
-import '../widgets/course_place_row.dart';
-import 'add_places_page.dart';
 
-/// #25 / #26 동행 설정 (3/4) — 한 화면의 [혼자 갈게요 | 함께 갈게요] 토글
+/// #25 / #26 동행 설정 (2/4, 정보 다음 · 장소 선택 전) — 한 화면의 [혼자 갈게요 | 함께 갈게요] 토글
 class CompanionPage extends ConsumerStatefulWidget {
   const CompanionPage({super.key});
 
@@ -53,24 +50,6 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
     }
   }
 
-  Future<void> _addMore() async {
-    final picked = await context.push<List<Place>>(
-      AppRoutes.pickPlaces,
-      extra: AddPlacesArgs(excludedPlaceIds: ref.read(courseDraftProvider).placeIds),
-    );
-    if (picked != null && picked.isNotEmpty) _draft.update((d) => d.addPlaces(picked));
-  }
-
-  void _placeMenu(Place p, int index, int count) {
-    showActionSheet(context, title: p.name, actions: [
-      if (index > 0)
-        SheetAction(label: '위로 이동', icon: Icons.arrow_upward_rounded, onTap: () => _draft.update((d) => d.reorder(index, index - 1))),
-      if (index < count - 1)
-        SheetAction(label: '아래로 이동', icon: Icons.arrow_downward_rounded, onTap: () => _draft.update((d) => d.reorder(index, index + 2))),
-      SheetAction(label: '코스에서 빼기', icon: Icons.delete_outline_rounded, destructive: true, onTap: () => _draft.update((d) => d.removePlace(p.id))),
-    ]);
-  }
-
   @override
   Widget build(BuildContext context) {
     final draft = ref.watch(courseDraftProvider);
@@ -80,7 +59,7 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
       body: SafeArea(
         child: Column(
           children: [
-            const StepHeader(title: '동행 설정', step: 3),
+            const StepHeader(title: '동행 설정', step: 2),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.lg, AppSpacing.screenH, AppSpacing.lg),
@@ -95,50 +74,6 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
                     style: SegmentedStyle.pills,
                     onChanged: (i) => _setCompanion(i == 1 ? Companion.party : Companion.solo),
                   ),
-                  SectionHeader(
-                    title: '선택한 장소',
-                    padding: const EdgeInsets.only(top: AppSpacing.xl, bottom: AppSpacing.sm),
-                    trailing: Text('순서를 끌어 변경', style: AppTypography.caption),
-                  ),
-                  ReorderableListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    buildDefaultDragHandles: false,
-                    itemCount: draft.places.length,
-                    onReorder: (o, n) => _draft.update((d) => d.reorder(o, n)),
-                    itemBuilder: (_, i) {
-                      final p = draft.places[i];
-                      return Padding(
-                        key: ValueKey(p.id),
-                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                        child: CoursePlaceRow(
-                          stopName: p.name,
-                          imageUrl: p.imageUrl,
-                          source: PlaceSource.user,
-                          number: i + 1,
-                          subtitle: '${i + 1}번째 장소',
-                          dragHandle: DragHandle(index: i),
-                          trailing: IconButton(
-                            tooltip: '장소 메뉴',
-                            icon: const Icon(Icons.more_vert_rounded, color: AppColors.textSecondary),
-                            onPressed: () => _placeMenu(p, i, draft.places.length),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  AppCard(
-                    onTap: _addMore,
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.add_rounded, color: AppColors.primary),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(child: Text('장소 더 추가하기', style: AppTypography.bodyStrong.copyWith(color: AppColors.primary))),
-                        Text('저장한 장소에서 선택', style: AppTypography.caption),
-                      ],
-                    ),
-                  ),
                   const SizedBox(height: AppSpacing.lg),
                   if (isParty)
                     _creatingParty || draft.partyId == null
@@ -151,9 +86,9 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
             ),
             BottomCta(
               child: AppButton(
-                label: isParty ? '다음: 파티 취향 AI 추천' : '다음: 나만의 AI 코스 추천',
-                onPressed: draft.hasPlaces && !_creatingParty && (!isParty || draft.partyId != null)
-                    ? () => context.push(AppRoutes.courseNewAi)
+                label: '다음: 저장한 장소 선택',
+                onPressed: !_creatingParty && (!isParty || draft.partyId != null)
+                    ? () => context.push(AppRoutes.courseNewPlaces)
                     : null,
               ),
             ),

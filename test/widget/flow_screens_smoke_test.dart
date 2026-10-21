@@ -26,8 +26,8 @@ void main() {
 
   final screens = <String, Widget Function()>{
     '1/4 기본 정보': () => const CourseInfoPage(),
-    '2/4 장소 선택': () => const PlaceSelectionPage(),
-    '3/4 동행 설정': () => const CompanionPage(),
+    '2/4 동행 설정': () => const CompanionPage(),
+    '3/4 장소 선택': () => const PlaceSelectionPage(),
     '4/4 AI 추천': () => const AiRecommendationPage(),
     '장소 추가': () => const AddPlacesPage(args: AddPlacesArgs()),
     '코스 완성': () => const CourseDonePage(courseId: 'k1'),

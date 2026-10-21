@@ -11,7 +11,7 @@ import '../../../../core/widgets/headers.dart';
 import '../../../saved/presentation/widgets/saved_place_picker.dart';
 import '../course_draft_controller.dart';
 
-/// #24 저장한 장소 선택 (2/4). 선택 순서대로 번호가 붙고, 사전 선택(장소 상세/보관함 진입)이 반영된다.
+/// #24 저장한 장소 선택 (3/4, 동행 설정 다음). 선택 순서대로 번호가 붙고, 사전 선택(장소 상세/보관함 진입)이 반영된다.
 class PlaceSelectionPage extends ConsumerWidget {
   const PlaceSelectionPage({super.key});
 
@@ -25,7 +25,7 @@ class PlaceSelectionPage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const StepHeader(title: '저장한 장소 선택', step: 2),
+            const StepHeader(title: '저장한 장소 선택', step: 3),
             Padding(
               padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.lg, AppSpacing.screenH, AppSpacing.md),
               child: Column(
@@ -50,7 +50,7 @@ class PlaceSelectionPage extends ConsumerWidget {
               child: AppButton(
                 label: '선택한 장소로 계속하기 (${draft.places.length})',
                 // 0곳 진행 허용 여부는 정책 확인 필요 — 우선 1곳 이상일 때만 진행
-                onPressed: draft.hasPlaces ? () => context.push(AppRoutes.courseNewCompanion) : null,
+                onPressed: draft.hasPlaces ? () => context.push(AppRoutes.courseNewAi) : null,
               ),
             ),
           ],

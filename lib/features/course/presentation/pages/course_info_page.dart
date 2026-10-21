@@ -114,8 +114,8 @@ class _CourseInfoPageState extends ConsumerState<CourseInfoPage> {
             ),
             BottomCta(
               child: AppButton(
-                label: '다음: 저장한 장소 선택',
-                onPressed: draft.infoComplete ? () => context.push(AppRoutes.courseNewPlaces) : null,
+                label: '다음: 동행 설정',
+                onPressed: draft.infoComplete ? () => context.push(AppRoutes.courseNewCompanion) : null,
               ),
             ),
           ],

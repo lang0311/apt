@@ -146,6 +146,6 @@ class Course {
   final Set<String> moodKeys;
   final String? partyId;
 
-  /// 소유자/참여자 권한 차이 (정책 확정 필요)
+  /// 편집 가능 여부 (서버 값). 파티 코스는 초대된 참여자도 편집할 수 있다 (07 D23)
   final bool canEdit;
 }
