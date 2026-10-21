@@ -33,7 +33,8 @@ void main() {
     '장소 상세': () => const PlaceDetailPage(placeId: 'p1'),
     '링크 입력': () => const LinkInputPage(),
     '코스 목록': () => const CoursesPage(),
-    '코스 상세': () => const CourseDetailPage(courseId: 'k1'),
+    '코스 상세': () => const CourseDetailPage(courseId: 'k1', justSaved: true),
+    '파티 코스 상세': () => const CourseDetailPage(courseId: 'k4'),
     '마이': () => const MyPage(),
     '취향 설정': () => const PreferencePage(),
   };

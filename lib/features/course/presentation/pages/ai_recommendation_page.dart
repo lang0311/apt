@@ -192,10 +192,6 @@ class _Result extends StatelessWidget {
           const SizedBox(height: 4),
           Text(rec.description!, style: AppTypography.body),
         ],
-        if (rec.preferenceMix.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.md),
-          _PreferenceMixBar(mix: rec.preferenceMix),
-        ],
         const SizedBox(height: AppSpacing.md),
         CourseRouteMap(stops: stops),
         const SizedBox(height: AppSpacing.md),
@@ -277,32 +273,6 @@ class _StopRow extends StatelessWidget {
             tooltip: '${stop.place.name} 편집',
             onPressed: onEdit,
             icon: const Icon(Icons.edit_outlined, color: AppColors.textSecondary, size: 20),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 파티 취향 반영 비율 (값은 서버)
-class _PreferenceMixBar extends StatelessWidget {
-  const _PreferenceMixBar({required this.mix});
-  final List<PreferenceShare> mix;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-      decoration: BoxDecoration(color: AppColors.extractSoft, borderRadius: BorderRadius.circular(16)),
-      child: Row(
-        children: [
-          const Icon(Icons.groups_rounded, color: AppColors.extract, size: 20),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              ['파티 취향 반영', for (final m in mix) '${m.label} ${m.percent}%'].join(' · '),
-              style: AppTypography.label.copyWith(color: AppColors.extract),
-            ),
           ),
         ],
       ),

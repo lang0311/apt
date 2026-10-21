@@ -88,6 +88,55 @@ class SubPageHeader extends StatelessWidget {
   }
 }
 
+/// 배경 없는 아이콘 헤더: 왼쪽 아이콘(뒤로/닫기) + 제목 17 + 오른쪽 아이콘들. 누르는 영역은 48.
+/// 코스 화면(상세 · 편집 · 만들기)에서 쓴다.
+class PlainHeader extends StatelessWidget {
+  const PlainHeader({
+    super.key,
+    this.title,
+    this.leadingIcon = Icons.chevron_left_rounded,
+    this.leadingTooltip = '뒤로',
+    this.onLeading,
+    this.actions = const [],
+    this.trailing,
+  });
+
+  final String? title;
+  final IconData leadingIcon;
+  final String leadingTooltip;
+  final VoidCallback? onLeading;
+  final List<Widget> actions;
+
+  /// 오른쪽 끝 글자 (예: 3 / 4)
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.xxs, AppSpacing.xxs, AppSpacing.xs, AppSpacing.xxs),
+      child: SizedBox(
+        height: 48,
+        child: Row(
+          children: [
+            IconButton(
+              tooltip: leadingTooltip,
+              onPressed: onLeading ?? () => _defaultBack(context),
+              icon: Icon(leadingIcon, size: leadingIcon == Icons.chevron_left_rounded ? 30 : 24, color: AppColors.textPrimary),
+            ),
+            Expanded(
+              child: title == null
+                  ? const SizedBox()
+                  : Text(title!, style: AppTypography.header.copyWith(fontSize: 17, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
+            ...actions,
+            if (trailing != null) Padding(padding: const EdgeInsets.only(right: AppSpacing.sm), child: trailing),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// 인증 화면: 테두리 없는 뒤로 아이콘 + 큰 제목 + 설명
 class AuthHeader extends StatelessWidget {
   const AuthHeader({super.key, required this.title, this.subtitle, this.showBack = true, this.onBack});

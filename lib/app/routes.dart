@@ -26,7 +26,8 @@ abstract final class AppRoutes {
   static String place(String id) => '/places/$id';
 
   static const courses = '/courses';
-  static String course(String id) => '/courses/$id';
+  static String course(String id, {bool justSaved = false}) => justSaved ? '/courses/$id?saved=1' : '/courses/$id';
+  static String courseEdit(String id) => '/course-edit/$id';
   static const courseNewInfo = '/courses/new/info';
   static const courseNewPlaces = '/courses/new/places';
   static const courseNewCompanion = '/courses/new/companion';

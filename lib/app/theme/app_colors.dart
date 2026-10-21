@@ -11,6 +11,9 @@ abstract final class AppColors {
   static const textSecondary = Color(0xFF5F6E86);
   static const textHint = Color(0xFF98A3B5);
 
+  /// 개수·입력칸 안내·하단 탭 이름처럼 읽어야 하는 보조 글자 (흰 바탕 약 4.7:1). `textHint`는 장식용.
+  static const textTertiary = Color(0xFF6B7890);
+
   static const ink = Color(0xFF14223A);
 
   /// 밝기 3단계로 층을 나눈다(그림자 없음): 배경 `bg` → 섹션·카드 `surface`(+ `border` 1px) → 그 안의 카드 `surfaceRaised`.
@@ -35,6 +38,9 @@ abstract final class AppColors {
 
   static const danger = Color(0xFFF0645A);
   static const dangerSoft = Color(0xFFFDECEB);
+
+  /// 차단·삭제처럼 위험한 동작의 글자. `danger`는 흰 바탕 글자 대비가 약 3:1이라 문장에는 이 값을 쓴다(약 5:1).
+  static const dangerText = Color(0xFFC8463C);
   static const success = Color(0xFF16A07D);
   static const successSoft = Color(0xFFE6F6F1);
 

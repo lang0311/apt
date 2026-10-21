@@ -51,13 +51,6 @@ class MoodOption {
   final String label;
 }
 
-/// 취향 반영 비율 (예: 카페 42%). 값은 서버가 준다.
-class PreferenceShare {
-  const PreferenceShare({required this.label, required this.percent});
-  final String label;
-  final int percent;
-}
-
 /// AI 추천 결과
 class Recommendation {
   const Recommendation({
@@ -65,7 +58,6 @@ class Recommendation {
     required this.stops,
     this.headline,
     this.description,
-    this.preferenceMix = const [],
   });
 
   /// 서버가 추천 세션을 보존하는 경우의 ID (NEEDS BACKEND: 무상태 여부 확인)
@@ -73,7 +65,14 @@ class Recommendation {
   final List<CourseStop> stops;
   final String? headline;
   final String? description;
-  final List<PreferenceShare> preferenceMix;
+}
+
+/// 추천하지 않는 장소 (사용자가 "앞으로 추천하지 않기"로 차단한 AI 추천 장소).
+/// 모든 코스 추천에서 제외된다. 이번 코스에서만 뺀 장소는 [CourseDraft.rejectedPlaceIds]에 둔다.
+class BlockedPlace {
+  const BlockedPlace({required this.place, required this.blockedAt});
+  final Place place;
+  final DateTime blockedAt;
 }
 
 /// 코스 목록 카드

@@ -78,7 +78,7 @@ class MockCourseRepository implements CourseRepository {
       () {
         // 사용자 장소는 현재 순서 그대로 유지, AI 장소만 교체 (가정 A6)
         final userIds = draft.places.map((p) => p.id).toList();
-        final excluded = {...userIds, ...draft.rejectedPlaceIds};
+        final excluded = {...userIds, ...draft.rejectedPlaceIds, ..._store.blockedPlaces.keys};
         final pool = MockFixtures.aiCandidates.where((c) => !excluded.contains(c.$1)).toList();
         final offset = pool.isEmpty ? 0 : (draft.recommendationRound * 2) % pool.length;
         final picks = [for (var i = 0; i < pool.length && i < 2; i++) pool[(offset + i) % pool.length]];
@@ -93,19 +93,9 @@ class MockCourseRepository implements CourseRepository {
           final p = picks.length > 1 ? picks[1] : picks[0];
           spec.add((p.$1, PlaceSource.ai, p.$2));
         }
-        final isParty = draft.companion == Companion.party;
         return Recommendation(
           recommendationId: 'rec-${draft.recommendationRound}',
           stops: MockFixtures.stopsFor(spec, start: draft.startTime ?? const TimeOfDay(hour: 11, minute: 0)),
-          headline: '빈 시간에 어울리는 장소를 찾았어요',
-          description: isParty ? '파티 3명의 취향과 현재 동선을 함께 분석했어요.' : '나의 취향과 현재 동선을 함께 분석했어요.',
-          preferenceMix: isParty
-              ? const [
-                  PreferenceShare(label: '카페', percent: 42),
-                  PreferenceShare(label: '자연', percent: 35),
-                  PreferenceShare(label: '맛집', percent: 23),
-                ]
-              : const [],
         );
       },
       latency: const Duration(milliseconds: 2400),
@@ -161,6 +151,23 @@ class MockCourseRepository implements CourseRepository {
         _store.courses[courseId] = updated;
         return updated;
       });
+
+  @override
+  Future<List<BlockedPlace>> fetchBlockedPlaces() => _store.behavior.query(
+        () {
+          final list = [
+            for (final e in _store.blockedPlaces.entries) BlockedPlace(place: MockFixtures.place(e.key), blockedAt: e.value),
+          ]..sort((a, b) => b.blockedAt.compareTo(a.blockedAt));
+          return list;
+        },
+        empty: () => const [],
+      );
+
+  @override
+  Future<void> blockPlace(String placeId) => _store.behavior.mutate(() => _store.blockedPlaces[placeId] = DateTime.now());
+
+  @override
+  Future<void> unblockPlace(String placeId) => _store.behavior.mutate(() => _store.blockedPlaces.remove(placeId));
 }
 
 // NEEDS BACKEND: 코스 CRUD, 목록 summary, 추천/재추천 API (docs/06 §3)
@@ -189,4 +196,10 @@ class ApiCourseRepository implements CourseRepository {
   Future<Course> createCourse({required CourseDraft draft, required List<CourseStop> stops}) async => throw _f;
   @override
   Future<Course> updateCourseStops({required String courseId, required List<CourseStop> stops}) async => throw _f;
+  @override
+  Future<List<BlockedPlace>> fetchBlockedPlaces() async => throw _f;
+  @override
+  Future<void> blockPlace(String placeId) async => throw _f;
+  @override
+  Future<void> unblockPlace(String placeId) async => throw _f;
 }

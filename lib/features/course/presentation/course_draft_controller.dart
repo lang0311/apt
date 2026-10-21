@@ -16,7 +16,7 @@ class CourseDraftController extends Notifier<CourseDraft> {
   /// 새 코스 시작. 장소 상세/보관함에서 들어오면 장소를 사전 선택한다.
   void start({List<Place> places = const []}) => state = CourseDraft(places: places);
 
-  /// 완성된 코스로 루프 재진입 (코스 상세 → 다른 추천 받기 / 장소 추가)
+  /// 저장한 코스 편집 (코스 상세 → 편집). 이 코스의 다시 추천 기준이 된다.
   void loadFromCourse(Course course) => state = CourseDraft.fromCourse(course);
 
   void update(CourseDraft Function(CourseDraft d) change) => state = change(state);
@@ -29,11 +29,4 @@ void startCourseWizard(BuildContext context, WidgetRef ref, {List<Place> places 
   ref.read(courseDraftProvider.notifier).start(places: places);
   ref.invalidate(recommendationProvider);
   context.push(AppRoutes.courseNewInfo);
-}
-
-/// 완성된 코스에서 루프 재진입 (코스 상세 → 다른 추천 받기). 4/4 화면으로 바로 간다.
-void reenterRecommendation(BuildContext context, WidgetRef ref, Course course) {
-  ref.read(courseDraftProvider.notifier).loadFromCourse(course);
-  ref.invalidate(recommendationProvider);
-  context.push(AppRoutes.courseNewAi);
 }

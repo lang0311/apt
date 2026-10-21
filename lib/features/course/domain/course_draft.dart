@@ -4,7 +4,7 @@ import '../../place/domain/place.dart';
 import 'course_models.dart';
 
 /// 코스 만들기 위저드 전 단계가 공유하는 초안. (docs/02 §7)
-/// 정보(1) → 장소(2) → 동행(3) → AI 추천(4) ⇄ [장소 수정 → 재추천]
+/// 정보(1) → 동행(2) → 장소(3) → AI 추천(4) ⇄ [장소 수정 → 재추천]
 class CourseDraft {
   const CourseDraft({
     this.courseId,
@@ -31,7 +31,8 @@ class CourseDraft {
   final Companion companion;
   final String? partyId;
 
-  /// 사용자가 빼거나 교체한 AI 추천 — 재추천 시 제외 요청용 (서버 지원 여부 NEEDS BACKEND)
+  /// 이번 코스에서만 뺀 장소(바꾸기·빼기·편집 X) — 이 코스를 다시 추천할 때 제외 요청용.
+  /// 다른 코스에서는 다시 나올 수 있다. 계정 단위 차단은 [CourseRepository.blockPlace]. (서버 지원 여부 NEEDS BACKEND)
   final Set<String> rejectedPlaceIds;
   final int recommendationRound;
 
@@ -91,6 +92,8 @@ class CourseDraft {
   }
 
   CourseDraft reject(String placeId) => copyWith(rejectedPlaceIds: {...rejectedPlaceIds, placeId});
+
+  CourseDraft unreject(String placeId) => copyWith(rejectedPlaceIds: {...rejectedPlaceIds}..remove(placeId));
 
   static CourseDraft fromCourse(Course course) => CourseDraft(
         courseId: course.id,

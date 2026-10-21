@@ -7,6 +7,7 @@ import 'package:apt/features/course/presentation/pages/add_places_page.dart';
 import 'package:apt/features/course/presentation/pages/ai_recommendation_page.dart';
 import 'package:apt/features/course/presentation/pages/companion_page.dart';
 import 'package:apt/features/course/presentation/pages/course_done_page.dart';
+import 'package:apt/features/course/presentation/pages/course_edit_page.dart';
 import 'package:apt/features/course/presentation/pages/course_info_page.dart';
 import 'package:apt/features/course/presentation/pages/place_selection_page.dart';
 import 'package:apt/features/extraction/presentation/pages/extraction_result_page.dart';
@@ -31,6 +32,7 @@ void main() {
     '4/4 AI 추천': () => const AiRecommendationPage(),
     '장소 추가': () => const AddPlacesPage(args: AddPlacesArgs()),
     '코스 완성': () => const CourseDonePage(courseId: 'k1'),
+    '코스 편집': () => const CourseEditPage(courseId: 'k1'),
     '추출 결과': () => const ExtractionResultPage(url: 'https://www.instagram.com/p/C3k9xYzAbcD/'),
     '추출 실패(비공개)': () => const ExtractionResultPage(url: 'https://www.instagram.com/p/private1/'),
     '카테고리 지도': () => const SavedMapPage(mode: SavedMapMode.category),

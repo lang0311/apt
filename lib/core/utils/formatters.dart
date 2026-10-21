@@ -63,3 +63,17 @@ String ddayLabel(DateTime target, {DateTime? now}) {
   if (d == 0) return 'D-DAY';
   return d > 0 ? 'D-$d' : 'D+${-d}';
 }
+
+/// 마지막 글자에 받침이 있는지 (한글이 아니면 숫자·영문 끝소리를 대략 따른다)
+bool _hasFinalConsonant(String word) {
+  if (word.isEmpty) return false;
+  final c = word.runes.last;
+  if (c >= 0xAC00 && c <= 0xD7A3) return (c - 0xAC00) % 28 != 0;
+  return '013678LMNlmn'.contains(String.fromCharCode(c));
+}
+
+/// 성수 정원을 / 카페를
+String withObjectParticle(String word) => '$word${_hasFinalConsonant(word) ? '을' : '를'}';
+
+/// 성수 정원은 / 카페는
+String withTopicParticle(String word) => '$word${_hasFinalConsonant(word) ? '은' : '는'}';

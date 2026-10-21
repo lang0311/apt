@@ -130,6 +130,9 @@ class MockStore {
   }
 
   final Map<String, CourseSummaryMeta> courseMeta = {};
+
+  /// 추천하지 않는 장소 (placeId → 차단한 시각)
+  final Map<String, DateTime> blockedPlaces = {};
 }
 
 /// Mock 전용 코스 목록 메타 (서버 summary 흉내)

@@ -28,6 +28,14 @@ class _FakeCourseRepository implements CourseRepository {
     ]);
   }
 
+  final blocked = <String>{};
+
+  @override
+  Future<void> blockPlace(String placeId) async => blocked.add(placeId);
+
+  @override
+  Future<void> unblockPlace(String placeId) async => blocked.remove(placeId);
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -86,5 +94,40 @@ void main() {
     controller().moveStop(0, 2); // a를 b 뒤로
     expect(state().stops.map((s) => s.place.id), ['b', 'a', 'ai1']);
     expect(draft().places.map((p) => p.id), ['b', 'a']);
+  });
+
+  test('앞으로 추천하지 않기는 계정 차단 + 이 코스에서 빼기, 되돌리면 둘 다 되돌린다', () async {
+    await controller().syncWithDraft();
+    final ai = state().stops.last;
+    await controller().blockStop(ai);
+    expect(repo.blocked, {'ai1'});
+    expect(state().stops.map((s) => s.place.id), ['a', 'b']);
+    await controller().undo();
+    expect(repo.blocked, isEmpty);
+    expect(state().stops.map((s) => s.place.id), ['a', 'b', 'ai1']);
+    expect(draft().rejectedPlaceIds, isEmpty);
+  });
+
+  test('다시 추천은 바뀐 AI 장소를 알려 주고, 되돌리면 직전 결과로 돌아간다', () async {
+    await controller().syncWithDraft();
+    final n = await controller().recommendAgain();
+    expect(n, 1);
+    expect(state().changedIds, {'ai2'});
+    await controller().undo();
+    expect(state().stops.map((s) => s.place.id), ['a', 'b', 'ai1']);
+    expect(state().changedIds, isEmpty);
+  });
+
+  test('저장한 코스 편집: 시작 값과 달라지면 isDirty', () {
+    final course = Course(id: 'k1', title: '코스', stops: [
+      CourseStop(place: _p('a'), source: PlaceSource.user),
+      CourseStop(place: _p('x'), source: PlaceSource.ai),
+    ]);
+    controller().startEditing(course);
+    expect(controller().isDirty, isFalse);
+    expect(draft().courseId, 'k1');
+    controller().removeStop(state().stops.last);
+    expect(controller().isDirty, isTrue);
+    expect(draft().rejectedPlaceIds, {'x'});
   });
 }
