@@ -137,7 +137,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
       body: SafeArea(
         child: Column(
           children: [
-            StepHeader(title: editing ? '다른 추천 받기' : 'AI 코스 추천', step: 4),
+            const StepHeader(step: 4),
             if (state.loading && state.hasResult)
               const Padding(
                 padding: EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.xs, AppSpacing.screenH, 0),

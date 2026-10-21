@@ -6,18 +6,28 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/error/app_failure.dart';
-import '../../../../core/widgets/buttons.dart';
 import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/surfaces.dart';
 import '../party_providers.dart';
 
-/// #27 파티원 초대 모달
+/// #27 파티원 초대 — 하단 시트(카카오톡 · 링크 복사). 닫기 버튼 없이 바깥 탭/끌어내리기로 닫는다.
 Future<void> showInviteModal(BuildContext context, {required String partyId}) {
-  return showAppModal<void>(
+  return showAppBottomSheet<void>(
     context,
-    title: '파티원 초대하기',
-    subtitle: '친구의 취향도 AI 추천에 함께 반영돼요.',
-    builder: (_) => _InviteBody(partyId: partyId),
+    builder: (_) => Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.xxs, AppSpacing.screenH, AppSpacing.md),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('파티원 초대', style: AppTypography.cardTitle),
+          const SizedBox(height: 2),
+          Text('초대받은 사람의 취향도 추천에 반영돼요.', style: AppTypography.meta),
+          const SizedBox(height: AppSpacing.md),
+          _InviteBody(partyId: partyId),
+        ],
+      ),
+    ),
   );
 }
 
@@ -51,8 +61,8 @@ class _InviteBody extends ConsumerWidget {
             decoration: const BoxDecoration(color: AppColors.kakao, shape: BoxShape.circle),
             child: const Icon(Icons.chat_bubble_rounded, color: Color(0xFF191919), size: 20),
           ),
-          title: '카카오톡으로 초대장 보내기',
-          description: '친구에게 바로 공유할 수 있어요.',
+          title: '카카오톡으로 보내기',
+          description: '친구에게 초대 메시지 보내기',
           // NEEDS: 카카오 SDK(카카오톡 공유) 키 발급
           onTap: () => showAppSnackBar(context, '카카오톡 공유는 준비 중이에요. 링크 복사를 이용해주세요.'),
         ),
@@ -61,13 +71,9 @@ class _InviteBody extends ConsumerWidget {
           background: AppColors.bg,
           leading: const IconCircle(icon: Icons.link_rounded),
           title: '초대 링크 복사',
-          description: link.isLoading ? '링크를 만들고 있어요…' : '링크를 원하는 곳에 붙여넣으세요.',
+          description: link.isLoading ? '링크를 만들고 있어요' : '링크로 초대하기',
           onTap: copy,
         ),
-        const SizedBox(height: AppSpacing.lg),
-        Text('파티원이 참여하면 각자의 저장 장소와 취향이\n추천 코스에 반영됩니다.', style: AppTypography.meta),
-        const SizedBox(height: AppSpacing.lg),
-        AppButton(label: '닫기', onPressed: () => Navigator.of(context).pop()),
       ],
     );
   }

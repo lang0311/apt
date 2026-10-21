@@ -12,7 +12,7 @@ import '../../../../core/widgets/bottom_cta.dart';
 import '../../../../core/widgets/buttons.dart';
 import '../../../../core/widgets/headers.dart';
 import '../../../../core/widgets/overlays.dart';
-import '../../../../core/widgets/segmented_tabs.dart';
+import '../../../../core/widgets/selection.dart';
 import '../../../../core/widgets/states.dart';
 import '../../../../core/widgets/surfaces.dart';
 import '../../../party/presentation/party_providers.dart';
@@ -22,7 +22,7 @@ import '../../../preference/presentation/preference_providers.dart';
 import '../../domain/course_models.dart';
 import '../course_draft_controller.dart';
 
-/// #25 / #26 동행 설정 (2/4, 정보 다음 · 장소 선택 전) — 한 화면의 [혼자 갈게요 | 함께 갈게요] 토글
+/// #25 / #26 동행 설정 (2/4, 정보 다음 · 장소 선택 전) — 혼자 가요 / 함께 가요 라디오
 class CompanionPage extends ConsumerStatefulWidget {
   const CompanionPage({super.key});
 
@@ -59,22 +59,34 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
       body: SafeArea(
         child: Column(
           children: [
-            const StepHeader(title: '동행 설정', step: 2),
+            const StepHeader(step: 2),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.lg, AppSpacing.screenH, AppSpacing.lg),
                 children: [
-                  Text('이번 코스는 누구와 함께하나요?', style: AppTypography.title),
-                  const SizedBox(height: 4),
-                  Text('동행에 따라 AI가 참고할 취향이 달라져요.', style: AppTypography.body),
-                  const SizedBox(height: AppSpacing.lg),
-                  SegmentedTabs(
-                    labels: const ['혼자 갈게요', '함께 갈게요'],
-                    selectedIndex: isParty ? 1 : 0,
-                    style: SegmentedStyle.pills,
-                    onChanged: (i) => _setCompanion(i == 1 ? Companion.party : Companion.solo),
+                  Text('누구와 함께 가나요?', style: AppTypography.title),
+                  const SizedBox(height: AppSpacing.md),
+                  AppCard(
+                    padding: EdgeInsets.zero,
+                    child: Column(
+                      children: [
+                        _RadioRow(
+                          title: '혼자 가요',
+                          description: '내 취향으로 추천해요',
+                          selected: !isParty,
+                          onTap: () => _setCompanion(Companion.solo),
+                        ),
+                        const Divider(height: 1, indent: AppSpacing.md, endIndent: AppSpacing.md, color: AppColors.divider),
+                        _RadioRow(
+                          title: '함께 가요',
+                          description: '파티원 취향을 함께 반영해요',
+                          selected: isParty,
+                          onTap: () => _setCompanion(Companion.party),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: AppSpacing.lg),
+                  const SizedBox(height: AppSpacing.sm),
                   if (isParty)
                     _creatingParty || draft.partyId == null
                         ? const AppLoading(message: '파티를 만들고 있어요')
@@ -86,7 +98,8 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
             ),
             BottomCta(
               child: AppButton(
-                label: '다음: 저장한 장소 선택',
+                label: '다음',
+                // 함께 가요를 골라도 초대 수락을 기다리지 않고 넘어간다
                 onPressed: !_creatingParty && (!isParty || draft.partyId != null)
                     ? () => context.push(AppRoutes.courseNewPlaces)
                     : null,
@@ -99,6 +112,45 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
   }
 }
 
+class _RadioRow extends StatelessWidget {
+  const _RadioRow({required this.title, required this.description, required this.selected, required this.onTap});
+  final String title;
+  final String description;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      selected: selected,
+      inMutuallyExclusiveGroup: true,
+      button: true,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 14),
+          child: Row(
+            children: [
+              RadioDot(selected: selected),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: AppTypography.bodyStrong),
+                    Text(description, style: AppTypography.caption),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 파티원: 사람마다 한 행 + 마지막 "초대하기"
 class _PartyCard extends ConsumerWidget {
   const _PartyCard({required this.partyId});
   final String partyId;
@@ -106,50 +158,50 @@ class _PartyCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final party = ref.watch(partyProvider(partyId));
-    return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+    return SectionCard(
+      title: party.hasValue ? '파티원 ${party.value!.members.length}' : '파티원',
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('함께할 파티원', style: AppTypography.section),
-          const SizedBox(height: 4),
-          Text('참여자의 저장 장소와 취향을 추천에 반영해요.', style: AppTypography.meta),
-          const SizedBox(height: AppSpacing.md),
           AsyncValueView(
             value: party,
             compactError: true,
             onRetry: () => ref.invalidate(partyProvider(partyId)),
-            loading: const SkeletonBox(height: 48),
-            data: (p) => Row(
+            loading: const Padding(padding: EdgeInsets.symmetric(horizontal: AppSpacing.md), child: SkeletonBox(height: 48)),
+            data: (p) => DividedRows(
+              indent: SectionCard.innerPadding + 36 + AppSpacing.sm,
               children: [
-                PartyAvatarStack(members: p.members),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('현재 ${p.members.length}명', style: AppTypography.bodyStrong),
-                      if (p.preferenceSummary.isNotEmpty)
-                        Text('${p.preferenceSummary.join(' · ')} 취향', style: AppTypography.caption),
-                    ],
+                for (final m in p.members)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: 10),
+                    child: Row(
+                      children: [
+                        PartyAvatarStack(members: [m], size: 36, max: 1),
+                        const SizedBox(width: AppSpacing.sm),
+                        // NEEDS BACKEND: 파티원별 취향 요약 (오면 이름 아래 한 줄)
+                        Text(m.isMe ? '나' : m.nickname, style: AppTypography.bodyStrong),
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
-          AppCard(
-            color: AppColors.primarySoft,
-            radius: AppRadius.input,
+          InkWell(
             onTap: () => showInviteModal(context, partyId: partyId),
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Row(
-              children: [
-                const Icon(Icons.add_rounded, color: AppColors.primary),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(child: Text('파티원 추가하기', style: AppTypography.bodyStrong.copyWith(color: AppColors.primary))),
-                const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
+                    child: const Icon(Icons.add_rounded, color: AppColors.primary, size: 20),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text('초대하기', style: AppTypography.bodyStrong.copyWith(color: AppColors.primary)),
+                ],
+              ),
             ),
           ),
         ],
@@ -158,52 +210,28 @@ class _PartyCard extends ConsumerWidget {
   }
 }
 
+/// 혼자: 반영할 취향 한 줄 + 취향 수정
 class _SoloCard extends ConsumerWidget {
   const _SoloCard();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final labels = ref.watch(myPreferenceLabelsProvider);
-    return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const IconCircle(icon: Icons.person_outline_rounded, size: 48),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('나의 취향으로 추천', style: AppTypography.section),
-                    const SizedBox(height: 2),
-                    switch (labels) {
-                      AsyncData(:final value) when value.isNotEmpty =>
-                        Text(value.take(4).join(' · '), style: AppTypography.meta),
-                      AsyncData() => AppTextLink(
-                          label: '취향 설정하기',
-                          trailingChevron: true,
-                          onPressed: () => context.push(AppRoutes.preferences),
-                        ),
-                      AsyncError() => Text('취향을 불러오지 못했어요.', style: AppTypography.meta),
-                      _ => const SkeletonBox(width: 140, height: 12),
-                    },
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const Padding(padding: EdgeInsets.symmetric(vertical: AppSpacing.md), child: Divider()),
-          Row(
-            children: [
-              const Icon(Icons.auto_awesome, color: AppColors.ai, size: 20),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(child: Text('AI가 빈 시간과 부족한 장소를 채워드려요.', style: AppTypography.body)),
-            ],
-          ),
-        ],
+    return SectionCard(
+      title: '반영할 취향',
+      trailing: TextButton(
+        onPressed: () => context.push(AppRoutes.preferences),
+        style: TextButton.styleFrom(foregroundColor: AppColors.primary, minimumSize: const Size(44, 44)),
+        child: Text('취향 수정', style: AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
+        child: switch (labels) {
+          AsyncData(:final value) when value.isNotEmpty => Text(value.take(5).join(' · '), style: AppTypography.bodyStrong),
+          AsyncData() => Text('아직 고른 취향이 없어요', style: AppTypography.meta),
+          AsyncError() => Text('취향을 불러오지 못했어요', style: AppTypography.meta),
+          _ => const SkeletonBox(width: 160, height: 14),
+        },
       ),
     );
   }

@@ -184,9 +184,9 @@ class AuthHeader extends StatelessWidget {
   }
 }
 
-/// 코스 만들기 위저드 헤더: 뒤로 + 타이틀 + n/4 + 4분할 진행 바
+/// 코스 만들기 위저드 헤더: 배경 없는 뒤로 + "코스 만들기" + n / 4 + 4분할 진행 바 (1–4단계 같은 모양)
 class StepHeader extends StatelessWidget {
-  const StepHeader({super.key, required this.title, required this.step, this.total = 4, this.onBack, this.trailing});
+  const StepHeader({super.key, this.title = '코스 만들기', required this.step, this.total = 4, this.onBack, this.trailing});
 
   final String title;
   final int step;
@@ -198,14 +198,14 @@ class StepHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SubPageHeader(
+        PlainHeader(
           title: title,
-          onBack: onBack,
+          onLeading: onBack,
           trailing: trailing ??
-              Text('$step / $total', style: AppTypography.label.copyWith(color: AppColors.textSecondary)),
+              Text('$step / $total', style: AppTypography.label.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH + 4),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH),
           child: StepProgressBar(step: step, total: total),
         ),
       ],
