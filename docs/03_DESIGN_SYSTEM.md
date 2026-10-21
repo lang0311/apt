@@ -41,6 +41,7 @@
 | `textPrimary` | `#132238` (`#17243A`, `#102033`) | 제목, 본문 |
 | `textSecondary` | `#5F6E86` (2026-10-20 변경, 시안 `#7B8AA3`는 대비 3.50:1로 미달 → 흰 배경 5.17:1) | 설명, 메타 |
 | `textHint` | `#98A3B5` | 장식용 아이콘만 (2.55:1이라 글자에는 쓰지 않음). placeholder·미선택 안내 글자는 `textSecondary` (2026-10-20) |
+| `textTertiary` | `#6B7890` | 탭 개수·대기 단계처럼 한 단계 낮춰 읽는 보조 글자 (흰 배경 약 4.7:1, 2026-10-21) |
 | `ink` | `#0E1E33` | 다크 버튼, 상태바 아일랜드 |
 | `bg` | `#EEF1F5` (2026-10-20 변경, 시안 `#F6F8FC`는 흰 카드와 거의 구분되지 않음) | 화면 배경, 탭 화면 상단바 |
 | `surface` | `#F9FAFC` (2026-10-20 변경, 시안 `#FFFFFF`) | 섹션 묶음·카드·입력·탭바. 카드는 `border` 1px로 경계를 잡는다(그림자 없음) |
@@ -51,6 +52,7 @@
 | `ai` | `#F39A45` (배경 `#FFF1E4`) | **AI 추천 전용 강조** (✦, 주황 핀/뱃지, 'AI 추천' 태그·라벨) |
 | `aiText` | `#A85400` | AI 추천 **이유 문장**처럼 읽어야 하는 AI 글자 (흰 배경 5.34:1). `ai`는 글자 대비 2.21:1이라 문장에는 쓰지 않는다 (2026-10-20) |
 | `danger` | `#F0645A` | 오류, 로그아웃 |
+| `dangerText` | `#C8463C` | 차단·삭제 같은 위험 동작의 **글자** (흰 배경 약 5:1, 2026-10-21). 시트에서는 구분선 아래 따로 떼어 두고 아이콘과 함께 쓴다 |
 | `success` | `#16A07D` | 완료 |
 | `extract` | `#8A63E6` | 추출 계열 보조(보라) |
 | `kakao` | `#FEE500` | 카카오 버튼 |
@@ -79,7 +81,7 @@
 | 섹션 묶음 | `SectionCard`: 제목을 컨테이너 안에 두는 섹션 카드. 탭 화면 본문은 바깥 여백 12 · 카드 사이 10 · 안쪽 16 (2026-10-20, 홈부터) |
 | 칩 | 높이 32, radius 16(풀 라운드), 선택=primary 채움 / 비선택=흰+border |
 | 썸네일 | radius 13–16 |
-| 뒤로가기 버튼 | 36×36, radius 12, 흰 배경 |
+| 뒤로가기 버튼 | 36×36, radius 12, 흰 배경. **코스 화면은 배경 없는 아이콘**(`PlainHeader`, 누르는 영역 48, 제목 17) — 2026-10-21 |
 | 진행 바 | 4분할, 높이 4, radius 2, 활성 primary / 비활성 `divider` |
 | 바텀시트 | 상단 radius 큼 + 핸들 |
 | 하단 탭 | 5개 (홈·코스·저장됨·추출·마이), 활성=primary + 연한 배경 원 |
@@ -93,7 +95,8 @@
 **섹션·사진**: `SectionCard`(섹션 컨테이너, 제목 줄 오른쪽 `trailing`) `PlaceImage`(사진 없으면 카테고리 색 칸 + 아이콘, 같은 크기 유지) `DividedRows`(컨테이너 안 구분선 행) `HeaderTextButton`(제목 줄 글자 버튼)
 **탭**: `SegmentedTabs` — track(회색 트랙) / pills / **underline**(저장됨, 2026-10-20). 걸린 필터 표시는 남색 `AppliedFilterChip`
 **도메인**: `SocialLoginButton` `SegmentedTabs` `SavedPlaceRow` `CollectionRow(2×2 미니 콜라주)` `PlaceListTile` `PlaceCardSmall` `ExtractedPlaceCard` `CourseCard` `StatTile` `StepHeader(뒤로+타이틀+n/4)` `StepProgressBar` `CoursePlaceRow(번호·드래그·⋮)` `AiBadge(✦)` `PartyAvatarStack` `RouteSegmentChip(도보/버스 N분)` `PreferenceChipGroup` `AppBottomNav`
-**지도**: `AptMap` `MapPin(번호/선택/AI/내 위치)` `MapBottomSheet`
+**지도**: `AptMap` `MapPin(번호/선택/AI/내 위치)` `MapBottomSheet` `MapPlacePicker`(지도 위 장소 고르기: 반투명 검색 · 필터 칩 · 카드 한 줄 · 목록 전환, 3단계·장소 추가 공용)
+**코스 (2026-10-21)**: `CourseHero`(이름 + 한 줄 정보) `CourseTimeline`(보기: 시각 · 번호/✦ · 이름 · 이유 · 점선 이동 줄, 바뀐 자리 주황·뼈대) `CourseEditList`(편집: 손잡이 · X · 장소 추가, 새로 추가 파란 테두리) `CourseEditButton` 장소 시트(`showResultStopSheet` / `showEditStopSheet` — 이번만 표시, 차단은 빨간 글자로 떼어 둠) `CourseSummaryRow` `PickedTray`
 
 규칙: 페이지 안에서 같은 UI를 반복 작성하지 않는다. 새 화면 전에 **기존 컴포넌트를 검색해 재사용/확장**한다.
 

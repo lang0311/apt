@@ -1,5 +1,6 @@
 import 'package:apt/app/theme/app_theme.dart';
 import 'package:apt/features/auth/presentation/pages/social_login_page.dart';
+import 'package:apt/features/course/presentation/pages/blocked_places_page.dart';
 import 'package:apt/features/course/presentation/pages/course_detail_page.dart';
 import 'package:apt/features/course/presentation/pages/courses_page.dart';
 import 'package:apt/features/extraction/presentation/pages/link_input_page.dart';
@@ -35,6 +36,7 @@ void main() {
     '코스 목록': () => const CoursesPage(),
     '코스 상세': () => const CourseDetailPage(courseId: 'k1', justSaved: true),
     '파티 코스 상세': () => const CourseDetailPage(courseId: 'k4'),
+    '추천하지 않는 장소': () => const BlockedPlacesPage(),
     '마이': () => const MyPage(),
     '취향 설정': () => const PreferencePage(),
   };

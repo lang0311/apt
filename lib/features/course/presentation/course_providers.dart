@@ -35,3 +35,8 @@ void invalidateCourseData(WidgetRef ref) {
   ref.invalidate(activeCoursesProvider);
   ref.invalidate(courseDetailProvider);
 }
+
+/// 추천하지 않는 장소 (마이 → 추천하지 않는 장소)
+final blockedPlacesProvider = FutureProvider.autoDispose<List<BlockedPlace>>(
+  (ref) => ref.watch(courseRepositoryProvider).fetchBlockedPlaces(),
+);

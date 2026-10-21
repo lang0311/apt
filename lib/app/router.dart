@@ -16,9 +16,9 @@ import '../features/auth/presentation/pages/terms_page.dart';
 import '../features/course/presentation/pages/add_places_page.dart';
 import '../features/course/presentation/pages/ai_recommendation_page.dart';
 import '../features/course/presentation/pages/companion_page.dart';
+import '../features/course/presentation/pages/blocked_places_page.dart';
 import '../features/course/presentation/pages/course_detail_page.dart';
 import '../features/course/presentation/pages/course_edit_page.dart';
-import '../features/course/presentation/pages/course_done_page.dart';
 import '../features/course/presentation/pages/course_info_page.dart';
 import '../features/course/presentation/pages/courses_page.dart';
 import '../features/course/presentation/pages/place_selection_page.dart';
@@ -99,10 +99,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.courseNewPlaces, builder: (_, _) => const PlaceSelectionPage()),
       GoRoute(path: AppRoutes.courseNewCompanion, builder: (_, _) => const CompanionPage()),
       GoRoute(path: AppRoutes.courseNewAi, builder: (_, _) => const AiRecommendationPage()),
+      // 완료 화면은 없앴다(저장하면 바로 상세). 예전 링크는 상세로 보낸다.
       GoRoute(
         path: '/courses/new/done',
-        builder: (_, s) => CourseDonePage(courseId: s.uri.queryParameters['id'] ?? ''),
+        redirect: (_, s) => AppRoutes.course(s.uri.queryParameters['id'] ?? '', justSaved: true),
       ),
+      GoRoute(path: AppRoutes.blockedPlaces, builder: (_, _) => const BlockedPlacesPage()),
       GoRoute(path: '/course-edit/:id', builder: (_, s) => CourseEditPage(courseId: s.pathParameters['id']!)),
       GoRoute(path: '/invites/:token', builder: (_, s) => InviteAcceptPage(token: s.pathParameters['token']!)),
       GoRoute(

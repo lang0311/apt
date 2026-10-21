@@ -53,6 +53,7 @@ class MyPage extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.sm),
               _MenuItem(icon: Icons.bookmark_border_rounded, label: '내 활동', onTap: () => _todo(context, '내 활동')),
+              _MenuItem(icon: Icons.block_rounded, label: '추천하지 않는 장소', onTap: () => context.push(AppRoutes.blockedPlaces)),
               _MenuItem(icon: Icons.notifications_none_rounded, label: '알림', onTap: () => _todo(context, '알림')),
               _MenuItem(icon: Icons.shield_outlined, label: '개인정보 설정', onTap: () => _todo(context, '개인정보 설정')),
               _MenuItem(icon: Icons.help_outline_rounded, label: '도움말 및 문의', onTap: () => _todo(context, '도움말 및 문의')),

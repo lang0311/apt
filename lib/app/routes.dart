@@ -32,12 +32,12 @@ abstract final class AppRoutes {
   static const courseNewPlaces = '/courses/new/places';
   static const courseNewCompanion = '/courses/new/companion';
   static const courseNewAi = '/courses/new/ai';
-  static String courseNewDone(String courseId) => '/courses/new/done?id=$courseId';
   static const pickPlaces = '/courses/pick-places';
 
   static String invite(String token) => '/invites/$token';
 
   static const my = '/my';
   static const preferences = '/my/preferences';
+  static const blockedPlaces = '/my/blocked-places';
   static const preferencesOnboarding = '/my/preferences?mode=onboarding';
 }

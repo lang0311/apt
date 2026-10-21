@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,27 +11,24 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/error/app_failure.dart';
 import '../../../../core/utils/formatters.dart';
-import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/bottom_cta.dart';
 import '../../../../core/widgets/buttons.dart';
-import '../../../../core/widgets/chips.dart';
 import '../../../../core/widgets/headers.dart';
 import '../../../../core/widgets/overlays.dart';
-import '../../../../core/widgets/staged_loading.dart';
 import '../../../../core/widgets/states.dart';
 import '../../../../core/widgets/surfaces.dart';
 import '../../../home/presentation/home_providers.dart';
 import '../../../place/domain/place.dart';
-import '../../domain/course_models.dart';
 import '../course_draft_controller.dart';
 import '../course_providers.dart';
 import '../recommendation_controller.dart';
-import '../widgets/course_place_row.dart';
+import '../widgets/course_edit_actions.dart';
 import '../widgets/course_route_map.dart';
-import 'add_places_page.dart';
+import '../widgets/course_timeline.dart';
 
-/// #30 AI 추천·동선 검토 (4/4) — 루프 화면.
-/// 편집(교체/삭제/순서/추가) → "다른 추천" → 재추천을 반복할 수 있다. 진행 바는 4/4 유지.
+/// #30 AI 추천 (4/4) — 결과는 코스 상세와 같은 화면(머리 · 지도 · 일정 카드 "편집").
+/// 장소를 누르면 시트(바꾸기 · 이번만 빼기 · 앞으로 추천하지 않기), "편집"은 상세 편집과 같은 목록.
+/// 다시 추천은 내가 고른 장소를 두고 AI 자리만 바꾸고, 바뀐 자리를 주황으로 보여 준다. 진행 바는 4/4 유지.
 class AiRecommendationPage extends ConsumerStatefulWidget {
   const AiRecommendationPage({super.key});
 
@@ -38,7 +37,8 @@ class AiRecommendationPage extends ConsumerStatefulWidget {
 }
 
 class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
-  bool _completing = false;
+  bool _saving = false;
+  bool _editing = false;
 
   RecommendationController get _rec => ref.read(recommendationProvider.notifier);
 
@@ -47,180 +47,221 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final stale = await _rec.syncWithDraft();
-      if (stale && mounted) showAppSnackBar(context, '선택한 장소가 바뀌어 새로 추천받았어요.');
+      if (stale && mounted) showAppSnackBar(context, '고른 장소가 바뀌어 새로 추천받았어요');
     });
-  }
-
-  Future<void> _again() async {
-    await _rec.recommendAgain();
-    _showErrorIfAny();
-  }
-
-  void _showErrorIfAny() {
-    final e = ref.read(recommendationProvider).error;
-    if (e != null && mounted) showAppSnackBar(context, '다른 추천을 받지 못했어요. ${failureMessage(e)}');
   }
 
   Future<void> _addPlaces() async {
     final picked = await context.push<List<Place>>(
       AppRoutes.pickPlaces,
-      extra: AddPlacesArgs(excludedPlaceIds: ref.read(recommendationProvider).stops.map((s) => s.place.id).toSet()),
+      extra: courseAddPlacesArgs(ref.read(recommendationProvider).stops),
     );
-    if (picked != null && picked.isNotEmpty) _rec.addPlaces(picked);
+    if (picked == null || picked.isEmpty) return;
+    _rec.addPlaces(picked);
+    if (mounted) showAppSnackBar(context, '${picked.length}곳을 추가했어요');
   }
 
-  void _edit(CourseStop stop, int index, int count) {
-    showActionSheet(context, title: stop.place.name, actions: [
-      if (index > 0) SheetAction(label: '앞으로 이동', icon: Icons.arrow_upward_rounded, onTap: () => _rec.moveStop(index, index - 1)),
-      if (index < count - 1)
-        SheetAction(label: '뒤로 이동', icon: Icons.arrow_downward_rounded, onTap: () => _rec.moveStop(index, index + 2)),
-      if (stop.isAi)
-        SheetAction(
-          label: '다른 장소로 바꾸기',
-          icon: Icons.autorenew_rounded,
-          onTap: () async {
-            await _rec.replaceAi(stop);
-            _showErrorIfAny();
-          },
-        ),
-      SheetAction(label: '코스에서 빼기', icon: Icons.delete_outline_rounded, destructive: true, onTap: () => _rec.removeStop(stop)),
-    ]);
-  }
-
-  Future<void> _complete() async {
+  Future<void> _save() async {
     final draft = ref.read(courseDraftProvider);
     final stops = ref.read(recommendationProvider).stops;
     final repo = ref.read(courseRepositoryProvider);
-    setState(() => _completing = true);
+    setState(() => _saving = true);
     try {
       if (draft.isEditingExisting) {
-        // 완성된 코스의 루프 재진입: 변경 내용을 코스에 바로 반영
         await repo.updateCourseStops(courseId: draft.courseId!, stops: stops);
         invalidateCourseData(ref);
-        if (mounted) {
-          showAppSnackBar(context, '코스를 업데이트했어요.');
-          context.pop();
-        }
+        if (mounted) context.go(AppRoutes.course(draft.courseId!, justSaved: true));
       } else {
         final course = await repo.createCourse(draft: draft, stops: stops);
         invalidateCourseData(ref);
         // 코스를 만들었으면 지금까지 저장한 곳은 홈 제안에서 뺀다
         ref.read(homeNudgeSeenAtProvider.notifier).markSeen();
-        if (mounted) context.go(AppRoutes.courseNewDone(course.id));
+        // 완료 화면 없이 바로 상세로 (위저드 화면은 스택에서 지워 뒤로 가면 코스 목록)
+        if (mounted) context.go(AppRoutes.course(course.id, justSaved: true));
       }
     } catch (e) {
       if (mounted) showAppSnackBar(context, failureMessage(e));
     } finally {
-      if (mounted) setState(() => _completing = false);
+      if (mounted) setState(() => _saving = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(recommendationProvider);
-    final editing = ref.watch(courseDraftProvider.select((d) => d.isEditingExisting));
+    final draft = ref.watch(courseDraftProvider);
+    final busy = state.loading || _saving;
 
     final Widget body;
     if (!state.hasResult && state.error != null) {
       body = AppErrorState(error: state.error!, title: '추천을 받지 못했어요', onRetry: () => _rec.syncWithDraft());
     } else if (!state.hasResult) {
-      body = const StagedLoading(messages: [
-        '선택한 장소와 동선을 살펴보고 있어요',
-        '취향에 맞는 장소를 고르고 있어요',
-        '빈 시간에 어울리는 곳을 채우고 있어요',
-      ]);
+      body = _Waiting(title: draft.name, date: draft.date);
     } else {
-      body = _Result(state: state, onEdit: _edit, onAdd: _addPlaces);
+      body = ListView(
+        padding: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.lg),
+        children: [
+          CourseHero(
+            title: draft.name,
+            meta: courseMetaLine(
+              date: draft.date,
+              start: draft.startTime,
+              placeCount: _editing ? null : state.stops.length,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Padding(
+            padding: AppSpacing.screenPadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (!_editing) ...[
+                  CourseRouteMap(stops: state.stops, height: 160),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+                if (_editing)
+                  SectionCard(
+                    title: '일정 편집',
+                    child: CourseEditList(
+                      stops: state.stops,
+                      enabled: !busy,
+                      addedIds: state.addedIds,
+                      highlightIds: state.changedIds,
+                      loadingIds: state.loadingIds,
+                      onReorder: _rec.moveStop,
+                      onRemove: (s) => removeStopWithUndo(context, ref, s),
+                      onTapTile: (s, i) => showEditTileSheet(context, ref, s, i),
+                      onAdd: _addPlaces,
+                    ),
+                  )
+                else
+                  SectionCard(
+                    title: '일정',
+                    trailing: CourseEditButton(onPressed: busy ? null : () => setState(() => _editing = true)),
+                    child: state.stops.isEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
+                            child: Text('일정에 장소가 없어요. "편집"에서 장소를 추가해 주세요.', style: AppTypography.meta),
+                          )
+                        : CourseTimeline(
+                            stops: state.stops,
+                            highlightIds: state.changedIds,
+                            loadingIds: state.loadingIds,
+                            onTapStop: busy ? null : (s, _) => showResultSheet(context, ref, s),
+                            onMore: busy ? null : (s, _) => showResultSheet(context, ref, s),
+                          ),
+                  ),
+                if (_editing)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(6, AppSpacing.xs, 0, 0),
+                    child: Text('시간과 이동 정보는 다시 추천하거나 완료하면 다시 계산돼요.', style: AppTypography.caption),
+                  )
+                else if (!state.stops.any((s) => s.isAi))
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(6, AppSpacing.xs, 0, 0),
+                    // 추천 0건 — 디자인 없음 (docs/07 §3)
+                    child: Text('지금 조건에 맞는 추천 장소를 찾지 못했어요. 장소나 분위기를 바꿔 다시 추천받아 보세요.', style: AppTypography.caption),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      );
     }
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            const StepHeader(step: 4),
-            if (state.loading && state.hasResult)
-              const Padding(
-                padding: EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.xs, AppSpacing.screenH, 0),
-                child: LinearProgressIndicator(minHeight: 3, color: AppColors.ai, backgroundColor: AppColors.aiSoft),
-              ),
-            Expanded(child: body),
-            if (state.hasResult)
-              BottomCta(
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: AppButton.outline(label: '다른 추천', loading: state.loading, onPressed: _completing ? null : _again),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      flex: 3,
-                      child: AppButton(
-                        label: editing ? '변경 내용 저장하기' : '이 코스로 완성하기',
-                        loading: _completing,
-                        onPressed: state.loading || state.stops.isEmpty ? null : _complete,
+    return PopScope(
+      canPop: !_editing,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _editing) setState(() => _editing = false);
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: Column(
+            children: [
+              StepHeader(step: 4, onBack: _editing ? () => setState(() => _editing = false) : null),
+              Expanded(child: body),
+              if (state.hasResult)
+                BottomCta(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: AppButton(
+                          label: '다시 추천',
+                          variant: AppButtonVariant.white,
+                          loading: state.loading,
+                          onPressed: busy ? null : () => recommendAgainWithUndo(context, ref),
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: AppSpacing.xs),
+                      Expanded(
+                        flex: 3,
+                        child: _editing
+                            ? AppButton(label: '완료', onPressed: busy ? null : () => setState(() => _editing = false))
+                            : AppButton(
+                                label: '코스 저장',
+                                loading: _saving,
+                                onPressed: busy || state.stops.isEmpty ? null : _save,
+                              ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _Result extends StatelessWidget {
-  const _Result({required this.state, required this.onEdit, required this.onAdd});
-  final RecommendationState state;
-  final void Function(CourseStop stop, int index, int count) onEdit;
-  final VoidCallback onAdd;
+/// 기다리는 동안: 결과와 같은 자리에 뼈대(제목 → 지도 자리의 단계 표시 → 일정)
+class _Waiting extends StatelessWidget {
+  const _Waiting({required this.title, required this.date});
+  final String title;
+  final DateTime? date;
 
   @override
   Widget build(BuildContext context) {
-    final rec = state.recommendation!;
-    final stops = state.stops;
-    final numbers = userStopNumbers(stops);
-    final hasAi = stops.any((s) => s.isAi);
-
     return ListView(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.lg, AppSpacing.screenH, AppSpacing.lg),
+      padding: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.lg),
       children: [
-        Text(rec.headline ?? 'AI가 코스를 추천했어요', style: AppTypography.title),
-        if (rec.description != null) ...[
-          const SizedBox(height: 4),
-          Text(rec.description!, style: AppTypography.body),
-        ],
-        const SizedBox(height: AppSpacing.md),
-        CourseRouteMap(stops: stops),
-        const SizedBox(height: AppSpacing.md),
-        AppCard(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.xs, AppSpacing.sm),
+        CourseHero(title: '코스를 만들고 있어요', meta: [title, if (date != null) formatMonthDayWeekday(date!)].join(' · ')),
+        const SizedBox(height: AppSpacing.sm),
+        Padding(
+          padding: AppSpacing.screenPadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                children: [
-                  Expanded(child: Text('추천 동선', style: AppTypography.section)),
-                  const AppTag('AI 추천', tone: AppTagTone.ai, icon: Icons.auto_awesome),
-                  const SizedBox(width: AppSpacing.sm),
-                ],
+              const AppCard(
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                child: SizedBox(height: 160, child: _Stages()),
               ),
-              if (!hasAi)
-                Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.sm, right: AppSpacing.sm),
-                  // 추천 0건 — 디자인 없음 (docs/07 §3)
-                  child: Text('지금 조건에 맞는 추천 장소를 찾지 못했어요. 장소나 분위기를 바꿔 다시 추천받아 보세요.', style: AppTypography.meta),
+              const SizedBox(height: AppSpacing.sm),
+              SectionCard(
+                title: '일정',
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  child: Column(
+                    children: [
+                      for (final w in const [0.6, 0.5, 0.65]) ...[
+                        Container(
+                          height: 56,
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                          decoration: BoxDecoration(color: AppColors.surfaceRaised, borderRadius: BorderRadius.circular(14)),
+                          child: Row(
+                            children: [
+                              const SkeletonBox(width: 26, height: 26, radius: 13),
+                              const SizedBox(width: 10),
+                              Expanded(child: FractionallySizedBox(alignment: Alignment.centerLeft, widthFactor: w, child: const SkeletonBox(height: 11, radius: 5))),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                      ],
+                    ],
+                  ),
                 ),
-              const SizedBox(height: AppSpacing.xs),
-              for (var i = 0; i < stops.length; i++)
-                _StopRow(stop: stops[i], number: numbers[i], onEdit: () => onEdit(stops[i], i, stops.length)),
-              TextButton.icon(
-                onPressed: onAdd,
-                icon: const Icon(Icons.add_rounded),
-                label: const Text('장소 추가'),
-                style: TextButton.styleFrom(foregroundColor: AppColors.primary, alignment: Alignment.centerLeft),
               ),
             ],
           ),
@@ -230,50 +271,75 @@ class _Result extends StatelessWidget {
   }
 }
 
-class _StopRow extends StatelessWidget {
-  const _StopRow({required this.stop, required this.number, required this.onEdit});
-  final CourseStop stop;
-  final int? number;
-  final VoidCallback onEdit;
+/// 단계 표시 — 앱이 정한 안내 문구(서버 진행률 아님). 마지막 단계에서 멈춘다.
+class _Stages extends StatefulWidget {
+  const _Stages();
+
+  @override
+  State<_Stages> createState() => _StagesState();
+}
+
+class _StagesState extends State<_Stages> {
+  static const _labels = ['장소 위치 확인', '취향 반영', '동선 정리'];
+  int _now = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(milliseconds: 1100), (_) {
+      if (_now < _labels.length - 1) setState(() => _now++);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final subtitle = stop.isAi
-        ? ['AI 추천', ?stop.aiReason].join(' · ')
-        : [
-            '선택 장소',
-            if (stop.arrivalTime != null) formatClock(stop.arrivalTime!),
-          ].join(' · ');
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
+    return Semantics(
+      liveRegion: true,
+      label: '${_labels[_now]} 중',
+      excludeSemantics: true,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppNetworkImage(url: stop.place.imageUrl, width: 52, height: 52, radius: 12),
-          const SizedBox(width: AppSpacing.sm),
-          StopMarker(source: stop.source, number: number),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(stop.place.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
-                Text(
-                  subtitle,
-                  style: AppTypography.caption.copyWith(
-                    color: stop.isAi ? AppColors.aiText : null,
-                    fontWeight: stop.isAi ? FontWeight.w700 : null,
+          for (var i = 0; i < _labels.length; i++)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(
+                children: [
+                  SizedBox.square(
+                    dimension: 20,
+                    child: i < _now
+                        ? Container(
+                            decoration: const BoxDecoration(color: AppColors.successSoft, shape: BoxShape.circle),
+                            child: const Icon(Icons.check_rounded, size: 14, color: AppColors.success),
+                          )
+                        : i == _now
+                            ? const CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)
+                            : Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: AppColors.progressInactive, width: 2),
+                                ),
+                              ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                  const SizedBox(width: 10),
+                  Text(
+                    _labels[i],
+                    style: AppTypography.bodyStrong.copyWith(
+                      color: i == _now ? AppColors.textPrimary : (i < _now ? AppColors.textSecondary : AppColors.textTertiary),
+                      fontWeight: i == _now ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          IconButton(
-            tooltip: '${stop.place.name} 편집',
-            onPressed: onEdit,
-            icon: const Icon(Icons.edit_outlined, color: AppColors.textSecondary, size: 20),
-          ),
         ],
       ),
     );

@@ -119,14 +119,14 @@ void main() {
     expectNoErrors(tester);
   });
 
-  testWidgets('G. 코스 만들기: 1/4 → 2/4(함께) → 3/4 → 4/4 → 다른 추천 → 완성 → 상세', (tester) async {
+  testWidgets('G. 코스 만들기: 1/4 → 2/4(함께) → 3/4(지도·목록) → 4/4 → 다시 추천 → 저장 → 상세', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '코스');
     await waitFor(tester, find.text('내 코스'));
     await tapFinder(tester, find.byTooltip('코스 만들기'));
 
     // 1/4
-    await waitFor(tester, find.text('어떤 여행을 만들까요?'));
+    await waitFor(tester, find.text('어떤 코스를 만들까요?'));
     await typeInto(tester, find.byType(TextField).first, '가을 서울 카페 산책');
     await tester.pump(const Duration(milliseconds: 300));
     await tapText(tester, '날짜를 선택해주세요');
@@ -134,54 +134,59 @@ void main() {
     await tapText(tester, '시간을 선택해주세요');
     await tapText(tester, '확인', scroll: false);
     await tapText(tester, '산책');
-    await tapText(tester, '다음: 동행 설정');
+    await tapText(tester, '다음');
 
     // 2/4
-    await waitFor(tester, find.text('이번 코스는 누구와 함께하나요?'));
-    await tapText(tester, '함께 갈게요');
-    await waitFor(tester, find.text('현재 3명'));
-    await tapText(tester, '파티원 추가하기');
-    await waitFor(tester, find.text('파티원 초대하기'));
-    await tapText(tester, '초대 링크 복사');
+    await waitFor(tester, find.text('누구와 함께 가나요?'));
+    await tapText(tester, '함께 가요');
+    await waitFor(tester, find.text('파티원 3'));
+    await tapText(tester, '초대하기');
+    await waitFor(tester, find.text('파티원 초대'));
+    await tapText(tester, '초대 링크 복사', scroll: false);
     await expectSnack(tester, '초대 링크를 복사했어요.');
-    await tapText(tester, '닫기', scroll: false);
-    await tapText(tester, '다음: 저장한 장소 선택');
+    await tester.tapAt(const Offset(20, 120)); // 시트 바깥을 눌러 닫는다
+    await tester.pump(const Duration(milliseconds: 500));
+    await tapText(tester, '다음');
 
-    // 3/4
-    await waitFor(tester, find.text('코스에 넣을 장소를 골라주세요'));
+    // 3/4 — 목록으로 바꿔 두 곳 고르기
+    await tapFinder(tester, find.textContaining('목록 '), scroll: false);
     await tapText(tester, '카페 온더뷰');
     await tapText(tester, '연남식당');
-    await tapText(tester, '선택한 장소로 계속하기 (2)');
+    await waitFor(tester, find.text('2곳'));
+    await tapText(tester, '코스 추천받기', scroll: false);
 
     // 4/4
-    await waitFor(tester, find.text('추천 동선'), timeout: const Duration(seconds: 20));
-    expect(find.textContaining('파티 취향 반영'), findsOneWidget);
-    expect(find.textContaining('AI 추천 ·'), findsWidgets);
-    await tapText(tester, '다른 추천');
-    await waitFor(tester, find.byType(LinearProgressIndicator));
-    await waitGone(tester, find.byType(LinearProgressIndicator), timeout: const Duration(seconds: 20));
-    await tapText(tester, '이 코스로 완성하기');
+    await waitFor(tester, find.text('코스 저장'), timeout: const Duration(seconds: 20));
+    expect(find.text('일정'), findsOneWidget);
+    await tapText(tester, '다시 추천', scroll: false);
+    await waitFor(tester, find.textContaining('추천 장소'), timeout: const Duration(seconds: 20));
+    await waitGone(tester, find.byType(SnackBar), timeout: const Duration(seconds: 8));
+    await tapText(tester, '코스 저장', scroll: false);
 
-    await waitFor(tester, find.text('코스가 완성됐어요!'));
-    await tapText(tester, '코스 보기');
-    await waitFor(tester, find.text('일정'));
+    // 완료 화면 없이 바로 상세
+    await waitFor(tester, find.text('코스가 저장되었어요'));
     await waitFor(tester, find.text('가을 서울 카페 산책'));
     expectNoErrors(tester);
   });
 
-  testWidgets('H. 코스 상세: 순서 편집 → 다른 추천 받기(루프 재진입) → 저장', (tester) async {
+  testWidgets('H. 코스 상세 → 편집: 이번만 빼기 → 다시 추천 → 저장', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '코스');
     await tapText(tester, '서울 카페 투어');
     await waitFor(tester, find.text('일정'));
-    await tapText(tester, '순서 편집');
-    await waitFor(tester, find.text('완료'));
-    await tapText(tester, '완료');
-    await expectSnack(tester, '코스를 업데이트했어요.');
+    await tapText(tester, '편집');
+    await waitFor(tester, find.text('일정 편집'));
 
-    await tapText(tester, '다른 추천 받기');
-    await waitFor(tester, find.text('추천 동선'), timeout: const Duration(seconds: 20));
-    await tapText(tester, '변경 내용 저장하기');
+    final removeButtons = find.byWidgetPredicate((w) => w is IconButton && (w.tooltip?.endsWith(' 빼기') ?? false));
+    await tapFinder(tester, removeButtons, scroll: false);
+    await waitFor(tester, find.textContaining('이번 코스에서 뺐어요'));
+    await waitGone(tester, find.byType(SnackBar), timeout: const Duration(seconds: 8));
+
+    await tapText(tester, '다시 추천', scroll: false);
+    await waitFor(tester, find.textContaining('추천 장소'), timeout: const Duration(seconds: 20));
+    await waitGone(tester, find.byType(SnackBar), timeout: const Duration(seconds: 8));
+    await tapText(tester, '저장', scroll: false);
+    await expectSnack(tester, '코스를 저장했어요');
     await waitFor(tester, find.text('일정'));
     expectNoErrors(tester);
   });
@@ -212,7 +217,7 @@ void main() {
     await tapText(tester, 'Google로 계속하기');
     await waitFor(tester, find.text('민지님이 코스에 초대했어요'));
     await tapText(tester, '코스에 참여하기');
-    await waitFor(tester, find.text('모임 / 파티 코스'));
+    await waitFor(tester, find.text('함께하는 코스'));
     expectNoErrors(tester);
   });
 }

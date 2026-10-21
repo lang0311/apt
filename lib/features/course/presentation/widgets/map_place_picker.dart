@@ -21,13 +21,20 @@ import '../../../saved/presentation/widgets/saved_rows.dart';
 /// 지도를 깔고 위에 반투명 검색창(+ 필터 버튼), 아래에 장소 카드 한 줄. "목록"으로 전체 목록을 덮어 본다.
 /// 선택 상태는 호출 측이 가진다 ([selectedIds] 순서 = 고른 순서).
 class MapPlacePicker extends ConsumerStatefulWidget {
-  const MapPlacePicker({super.key, required this.selectedIds, required this.onToggle, this.excludedIds = const {}});
+  const MapPlacePicker({
+    super.key,
+    required this.selectedIds,
+    required this.onToggle,
+    this.excludedIds = const {},
+    this.excludedLabel = '코스에 있음',
+  });
 
   final List<String> selectedIds;
   final ValueChanged<Place> onToggle;
 
-  /// 이미 코스에 있는 장소 — 흐리게 + "코스에 있음", 고를 수 없다
+  /// 이미 코스(보관함)에 있는 장소 — 흐리게 + [excludedLabel], 고를 수 없다
   final Set<String> excludedIds;
+  final String excludedLabel;
 
   @override
   ConsumerState<MapPlacePicker> createState() => _MapPlacePickerState();
@@ -115,6 +122,7 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
               items: items,
               selectedIds: selected,
               excludedIds: widget.excludedIds,
+              excludedLabel: widget.excludedLabel,
               onToggle: widget.onToggle,
               onRetry: () => ref.invalidate(savedPlacesProvider(_query)),
             ),
@@ -177,6 +185,7 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
                         focused: p.id == _focusedId,
                         number: selected.contains(p.id) ? selected.indexOf(p.id) + 1 : null,
                         inCourse: widget.excludedIds.contains(p.id),
+                        excludedLabel: widget.excludedLabel,
                         onTap: () => _focus(places, i, scrollCards: true),
                         onToggle: () => widget.onToggle(p),
                       ),
@@ -377,14 +386,15 @@ class _SelectButton extends StatelessWidget {
 }
 
 class _InCourseTag extends StatelessWidget {
-  const _InCourseTag();
+  const _InCourseTag(this.label);
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6)),
-      child: Text('코스에 있음', style: AppTypography.caption.copyWith(fontSize: 10.5, fontWeight: FontWeight.w700)),
+      child: Text(label, style: AppTypography.caption.copyWith(fontSize: 10.5, fontWeight: FontWeight.w700)),
     );
   }
 }
@@ -403,10 +413,12 @@ class _PlaceCard extends StatelessWidget {
     required this.focused,
     required this.number,
     required this.inCourse,
+    required this.excludedLabel,
     required this.onTap,
     required this.onToggle,
   });
 
+  final String excludedLabel;
   final Place place;
   final bool focused;
   final int? number;
@@ -447,7 +459,7 @@ class _PlaceCard extends StatelessWidget {
                   ),
                 ),
                 if (inCourse)
-                  const Padding(padding: EdgeInsets.only(right: 10), child: _InCourseTag())
+                  Padding(padding: const EdgeInsets.only(right: 10), child: _InCourseTag(excludedLabel))
                 else
                   _SelectButton(number: number, name: place.name, onTap: onToggle),
               ],
@@ -465,9 +477,12 @@ class _ListPanel extends StatelessWidget {
     required this.items,
     required this.selectedIds,
     required this.excludedIds,
+    required this.excludedLabel,
     required this.onToggle,
     required this.onRetry,
   });
+
+  final String excludedLabel;
 
   final AsyncValue<List<SavedPlaceItem>> items;
   final List<String> selectedIds;
@@ -530,7 +545,7 @@ class _ListPanel extends StatelessWidget {
                                     ),
                                   ),
                                   if (inCourse)
-                                    const Padding(padding: EdgeInsets.all(10), child: _InCourseTag())
+                                    Padding(padding: const EdgeInsets.all(10), child: _InCourseTag(excludedLabel))
                                   else
                                     _SelectButton(number: n < 0 ? null : n + 1, name: p.name, onTap: () => onToggle(p)),
                                 ],

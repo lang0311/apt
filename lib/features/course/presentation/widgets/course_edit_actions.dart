@@ -73,11 +73,7 @@ void showEditTileSheet(BuildContext context, WidgetRef ref, CourseStop stop, int
 }
 
 /// 장소 추가 화면 인자 (이미 코스에 있는 장소는 고를 수 없게)
-AddPlacesArgs courseAddPlacesArgs(List<CourseStop> stops) => AddPlacesArgs(
-      title: '장소 추가',
-      excludedPlaceIds: {for (final s in stops) s.place.id},
-      ctaLabel: '일정에 추가',
-    );
+AddPlacesArgs courseAddPlacesArgs(List<CourseStop> stops) => AddPlacesArgs(excludedPlaceIds: {for (final s in stops) s.place.id});
 
 /// 4단계 결과에서 장소를 누를 때
 void showResultSheet(BuildContext context, WidgetRef ref, CourseStop stop) {

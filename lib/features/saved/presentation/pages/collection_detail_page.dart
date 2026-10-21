@@ -45,7 +45,7 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
   Future<void> _addFromSaved(List<String> existing) async {
     final picked = await context.push<List<Place>>(
       AppRoutes.pickPlaces,
-      extra: AddPlacesArgs(title: '보관함에 장소 추가', excludedPlaceIds: existing.toSet(), ctaLabel: '보관함에 추가하기'),
+      extra: AddPlacesArgs(title: '보관함에 장소 추가', excludedPlaceIds: existing.toSet(), excludedLabel: '보관함에 있음', ctaLabel: '보관함에 추가'),
     );
     if (picked == null || picked.isEmpty || !mounted) return;
     try {
