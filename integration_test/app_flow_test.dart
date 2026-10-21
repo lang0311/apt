@@ -5,6 +5,7 @@ import 'package:integration_test/integration_test.dart';
 
 import 'package:apt/app/routes.dart';
 import 'package:apt/features/auth/domain/auth_models.dart';
+import 'package:apt/features/home/presentation/home_page.dart';
 
 import 'helpers.dart';
 
@@ -28,7 +29,7 @@ void main() {
 
     await waitFor(tester, find.text('가입이 완료됐어요'));
     await tapText(tester, '시작하기');
-    await waitFor(tester, find.text('최근 추출한 장소'));
+    await waitFor(tester, find.byType(HomePage));
     expectNoErrors(tester);
   });
 
@@ -46,18 +47,19 @@ void main() {
     );
     await waitFor(tester, find.text('이미 가입된 이메일이에요'));
     await tapText(tester, '기존 계정과 연결하기');
-    await waitFor(tester, find.text('최근 추출한 장소'));
+    await waitFor(tester, find.byType(HomePage));
     expectNoErrors(tester);
   });
 
   testWidgets('C. 저장됨: 카테고리 필터 → 장소 상세 → 보관함 변경', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '저장됨');
-    await waitFor(tester, find.text('전체 저장 장소'));
+    await waitFor(tester, find.text('저장한 곳'));
 
-    // 맛집 카테고리 선택 → 목록 제목 변경
-    await tapText(tester, '맛집');
-    await waitFor(tester, find.text('맛집 저장 장소'));
+    // 필터 시트에서 맛집 → 남색 칩으로 표시
+    await tapText(tester, '필터', scroll: false);
+    await tapText(tester, '맛집', scroll: false);
+    await waitFor(tester, find.textContaining('맛집 '));
     await tapText(tester, '연남식당');
 
     await waitFor(tester, find.text('장소 정보'));
@@ -73,7 +75,7 @@ void main() {
     await signInExisting(tester);
     await tapTab(tester, '저장됨');
     await tapText(tester, '내 보관함');
-    await tapText(tester, '새 보관함 만들기');
+    await tapText(tester, '새 보관함');
     await waitFor(tester, find.text('보관함 이름'));
     await typeInto(tester, find.byType(TextField).last, '서울 가을 산책');
     await tester.pump(const Duration(milliseconds: 300));
@@ -82,8 +84,9 @@ void main() {
     await waitFor(tester, find.text('아직 저장된 장소가 없어요'));
     await tapText(tester, '저장한 장소에서 추가하기');
     await waitFor(tester, find.text('보관함에 장소 추가'));
+    await tapFinder(tester, find.textContaining('목록 '), scroll: false);
     await tapText(tester, '카페 온더뷰');
-    await tapText(tester, '보관함에 추가하기 (1)');
+    await tapText(tester, '보관함에 추가', scroll: false);
     await expectSnack(tester, '1곳을 보관함에 추가했어요.');
     await waitFor(tester, find.text('이 보관함으로 코스 만들기'));
     expectNoErrors(tester);
@@ -122,17 +125,15 @@ void main() {
   testWidgets('G. 코스 만들기: 1/4 → 2/4(함께) → 3/4(지도·목록) → 4/4 → 다시 추천 → 저장 → 상세', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '코스');
-    await waitFor(tester, find.text('내 코스'));
+    await waitFor(tester, find.textContaining('내 코스', findRichText: true));
     await tapFinder(tester, find.byTooltip('코스 만들기'));
 
     // 1/4
     await waitFor(tester, find.text('어떤 코스를 만들까요?'));
     await typeInto(tester, find.byType(TextField).first, '가을 서울 카페 산책');
     await tester.pump(const Duration(milliseconds: 300));
-    await tapText(tester, '날짜를 선택해주세요');
-    await tapText(tester, '확인', scroll: false);
-    await tapText(tester, '시간을 선택해주세요');
-    await tapText(tester, '확인', scroll: false);
+    await tapText(tester, '날짜와 시작 시간을 골라 주세요');
+    await tapFinder(tester, find.textContaining('출발'), scroll: false); // 기본값(내일 오전 11:00)으로 확인
     await tapText(tester, '산책');
     await tapText(tester, '다음');
 
@@ -217,7 +218,7 @@ void main() {
     await tapText(tester, 'Google로 계속하기');
     await waitFor(tester, find.text('민지님이 코스에 초대했어요'));
     await tapText(tester, '코스에 참여하기');
-    await waitFor(tester, find.text('함께하는 코스'));
+    await waitFor(tester, find.textContaining('함께하는 코스', findRichText: true));
     expectNoErrors(tester);
   });
 }

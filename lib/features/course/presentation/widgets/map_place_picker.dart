@@ -170,7 +170,11 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
               AsyncData() when places.isEmpty => Center(
                   child: _Bubble(text: _keyword.isEmpty && _categoryKey == null ? '저장한 장소가 없어요' : '찾는 장소가 없어요'),
                 ),
-              AsyncData() => PageView.builder(
+              // 넘긴 카드가 늘 왼쪽 여백(12)에서 시작하도록 PageView를 여백 안에 두고, 지나간 카드는 밖으로 그린다
+              AsyncData() => Padding(
+                  padding: const EdgeInsets.only(left: AppSpacing.sm),
+                  child: PageView.builder(
+                  clipBehavior: Clip.none,
                   controller: _pages,
                   padEnds: false,
                   itemCount: places.length,
@@ -178,7 +182,7 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
                   itemBuilder: (_, i) {
                     final p = places[i];
                     return Padding(
-                      padding: EdgeInsets.only(left: i == 0 ? AppSpacing.sm : 0, right: AppSpacing.xs),
+                      padding: const EdgeInsets.only(right: AppSpacing.xs),
                       child: _PlaceCard(
                         key: ValueKey(p.id),
                         place: p,
@@ -191,6 +195,7 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
                       ),
                     );
                   },
+                ),
                 ),
               AsyncError() => Center(
                   child: _Bubble(text: '장소를 불러오지 못했어요', onTap: () => ref.invalidate(savedPlacesProvider(_query))),
@@ -530,7 +535,7 @@ class _ListPanel extends StatelessWidget {
                           child: InkWell(
                             onTap: inCourse ? null : () => onToggle(p),
                             child: Padding(
-                              padding: const EdgeInsets.only(left: AppSpacing.md, right: AppSpacing.xs),
+                              padding: const EdgeInsets.fromLTRB(AppSpacing.md, 6, AppSpacing.xs, 6),
                               child: Row(
                                 children: [
                                   AppNetworkImage(url: p.imageUrl, width: 48, height: 48, radius: 12),

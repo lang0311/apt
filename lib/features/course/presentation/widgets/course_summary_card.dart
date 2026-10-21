@@ -71,6 +71,7 @@ class _People extends StatelessWidget {
           members: [for (final (i, n) in names.take(3).indexed) PartyMember(id: '$i', nickname: n, isMe: n == '나')],
           size: 20,
           max: 3,
+          overlap: true,
         ),
         const SizedBox(width: 6),
         Expanded(

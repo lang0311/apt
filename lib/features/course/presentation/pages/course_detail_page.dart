@@ -131,7 +131,7 @@ class _CrewStrip extends ConsumerWidget {
             child: Row(
               children: [
                 if (members != null) ...[
-                  PartyAvatarStack(members: members, size: 24, max: 3),
+                  PartyAvatarStack(members: members, size: 24, max: 3, overlap: true),
                   const SizedBox(width: AppSpacing.xs),
                 ],
                 Expanded(child: Text(names, style: AppTypography.label, maxLines: 1, overflow: TextOverflow.ellipsis)),
@@ -161,12 +161,12 @@ class _CrewStrip extends ConsumerWidget {
           children: [
             Text('함께하는 사람 ${members.length}명', style: AppTypography.cardTitle),
             const SizedBox(height: AppSpacing.xs),
-            for (final m in members)
+            for (final (i, m) in members.indexed)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Row(
                   children: [
-                    PartyAvatarStack(members: [m], size: 36, max: 1),
+                    PartyAvatarStack(members: [m], size: 36, max: 1, colorOffset: i),
                     const SizedBox(width: AppSpacing.sm),
                     Text(m.isMe ? '${m.nickname} (나)' : m.nickname, style: AppTypography.bodyStrong),
                   ],

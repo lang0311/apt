@@ -1,3 +1,4 @@
+import 'package:apt/features/home/presentation/home_page.dart';
 import 'package:apt/app/app.dart';
 import 'package:apt/app/shell/app_shell.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +87,7 @@ Future<void> launchApp(WidgetTester tester) async {
 Future<void> signInExisting(WidgetTester tester) async {
   await launchApp(tester);
   await tapText(tester, 'Google로 계속하기');
-  await waitFor(tester, find.text('저장된 장소'));
+  await waitFor(tester, find.byType(HomePage));
 }
 
 /// 렌더링 예외(overflow 등)가 없었는지

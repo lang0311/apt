@@ -197,14 +197,16 @@ class _NaverMapViewState extends State<NaverMapView> implements AptMapCommands {
     await c.updateCamera(_fitUpdate([...widget.markers.map((m) => m.point), ...widget.route]));
   }
 
-  static NCameraUpdate _fitUpdate(List<GeoPoint> points) {
+  NCameraUpdate _fitUpdate(List<GeoPoint> points) {
     final bounds = focusBounds(points)!;
-    const edge = 56.0;
+    // 낮은 지도(코스 상세 120–160)에서 위아래 여백 56씩이면 남는 높이가 거의 없어 엉뚱하게 맞춰진다 → 높이에 맞춰 줄인다
+    final side = context.size?.shortestSide ?? 300;
+    final edge = (side * 0.18).clamp(16.0, 56.0);
     return points.length == 1
         ? NCameraUpdate.scrollAndZoomTo(target: _latLng(points.first), zoom: 15)
         : NCameraUpdate.fitBounds(
             NLatLngBounds(southWest: _latLng(bounds.southWest), northEast: _latLng(bounds.northEast)),
-            padding: const EdgeInsets.all(edge),
+            padding: EdgeInsets.all(edge),
           );
   }
 

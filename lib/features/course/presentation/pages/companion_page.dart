@@ -171,12 +171,12 @@ class _PartyCard extends ConsumerWidget {
             data: (p) => DividedRows(
               indent: SectionCard.innerPadding + 36 + AppSpacing.sm,
               children: [
-                for (final m in p.members)
+                for (final (i, m) in p.members.indexed)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: 10),
                     child: Row(
                       children: [
-                        PartyAvatarStack(members: [m], size: 36, max: 1),
+                        PartyAvatarStack(members: [m], size: 36, max: 1, colorOffset: i),
                         const SizedBox(width: AppSpacing.sm),
                         // NEEDS BACKEND: 파티원별 취향 요약 (오면 이름 아래 한 줄)
                         Text(m.isMe ? '나' : m.nickname, style: AppTypography.bodyStrong),

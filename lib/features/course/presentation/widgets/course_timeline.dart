@@ -5,6 +5,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/states.dart';
+import '../../../place/domain/place.dart';
 import '../../domain/course_models.dart';
 import 'course_place_row.dart';
 import 'course_route_map.dart';
@@ -114,7 +115,7 @@ class _StopText extends StatelessWidget {
     final place = stop.place;
     final sub = stop.isAi
         ? '✦ ${stop.aiReason ?? 'AI 추천'}'
-        : [place.categoryLabel, if (place.displayArea.isNotEmpty) place.displayArea].join(' · ');
+        : [place.categoryLabel, if (_shortArea(place).isNotEmpty) _shortArea(place)].join(' · ');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -137,6 +138,12 @@ class _StopText extends StatelessWidget {
       ],
     );
   }
+}
+
+/// '서울 성동구 성수동' → '성수동'
+String _shortArea(Place p) {
+  final parts = p.displayArea.trim().split(RegExp(r'\s+'));
+  return parts.isEmpty ? '' : parts.last;
 }
 
 /// 일정 타임라인 (보는 상태). 장소 행은 옅은 흰 바탕으로 나누고, 행 사이 점선에 이동 정보를 둔다.
