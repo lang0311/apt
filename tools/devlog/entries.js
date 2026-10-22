@@ -1056,6 +1056,31 @@ module.exports = [
       },
     ],
     decisions: ['D26 보완: 저장 뒤 결과에 남기, 마이 내 활동 · 톱니 삭제'],
-    pending: ['마이 화면 개편 시안 확인 → 구현', '스낵바가 하단 버튼을 가리는 문제 처리 여부'],
+    pending: ['스낵바가 하단 버튼을 가리는 문제 처리 여부'],
+  },
+  {
+    id: 33,
+    title: '마이 화면 개편',
+    date: '2026-10-22',
+    status: '완료',
+    commits: [],
+    goal: '시안(KRDQYmEYGYgoU4cqWxGVKj)의 마이 제안안대로 저장됨 · 코스와 같은 SectionCard 묶음으로 바꾼다.',
+    work: [
+      '프로필: 큰 사람 아이콘 원 → 이니셜 원 52 + 이름 + @id + 작은 회색 테두리 "프로필 편집"',
+      '통계 타일 → SectionCard "내 기록" 행 3개(숫자 · ›). 함께하는 코스는 /courses?tab=party로 코스 목록의 그 탭을 연다(CoursesPage initialTab)',
+      '취향 카드 → SectionCard "취향"(수정 · 키워드 한 줄 · 추천하지 않는 장소). 개수는 목록을 세지 않아 표시 안 함',
+      '바탕 위 메뉴 줄 → SectionCard "설정"(아이콘 칸 행), 로그아웃은 따로 뗀 카드(빨간 글자, 확인 창)',
+      '통합 테스트 I를 "수정"으로 들어가게. flutter test 101개 · 통합 I 통과, 에뮬레이터 캡처 확인',
+    ],
+    problems: [
+      {
+        problem: '프로필 편집 버튼이 파란 테두리 큰 버튼으로 나와 화면에서 가장 눈에 띔',
+        cause: 'AppButton.outline이 주 색 테두리 · 큰 글자',
+        solution: '회색 얇은 테두리 · 작은 글자 OutlinedButton으로(누르는 영역은 48 유지)',
+        status: '해결',
+      },
+    ],
+    decisions: ['D27: 마이 SectionCard 묶음'],
+    pending: ['하위 화면(알림 · 개인정보 · 도움말 · 프로필 편집) 디자인 없음', '앱 버전 표시는 package_info 의존성이 없어 넣지 않음'],
   },
 ];
