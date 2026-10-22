@@ -92,7 +92,7 @@ void main() {
     expectNoErrors(tester);
   });
 
-  testWidgets('E. 추출: 링크 입력 → 찾은 장소 → 보관함 고르기 → 저장 → 장소 상세', (tester) async {
+  testWidgets('E. 추출: 링크 입력 → 찾은 장소 → 보관함 고르기 → 저장(결과에 남음) → 보기 → 장소 상세', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '추출');
     await waitFor(tester, find.text('릴스에서 바로 저장하기'));
@@ -106,6 +106,10 @@ void main() {
     await waitFor(tester, find.text('새 보관함'));
     await tapText(tester, '확인');
     await tapText(tester, '1곳 저장');
+    // 저장 뒤에는 결과에 남고 스낵바 (07 D26 ①)
+    await waitFor(tester, find.text('1곳을 저장했어요'));
+    expect(find.text('완료'), findsOneWidget);
+    await tapText(tester, '보기', scroll: false);
     await waitFor(tester, find.text('장소 상세'));
     await waitFor(tester, find.text('한강 노을 포인트'));
     expectNoErrors(tester);

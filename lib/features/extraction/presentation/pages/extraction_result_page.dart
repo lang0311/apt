@@ -223,9 +223,14 @@ class _ReviewState extends ConsumerState<_Review> {
 
   /// 장소 id → 넣을 보관함 id (저장 전에 정해 두는 값)
   final Map<String, Set<String>> _collections = {};
+
+  /// 이 화면에서 방금 저장한 장소 (저장 뒤에도 결과에 남는다, 07 D26 ①)
+  final Set<String> _savedNow = {};
   bool _saving = false;
 
-  List<ExtractedPlace> get _selectable => widget.result.places.where((p) => !p.alreadySaved).toList();
+  bool _isSaved(ExtractedPlace p) => p.alreadySaved || _savedNow.contains(p.place.id);
+
+  List<ExtractedPlace> get _selectable => widget.result.places.where((p) => !_isSaved(p)).toList();
 
   void _toggle(String id) => setState(() => _selected.contains(id) ? _selected.remove(id) : _selected.add(id));
 
@@ -272,14 +277,31 @@ class _ReviewState extends ConsumerState<_Review> {
     }
     setState(() => _saving = true);
     final repo = ref.read(savedRepositoryProvider);
+    final router = GoRouter.of(context);
     try {
       for (final e in groups.entries) {
         await repo.savePlaces(placeIds: e.value, collectionIds: groupIds[e.key]!);
+        // 묶음마다 반영해 두면 중간에 실패해도 이미 저장한 곳은 '저장됨'으로 남는다
+        setState(() {
+          _savedNow.addAll(e.value);
+          _selected.removeAll(e.value);
+        });
       }
       invalidateSavedData(ref);
       if (!mounted) return;
-      // 저장 후 이동: 한 곳이면 장소 상세, 여러 곳이면 저장됨 (07 정해 주세요 ① 결정 전까지 지금 동작 유지)
-      context.go(places.length == 1 ? AppRoutes.place(places.single.id) : AppRoutes.saved);
+      // 저장 뒤에는 결과 화면에 남고 스낵바 (07 D26 ①)
+      final names = {for (final c in ref.read(collectionsProvider).value ?? []) c.id: c.name};
+      final onlyGroup = groupIds.length == 1 ? groupIds.values.single : const <String>[];
+      final oneCollection = onlyGroup.length == 1 && names.containsKey(onlyGroup.single) ? onlyGroup.single : null;
+      final n = places.length;
+      showAppSnackBar(
+        context,
+        oneCollection == null ? '$n곳을 저장했어요' : '$n곳을 ${names[oneCollection]}에 저장했어요',
+        actionLabel: '보기',
+        onAction: () => n == 1
+            ? router.push(AppRoutes.place(places.single.id))
+            : router.go(oneCollection == null ? AppRoutes.saved : AppRoutes.collection(oneCollection)),
+      );
     } catch (e) {
       invalidateSavedData(ref);
       if (mounted) showAppSnackBar(context, failureMessage(e));
@@ -292,6 +314,8 @@ class _ReviewState extends ConsumerState<_Review> {
   Widget build(BuildContext context) {
     final r = widget.result;
     final allSaved = _selectable.isEmpty;
+    // 이 화면에서 남은 장소까지 다 저장했으면 '완료'
+    final finished = allSaved && _savedNow.isNotEmpty;
     final allSelected = !allSaved && _selectable.every((p) => _selected.contains(p.place.id));
     final names = <String, String>{for (final c in ref.watch(collectionsProvider).value ?? []) c.id: c.name};
 
@@ -316,7 +340,7 @@ class _ReviewState extends ConsumerState<_Review> {
                   children: [
                     for (final item in r.places)
                       ExtractedPlaceRow(
-                        item: item,
+                        item: _savedNow.contains(item.place.id) ? ExtractedPlace(place: item.place, alreadySaved: true) : item,
                         selected: _selected.contains(item.place.id),
                         collectionLabel: _label(item.place.id, names),
                         onToggle: () => _toggle(item.place.id),
@@ -329,7 +353,9 @@ class _ReviewState extends ConsumerState<_Review> {
           ),
         ),
         BottomCta(
-          child: allSaved
+          child: finished
+              ? AppButton.outline(label: '완료', onPressed: () => context.go(AppRoutes.extract))
+              : allSaved
               ? AppButton(label: '저장됨에서 보기', variant: AppButtonVariant.soft, onPressed: () => context.go(AppRoutes.saved))
               : AppButton(
                   label: '${_selected.length}곳 저장',

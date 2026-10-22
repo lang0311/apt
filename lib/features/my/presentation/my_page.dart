@@ -6,7 +6,6 @@ import '../../../app/routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/app_typography.dart';
-import '../../../core/widgets/buttons.dart';
 import '../../../core/widgets/headers.dart';
 import '../../../core/widgets/overlays.dart';
 import '../../../core/widgets/states.dart';
@@ -19,7 +18,7 @@ import 'my_providers.dart';
 class MyPage extends ConsumerWidget {
   const MyPage({super.key});
 
-  // 하위 화면(내 활동·알림·개인정보·도움말)은 디자인 없음 (docs/07 §3)
+  // 하위 화면(알림·개인정보·도움말)은 디자인 없음 (docs/07 §3)
   void _todo(BuildContext context, String name) => showAppSnackBar(context, '$name은(는) 준비 중이에요.');
 
   Future<void> _signOut(BuildContext context, WidgetRef ref) async {
@@ -41,10 +40,8 @@ class MyPage extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
             children: [
-              PageTitleHeader(
-                title: '마이',
-                trailing: AppIconBox(icon: Icons.settings_outlined, size: 44, tooltip: '설정', onPressed: () => _todo(context, '설정')),
-              ),
+              // 톱니(설정)는 따로 된 설정 화면이 없어 뺀다 (07 D26 ③)
+              const PageTitleHeader(title: '마이'),
               AsyncValueView<MyProfile>(
                 value: profile,
                 onRetry: () => ref.invalidate(myProfileProvider),
@@ -52,7 +49,7 @@ class MyPage extends ConsumerWidget {
                 data: (p) => _ProfileSection(profile: p, onEdit: () => _todo(context, '프로필 편집')),
               ),
               const SizedBox(height: AppSpacing.sm),
-              _MenuItem(icon: Icons.bookmark_border_rounded, label: '내 활동', onTap: () => _todo(context, '내 활동')),
+              // '내 활동'은 보여 줄 내용이 정해지지 않았고 내 기록과 겹쳐 뺀다 (07 D26 ②)
               _MenuItem(icon: Icons.block_rounded, label: '추천하지 않는 장소', onTap: () => context.push(AppRoutes.blockedPlaces)),
               _MenuItem(icon: Icons.notifications_none_rounded, label: '알림', onTap: () => _todo(context, '알림')),
               _MenuItem(icon: Icons.shield_outlined, label: '개인정보 설정', onTap: () => _todo(context, '개인정보 설정')),
