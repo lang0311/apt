@@ -26,6 +26,8 @@ abstract final class AppRoutes {
   static String place(String id) => '/places/$id';
 
   static const courses = '/courses';
+  /// 코스 목록의 '함께하는 코스' 탭
+  static const coursesParty = '/courses?tab=party';
   static String course(String id, {bool justSaved = false}) => justSaved ? '/courses/$id?saved=1' : '/courses/$id';
   static String courseEdit(String id) => '/course-edit/$id';
   static const courseNewInfo = '/courses/new/info';

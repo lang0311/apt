@@ -22,14 +22,23 @@ import '../widgets/course_summary_card.dart';
 /// #21 코스 빈 상태 / #22 코스 목록 [내 코스 | 함께하는 코스].
 /// 탭마다 자기 코스만 보여 주고, 날짜로 "다가오는 코스"와 "지난 코스"를 나눈다 (D-day는 날짜에서 계산).
 class CoursesPage extends ConsumerStatefulWidget {
-  const CoursesPage({super.key});
+  const CoursesPage({super.key, this.initialTab = 0});
+
+  /// 0 = 내 코스, 1 = 함께하는 코스 (`/courses?tab=party`, 마이 '내 기록'에서)
+  final int initialTab;
 
   @override
   ConsumerState<CoursesPage> createState() => _CoursesPageState();
 }
 
 class _CoursesPageState extends ConsumerState<CoursesPage> {
-  int _tab = 0;
+  late int _tab = widget.initialTab;
+
+  @override
+  void didUpdateWidget(CoursesPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialTab != widget.initialTab) _tab = widget.initialTab;
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -200,8 +200,8 @@ void main() {
   testWidgets('I. 마이: 취향 설정 변경 → 저장 → 로그아웃', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '마이');
-    await waitFor(tester, find.text('취향 설정'));
-    await tapText(tester, '취향 설정');
+    await waitFor(tester, find.text('내 기록'));
+    await tapText(tester, '수정');
     await waitFor(tester, find.text('어떤 곳을 좋아하세요?'));
     await tapText(tester, '쇼핑');
     await waitFor(tester, find.text('8개 선택'));

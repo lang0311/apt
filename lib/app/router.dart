@@ -122,7 +122,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(routes: [
             GoRoute(
               path: AppRoutes.courses,
-              builder: (_, _) => const CoursesPage(),
+              builder: (_, s) => CoursesPage(initialTab: s.uri.queryParameters['tab'] == 'party' ? 1 : 0),
               routes: [
                 GoRoute(
                   path: ':id',
