@@ -14,7 +14,6 @@ import '../../../core/widgets/chips.dart';
 import '../../../core/widgets/headers.dart';
 import '../../../core/widgets/overlays.dart';
 import '../../../core/widgets/states.dart';
-import '../../../core/widgets/surfaces.dart';
 import '../../my/presentation/my_providers.dart';
 import '../domain/preference_models.dart';
 import 'preference_providers.dart';
@@ -107,9 +106,9 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
         body: SafeArea(
           child: Column(
             children: [
-              SubPageHeader(
+              PlainHeader(
                 title: '취향 설정',
-                onBack: () => _dirty ? _confirmLeave() : _leave(),
+                onLeading: () => _dirty ? _confirmLeave() : _leave(),
                 trailing: _selected == null
                     ? null
                     : Text('${_selected!.length}개 선택', style: AppTypography.label.copyWith(color: AppColors.textSecondary)),
@@ -125,7 +124,7 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
                       )
                     : !groups.hasValue || _selected == null
                         ? const _Skeleton()
-                        : _content(groups.value!, _initial!),
+                        : _content(groups.value!),
               ),
               BottomCta(
                 child: AppButton(label: '취향 저장하기', loading: _saving, onPressed: _dirty ? _save : null),
@@ -137,7 +136,7 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
     );
   }
 
-  Widget _content(List<PreferenceGroup> groups, MyPreferences mine) {
+  Widget _content(List<PreferenceGroup> groups) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.md, AppSpacing.screenH, AppSpacing.lg),
       children: [
@@ -158,7 +157,7 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
             runSpacing: AppSpacing.xs,
             children: [
               for (final item in g.items)
-                AppChip(
+                AppTextChip(
                   label: item.label,
                   selected: _selected!.contains(item.key),
                   onTap: () => setState(() {
@@ -173,45 +172,7 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
             ],
           ),
         ],
-        // 서버가 암묵적 취향 분석을 지원할 때만 노출 (가정 A4)
-        if (mine.autoAnalysisSupported) ...[
-          const SizedBox(height: AppSpacing.xl),
-          AppCard(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const IconCircle(icon: Icons.bookmark_border_rounded),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('저장한 장소로 취향 자동 분석', style: AppTypography.bodyStrong),
-                          if (mine.analysisBasisCount != null)
-                            Text('저장한 ${mine.analysisBasisCount}곳을 바탕으로 취향을 보완해요.', style: AppTypography.caption),
-                        ],
-                      ),
-                    ),
-                    Switch(value: _autoAnalysis!, onChanged: (v) => setState(() => _autoAnalysis = v)),
-                  ],
-                ),
-                if (_autoAnalysis! && mine.analyzedLabels.isNotEmpty) ...[
-                  const Padding(padding: EdgeInsets.symmetric(vertical: AppSpacing.sm), child: Divider()),
-                  Row(
-                    children: [
-                      Text('분석된 취향', style: AppTypography.meta),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(child: TagWrap(mine.analyzedLabels, tone: AppTagTone.primary)),
-                    ],
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
+        // '저장한 장소로 취향 자동 분석'은 나중에 넣을 기능 (07 §3) — 값은 서버에 받은 그대로 다시 보낸다
       ],
     );
   }
