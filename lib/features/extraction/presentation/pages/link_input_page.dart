@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/routes.dart';
@@ -7,15 +6,13 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/utils/instagram_url.dart';
-import '../../../../core/widgets/bottom_cta.dart';
-import '../../../../core/widgets/buttons.dart';
 import '../../../../core/widgets/headers.dart';
 import '../../../../core/widgets/inputs.dart';
-import '../../../../core/widgets/overlays.dart';
-import '../../../../core/widgets/selection.dart';
 import '../../../../core/widgets/surfaces.dart';
+import '../widgets/extracted_place_card.dart';
 
 /// #10 링크 입력 (폴백). 주 경로는 릴스 "공유 → 우리 앱"이며, 공유로 들어오면 이 화면을 건너뛴다.
+/// 맨 위 링크 줄은 찾는 중 · 찾은 장소 화면의 링크 줄과 같은 모양이다 (07 D26).
 class LinkInputPage extends StatefulWidget {
   const LinkInputPage({super.key});
 
@@ -25,33 +22,26 @@ class LinkInputPage extends StatefulWidget {
 
 class _LinkInputPageState extends State<LinkInputPage> {
   final _url = TextEditingController();
+  final _focus = FocusNode();
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _focus.addListener(() => setState(() {}));
+  }
 
   @override
   void dispose() {
     _url.dispose();
+    _focus.dispose();
     super.dispose();
-  }
-
-  Future<void> _paste() async {
-    final data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (!mounted) return;
-    final text = data?.text?.trim();
-    if (text == null || text.isEmpty) {
-      showAppSnackBar(context, '클립보드가 비어 있어요.');
-      return;
-    }
-    final url = InstagramUrl.extract(text);
-    setState(() {
-      _url.text = url ?? text;
-      _error = url == null ? '인스타그램 게시물 링크가 아니에요.' : null;
-    });
   }
 
   void _submit() {
     final url = InstagramUrl.extract(_url.text);
     if (url == null) {
-      setState(() => _error = '인스타그램 게시물 또는 릴스 링크를 입력해주세요.');
+      setState(() => _error = '인스타그램 게시물 또는 릴스 링크를 넣어 주세요.');
       return;
     }
     FocusScope.of(context).unfocus();
@@ -60,90 +50,111 @@ class _LinkInputPageState extends State<LinkInputPage> {
 
   @override
   Widget build(BuildContext context) {
+    final hasText = _url.text.trim().isNotEmpty;
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: Column(
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: AppSpacing.xl),
           children: [
-            Expanded(
-              child: ListView(
+            const PageTitleHeader(title: '추출'),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const PageTitleHeader(title: '장소 추출'),
-                  Padding(
-                    padding: AppSpacing.screenPadding,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                  ExtractSourceRow(
+                    focused: _focus.hasFocus,
+                    leading: const LinkTile(),
+                    action: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        AppCard(
-                          color: AppColors.primarySoft,
-                          padding: const EdgeInsets.all(AppSpacing.lg),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14)),
-                                child: const Icon(Icons.link_rounded, color: AppColors.primary),
-                              ),
-                              const SizedBox(height: AppSpacing.md),
-                              Text('인스타그램에서 발견한 장소', style: AppTypography.section),
-                              const SizedBox(height: 4),
-                              Text('게시물 링크를 붙여넣으면 장소를 찾아드려요.', style: AppTypography.body),
-                            ],
+                        if (hasText)
+                          IconButton(
+                            tooltip: '지우기',
+                            onPressed: () => setState(() {
+                              _url.clear();
+                              _error = null;
+                            }),
+                            icon: const Icon(Icons.close_rounded, size: 18, color: AppColors.textHint),
+                            constraints: const BoxConstraints(minWidth: 40, minHeight: 44),
                           ),
-                        ),
-                        const SizedBox(height: AppSpacing.xl),
-                        AppTextField(
-                          controller: _url,
-                          label: '인스타그램 링크',
-                          hint: '인스타그램 링크를 붙여넣어 주세요',
-                          prefixIcon: Icons.link_rounded,
-                          keyboardType: TextInputType.url,
-                          textInputAction: TextInputAction.go,
-                          hasError: _error != null,
-                          onChanged: (_) => setState(() => _error = null),
-                          onSubmitted: (_) => _submit(),
-                        ),
-                        if (_error != null) ...[const SizedBox(height: AppSpacing.xs), AppFieldError(_error!)],
-                        const SizedBox(height: AppSpacing.sm),
-                        AppButton(
-                          label: '클립보드에서 붙여넣기',
-                          icon: Icons.content_paste_rounded,
-                          variant: AppButtonVariant.soft,
-                          onPressed: _paste,
-                        ),
-                        const SizedBox(height: AppSpacing.xl),
-                        Text('이렇게 이용해 보세요', style: AppTypography.cardTitle),
-                        const SizedBox(height: AppSpacing.sm),
-                        for (final (i, step) in const [
-                          '인스타그램 게시물의 링크를 복사해요.',
-                          '링크를 붙여넣고 장소를 추출해요.',
-                          '원하는 장소를 선택해 저장해요.',
-                        ].indexed)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                            child: Row(
-                              children: [
-                                NumberBadge(i + 1, size: 26, color: AppColors.primarySoft, textColor: AppColors.primary),
-                                const SizedBox(width: AppSpacing.sm),
-                                Expanded(child: Text(step, style: AppTypography.body)),
-                              ],
-                            ),
-                          ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text('공개 게시물만 지원해요. 장소 정보는 다를 수 있어요.', style: AppTypography.caption),
+                        SourceRowAction(label: '찾기', onPressed: hasText ? _submit : null),
                       ],
+                    ),
+                    child: TextField(
+                      controller: _url,
+                      focusNode: _focus,
+                      keyboardType: TextInputType.url,
+                      textInputAction: TextInputAction.go,
+                      style: AppTypography.bodyStrong,
+                      decoration: InputDecoration(
+                        hintText: '링크를 붙여 넣어 주세요',
+                        hintStyle: AppTypography.body.copyWith(color: AppColors.textHint),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        filled: false,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                      ),
+                      onChanged: (_) => setState(() => _error = null),
+                      onSubmitted: (_) => _submit(),
+                    ),
+                  ),
+                  if (_error != null)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(AppSpacing.xs, AppSpacing.xs, AppSpacing.xs, 0),
+                      child: AppFieldError(_error!),
+                    ),
+                  const SizedBox(height: AppSpacing.sm),
+                  SectionCard(
+                    title: '릴스에서 바로 저장하기',
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                      child: Column(
+                        children: const [
+                          _GuideRow(icon: Icons.share_outlined, text: '릴스에서 공유를 눌러요'),
+                          _GuideRow(icon: Icons.more_horiz_rounded, text: '앱 목록에서 APT를 골라요'),
+                          _GuideRow(icon: Icons.check_rounded, text: '찾은 장소를 확인하고 저장해요'),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            BottomCta(
-              child: AppButton(label: '장소 추출하기', onPressed: _url.text.trim().isEmpty ? null : _submit),
-            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _GuideRow extends StatelessWidget {
+  const _GuideRow({required this.icon, required this.text});
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: AppColors.surfaceRaised,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Icon(icon, size: 17, color: AppColors.textPrimary),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: Text(text, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w500))),
+        ],
       ),
     );
   }

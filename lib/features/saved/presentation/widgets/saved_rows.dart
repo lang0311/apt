@@ -18,14 +18,14 @@ class SavedPlaceRow extends StatelessWidget {
   final VoidCallback onTap;
 
   /// '서울 성동구 성수동' → '성수동'
-  static String _shortArea(Place p) {
+  static String shortArea(Place p) {
     final parts = p.displayArea.trim().split(RegExp(r'\s+'));
     return parts.isEmpty ? '' : parts.last;
   }
 
   @override
   Widget build(BuildContext context) {
-    final area = _shortArea(place);
+    final area = shortArea(place);
     final handle = place.sourceHandle == null || place.sourceHandle!.isEmpty
         ? null
         : (place.sourceHandle!.startsWith('@') ? place.sourceHandle! : '@${place.sourceHandle}');
@@ -106,7 +106,7 @@ class CollectionRow extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(AppSpacing.md, 10, AppSpacing.xxs, 10),
           child: Row(
             children: [
-              _MiniCollage(urls: c.thumbnailUrls),
+              MiniCollage(urls: c.thumbnailUrls),
               const SizedBox(width: 14),
               Expanded(
                 child: Semantics(
@@ -138,31 +138,30 @@ class CollectionRow extends StatelessWidget {
 }
 
 /// 썸네일 최대 4장, 모자라면 회색 칸, 0장이면 폴더 아이콘
-class _MiniCollage extends StatelessWidget {
-  const _MiniCollage({required this.urls});
+class MiniCollage extends StatelessWidget {
+  const MiniCollage({super.key, required this.urls, this.size = 56});
   final List<String> urls;
-
-  static const _size = 56.0;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     if (urls.isEmpty) {
       return Container(
-        width: _size,
-        height: _size,
+        width: size,
+        height: size,
         decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.thumb)),
         child: const Icon(Icons.folder_outlined, color: AppColors.textSecondary),
       );
     }
-    const cell = (_size - 1.5) / 2;
+    final cell = (size - 1.5) / 2;
     Widget tile(int i) => i < urls.length
         ? AppNetworkImage(url: urls[i], width: cell, height: cell, radius: 0)
         : Container(width: cell, height: cell, color: AppColors.surfaceMuted);
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.thumb),
       child: SizedBox(
-        width: _size,
-        height: _size,
+        width: size,
+        height: size,
         child: Column(
           children: [
             Row(children: [tile(0), const SizedBox(width: 1.5), tile(1)]),

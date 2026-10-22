@@ -3,51 +3,51 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_typography.dart';
 
-/// 원형 체크 (약관 동의)
+/// 체크 표시: 배경·테두리 없이 체크 아이콘만, 고르면 primary (07 D26)
+class _CheckMark extends StatelessWidget {
+  const _CheckMark({required this.checked, required this.size, this.enabled = true});
+  final bool checked;
+  final double size;
+  final bool enabled;
+
+  // 안 고른 상태의 회색 체크
+  static const _off = Color(0xFFC3CBD7);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: TweenAnimationBuilder<Color?>(
+        duration: const Duration(milliseconds: 150),
+        tween: ColorTween(end: checked ? AppColors.primary : (enabled ? _off : AppColors.border)),
+        builder: (_, color, _) => Icon(Icons.check_rounded, size: size, color: color, weight: 700),
+      ),
+    );
+  }
+}
+
+/// 체크 (약관 동의, 목록 선택)
 class CircleCheck extends StatelessWidget {
   const CircleCheck({super.key, required this.checked, this.size = 22});
   final bool checked;
   final double size;
 
   @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: checked ? AppColors.primary : AppColors.surface,
-        border: Border.all(color: checked ? AppColors.primary : AppColors.controlBorder, width: 1.6),
-      ),
-      child: checked ? Icon(Icons.check_rounded, size: size * 0.7, color: Colors.white) : null,
-    );
-  }
+  Widget build(BuildContext context) => _CheckMark(checked: checked, size: size);
 }
 
-/// 사각 체크박스 (보관함 선택, 장소 추가)
+/// 체크 (보관함 선택, 장소 추가). 모양은 [CircleCheck]와 같다.
 class SquareCheck extends StatelessWidget {
   const SquareCheck({super.key, required this.checked, this.size = 22});
   final bool checked;
   final double size;
 
   @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(size * 0.3),
-        color: checked ? AppColors.primary : AppColors.surface,
-        border: Border.all(color: checked ? AppColors.primary : AppColors.controlBorder, width: 1.6),
-      ),
-      child: checked ? Icon(Icons.check_rounded, size: size * 0.75, color: Colors.white) : null,
-    );
-  }
+  Widget build(BuildContext context) => _CheckMark(checked: checked, size: size);
 }
 
-/// 라디오 점 (추출 결과 선택)
+/// 선택 체크. 고를 수 없는 항목은 더 연하게.
 class RadioDot extends StatelessWidget {
   const RadioDot({super.key, required this.selected, this.enabled = true, this.size = 22});
   final bool selected;
@@ -55,22 +55,7 @@ class RadioDot extends StatelessWidget {
   final double size;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: selected ? AppColors.primary : (enabled ? AppColors.surface : AppColors.surfaceMuted),
-        border: Border.all(
-          // 고를 수 없는 항목(이미 저장됨)은 누를 수 있어 보이지 않게 연한 테두리
-          color: selected ? AppColors.primary : (enabled ? AppColors.controlBorder : AppColors.border),
-          width: 1.6,
-        ),
-      ),
-      child: selected ? Icon(Icons.check_rounded, size: size * 0.7, color: Colors.white) : null,
-    );
-  }
+  Widget build(BuildContext context) => _CheckMark(checked: selected, size: size, enabled: enabled);
 }
 
 /// 번호 원 (선택 순서, 코스 순번)

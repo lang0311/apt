@@ -22,6 +22,8 @@ abstract final class AppSpacing {
 
 /// 디자인 토큰 — 모서리
 abstract final class AppRadius {
+  /// 작은 글자 버튼 (추출 '보관함')
+  static const xs = 8.0;
   static const sm = 12.0;
   static const input = 15.0;
   static const button = 16.0;

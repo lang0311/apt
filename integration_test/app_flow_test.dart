@@ -92,33 +92,34 @@ void main() {
     expectNoErrors(tester);
   });
 
-  testWidgets('E. 추출: 링크 입력 → 결과 검토 → 보관함 선택 → 장소 상세', (tester) async {
+  testWidgets('E. 추출: 링크 입력 → 찾은 장소 → 보관함 고르기 → 저장 → 장소 상세', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '추출');
-    await waitFor(tester, find.text('인스타그램 링크'));
+    await waitFor(tester, find.text('릴스에서 바로 저장하기'));
     await typeInto(tester, find.byType(TextField).first, 'https://www.instagram.com/reel/DA7mNpQrStU/');
     await tester.pump(const Duration(milliseconds: 300));
-    await tapText(tester, '장소 추출하기');
+    await tapText(tester, '찾기');
 
-    await waitFor(tester, find.text('Instagram 링크 분석 완료'));
+    await waitFor(tester, find.text('찾은 장소 2'));
     // reel → 라쿠치나(저장됨)·한강 노을 포인트(미저장) → 저장 가능한 1곳 기본 선택
-    await tapText(tester, '선택한 1곳 저장하기');
-    await waitFor(tester, find.text('보관함에 저장'));
-    await tapText(tester, '1개 보관함에 저장하기');
+    await tapText(tester, '보관함');
+    await waitFor(tester, find.text('새 보관함'));
+    await tapText(tester, '확인');
+    await tapText(tester, '1곳 저장');
     await waitFor(tester, find.text('장소 상세'));
     await waitFor(tester, find.text('한강 노을 포인트'));
     expectNoErrors(tester);
   });
 
-  testWidgets('F. 추출 실패: 비공개 게시물 → 다른 링크 입력하기', (tester) async {
+  testWidgets('F. 추출 실패: 비공개 게시물 → 다른 링크 넣기', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '추출');
     await typeInto(tester, find.byType(TextField).first, 'https://www.instagram.com/p/private123/');
     await tester.pump(const Duration(milliseconds: 300));
-    await tapText(tester, '장소 추출하기');
+    await tapText(tester, '찾기');
     await waitFor(tester, find.text('비공개 게시물이에요'));
-    await tapText(tester, '다른 링크 입력하기');
-    await waitFor(tester, find.text('인스타그램 링크'));
+    await tapText(tester, '다른 링크 넣기');
+    await waitFor(tester, find.text('릴스에서 바로 저장하기'));
     expectNoErrors(tester);
   });
 
