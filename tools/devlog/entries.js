@@ -986,4 +986,46 @@ module.exports = [
     decisions: [],
     pending: ['NEEDS BACKEND 항목은 07 §3 그대로', '마이 화면 개편 때 추천하지 않는 장소를 취향 메뉴 안으로'],
   },
+  {
+    id: 31,
+    title: '추출 · 취향 설정 화면 개편 (시안 확정 → 구현)',
+    date: '2026-10-22',
+    status: '완료',
+    commits: [],
+    goal: '추출 · 마이 시안(KRDQYmEYGYgoU4cqWxGVKj)에서 확정된 추출 흐름과 취향 설정을 Flutter로 옮긴다. 마이는 확인 전이라 이번 범위에서 뺀다.',
+    work: [
+      '추출 입력: 제목 "추출", 링크 줄(링크 아이콘 칸 · 입력 · X · 찾기), "릴스에서 바로 저장하기" 안내 카드. 붙여넣기 버튼 · 하단 큰 버튼 · 파란 안내 카드 삭제',
+      '찾은 장소: 같은 링크 줄(계정 이름을 받으면 @계정 · 릴스, 아니면 링크) + 찾는 중 뼈대 / 찾은 장소 N 목록 / 실패 이유 카드를 같은 자리에. 행 = 사진 · 이름 · 카테고리 · 동네 · 보관함 이름 · 보관함 버튼 · 체크',
+      '보관함 고르기 시트(collection_select_sheet.dart): 새 보관함 맨 위, 미니 콜라주 행, n곳 모두 적용, 확인(저장하지 않고 고른 값만). 저장은 N곳 저장 한 번 — 같은 보관함 조합끼리 묶어 savePlaces',
+      '공통: 체크(CircleCheck · SquareCheck · RadioDot)를 배경 없는 체크 아이콘으로, 글자 칩 AppTextChip, MiniCollage 공개, AppRadius.xs',
+      '취향 설정: 지금 화면 유지, 뒤로 아이콘(PlainHeader), 칩은 투명 바탕 · 선택 시 글자만 파랗고 굵게, 자동 분석 카드 삭제(값은 서버 값 그대로 다시 보냄)',
+      '통합 테스트 E · F를 새 화면 기준으로 고침. E · F · I 에뮬레이터(Pixel_6_Pro) 통과, flutter test 101개 통과',
+    ],
+    problems: [
+      {
+        problem: '찾기 · 게시물 보기 글자가 파랑이 아니라 검정으로 나옴',
+        cause: 'TextButton의 foregroundColor보다 Text에 준 AppTypography.label의 색(textPrimary)이 우선',
+        solution: '상태별 색을 Text 스타일에 직접 지정',
+        status: '해결',
+      },
+      {
+        problem: '취향 칩이 한 줄 전체 폭으로 늘어남',
+        cause: 'Container에 alignment를 주면 Wrap 안에서 가능한 폭을 다 차지',
+        solution: 'Row(mainAxisSize: min)로 내용 크기만큼',
+        status: '해결',
+      },
+      {
+        problem: '시안 편집 스크립트가 HTML 일부를 잘라 v12 시안의 한 화면이 깨짐',
+        cause: 'CSS를 먼저 넣은 뒤 그 전에 구한 위치로 문자열을 잘랐음',
+        solution: '자르기 직전에 위치를 다시 계산, 시안은 게시 전 headless 캡처로 확인',
+        status: '해결',
+      },
+    ],
+    decisions: ['D26: 추출 링크 줄 · 목록에서 장소마다 보관함 · 체크 아이콘만 · 취향 칩 글자 강조'],
+    pending: [
+      '미결: 추출 저장 후 결과에 남기 vs 이동(지금은 이동 유지), 마이 내 활동 · 톱니, 마이 화면 시안 확인',
+      'NEEDS BACKEND: 장소별 보관함 한 번 저장 API · 일부 실패, 추출 결과의 계정 이름(sourceHandle), 진행 상태 조회',
+      '나중에 넣을 기능: 최근 찾은 게시물, 저장한 장소로 취향 자동 분석 (07 §3)',
+    ],
+  },
 ];
