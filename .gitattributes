@@ -5,6 +5,8 @@
 /docs/08_DEV_LOG.docx export-ignore
 /docs/09_COMMIT_CONVENTION.md export-ignore
 /docs/10_MY_WORKFLOW.md export-ignore
+/design-critique.md export-ignore
+/improvement-plan.md export-ignore
 /.agents/ export-ignore
 /skills-lock.json export-ignore
 /.gitattributes export-ignore
