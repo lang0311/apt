@@ -15,6 +15,8 @@ import '../../place/domain/place_repository.dart';
 import '../../course/domain/course_models.dart';
 import '../../course/domain/course_draft.dart';
 import '../../course/domain/course_repository.dart';
+import '../../extraction/domain/extraction_models.dart';
+import '../../extraction/domain/extraction_repository.dart';
 import '../../home/domain/home_models.dart';
 import '../../home/domain/home_repository.dart';
 import '../../party/domain/party_models.dart';
@@ -522,4 +524,14 @@ class PlatformPartyRepository implements PartyRepository {
 
   @override
   Future<void> declineInvitation(String token) async {}
+}
+
+/// 팀 서버에는 링크 추출 기능이 없다 (NEEDS BACKEND). 추출 기록은 없는 것으로 보고 빈 목록을 준다 —
+/// 홈의 "최근 저장한 곳"이 오류 칸 대신 숨겨진다. Mock 결과로 대신하지 않는다.
+class PlatformExtractionRepository implements ExtractionRepository {
+  @override
+  Future<ExtractionResult> extract(String url) async => throw const NotImplementedFailure('링크로 장소 찾기');
+
+  @override
+  Future<List<RecentExtraction>> fetchRecent({int limit = 2}) async => const [];
 }

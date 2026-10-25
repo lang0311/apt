@@ -32,7 +32,7 @@ import 'data_source.dart';
 /// Repository 주입. 어떤 구현을 쓸지는 [dataSourceProvider]가 정한다.
 /// - Mock: `USE_MOCK=true`(기본) — 앱 안의 Mock 데이터
 /// - Api: `USE_MOCK=false` — API 명세 수령 후 Api* 클래스만 채우면 되고, 화면/Provider 코드는 바뀌지 않는다
-/// - 서버: `APT_BACKEND=true` — 팀 Python 서버(Platform*). 서버에 없는 기능(추출 등)은 Mock으로 대신하지 않고 Api*(준비 중)를 쓴다.
+/// - 서버: `APT_BACKEND=true` — 팀 Python 서버(Platform*). 서버에 없는 기능(추출 등)은 Mock으로 대신하지 않고 준비 중으로 둔다.
 ///   소셜로 로그인하면 Mock으로 바뀐다 (07 D28).
 
 /// 키가 있는 공급자만 실제 SDK, 나머지는 Mock SDK. 서버 토큰 교환은 [authRepositoryProvider]가 결정한다.
@@ -67,10 +67,11 @@ final placeRepositoryProvider = Provider<PlaceRepository>((ref) => switch (ref.w
       DataSource.server => PlatformPlaceRepository(ref.watch(platformClientProvider)),
     });
 
-/// 팀 서버에 추출 기능이 없다 — 서버 모드는 Api(준비 중). NEEDS BACKEND
+/// 팀 서버에 추출 기능이 없다 — 서버 모드는 추출 준비 중, 기록은 빈 목록. NEEDS BACKEND
 final extractionRepositoryProvider = Provider<ExtractionRepository>((ref) => switch (ref.watch(dataSourceProvider)) {
       DataSource.mock => MockExtractionRepository(ref.watch(mockStoreProvider)),
-      DataSource.api || DataSource.server => ApiExtractionRepository(ref.watch(apiClientProvider)),
+      DataSource.api => ApiExtractionRepository(ref.watch(apiClientProvider)),
+      DataSource.server => PlatformExtractionRepository(),
     });
 
 final homeRepositoryProvider = Provider<HomeRepository>((ref) => switch (ref.watch(dataSourceProvider)) {

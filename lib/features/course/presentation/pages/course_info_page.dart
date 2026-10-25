@@ -50,6 +50,8 @@ class _CourseInfoPageState extends ConsumerState<CourseInfoPage> {
   Widget build(BuildContext context) {
     final draft = ref.watch(courseDraftProvider);
     final moods = ref.watch(moodOptionsProvider);
+    // 서버가 분위기 목록을 주지 않으면(빈 목록) 분위기 영역 전체를 숨긴다 (팀 서버는 분위기 입력이 없다)
+    final showMoods = !(moods.hasValue && moods.value!.isEmpty);
 
     return Scaffold(
       body: SafeArea(
@@ -85,13 +87,16 @@ class _CourseInfoPageState extends ConsumerState<CourseInfoPage> {
                           hint: '날짜와 시작 시간을 골라 주세요',
                           onTap: _pickWhen,
                         ),
-                        const SizedBox(height: AppSpacing.lg),
-                        Text('여행 분위기', style: AppTypography.label),
-                        const SizedBox(height: AppSpacing.xs),
+                        if (showMoods) ...[
+                          const SizedBox(height: AppSpacing.lg),
+                          Text('여행 분위기', style: AppTypography.label),
+                          const SizedBox(height: AppSpacing.xs),
+                        ],
                       ],
                     ),
                   ),
                   // 분위기 칩은 개수와 상관없이 한 줄, 가로로 넘긴다 (서버 키워드 그대로)
+                  if (showMoods) ...[
                   AsyncValueView(
                     value: moods,
                     compactError: true,
@@ -110,6 +115,7 @@ class _CourseInfoPageState extends ConsumerState<CourseInfoPage> {
                       ],
                     ),
                   ),
+                  ],
                 ],
               ),
             ),
