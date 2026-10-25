@@ -1083,4 +1083,46 @@ module.exports = [
     decisions: ['D27: 마이 SectionCard 묶음'],
     pending: ['하위 화면(알림 · 개인정보 · 도움말 · 프로필 편집) 디자인 없음', '앱 버전 표시는 package_info 의존성이 없어 넣지 않음'],
   },
+  {
+    id: 34,
+    title: '규칙 정리 · 팀 clone 위치 이동',
+    date: '2026-10-25',
+    status: '완료',
+    commits: ['ae8d020', '25ab275', '370e68b'],
+    goal: 'CLAUDE.md · docs · Claude 메모리에 흩어진 작업 규칙을 정리해, 규칙마다 정본을 한 곳에 두고 팀용과 개인용을 나눈다.',
+    work: [
+      '팀 레포 clone을 apt 옆(grad_proj/team)으로 옮김. sync_team.sh 기본 경로를 ../team으로(없으면 예전 위치, 둘 다 없으면 멈춤), 반영 결과 키 검사에 .env · env 추가',
+      'AI 서버 키(OpenRouter · 카카오 REST · 네이버)는 team/.env에 둠 — 키 파일 이름이 env로 되어 있어 서버가 못 읽고 gitignore에도 안 걸리던 것을 .env로 바꿈',
+      '개발 단계 1–8 완료 표시(CLAUDE.md · 02 §10), 작업 시작 절차를 조건별로(API 확인은 API 작업 때만, 구현 차이 분류 보고는 새 화면 · 기능 시작이나 명세 변경 때만)',
+      '09 커밋 규칙을 개인 레포 전용으로(export-ignore), 키 위치 표 추가',
+      '10_MY_WORKFLOW.md 신설(개인 전용): 시안 먼저 · 시안 없이 해도 되는 경우 · 완료 기준 · 개발 일지 단계 기준 · 결정 대기 위치',
+      '02에 앱 실행하기 절(Mock 실행, config/dev.json 만드는 법, 항목별 용도) 추가 — 키 값 없이 방법만',
+      '07 §3에 사용자 결정 대기 표(앱 기획 · 디자인 결정은 이 표에만), docs/README.md를 목차 역할로 정리',
+      '기타: Claude 메모리 정리(끝난 기록은 archive로, 같은 규칙은 docs 정본을 가리키게)',
+    ],
+    problems: [
+      {
+        problem: '서버 키 파일이 env(점 없음)로 저장됨',
+        cause: '파일 이름 오타',
+        solution: '.env로 변경 — 서버가 읽고, 팀 레포 .gitignore에도 걸림',
+        status: '해결',
+      },
+      {
+        problem: '같은 규칙이 CLAUDE.md · docs · 메모리 여러 곳에 있어 한쪽만 바뀌면 어긋남',
+        cause: '지시를 받을 때마다 메모리에 따로 적어 옴',
+        solution: '규칙마다 정본 하나(팀용은 CLAUDE.md · 01–07, 개인용은 09 · 10), 메모리에는 이유와 주의만',
+        status: '해결',
+      },
+    ],
+    decisions: [
+      '커밋 · 작업 방식 · 완료 기준 · 일지 규칙은 개인 작업 규칙 — 팀원은 따를 필요 없고 팀 레포에 넘기지 않음(09 · 10 export-ignore)',
+      '개발 일지 1단계 = 기능 묶음 하나, 작은 수정은 다음 단계 기타에',
+      '앱 결정 대기는 07 §3 표, 개인 작업 결정은 Claude 메모리',
+    ],
+    pending: [
+      '팀 clone에도 pre-commit hook 설치 여부',
+      'API 기준(실제 서버 vs xlsx), 팀원 연동 코드 포팅 여부, 화면 기준 문구(07이 SVG보다 우선), AI ✦ 사용 범위',
+      '다음 팀 반영 때 팀 레포 mobile/docs/09가 삭제로 잡힘(개인 전용으로 바꾼 결과)',
+    ],
+  },
 ];

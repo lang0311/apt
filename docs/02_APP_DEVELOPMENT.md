@@ -9,13 +9,12 @@
 
 ## 2. 작업 시작 절차 (코드 수정 전)
 
-1. repository tree, Flutter/Dart 버전, `pubspec.yaml` 확인
-2. 기존 화면 / 라우터 / 상태관리 / API 클라이언트 / 모델 / 에셋 확인
-3. API 명세(또는 DTO/문서) 확인 — 없으면 `NEEDS BACKEND`
-4. 이 docs와의 차이 분석 후 보고 (아래 형식)
-5. 구현 범위를 사용자와 확인한 뒤 작업
+1. **매번**: 고칠 곳과 관련된 기존 화면 / 라우터 / 상태관리 / API 클라이언트 / 모델 / 에셋 / 공통 컴포넌트 확인 (의존성을 건드리면 `pubspec.yaml`, Flutter/Dart 버전도)
+2. **API를 건드리는 작업일 때만**: API 명세(`docs/API/`) 변동 확인 — 없으면 `NEEDS BACKEND`
+3. **새 화면·기능을 시작할 때, 또는 API 명세가 바뀌었을 때만**: 그 부분만 이 docs와의 차이를 분석해 보고 (아래 형식)
+4. 구현 범위를 사용자와 확인한 뒤 작업
 
-**보고 형식**
+**보고 형식** (3번일 때)
 ```
 ## Current Architecture / Existing Screens / Models / APIs / Assets / State / Navigation
 ## Gap Against docs
@@ -165,3 +164,23 @@ API가 없는 단계는 **Repository Interface + Mock Repository**로 UI를 먼�
 - 홈을 지도 앱처럼 만들기
 - 이메일 로그인을 노출 상태로 출시 (flag off 유지)
 - 기존 코드/구조를 무시한 재작성
+
+## 12. 앱 실행하기
+
+키 없이 Mock으로 바로 실행할 수 있다. 실제 SDK(지도·소셜 로그인)를 쓰려면 키 파일을 만든다. **키 파일은 커밋하지 않는다** (gitignore 대상). 키 값은 담당자에게 따로 받는다.
+
+1. **Mock 실행 (키 없이)**: `flutter run`
+   - 지도는 미리보기 위젯, 카카오·Google 로그인은 Mock SDK로 동작한다.
+   - 상태 확인: `--dart-define=MOCK_SCENARIO=empty` 또는 `error`
+2. **실제 SDK로 실행**
+   - `config/dev.example.json`을 `config/dev.json`으로 복사하고 값을 채운다.
+   - iOS: `ios/Flutter/Secrets.xcconfig.example`을 `ios/Flutter/Secrets.xcconfig`로 복사하고 값을 채운다.
+   - `flutter run --dart-define-from-file=config/dev.json`
+
+| 항목 (`config/dev.json`) | 용도 | 비어 있으면 |
+|---|---|---|
+| `USE_MOCK` | Mock Repository 사용 여부 | `true` |
+| `NAVER_MAP_CLIENT_ID` | 네이버 지도 | 지도 미리보기 위젯 |
+| `KAKAO_NATIVE_APP_KEY` | 카카오 로그인 (Android scheme도 이 값) | 카카오 Mock SDK |
+| `GOOGLE_SERVER_CLIENT_ID` | Google 로그인 (웹 클라이언트 ID, 서버 idToken 검증용) | Google Mock SDK |
+| `GOOGLE_IOS_CLIENT_ID` | Google 로그인 iOS | — |

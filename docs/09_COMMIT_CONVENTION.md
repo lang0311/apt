@@ -37,7 +37,7 @@ type: 상세 내용
 ## 커밋 단위
 
 - 화면 하나 / 컴포넌트 묶음 하나 단위로 작게 커밋하고 push한다 (단계 전체를 한 번에 커밋하지 않는다).
-- 단계를 마치면 개발 일지(`tools/devlog/entries.js` → `docs/08_DEV_LOG.docx`)를 갱신해 함께 올린다. 커밋 메시지에는 일지·단계 번호를 적지 않는다.
+- 단계를 마치면 개발 일지(`tools/devlog/entries.js` → `docs/08_DEV_LOG.docx`)를 갱신해 함께 올린다. 커밋 메시지에는 일지·단계 번호를 적지 않는다. "단계"의 기준은 `10` §4.
 
 ## 팀 레포 반영
 
@@ -56,6 +56,19 @@ type: 상세 내용
 - 릴리스 키스토어(`.jks`, `.keystore`), `key.properties`
 - Secret · Admin 키 · 비밀번호 (네이버 Client Secret, 카카오 Admin/REST 키, Google Client Secret 등)
 - 개발 일지 · 문서 · 커밋 메시지에도 키 **값**은 적지 않는다 (어디서 관리하는지만 적는다)
+
+### 키 위치
+
+값은 적지 않는다. 키는 대화에 붙이지 않고 파일에 넣은 뒤 경로만 알려 준다.
+
+| 파일 (gitignore) | 들어가는 키 | 예시 파일 (커밋됨, 값 비어 있음) |
+|---|---|---|
+| `apt/config/dev.json` | 네이버 지도 Client ID, 카카오 네이티브 앱 키, Google 웹·iOS 클라이언트 ID, `USE_MOCK` | `config/dev.example.json` |
+| `apt/ios/Flutter/Secrets.xcconfig` | iOS URL scheme용 카카오 키 · Google 뒤집은 클라이언트 ID | `ios/Flutter/Secrets.xcconfig.example` |
+| `team/.env` (팀 서버, `apt` 옆 폴더) | OpenRouter, 카카오 REST, 네이버 검색 ID/Secret, Google | `team/.env.example` |
+| (어디에도 넣지 않음) | 네이버 Client Secret(지도), 카카오 Admin 키 — 서버 전용 | — |
+
+- 팀 서버를 스크래치 폴더에서 돌릴 때는 `team/.env`를 그 폴더로 **복사만** 하고 값은 출력하지 않는다.
 
 ### 커밋 전 키 검사
 
