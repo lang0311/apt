@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart' show DateUtils;
 
 import '../../../core/config/env.dart';
 import '../../../core/error/app_failure.dart';
@@ -234,27 +235,41 @@ class PlatformCourseRepository implements CourseRepository {
             as List)
       Map<String, dynamic>.from(p as Map),
   ];
-  @override
-  Future<List<CourseSummary>> fetchMyCourses() async => [
-    for (final p in await rows()) summary(p),
-  ];
-  @override
-  Future<List<CourseSummary>> fetchPartyCourses() async {
+  /// 서버는 추천을 받을 때마다 결과를 초안(draft)으로 저장한다. 사용자가 저장한 코스는 확정(confirmed)이라
+  /// 목록 · 홈에는 확정한 코스만 쓴다 (저장하지 않은 추천 결과는 보이지 않게).
+  static bool isSaved(Json p) => p['status'] == 'confirmed';
+
+  /// 홈 맨 위 카드용: 저장한 코스 중 오늘 이후(오늘 포함) 날짜, 날짜가 없으면 포함 (Mock과 같은 기준, 07 D20)
+  static bool isUpcoming(Json p, DateTime today) {
+    if (!isSaved(p)) return false;
+    final date = DateTime.tryParse((p['date'] ?? '').toString());
+    return date == null || !DateUtils.dateOnly(date).isBefore(today);
+  }
+
+  Future<List<Json>> partyRows() async {
     final me = await c.me();
-    final result = <CourseSummary>[];
-    for (final party in me['parties'] as List) {
-      result.addAll([
-        for (final p in await rows(party['id'] as String)) summary(p),
-      ]);
-    }
-    return result;
+    return [
+      for (final party in me['parties'] as List) ...await rows(party['id'] as String),
+    ];
   }
 
   @override
-  Future<List<CourseSummary>> fetchActiveCourses() async => [
-    for (final p in await rows())
-      if (p['status'] != 'confirmed') summary(p),
+  Future<List<CourseSummary>> fetchMyCourses() async => [
+    for (final p in await rows()) if (isSaved(p)) summary(p),
   ];
+  @override
+  Future<List<CourseSummary>> fetchPartyCourses() async => [
+    for (final p in await partyRows()) if (isSaved(p)) summary(p),
+  ];
+
+  /// 개인 코스(GET /courses)에는 파티 코스가 없어 파티별로 따로 받아 합친다.
+  @override
+  Future<List<CourseSummary>> fetchActiveCourses() async {
+    final today = DateUtils.dateOnly(DateTime.now());
+    return [
+      for (final p in [...await rows(), ...await partyRows()]) if (isUpcoming(p, today)) summary(p),
+    ];
+  }
   @override
   Future<List<SuggestedCourse>> fetchSuggestedCourses() async => [];
   @override
@@ -541,9 +556,27 @@ class PlatformPartyRepository implements PartyRepository {
 /// 팀 서버에는 링크 추출 기능이 없다 (NEEDS BACKEND). 추출 기록은 없는 것으로 보고 빈 목록을 준다 —
 /// 홈의 "최근 저장한 곳"이 오류 칸 대신 숨겨진다. Mock 결과로 대신하지 않는다.
 class PlatformExtractionRepository implements ExtractionRepository {
+  PlatformExtractionRepository(this.c);
+  final PlatformClient c;
+
   @override
   Future<ExtractionResult> extract(String url) async => throw const NotImplementedFailure('링크로 장소 찾기');
 
+  /// 서버에는 추출 기록이 없어, 저장 장소(/me)를 저장한 시각(saved_at) 순으로 대신 쓴다 (홈 '최근 저장한 곳').
   @override
-  Future<List<RecentExtraction>> fetchRecent({int limit = 2}) async => const [];
+  Future<List<RecentExtraction>> fetchRecent({int limit = 2}) async => recentFrom(
+        [for (final p in (await c.me())['places'] as List) Map<String, dynamic>.from(p as Map)],
+        limit: limit,
+      );
+
+  List<RecentExtraction> recentFrom(List<Json> places, {required int limit}) {
+    final dated = [
+      for (final p in places)
+        if (DateTime.tryParse((p['saved_at'] ?? '').toString()) case final at?) (p, at.toLocal()),
+    ]..sort((a, b) => b.$2.compareTo(a.$2));
+    return [
+      for (final (p, at) in dated.take(limit))
+        RecentExtraction(place: c.place(p, saved: true), sourceUrl: (p['place_url'] ?? '').toString(), extractedAt: at),
+    ];
+  }
 }

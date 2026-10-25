@@ -76,11 +76,11 @@ final placeSearchRepositoryProvider = Provider<PlaceSearchRepository>((ref) => s
       DataSource.server => PlatformPlaceSearchRepository(ref.watch(platformClientProvider)),
     });
 
-/// 팀 서버에 추출 기능이 없다 — 서버 모드는 추출 준비 중, 기록은 빈 목록. NEEDS BACKEND
+/// 팀 서버에 추출 기능이 없다 — 서버 모드는 추출 준비 중, 최근 기록은 저장 장소의 저장 시각으로 대신한다. NEEDS BACKEND
 final extractionRepositoryProvider = Provider<ExtractionRepository>((ref) => switch (ref.watch(dataSourceProvider)) {
       DataSource.mock => MockExtractionRepository(ref.watch(mockStoreProvider)),
       DataSource.api => ApiExtractionRepository(ref.watch(apiClientProvider)),
-      DataSource.server => PlatformExtractionRepository(),
+      DataSource.server => PlatformExtractionRepository(ref.watch(platformClientProvider)),
     });
 
 final homeRepositoryProvider = Provider<HomeRepository>((ref) => switch (ref.watch(dataSourceProvider)) {
