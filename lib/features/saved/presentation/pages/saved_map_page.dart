@@ -364,13 +364,23 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
         ),
         _visibleState(visible) ??
             (list.isEmpty
-                ? AppEmptyState(
-                    compact: true,
-                    icon: Icons.location_off_outlined,
-                    title: '이 근처에 저장한 장소가 없어요',
-                    actionLabel: _markerPoints.isEmpty ? null : '저장한 장소 전체 보기',
-                    onAction: () => _map.fitTo(_markerPoints),
-                  )
+                ? (_markerPoints.isEmpty
+                    // 저장 0곳: 찾아서 저장하도록 안내 (07 D32)
+                    ? AppEmptyState(
+                        compact: true,
+                        icon: Icons.bookmark_border_rounded,
+                        title: '아직 저장한 곳이 없어요',
+                        description: '가고 싶은 곳을 찾아 저장하면 지도에 표시돼요.',
+                        actionLabel: '장소 찾기',
+                        onAction: () => context.push(AppRoutes.placeSearch),
+                      )
+                    : AppEmptyState(
+                        compact: true,
+                        icon: Icons.location_off_outlined,
+                        title: '이 근처에 저장한 장소가 없어요',
+                        actionLabel: '저장한 장소 전체 보기',
+                        onAction: () => _map.fitTo(_markerPoints),
+                      ))
                 : SizedBox(
                     height: 112,
                     child: ListView.separated(

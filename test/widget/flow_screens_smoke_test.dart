@@ -11,6 +11,7 @@ import 'package:apt/features/course/presentation/pages/course_info_page.dart';
 import 'package:apt/features/course/presentation/pages/place_selection_page.dart';
 import 'package:apt/features/extraction/presentation/pages/extraction_result_page.dart';
 import 'package:apt/features/party/presentation/invite_accept_page.dart';
+import 'package:apt/features/place/presentation/place_search_page.dart';
 import 'package:apt/features/saved/domain/saved_models.dart';
 import 'package:apt/features/saved/presentation/pages/saved_map_page.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +38,7 @@ void main() {
     '보관함 지도': () => const SavedMapPage(mode: SavedMapMode.collection, initialCollectionId: 'c1'),
     '초대 수락': () => const InviteAcceptPage(token: 'demo'),
     '초대 만료': () => const InviteAcceptPage(token: 'expired'),
+    '지도에서 검색하기': () => const PlaceSearchPage(),
   };
 
   for (final size in sizes.entries) {

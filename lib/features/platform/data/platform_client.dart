@@ -56,8 +56,12 @@ class PlatformClient {
     );
   }
 
-  Future<List<Place>> search(String q) async {
-    final data = await get('/places/search', {'q': q});
+  /// 카카오 지도 검색. [near]를 주면 그 주변(서버 기준 반경 1.5km)에서 가까운 순.
+  Future<List<Place>> search(String q, {GeoPoint? near}) async {
+    final data = await get('/places/search', {
+      'q': q,
+      if (near != null) ...{'lat': near.lat, 'lon': near.lng},
+    });
     return [
       for (final p in data['places'] as List)
         place(Map<String, dynamic>.from(p as Map)),

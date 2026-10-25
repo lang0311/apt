@@ -12,6 +12,7 @@ import '../../saved/data/api_saved_repository.dart';
 import '../../saved/domain/saved_models.dart';
 import '../../place/domain/place.dart';
 import '../../place/domain/place_repository.dart';
+import '../../place/domain/place_search_repository.dart';
 import '../../course/domain/course_models.dart';
 import '../../course/domain/course_draft.dart';
 import '../../course/domain/course_repository.dart';
@@ -202,6 +203,17 @@ class PlatformPlaceRepository implements PlaceRepository {
     final p = c.places[placeId];
     if (p == null) throw const NotFoundFailure();
     return PlaceDetail(place: c.place(p));
+  }
+}
+
+/// 지도에서 검색하기: GET /places/search. 저장 상태를 맞추려고 먼저 /me를 읽는다.
+class PlatformPlaceSearchRepository implements PlaceSearchRepository {
+  PlatformPlaceSearchRepository(this.c);
+  final PlatformClient c;
+  @override
+  Future<List<Place>> search(String query, {GeoPoint? near}) async {
+    await c.me();
+    return c.search(query, near: near);
   }
 }
 

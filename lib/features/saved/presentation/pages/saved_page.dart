@@ -50,8 +50,6 @@ class _SavedPageState extends ConsumerState<SavedPage> {
 
   @override
   Widget build(BuildContext context) {
-    final total = ref.watch(savedSummaryProvider).value?.totalCount;
-
     return Scaffold(
       body: SafeArea(
         bottom: false,
@@ -62,7 +60,7 @@ class _SavedPageState extends ConsumerState<SavedPage> {
             children: [
               PageTitleHeader(
                 title: '저장됨',
-                trailing: _MapButton(onPressed: total == 0 ? null : _openMap),
+                trailing: _MapButton(onPressed: _openMap),
               ),
               Padding(
                 padding: AppSpacing.screenPadding,
@@ -94,7 +92,7 @@ class _SavedPageState extends ConsumerState<SavedPage> {
   }
 }
 
-/// 상단바 '지도' 버튼. 저장한 곳이 없으면 비활성.
+/// 상단바 '지도' 버튼. 저장한 곳이 없어도 켜 둔다 (07 D32).
 class _MapButton extends StatelessWidget {
   const _MapButton({required this.onPressed});
   final VoidCallback? onPressed;
@@ -147,10 +145,12 @@ class _CategoryTab extends ConsumerWidget {
       return SectionCard(
         title: '아직 저장한 곳이 없어요',
         child: _EmptyBody(
-          message: '릴스에서 공유 → APT로 보내면 여기에 모여요.\n링크를 알고 있다면 바로 붙여넣어도 돼요.',
-          actionLabel: '링크 붙여넣기',
-          actionIcon: Icons.link_rounded,
-          onAction: () => context.go(AppRoutes.extract),
+          message: '릴스에서 공유 → APT로 보내면 여기에 모여요.\n지도에서 검색해서 저장해도 돼요.',
+          actionLabel: '장소 찾기',
+          actionIcon: Icons.search_rounded,
+          onAction: () => context.push(AppRoutes.placeSearch),
+          secondaryLabel: '링크 붙여넣기',
+          onSecondary: () => context.go(AppRoutes.extract),
         ),
       );
     }
@@ -264,12 +264,24 @@ class _CollectionsTab extends ConsumerWidget {
 
 /// 컨테이너 안 빈 상태: (제목) + 한두 문장 + 버튼 하나
 class _EmptyBody extends StatelessWidget {
-  const _EmptyBody({this.title, required this.message, required this.actionLabel, required this.onAction, this.actionIcon});
+  const _EmptyBody({
+    this.title,
+    required this.message,
+    required this.actionLabel,
+    required this.onAction,
+    this.actionIcon,
+    this.secondaryLabel,
+    this.onSecondary,
+  });
   final String? title;
   final String message;
   final String actionLabel;
   final IconData? actionIcon;
   final VoidCallback onAction;
+
+  /// 주 버튼 아래 글자 버튼
+  final String? secondaryLabel;
+  final VoidCallback? onSecondary;
 
   @override
   Widget build(BuildContext context) {
@@ -285,6 +297,7 @@ class _EmptyBody extends StatelessWidget {
           Text(message, style: AppTypography.meta.copyWith(height: 1.55)),
           const SizedBox(height: AppSpacing.sm),
           AppButton(label: actionLabel, icon: actionIcon, variant: AppButtonVariant.white, height: 44, onPressed: onAction),
+          if (secondaryLabel != null) Center(child: AppTextLink(label: secondaryLabel!, onPressed: onSecondary)),
         ],
       ),
     );

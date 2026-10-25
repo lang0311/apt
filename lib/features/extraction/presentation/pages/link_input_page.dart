@@ -108,6 +108,26 @@ class _LinkInputPageState extends State<LinkInputPage> {
                       child: AppFieldError(_error!),
                     ),
                   const SizedBox(height: AppSpacing.sm),
+                  // 링크를 모를 때: 가게 이름으로 지도에서 찾기 (07 D32)
+                  Semantics(
+                    button: true,
+                    label: '지도에서 검색하기',
+                    excludeSemantics: true,
+                    onTap: () => context.push(AppRoutes.placeSearch),
+                    child: InkWell(
+                      borderRadius: AppRadius.cardAll,
+                      onTap: () => context.push(AppRoutes.placeSearch),
+                      child: const ExtractSourceRow(
+                        leading: LinkTile(icon: Icons.search_rounded),
+                        action: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                          child: Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+                        ),
+                        child: _SearchRowLabel(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
                   SectionCard(
                     title: '릴스에서 바로 저장하기',
                     child: Padding(
@@ -127,6 +147,18 @@ class _LinkInputPageState extends State<LinkInputPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SearchRowLabel extends StatelessWidget {
+  const _SearchRowLabel();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Text('지도에서 검색하기', style: AppTypography.body.copyWith(color: AppColors.textSecondary)),
     );
   }
 }

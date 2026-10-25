@@ -21,7 +21,9 @@ import '../../features/party/domain/party_repository.dart';
 import '../../features/platform/data/platform_client.dart';
 import '../../features/platform/data/platform_repositories.dart';
 import '../../features/place/data/place_repositories.dart';
+import '../../features/place/data/place_search_repositories.dart';
 import '../../features/place/domain/place_repository.dart';
+import '../../features/place/domain/place_search_repository.dart';
 import '../../features/preference/data/preference_repositories.dart';
 import '../../features/preference/domain/preference_repository.dart';
 import '../../features/saved/data/api_saved_repository.dart';
@@ -65,6 +67,13 @@ final placeRepositoryProvider = Provider<PlaceRepository>((ref) => switch (ref.w
       DataSource.mock => MockPlaceRepository(ref.watch(mockStoreProvider)),
       DataSource.api => ApiPlaceRepository(ref.watch(apiClientProvider)),
       DataSource.server => PlatformPlaceRepository(ref.watch(platformClientProvider)),
+    });
+
+/// 지도에서 검색하기 (07 D32). 서버 모드는 팀 서버의 카카오 지도 검색.
+final placeSearchRepositoryProvider = Provider<PlaceSearchRepository>((ref) => switch (ref.watch(dataSourceProvider)) {
+      DataSource.mock => MockPlaceSearchRepository(ref.watch(mockStoreProvider)),
+      DataSource.api => ApiPlaceSearchRepository(ref.watch(apiClientProvider)),
+      DataSource.server => PlatformPlaceSearchRepository(ref.watch(platformClientProvider)),
     });
 
 /// 팀 서버에 추출 기능이 없다 — 서버 모드는 추출 준비 중, 기록은 빈 목록. NEEDS BACKEND

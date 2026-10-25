@@ -163,6 +163,9 @@ class AppSearchField extends StatelessWidget {
     this.fillColor = AppColors.surface,
     this.trailing,
     this.bordered = false,
+    this.focusNode,
+    this.autofocus = false,
+    this.onSubmitted,
   });
 
   final String hint;
@@ -171,6 +174,11 @@ class AppSearchField extends StatelessWidget {
   final Color fillColor;
   final Widget? trailing;
   final bool bordered;
+  final FocusNode? focusNode;
+  final bool autofocus;
+
+  /// 키보드의 검색 버튼
+  final ValueChanged<String>? onSubmitted;
 
   @override
   Widget build(BuildContext context) {
@@ -189,7 +197,10 @@ class AppSearchField extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: controller,
+              focusNode: focusNode,
+              autofocus: autofocus,
               onChanged: onChanged,
+              onSubmitted: onSubmitted,
               textInputAction: TextInputAction.search,
               style: AppTypography.bodyStrong,
               decoration: InputDecoration(

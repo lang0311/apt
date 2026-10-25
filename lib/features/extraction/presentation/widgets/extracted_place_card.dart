@@ -42,9 +42,10 @@ class ExtractSourceRow extends StatelessWidget {
   }
 }
 
-/// 링크 줄 왼쪽 칸: 링크 아이콘
+/// 링크 줄 왼쪽 칸: 링크 아이콘 (지도 검색 줄은 돋보기)
 class LinkTile extends StatelessWidget {
-  const LinkTile({super.key});
+  const LinkTile({super.key, this.icon = Icons.link_rounded});
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +53,7 @@ class LinkTile extends StatelessWidget {
       width: 30,
       height: 30,
       decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(9)),
-      child: const Icon(Icons.link_rounded, size: 18, color: AppColors.textSecondary),
+      child: Icon(icon, size: 18, color: AppColors.textSecondary),
     );
   }
 }

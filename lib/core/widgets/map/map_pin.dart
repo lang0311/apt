@@ -15,6 +15,9 @@ enum MapPinKind {
 
   /// 묶음 (N곳)
   cluster,
+
+  /// 찾은 장소 (흰 원 + 업종 색 테두리·아이콘). 저장하면 [place]로 바뀐다.
+  result,
 }
 
 class MapPin extends StatelessWidget {
@@ -49,6 +52,7 @@ class MapPin extends StatelessWidget {
           size: 34,
         ),
       MapPinKind.place => _teardrop(),
+      MapPinKind.result => _result(),
     };
 
     if (label == null && !selected) return pin;
@@ -83,6 +87,22 @@ class MapPin extends StatelessWidget {
         boxShadow: const [BoxShadow(color: Color(0x3314223A), blurRadius: 6, offset: Offset(0, 2))],
       ),
       child: child,
+    );
+  }
+
+  Widget _result() {
+    final c = color ?? AppColors.textSecondary;
+    return Container(
+      width: 34,
+      height: 34,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        border: Border.all(color: c, width: 2.5),
+        boxShadow: const [BoxShadow(color: Color(0x2E14223A), blurRadius: 5, offset: Offset(0, 1))],
+      ),
+      child: Icon(icon ?? Icons.place, size: 17, color: c),
     );
   }
 

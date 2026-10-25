@@ -19,5 +19,17 @@ class CategoryStyle {
 
   static const fallback = CategoryStyle(Icons.place_rounded, AppColors.textSecondary);
 
-  static CategoryStyle of(String? key) => _map[key] ?? fallback;
+  static CategoryStyle of(String? key) => _map[key] ?? _fromKakao(key) ?? fallback;
+
+  /// 팀 서버(카카오 지도)는 'cafe' 같은 키 대신 '음식점 > 카페' 같은 업종 이름을 준다.
+  /// 아이콘·색만 고르는 것이고, 카테고리 목록·개수는 그대로 서버 값을 쓴다.
+  static CategoryStyle? _fromKakao(String? name) {
+    if (name == null) return null;
+    if (name.contains('카페')) return _map['cafe'];
+    if (name.contains('음식점')) return _map['restaurant'];
+    if (name.contains('숙박')) return _map['stay'];
+    if (name.contains('문화')) return _map['culture'];
+    if (name.contains('여행') || name.contains('관광')) return _map['tour'];
+    return null;
+  }
 }

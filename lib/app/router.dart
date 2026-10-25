@@ -29,6 +29,7 @@ import '../features/home/presentation/home_page.dart';
 import '../features/my/presentation/my_page.dart';
 import '../features/party/presentation/invite_accept_page.dart';
 import '../features/place/presentation/place_detail_page.dart';
+import '../features/place/presentation/place_search_page.dart';
 import '../features/saved/presentation/pages/collection_detail_page.dart';
 import '../features/preference/presentation/preference_page.dart';
 import '../features/saved/domain/saved_models.dart';
@@ -107,6 +108,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         redirect: (_, s) => AppRoutes.course(s.uri.queryParameters['id'] ?? '', justSaved: true),
       ),
       GoRoute(path: AppRoutes.blockedPlaces, builder: (_, _) => const BlockedPlacesPage()),
+      GoRoute(path: AppRoutes.placeSearch, builder: (_, _) => const PlaceSearchPage()),
       GoRoute(path: '/course-edit/:id', builder: (_, s) => CourseEditPage(courseId: s.pathParameters['id']!)),
       GoRoute(path: '/invites/:token', builder: (_, s) => InviteAcceptPage(token: s.pathParameters['token']!)),
       GoRoute(

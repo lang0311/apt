@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/repositories.dart';
+import '../../../app/di/data_source.dart';
 import '../../../core/location/location_service.dart';
 import '../../../core/models/geo_point.dart';
 import '../../extraction/presentation/extraction_providers.dart';
@@ -66,6 +67,9 @@ final collectionProvider = FutureProvider.autoDispose.family<PlaceCollection, St
 final placeDetailProvider = FutureProvider.autoDispose.family<PlaceDetail, String>(
   (ref, id) => ref.watch(placeRepositoryProvider).fetchPlace(id),
 );
+
+/// 팀 서버에는 보관함이 아직 없다. 서버 데이터일 때 보관함 버튼은 그대로 두고 누르면 준비 중으로 안내한다. NEEDS BACKEND
+final collectionsSupportedProvider = Provider<bool>((ref) => ref.watch(dataSourceProvider) != DataSource.server);
 
 /// 저장 관련 변경 후 영향을 받는 조회를 새로 고친다.
 void invalidateSavedData(WidgetRef ref) {
