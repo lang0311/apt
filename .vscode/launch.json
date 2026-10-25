@@ -11,6 +11,35 @@
             "toolArgs": ["--dart-define-from-file=config/dev.json"]
         },
         {
+            // 팀 서버(team/, 127.0.0.1:8000)에 연결. 에뮬레이터에서 PC는 10.0.2.2로 보인다.
+            "name": "apt (서버 연결, 에뮬레이터)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "toolArgs": [
+                "--dart-define-from-file=config/dev.json",
+                "--dart-define=APT_BACKEND=true",
+                "--dart-define=USE_MOCK=false",
+                "--dart-define=API_BASE_URL=http://10.0.2.2:8000"
+            ]
+        },
+        {
+            // 웹은 서버 CORS가 127.0.0.1:5173만 허용한다. 주소를 localhost로 바꾸면 로그인이 유지되지 않는다.
+            "name": "apt (서버 연결, 웹)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "deviceId": "chrome",
+            "toolArgs": [
+                "--dart-define-from-file=config/dev.json",
+                "--dart-define=APT_BACKEND=true",
+                "--dart-define=USE_MOCK=false",
+                "--dart-define=API_BASE_URL=http://127.0.0.1:8000",
+                "--web-hostname=127.0.0.1",
+                "--web-port=5173"
+            ]
+        },
+        {
             "name": "apt (dev, profile)",
             "request": "launch",
             "type": "dart",
