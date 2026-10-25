@@ -38,16 +38,15 @@
 | API 연동, Mock, 백엔드에 요청할 것 | `docs/06_API_INTEGRATION.md` |
 | API 명세 초안/변경 확인 | `docs/API/` (엑셀 등). **API 작업 전 매번 열어 06·현재 코드와 달라진 점을 확인** |
 | 막혔을 때, 정해진 것/가정/미해결 확인 | `docs/07_DECISIONS_AND_OPEN_ITEMS.md` |
-| 커밋 전 (메시지 형식 `type: 상세 내용`, 커밋 금지 항목) | `docs/09_COMMIT_CONVENTION.md` |
+| 커밋 전 (메시지 형식 `type: 상세 내용`, 커밋 금지·키 검사, 팀 레포 반영) | `docs/09_COMMIT_CONVENTION.md` — 개인 레포 작업 규칙, **개인 레포에만 있음** |
 | 문서 인덱스 | `docs/README.md` |
 문서와 API 명세가 **충돌하면 임의로 한쪽을 택하지 말고** 충돌 지점을 명시해 보고한다. 문서끼리 충돌하면 번호가 큰 쪽(최신 결정은 07)을 확인한다.
 
 ## 작업 시작 절차 (코드 수정 전)
-1. 레포 트리, Flutter/Dart 버전, `pubspec.yaml` 확인
-2. 기존 화면/라우터/상태관리/API 클라이언트/모델/에셋 확인
-3. API 명세 확인: `docs/API/` 폴더의 파일(엑셀 등)이 **추가·수정됐는지 확인**하고, 변동이 있으면 06·Repository와 비교해 차이를 보고 (없으면 `NEEDS BACKEND`). 현재 명세는 **방향만 나온 초안**(응답 형식 없음)이라 필드를 추측해 DTO를 만들지 않는다
-4. 현재 구현과 docs의 차이를 `IMPLEMENTED / PARTIAL / NOT IMPLEMENTED / NEEDS BACKEND`로 분류해 보고
-5. 구현 범위를 사용자와 확인 후 작업
+1. **매번**: 고칠 곳과 관련된 기존 화면/라우터/상태관리/API 클라이언트/모델/에셋/공통 컴포넌트 확인 (의존성을 건드리면 `pubspec.yaml`, Flutter/Dart 버전도)
+2. **API를 건드리는 작업일 때만**: `docs/API/` 파일이 추가·수정됐는지 확인하고, 변동이 있으면 06·Repository와 비교해 차이를 보고 (없으면 `NEEDS BACKEND`). 현재 명세는 **방향만 나온 초안**(응답 형식 없음)이라 필드를 추측해 DTO를 만들지 않는다
+3. **새 화면·기능을 시작할 때, 또는 API 명세가 바뀌었을 때만**: 그 화면·기능에 해당하는 부분만 현재 구현과 docs의 차이를 `IMPLEMENTED / PARTIAL / NOT IMPLEMENTED / NEEDS BACKEND`로 분류해 보고
+4. 구현 범위를 사용자와 확인 후 작업
 
 ## 구현 규칙
 **구조**: feature-first (`lib/app`, `lib/core`, `lib/features/{auth,home,extraction,saved,place,course,party,preference,my}`). 과한 Clean Architecture 금지. 상세 구조는 02 문서.

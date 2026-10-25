@@ -1,47 +1,33 @@
-# APT 프로젝트 문서 인덱스
+# APT 프로젝트 문서 목차
 
-> 새 Codex Work / 개발 세션은 **이 파일부터 읽는다.**
-> 기준일: 2026-10-03 · 클라이언트: Flutter · 백엔드/AI: 외부 제공(API 소비자)
+> 이 폴더의 목차다. **작업 규칙은 `CLAUDE.md`, 최신 결정은 `07`** 을 본다. 문서는 필요할 때 해당 문서만 읽는다.
+> 클라이언트: Flutter · 백엔드/AI: 외부 제공(API 소비자) · 갱신: 2026-10-25
 
 ## 문서 구성
 
 | 파일 | 주제 | 언제 읽나 |
 |------|------|-----------|
-| [01_PROJECT_PURPOSE.md](01_PROJECT_PURPOSE.md) | 서비스 목적 · 핵심 가치 · 책임 분담 | 항상 (가장 먼저) |
+| [01_PROJECT_PURPOSE.md](01_PROJECT_PURPOSE.md) | 서비스 목적 · 핵심 가치 · 책임 분담 | 처음 / 서비스 의도 확인 |
 | [02_APP_DEVELOPMENT.md](02_APP_DEVELOPMENT.md) | Flutter 앱 개발: 아키텍처 · 인증 · 공유 수신 · 지도 · 개발 단계 · 작업 규칙 | 코드 작성 전 |
 | [03_DESIGN_SYSTEM.md](03_DESIGN_SYSTEM.md) | 디자인 프레임 정책 · 토큰 · 컴포넌트 · 새 화면 디자인 원칙 | UI 구현/신규 디자인 시 |
 | [04_UX_FLOWS.md](04_UX_FLOWS.md) | 사용자 흐름: 인증 · 공유 추출 · 저장 · 코스 루프 · 파티 · 취향 | 화면 연결/네비게이션 구현 시 |
 | [05_SCREEN_SPEC.md](05_SCREEN_SPEC.md) | 화면 34개 명세 (라우트 · UI · 데이터 · 상태) | 화면 단위 구현 시 |
 | [06_API_INTEGRATION.md](06_API_INTEGRATION.md) | 백엔드 연동 원칙 · 필요 데이터 목록 · Mock 전략 | API 연동/백엔드 협의 시 |
-| [API/](API/) | 백엔드 API 명세 초안 (엑셀). 아직 응답 형식 없음 — **변동 여부를 매번 확인** | API 연동/백엔드 협의 시 |
-| [07_DECISIONS_AND_OPEN_ITEMS.md](07_DECISIONS_AND_OPEN_ITEMS.md) | 확정 사항 로그 · 가정 · 미해결 항목 | 막혔을 때 / 범위 확인 시 |
-| `08_DEV_LOG.docx` | 개발 일지: 단계별 작업 · 발생한 문제 · 해결 방법 (생성: `tools/devlog`). **개인 레포(`lang0311/apt`)에만 있음**, 팀 레포에는 올리지 않음 | 진행 상황 공유 / 보고 시 |
-| [09_COMMIT_CONVENTION.md](09_COMMIT_CONVENTION.md) | 커밋 메시지 형식(`type: 상세 내용`) · 커밋 단위 · 커밋 금지 항목 | 커밋 전 |
+| [API/](API/) | 백엔드 API 명세 초안 (엑셀). 아직 응답 형식 없음 — **API 작업 때 변동 여부 확인** | API 연동/백엔드 협의 시 |
+| [07_DECISIONS_AND_OPEN_ITEMS.md](07_DECISIONS_AND_OPEN_ITEMS.md) | 확정 결정(D1–) · 가정 · 미해결 항목 | 막혔을 때 / 범위 확인 시 |
+| `08_DEV_LOG.docx` | 개발 일지 (생성: `tools/devlog`) — **개인 레포에만 있음** | 진행 상황 공유 / 보고 시 |
+| `09_COMMIT_CONVENTION.md` | 커밋 규칙 · 키 검사 · 팀 레포 반영 — **개인 레포 작업 규칙, 개인 레포에만 있음** | 커밋 전 |
 
-## 한눈에 보는 확정 사항 (2026-10-03)
-
-1. 앱은 **Flutter**, 백엔드/API/AI는 **제공받는다**. 앱은 API 소비자.
-2. **핵심 진입은 인스타그램 릴스 "공유" → 우리 앱**. 앱 안의 링크 입력 화면은 SNS 주소를 이미 알 때 쓰는 **보조 경로**.
-3. 로그인은 **소셜 로그인 전용**. 단, **이메일 로그인 "틀"만 만들어 둔다** (feature flag로 숨김, 예외 화면은 간단히).
-4. 코스 만들기: **정보 → 동행 → 장소 → AI 추천 → (장소 수정 → AI 재추천) 반복 가능** (2026-10-21 순서 변경, 07 D22).
-5. 지도 SDK는 **네이버 지도**로 확정.
-6. 취향 설정 화면은 기존 UI 디자인 언어를 유지해 **새로 디자인함** (`ui_additions/`).
-7. 디자인 프레임 390×844는 **참고 기준**일 뿐, 개발은 **반응형**으로 한다 (03 문서 참고).
+확정 사항은 이 파일에 따로 적지 않는다. 요약은 `CLAUDE.md` "확정된 결정", 전체는 `07` §1 표가 정본이다.
 
 ## 자료 위치
 
 ```
-canonical_user_flow_ui_svgs/      ← 기존 31개 화면 + 흐름도 (PREVIEWS 먼저 확인)
-ui_additions/                     ← 이번에 추가한 화면 3개 (이메일 로그인 2 + 취향 설정 1)
-  ├── 01_AUTH/07_email_login.svg
-  ├── 01_AUTH/08_email_login_error.svg
-  ├── 07_MY/02_preference_settings.svg
-  └── PREVIEWS/added_3_screens.jpg
-docs/                             ← 이 문서들
+design/ui/canonical_user_flow_ui_svgs/   ← 원래 기준 31개 화면 + 흐름도 (PREVIEWS 먼저 확인)
+design/ui/ui_additions/                  ← 추가 3개 화면 (이메일 로그인 2 + 취향 설정 1)
+docs/screenshots/                        ← 리디자인 캡처·시안 로컬 사본 (gitignore, 레포에 없음)
+docs/_archive/                           ← 이전 문서 (DEVELOPMENT_DIRECTION.md, UI_SCREEN_SPEC.md) — 참고용
 ```
 
-## 이전 문서와의 관계
-
-- 앞서 만든 `DEVELOPMENT_DIRECTION.md`, `UI_SCREEN_SPEC.md`는 **이 docs/ 폴더로 대체**된다. 충돌 시 docs/가 우선.
-- 원본 ChatGPT 개발 방향 문서에서 이어받은 원칙(서버 Source of Truth, DTO/Domain 분리, 상태 UI 필수 등)은 02·03·06에 흡수되어 있다.
-- **API 명세와 이 문서가 충돌하면** 임의로 한쪽을 택하지 말고 충돌 지점을 명시해 보고한다.
+- 하단 탭 5개(홈·저장됨·코스·추출·마이)는 2026-10-20~22 리디자인으로 SVG와 다르다. 바뀐 내용은 `07` D15–D27과 `03`.
+- **API 명세와 문서가 충돌하면** 임의로 한쪽을 택하지 말고 충돌 지점을 명시해 보고한다.

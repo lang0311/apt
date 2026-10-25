@@ -3,6 +3,7 @@
 /tools/sync_team.sh export-ignore
 /tools/hooks/ export-ignore
 /docs/08_DEV_LOG.docx export-ignore
+/docs/09_COMMIT_CONVENTION.md export-ignore
 /.agents/ export-ignore
 /skills-lock.json export-ignore
 /.gitattributes export-ignore
