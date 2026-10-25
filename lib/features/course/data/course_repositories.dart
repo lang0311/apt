@@ -157,7 +157,7 @@ class MockCourseRepository implements CourseRepository {
         () {
           final list = [
             for (final e in _store.blockedPlaces.entries) BlockedPlace(place: MockFixtures.place(e.key), blockedAt: e.value),
-          ]..sort((a, b) => b.blockedAt.compareTo(a.blockedAt));
+          ]..sort((a, b) => b.blockedAt!.compareTo(a.blockedAt!));
           return list;
         },
         empty: () => const [],

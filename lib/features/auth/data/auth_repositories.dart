@@ -74,6 +74,41 @@ class MockAuthRepository implements AuthRepository {
   @override
   Future<SignInResult> signInWithEmail({required String email, required String password}) =>
       _store.behavior.mutate(() => password == 'password1' ? const SignedIn(_user) : const InvalidCredentials());
+
+  /// Mock 규칙: 비밀번호가 `password1`이면 로그인, 아니면 불일치.
+  @override
+  Future<SignInResult> signInWithId({required String login, required String password}) =>
+      _store.behavior.mutate(() => password == 'password1' ? const SignedIn(_user) : const InvalidCredentials());
+
+  /// Mock 규칙: 아이디 `taken`은 이미 사용 중. 형식 검사는 팀 서버 규칙과 같다.
+  @override
+  Future<AuthUser> signUpWithId({required String login, required String password, required String nickname}) =>
+      _store.behavior.mutate(() {
+        if (login.trim().toLowerCase() == 'taken') {
+          throw const ValidationFailure(IdSignupRules.loginTaken, fieldErrors: {'login': IdSignupRules.loginTaken});
+        }
+        final errors = IdSignupRules.validate(login: login, password: password, nickname: nickname);
+        if (errors.isNotEmpty) throw ValidationFailure(errors.values.first, fieldErrors: errors);
+        return AuthUser(id: 'u3', nickname: nickname.trim(), handle: login.trim().toLowerCase());
+      });
+}
+
+/// 아이디 가입 입력 규칙 (팀 서버 `platform_store.register`와 같게). 문구는 화면 말투(해요체).
+abstract final class IdSignupRules {
+  static final _login = RegExp(r'^[a-z0-9_]{3,30}$');
+  static const loginHelp = '영문 소문자·숫자·밑줄 3~30자';
+  static const passwordHelp = '8자 이상';
+  static const loginInvalid = '아이디는 영문 소문자·숫자·밑줄 3~30자로 입력해주세요.';
+  static const loginTaken = '이미 사용 중인 아이디예요.';
+  static const passwordInvalid = '비밀번호는 8자 이상 입력해주세요.';
+  static const nicknameEmpty = '닉네임을 입력해주세요.';
+
+  /// 칸별 오류. 비어 있으면 통과. 아이디는 서버처럼 소문자로 바꿔 검사한다.
+  static Map<String, String> validate({required String login, required String password, required String nickname}) => {
+        if (!_login.hasMatch(login.trim().toLowerCase())) 'login': loginInvalid,
+        if (password.length < 8 || password.length > 128) 'password': passwordInvalid,
+        if (nickname.trim().isEmpty || nickname.trim().length > 60) 'nickname': nicknameEmpty,
+      };
 }
 
 // NEEDS BACKEND: 소셜 토큰 교환, 신규/기존 판별, 계정 충돌 응답, 약관 버전/동의, 닉네임 규칙, 토큰 갱신
@@ -111,4 +146,10 @@ class ApiAuthRepository implements AuthRepository {
   /// 이메일 로그인은 틀만 (FeatureFlags.emailAuthEnabled=false)
   @override
   Future<SignInResult> signInWithEmail({required String email, required String password}) async => throw _f;
+
+  @override
+  Future<SignInResult> signInWithId({required String login, required String password}) async => throw _f;
+  @override
+  Future<AuthUser> signUpWithId({required String login, required String password, required String nickname}) async =>
+      throw _f;
 }

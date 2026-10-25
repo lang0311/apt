@@ -70,9 +70,11 @@ class Recommendation {
 /// 추천하지 않는 장소 (사용자가 "앞으로 추천하지 않기"로 차단한 AI 추천 장소).
 /// 모든 코스 추천에서 제외된다. 이번 코스에서만 뺀 장소는 [CourseDraft.rejectedPlaceIds]에 둔다.
 class BlockedPlace {
-  const BlockedPlace({required this.place, required this.blockedAt});
+  const BlockedPlace({required this.place, this.blockedAt});
   final Place place;
-  final DateTime blockedAt;
+
+  /// 차단한 날. 팀 서버는 주지 않는다 (NEEDS BACKEND) — 없으면 화면에서 날짜를 빼고 보여 준다.
+  final DateTime? blockedAt;
 }
 
 /// 코스 목록 카드

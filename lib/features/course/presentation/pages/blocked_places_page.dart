@@ -75,7 +75,7 @@ class BlockedPlacesPage extends ConsumerWidget {
                                               children: [
                                                 Text(b.place.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
                                                 Text(
-                                                  [b.place.categoryLabel, '${b.blockedAt.month}월 ${b.blockedAt.day}일'].join(' · '),
+                                                  [b.place.categoryLabel, if (b.blockedAt case final at?) '${at.month}월 ${at.day}일'].join(' · '),
                                                   style: AppTypography.caption,
                                                 ),
                                               ],

@@ -1,6 +1,6 @@
 import 'auth_models.dart';
 
-/// 인증. 소셜이 기본, 이메일은 틀만 (FeatureFlags.emailAuthEnabled).
+/// 인증. 아이디·비밀번호 로그인 + 소셜 로그인 (07 D28). 이메일은 틀만 (FeatureFlags.emailAuthEnabled).
 abstract interface class AuthRepository {
   /// 저장된 토큰으로 세션 복원. 없으면 null.
   Future<AuthUser?> restoreSession();
@@ -19,6 +19,13 @@ abstract interface class AuthRepository {
   Future<AuthUser> completeProfile({required String nickname, String? imagePath});
 
   Future<void> signOut();
+
+  /// 아이디·비밀번호 로그인. 틀리면 [InvalidCredentials] (어느 쪽이 틀렸는지 구분하지 않는다).
+  Future<SignInResult> signInWithId({required String login, required String password});
+
+  /// 아이디 가입. 가입하면 바로 로그인된다. 칸별 오류는 [ValidationFailure.fieldErrors]
+  /// (`login`·`password`·`nickname` 키)로 준다.
+  Future<AuthUser> signUpWithId({required String login, required String password, required String nickname});
 
   /// 이메일 로그인 (stub — flag off)
   Future<SignInResult> signInWithEmail({required String email, required String password});
