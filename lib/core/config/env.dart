@@ -5,6 +5,10 @@
 /// flutter run --dart-define=USE_MOCK=false --dart-define=API_BASE_URL=https://...
 /// ```
 abstract final class Env {
+  /// 팀 Python 서버 연결 모드 (docs/02 §12). 켜면 아이디 로그인은 서버, 소셜 로그인은 Mock 데이터를 쓴다 (07 D28).
+  /// `--dart-define=APT_BACKEND=true --dart-define=USE_MOCK=false --dart-define=API_BASE_URL=http://10.0.2.2:8000`
+  static const localBackend = bool.fromEnvironment('APT_BACKEND', defaultValue: false);
+
   /// Mock Repository 사용 여부. API 명세 수령 전까지 기본 true.
   static const useMock = bool.fromEnvironment('USE_MOCK', defaultValue: true);
 

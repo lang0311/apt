@@ -8,6 +8,7 @@ class TokenStorage {
 
   static const _accessKey = 'auth.access';
   static const _refreshKey = 'auth.refresh';
+  static const _sessionKey = 'auth.session';
 
   Future<String?> readAccessToken() => _storage.read(key: _accessKey);
   Future<String?> readRefreshToken() => _storage.read(key: _refreshKey);
@@ -16,6 +17,11 @@ class TokenStorage {
     await _storage.write(key: _accessKey, value: accessToken);
     if (refreshToken != null) await _storage.write(key: _refreshKey, value: refreshToken);
   }
+
+  /// 서버 모드 세션 쿠키 `apt_session` 값. 앱(웹 제외)에서만 쓴다 — 브라우저는 쿠키를 직접 관리한다.
+  Future<String?> readSessionCookie() => _storage.read(key: _sessionKey);
+  Future<void> saveSessionCookie(String value) => _storage.write(key: _sessionKey, value: value);
+  Future<void> clearSessionCookie() => _storage.delete(key: _sessionKey);
 
   Future<void> clear() async {
     await _storage.delete(key: _accessKey);
