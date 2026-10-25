@@ -6,6 +6,7 @@ import '../core/config/feature_flags.dart';
 import '../features/auth/domain/auth_models.dart';
 import '../features/auth/presentation/auth_controller.dart';
 import '../features/auth/presentation/pages/account_conflict_page.dart';
+import '../features/auth/presentation/pages/id_signup_page.dart';
 import '../features/auth/presentation/pages/email_login_page.dart';
 import '../features/auth/presentation/pages/profile_setup_page.dart';
 import '../features/auth/presentation/pages/signup_done_page.dart';
@@ -89,6 +90,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.loginEmail, builder: (_, _) => const EmailLoginPage()),
       GoRoute(path: AppRoutes.signupTerms, builder: (_, _) => const TermsPage()),
       GoRoute(path: AppRoutes.signupProfile, builder: (_, _) => const ProfileSetupPage()),
+      GoRoute(path: AppRoutes.signupAccount, builder: (_, _) => const IdSignupPage()),
       GoRoute(path: AppRoutes.signupDone, builder: (_, _) => const SignupDonePage()),
       GoRoute(
         path: AppRoutes.preferences,

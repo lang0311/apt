@@ -33,7 +33,8 @@ class _TermsPageState extends ConsumerState<TermsPage> {
     setState(() => _submitting = true);
     try {
       await ref.read(authControllerProvider.notifier).agreeTerms(_agreed);
-      if (mounted) context.push(AppRoutes.signupProfile);
+      // 아이디 가입은 약관 다음 계정 정보, 소셜 가입은 프로필
+      if (mounted) context.push(ref.read(authControllerProvider).idSignup ? AppRoutes.signupAccount : AppRoutes.signupProfile);
     } catch (e) {
       if (mounted) showAppSnackBar(context, failureMessage(e));
     } finally {

@@ -63,9 +63,12 @@ Future<void> expectSnack(WidgetTester tester, String message) async {
   await waitGone(tester, find.byType(SnackBar), timeout: const Duration(seconds: 6));
 }
 
-/// 텍스트 입력 후 키보드를 닫는다
+/// 텍스트 입력 후 키보드를 닫는다.
+/// 기기에서는 이미 값이 있는 칸(특히 비밀번호 칸)에 바로 enterText하면 입력기가 이전 값으로 되돌릴 수 있어, 칸을 먼저 누른다.
 Future<void> typeInto(WidgetTester tester, Finder field, String text) async {
   await waitFor(tester, field);
+  await tester.tap(field);
+  await tester.pump(const Duration(milliseconds: 300));
   await tester.enterText(field, text);
   await tester.pump(const Duration(milliseconds: 200));
   FocusManager.instance.primaryFocus?.unfocus();
@@ -80,13 +83,13 @@ Future<void> tapTab(WidgetTester tester, String label) async {
 /// 앱 시작 → 로그인 화면
 Future<void> launchApp(WidgetTester tester) async {
   await tester.pumpWidget(const AptRoot());
-  await waitFor(tester, find.text('Google로 계속하기'));
+  await waitFor(tester, find.byTooltip('Google로 로그인'));
 }
 
 /// 기존 회원(Mock: Google)으로 로그인 → 홈
 Future<void> signInExisting(WidgetTester tester) async {
   await launchApp(tester);
-  await tapText(tester, 'Google로 계속하기');
+  await tapFinder(tester, find.byTooltip('Google로 로그인'), scroll: false);
   await waitFor(tester, find.byType(HomePage));
 }
 

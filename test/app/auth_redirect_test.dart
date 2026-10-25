@@ -28,6 +28,7 @@ void main() {
       const signingUp = AuthState(status: AuthStatus.signingUp);
       expect(authRedirect(signingUp, AppRoutes.home), AppRoutes.signupTerms);
       expect(authRedirect(signingUp, AppRoutes.signupProfile), isNull);
+      expect(authRedirect(signingUp, AppRoutes.signupAccount), isNull);
       expect(authRedirect(signingUp, AppRoutes.preferences), isNull);
     });
 

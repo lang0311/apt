@@ -8,6 +8,9 @@ abstract final class AppRoutes {
   static const loginEmail = '/login/email';
   static const signupTerms = '/signup/terms';
   static const signupProfile = '/signup/profile';
+
+  /// 아이디 가입: 약관 다음 계정 정보 (07 D28)
+  static const signupAccount = '/signup/account';
   static const signupDone = '/signup/done';
 
   static const home = '/home';

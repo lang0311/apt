@@ -16,7 +16,7 @@ void main() {
 
   testWidgets('A. 신규 가입: 카카오 → 약관 → 프로필 → 가입 완료 → 홈', (tester) async {
     await launchApp(tester);
-    await tapText(tester, '카카오로 계속하기');
+    await tapFinder(tester, find.byTooltip('카카오로 로그인'), scroll: false);
 
     await waitFor(tester, find.text('약관 동의'));
     final cta = find.widgetWithText(InkWell, '동의하고 계속하기');
@@ -36,8 +36,8 @@ void main() {
   testWidgets('B. 계정 충돌 → 기존 계정과 연결 → 홈', (tester) async {
     await launchApp(tester);
     // Apple 버튼은 기본 숨김(FeatureFlags.appleAuthEnabled) → 충돌 응답을 받은 상황을 라우터로 흉내낸다
-    expect(find.text('Apple로 계속하기'), findsNothing);
-    GoRouter.of(tester.element(find.text('Google로 계속하기'))).push(
+    expect(find.byTooltip('Apple로 로그인'), findsNothing);
+    GoRouter.of(tester.element(find.byTooltip('Google로 로그인'))).push(
       AppRoutes.loginConflict,
       extra: const AccountConflict(
         maskedEmail: 'jis***@gmail.com',
@@ -210,20 +210,58 @@ void main() {
 
     await tapText(tester, '로그아웃');
     await tapText(tester, '로그아웃', index: 1, scroll: false);
-    await waitFor(tester, find.text('Google로 계속하기'));
+    await waitFor(tester, find.byTooltip('Google로 로그인'));
     expectNoErrors(tester);
   });
 
   testWidgets('J. 초대 링크(미로그인) → 로그인 → 초대 수락 → 참여', (tester) async {
     await launchApp(tester);
     // 초대 링크로 앱에 들어온 상황을 라우터로 흉내낸다 (App Links 설정 전)
-    GoRouter.of(tester.element(find.text('Google로 계속하기'))).go('/invites/demo');
+    GoRouter.of(tester.element(find.byTooltip('Google로 로그인'))).go('/invites/demo');
     await tester.pump(const Duration(milliseconds: 500));
     // 미로그인 → 토큰 보관 후 로그인 화면으로
-    await tapText(tester, 'Google로 계속하기');
+    await tapFinder(tester, find.byTooltip('Google로 로그인'), scroll: false);
     await waitFor(tester, find.text('민지님이 코스에 초대했어요'));
     await tapText(tester, '코스에 참여하기');
     await waitFor(tester, find.textContaining('함께하는 코스', findRichText: true));
+    expectNoErrors(tester);
+  });
+
+  testWidgets('K. 아이디 가입: 회원가입 → 약관 → 계정 정보(중복 아이디 오류) → 가입 완료 → 홈', (tester) async {
+    await launchApp(tester);
+    await tapText(tester, '회원가입');
+
+    await waitFor(tester, find.text('약관 동의'));
+    await tapText(tester, '전체 동의');
+    await tapFinder(tester, find.widgetWithText(InkWell, '동의하고 계속하기'));
+
+    await waitFor(tester, find.text('로그인에 쓸 아이디와 비밀번호를 정해주세요.'));
+    final fields = find.byType(TextField);
+    await typeInto(tester, fields.at(0), 'taken'); // Mock: 이미 사용 중
+    await typeInto(tester, fields.at(1), 'password1');
+    await typeInto(tester, fields.at(2), '여행하는 지상');
+    await tapText(tester, '가입하기');
+    await waitFor(tester, find.text('이미 사용 중인 아이디예요.'));
+
+    await typeInto(tester, fields.at(0), 'trip_jin');
+    await tapText(tester, '가입하기');
+    await waitFor(tester, find.text('가입이 완료됐어요'));
+    await tapText(tester, '시작하기');
+    await waitFor(tester, find.byType(HomePage));
+    expectNoErrors(tester);
+  });
+
+  testWidgets('L. 아이디 로그인: 틀린 비밀번호 → 오류 → 로그인 → 홈', (tester) async {
+    await launchApp(tester);
+    final fields = find.byType(TextField);
+    await typeInto(tester, fields.at(0), 'demo_user1');
+    await typeInto(tester, fields.at(1), 'wrongpass');
+    await tapText(tester, '로그인');
+    await waitFor(tester, find.text('아이디 또는 비밀번호를 확인해주세요.'));
+
+    await typeInto(tester, fields.at(1), 'password1'); // Mock: password1만 성공
+    await tapText(tester, '로그인');
+    await waitFor(tester, find.byType(HomePage));
     expectNoErrors(tester);
   });
 }

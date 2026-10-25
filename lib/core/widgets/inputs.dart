@@ -25,6 +25,7 @@ class AppTextField extends StatefulWidget {
     this.autofocus = false,
     this.enabled = true,
     this.fillColor = AppColors.surface,
+    this.autofillHints,
   });
 
   final TextEditingController? controller;
@@ -43,6 +44,9 @@ class AppTextField extends StatefulWidget {
   final bool autofocus;
   final bool enabled;
   final Color fillColor;
+
+  /// 비밀번호 관리자 자동 입력 (예: [AutofillHints.username]). 붙여넣기는 막지 않는다.
+  final Iterable<String>? autofillHints;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -100,6 +104,7 @@ class _AppTextFieldState extends State<AppTextField> {
               textInputAction: widget.textInputAction,
               onChanged: widget.onChanged,
               onSubmitted: widget.onSubmitted,
+              autofillHints: widget.autofillHints,
               maxLength: widget.maxLength,
               style: AppTypography.bodyStrong,
               decoration: InputDecoration(
