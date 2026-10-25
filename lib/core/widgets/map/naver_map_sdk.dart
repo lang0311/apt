@@ -12,7 +12,8 @@ abstract final class NaverMapSdk {
 
   /// `runApp` 전에 한 번 호출한다. 키가 없거나 초기화에 실패하면 미리보기 지도로 동작한다.
   static Future<void> init() async {
-    if (Env.naverMapClientId.isEmpty) return;
+    // 웹은 OpenStreetMap을 쓴다 (07 D29)
+    if (kIsWeb || Env.naverMapClientId.isEmpty) return;
     try {
       await FlutterNaverMap().init(
         clientId: Env.naverMapClientId,
