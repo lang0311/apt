@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
 # 개인 레포 main의 커밋된 내용을 팀 레포 mobile/에 맞추고 스테이징까지만 한다.
 # 커밋·push는 하지 않는다 (결과 확인 후 직접).
-# 사용: bash tools/sync_team.sh [팀 레포 경로]   (기본: 이 레포 기준 ../../team)
+# 사용: bash tools/sync_team.sh [팀 레포 경로]   (기본: 이 레포 옆 ../team, 없으면 예전 위치 ../../team)
 set -euo pipefail
 
 APP="$(git -C "$(dirname "$0")/.." rev-parse --show-toplevel)"
-TEAM="${1:-$APP/../../team}"
+if [ -n "${1:-}" ]; then
+  TEAM="$1"
+elif [ -d "$APP/../team/.git" ]; then
+  TEAM="$APP/../team"
+else
+  TEAM="$APP/../../team"
+fi
+git -C "$TEAM" rev-parse --git-dir >/dev/null 2>&1 || { echo "중단: 팀 레포를 찾을 수 없음 ($TEAM) — 경로를 인자로 넘겨 주세요"; exit 1; }
+TEAM="$(git -C "$TEAM" rev-parse --show-toplevel)"
 
 if [ -n "$(git -C "$APP" status --porcelain)" ]; then
   echo "주의: 개인 레포에 커밋 안 한 변경이 있음 — main에 커밋된 내용만 반영됨"
@@ -30,6 +38,6 @@ if [ -z "$STAGED" ]; then
 fi
 echo "추가 $(grep -c '^A' <<<"$STAGED" || true) / 수정 $(grep -c '^M' <<<"$STAGED" || true) / 삭제 $(grep -c '^D' <<<"$STAGED" || true)"
 echo "mobile/ 밖 변경: $(cut -f2- <<<"$STAGED" | grep -vc '^"\?mobile/' || true)"
-echo "키·일지·스킬 파일: $(grep -E '^[AM]' <<<"$STAGED" | cut -f2- | grep -cE 'config/dev\.json|Secrets\.xcconfig|local\.properties|devlog|08_DEV_LOG|\.agents/|skills-lock' || true)"
+echo "키·일지·스킬 파일: $(grep -E '^[AM]' <<<"$STAGED" | cut -f2- | grep -cE '(^|/)\.?env$|config/dev\.json|Secrets\.xcconfig|local\.properties|devlog|08_DEV_LOG|\.agents/|skills-lock' || true)"
 echo "---"
 echo "$STAGED"
