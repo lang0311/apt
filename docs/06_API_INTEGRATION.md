@@ -3,11 +3,38 @@
 > 백엔드/AI는 **제공받는다.** 이 문서는 "앱이 서버에 무엇을 필요로 하는가"를 정리해 **API 명세를 받을 때/요청할 때 체크리스트**로 쓰기 위한 것이다.
 > 엔드포인트, 필드명, enum은 **여기서 정하지 않는다.** (아래 예시 표기는 설명용)
 
-> **API 명세 위치: `docs/API/`** (현재 `API 정리.xlsx`, 방향만 나온 초안 — 응답 JSON·오류 형식·인증 없음). API 관련 작업 전 이 폴더의 파일이 추가·수정됐는지 먼저 확인하고, 변동 사항은 이 문서와 Repository에 비교해 보고한다.
+> **백엔드 기준 (07 D12, 2026-10-25):** 팀 레포에 **실제로 구현된 서버 API**(GitHub 최신 `origin/main`의 `api.py`·`src/`, 로컬 clone은 `apt` 옆 `team/`)가 기준이다. API 작업 전 `git fetch`로 새 커밋을 확인하고 바뀐 API는 보고한다.
+> `docs/API/API 정리.xlsx`는 서버와 작성자가 다른 초안(응답 형식 없음)이라 **서버에 없는 기능의 방향 참고로만** 쓴다. 둘이 다르면 서버를 따른다.
+
+## 0. 기능별 기준 출처
+
+2026-10-25 `origin/main`(7d06d02) 기준. 서버 엔드포인트 28개, 엑셀 16개 — 겹치는 것은 코스 상세 정도다.
+
+| 기능 | 기준 | 서버 엔드포인트 / 엑셀 참고 |
+|------|------|-----------------------------|
+| 가입·로그인·로그아웃 | **서버** | `POST /auth/register`, `/auth/login`, `/auth/logout` (아이디·비밀번호 쿠키 세션). 소셜 로그인은 서버에 없음 → `NEEDS BACKEND` |
+| 내 정보·사용량 | **서버** | `GET /me`, `/me/usage` |
+| 홈 요약 | **서버** | `GET /mobile/summary` |
+| 장소 검색 | **서버** | `GET /places/search` (카카오 키 필요) |
+| 내 장소 저장·삭제 | **서버** | `POST /me/places`, `DELETE /me/places/{key}` |
+| 코스 목록·상세 | **서버** | `GET /courses`, `/courses/{course}`, `POST /mobile/courses/{course}` |
+| AI 추천 (job) | **서버** | `POST /jobs`, `GET /jobs/{job}`, `POST /jobs/{job}/cancel`, `POST /recommend` |
+| 코스 장소 바꾸기·빼기·확정 | **서버** | `POST /courses/{course}/replace`, `DELETE /courses/{course}/places`, `GET .../places/{key}/selection`, `POST .../confirm` |
+| 추천하지 않는 장소(차단) | **서버** | `GET /me/blocks`, `DELETE /me/blocks/{key}` |
+| 파티·초대 | **서버** | `POST /parties`, `/parties/join`, `GET /parties/{party}`, `POST /parties/{party}/invites`, `GET /mobile/invites/{code}` |
+| 릴스 링크 추출 | 엑셀 참고 · `NEEDS BACKEND` | `POST /api/v1/places/share-link` |
+| 보관함 | 엑셀 참고 · `NEEDS BACKEND` | `/api/v1/user-lists` (만들기·내 목록·상세) |
+| 근처 저장 장소 (저장 지도) | 엑셀 참고 · `NEEDS BACKEND` | `GET /api/v1/places/nearby` |
+| 장소 상세·AI 키워드 | 엑셀 참고 · `NEEDS BACKEND` | `GET /api/v1/places/{placeId}` |
+| 프로필 수정 | 엑셀 참고 · `NEEDS BACKEND` | `PUT /api/v1/users/profile` |
+| 사용자 검색·팔로우 | 앱 범위 밖 | 엑셀에만 있음, 앱 화면 없음 |
+| 약관·트렌딩·취향 수동 설정 | 둘 다 없음 · `NEEDS BACKEND` | — |
+
+서버 공통 규칙: POST/PATCH/PUT/DELETE는 `X-APT-Request: 1` 헤더 필수, 쿠키 `apt_session`, 호스트는 한 가지로 통일(`127.0.0.1`과 `localhost`를 섞으면 쿠키가 안 붙음). 응답 필드는 서버 코드(`src/platform_api.py` 등)를 정본으로 보고 이 문서에는 옮겨 적지 않는다.
 
 ## 1. 연동 원칙
 
-1. **API 명세(또는 백엔드 코드/문서)가 Source of Truth.** 없는 필드/상태값을 추측해 구현하지 않는다.
+1. **실제 구현된 서버 코드가 Source of Truth**(그다음 엑셀 명세는 참고). 없는 필드/상태값을 추측해 구현하지 않는다.
 2. 명세가 없는 기능은 `Repository Interface` + `Mock Repository`로 분리하고 `NEEDS BACKEND`로 기록한다. Widget 안에 mock JSON 금지.
 3. `DTO → mapper → Domain Model → UI`. 서버 응답 구조가 바뀌어도 mapper만 수정하면 되게 한다.
 4. 서버 데이터(카테고리, 취향 키워드, 보관함, 코스, 통계)는 **UI에 하드코딩하지 않는다.**

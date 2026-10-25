@@ -44,6 +44,7 @@ type: 상세 내용
 개발과 커밋은 **개인 레포 `lang0311/apt`** 에서 한다. 팀 레포(`jim-min/Agentic-Personal-Travelassistant`)의 `mobile/`에는 큰 기능 추가·수정·개선이 끝날 때마다 한 번에 반영한다.
 
 - 팀 레포의 `mobile/`은 직접 수정하지 않는다. 항상 개인 레포에서 고친 뒤 반영한다.
+- 로컬 팀 clone(`apt` 옆 `team/`)은 **GitHub 최신으로 유지**한다. 서버 작업·API 작업 전에 `git fetch` → `git pull --ff-only` (스테이징된 파일과 원격 변경이 겹치면 멈추고 보고). 팀 clone에도 `tools/hooks/pre-commit`을 설치해 둔다(`.git/hooks`라 팀원에게 영향 없음).
 - 반영: `bash tools/sync_team.sh` → 개인 레포 `main`의 커밋된 내용을 팀 레포 `mobile/`에 맞추고 스테이징까지만 한다 (커밋·push 안 함).
 - 개발 일지, `.agents/`, `skills-lock.json`, 반영 도구 자체는 `.gitattributes`의 `export-ignore`로 팀 레포에 들어가지 않는다.
 - 결과(바뀐 파일, `mobile/` 밖 변경 0개, 키 파일 없음)를 확인한 뒤 기능 요약 메시지로 커밋하고 팀 레포 `main`에 push한다. 예: `add: AI 추천 API 연동, 장소 검색 화면`
