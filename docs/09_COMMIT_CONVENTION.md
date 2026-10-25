@@ -50,7 +50,14 @@ type: 상세 내용
 
 레포는 **공개(public)** 상태다. 아래는 절대 커밋하지 않는다.
 
-- `config/dev.json`, `ios/Flutter/Secrets.xcconfig`, `android/local.properties` (gitignore 대상)
+- `config/dev.json`, `ios/Flutter/Secrets.xcconfig`, `android/local.properties`, `.env` (gitignore 대상)
 - 릴리스 키스토어(`.jks`, `.keystore`), `key.properties`
 - Secret · Admin 키 · 비밀번호 (네이버 Client Secret, 카카오 Admin/REST 키, Google Client Secret 등)
 - 개발 일지 · 문서 · 커밋 메시지에도 키 **값**은 적지 않는다 (어디서 관리하는지만 적는다)
+
+### 커밋 전 키 검사
+
+커밋할 때마다 `tools/hooks/pre-commit`이 스테이징된 파일·추가된 줄에서 키 파일과 키 형식(OpenRouter·Google·GitHub·AWS 키, 개인 키, `*_KEY=`·`SECRET=`·`PASSWORD=` 등)을 찾고, 있으면 커밋을 멈춘다. 값은 출력하지 않고 위치만 보여 준다.
+
+- 설치(clone마다 한 번): `cp tools/hooks/pre-commit .git/hooks/pre-commit`
+- 걸리면 값을 gitignore 대상 파일로 옮긴다. `--no-verify`로 넘기지 않는다.
