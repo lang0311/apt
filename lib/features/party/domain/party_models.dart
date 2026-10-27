@@ -15,6 +15,24 @@ class Party {
 
   /// 파티원 취향 종합 키워드 (서버 집계)
   final List<String> preferenceSummary;
+
+  /// 나를 뺀 파티원
+  List<PartyMember> get others => [for (final m in members) if (!m.isMe) m];
+}
+
+extension PartyMemberNames on List<PartyMember> {
+  /// 한 줄을 넘지 않게: 나를 맨 앞에, 세 명까지 이름, 넘치면 "외 n명". 서버 파티 이름은 모두 같아서 이름으로 구분한다.
+  String get crewNames {
+    final sorted = [...where((m) => m.isMe), ...where((m) => !m.isMe)];
+    final shown = [for (final x in sorted.take(3)) x.isMe ? '나' : x.nickname];
+    return length > 3 ? '${shown.take(2).join(', ')} 외 ${length - 2}명' : shown.join(', ');
+  }
+
+  /// 나를 뺀 이름들 ("민지, 랑이"), 넘치면 "외 n명"
+  String get otherNames {
+    final names = [for (final m in this) if (!m.isMe) m.nickname];
+    return names.length > 2 ? '${names.take(2).join(', ')} 외 ${names.length - 2}명' : names.join(', ');
+  }
 }
 
 class InviteLink {

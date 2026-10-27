@@ -145,13 +145,19 @@ void main() {
     // 2/4
     await waitFor(tester, find.text('누구와 함께 가나요?'));
     await tapText(tester, '함께 가요');
-    await waitFor(tester, find.text('파티원 3'));
+    await waitFor(tester, find.text('어느 파티와 갈까요?'));
+    // 새 파티: 초대하기를 누를 때 파티가 생긴다
+    await tapText(tester, '새 파티 만들기');
+    await waitFor(tester, find.text('파티원 1'));
     await tapText(tester, '초대하기');
     await waitFor(tester, find.text('파티원 초대'));
     await tapText(tester, '초대 링크 복사', scroll: false);
     await expectSnack(tester, '초대 링크를 복사했어요.');
     await tester.tapAt(const Offset(20, 120)); // 시트 바깥을 눌러 닫는다
     await tester.pump(const Duration(milliseconds: 500));
+    // 기존 파티로 간다
+    await tapText(tester, '나, 민지, 랑이');
+    expect(find.text('파티원 1'), findsNothing);
     await tapText(tester, '다음');
 
     // 3/4 — 목록으로 바꿔 두 곳 고르기
@@ -177,9 +183,17 @@ void main() {
     await waitGone(tester, find.byType(SnackBar), timeout: const Duration(seconds: 8));
     await tapText(tester, '코스 저장', scroll: false);
 
-    // 완료 화면 없이 바로 상세
+    // 완료 화면 없이 바로 상세, 파티 코스라 파티원에게 알릴지 묻는다
     await waitFor(tester, find.text('코스가 저장되었어요'));
+    await waitFor(tester, find.text('민지, 랑이에게 알릴까요?'));
+    await tapText(tester, '코스 링크 복사', scroll: false);
+    await expectSnack(tester, '코스 링크를 복사했어요.');
+    await tapText(tester, '나중에', scroll: false);
+    await waitGone(tester, find.text('민지, 랑이에게 알릴까요?'));
     await waitFor(tester, find.text('가을 서울 카페 산책'));
+    // 파티원 시트에서 다시 알릴 수 있다
+    await tapText(tester, '나, 민지, 랑이');
+    await waitFor(tester, find.text('코스 알리기'));
     expectNoErrors(tester);
   });
 

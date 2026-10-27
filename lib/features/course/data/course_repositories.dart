@@ -113,6 +113,9 @@ class MockCourseRepository implements CourseRepository {
     if (cancel != null && !cancel.isCompleted) cancel.complete();
   }
 
+  @override
+  Future<String> courseLink(String courseId) async => 'https://apt.example.com/courses/$courseId';
+
   Future<Recommendation> _mockRecommend(CourseDraft draft) {
     return _store.behavior.mutate(
       () {
@@ -238,6 +241,8 @@ class ApiCourseRepository implements CourseRepository {
   }) async => throw _f;
   @override
   Future<void> cancelRecommendation() async {}
+  @override
+  Future<String> courseLink(String courseId) async => throw _f;
   @override
   Future<Course> createCourse({required CourseDraft draft, required List<CourseStop> stops}) async => throw _f;
   @override

@@ -43,6 +43,8 @@ class _FakeCourseRepository implements CourseRepository {
 
   @override
   Future<void> cancelRecommendation() async => cancels++;
+  @override
+  Future<String> courseLink(String courseId) async => throw UnimplementedError();
 
   final blocked = <String>{};
 

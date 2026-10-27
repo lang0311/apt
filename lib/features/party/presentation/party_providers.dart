@@ -7,6 +7,11 @@ final partyProvider = FutureProvider.autoDispose.family<Party, String>(
   (ref, partyId) => ref.watch(partyRepositoryProvider).fetchParty(partyId),
 );
 
+/// 내가 속한 파티 (2/4 파티 고르기)
+final myPartiesProvider = FutureProvider.autoDispose<List<Party>>(
+  (ref) => ref.watch(partyRepositoryProvider).fetchMyParties(),
+);
+
 /// 초대 링크 (서버 생성)
 final inviteLinkProvider = FutureProvider.autoDispose.family<InviteLink, String>(
   (ref, partyId) => ref.watch(partyRepositoryProvider).createInviteLink(partyId),

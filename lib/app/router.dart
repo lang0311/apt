@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/config/feature_flags.dart';
+import '../core/share/pending_links.dart';
 import '../features/auth/domain/auth_models.dart';
 import '../features/auth/presentation/auth_controller.dart';
 import '../features/auth/presentation/pages/account_conflict_page.dart';
@@ -47,6 +48,13 @@ class _AuthRefresh extends ChangeNotifier {
   }
 }
 
+/// 코스 링크(`/courses/{id}`)면 코스 id. 코스 만들기 · 장소 고르기 화면은 링크가 아니다.
+String? courseLinkId(String location) {
+  final parts = Uri.parse(location).pathSegments;
+  if (parts.length != 2 || parts[0] != 'courses') return null;
+  return const {'new', 'pick-places'}.contains(parts[1]) ? null : parts[1];
+}
+
 String? authRedirect(AuthState auth, String location) {
   final isLogin = location.startsWith('/login');
   final isSignup = location.startsWith('/signup');
@@ -78,7 +86,15 @@ final routerProvider = Provider<GoRouter>((ref) {
     navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.splash,
     refreshListenable: refresh,
-    redirect: (context, state) => authRedirect(ref.read(authControllerProvider), state.matchedLocation),
+    redirect: (context, state) {
+      final auth = ref.read(authControllerProvider);
+      // 코스 링크로 들어왔는데 아직 로그인 전(앱 시작 직후 포함)이면 보관했다가 로그인 후 연다
+      final courseId = courseLinkId(state.matchedLocation);
+      if (courseId != null && (auth.status != AuthStatus.authenticated || auth.justSignedUp)) {
+        Future.microtask(() => ref.read(pendingLinksProvider.notifier).setCourse(courseId));
+      }
+      return authRedirect(auth, state.matchedLocation);
+    },
     routes: [
       // ── 탭바 없는 화면 ──────────────────────────────
       GoRoute(path: AppRoutes.splash, builder: (_, _) => const SplashPage()),

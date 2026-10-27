@@ -1,8 +1,11 @@
 import 'party_models.dart';
 
 abstract interface class PartyRepository {
-  /// 코스 만들기 3/4에서 "함께 갈게요" 선택 시 파티 생성 (나 포함)
+  /// 코스 만들기 2/4에서 새 파티로 '다음'(또는 초대하기)을 누를 때 파티 생성 (나 포함)
   Future<Party> createParty();
+
+  /// 내가 속한 파티 목록 (2/4 "어느 파티와 갈까요?")
+  Future<List<Party>> fetchMyParties();
 
   Future<Party> fetchParty(String partyId);
 

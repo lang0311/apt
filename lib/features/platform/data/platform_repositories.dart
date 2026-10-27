@@ -377,6 +377,9 @@ class PlatformCourseRepository implements CourseRepository {
   @override
   Future<void> cancelRecommendation() => c.cancelRecommendation();
 
+  @override
+  Future<String> courseLink(String courseId) async => webAppLink('/courses/$courseId');
+
   /// 서버 job stage → 화면 단계. 화면은 앞으로만 진행하므로 순서가 오가도 괜찮다.
   /// 모르는 값(queued 등)은 null — 지금 단계를 유지한다.
   static RecommendationStage? recommendationStage(String stage) => switch (stage) {
@@ -524,6 +527,13 @@ class PlatformPreferenceRepository implements PreferenceRepository {
   }) async => throw const NotImplementedFailure('수동 취향 설정');
 }
 
+/// 밖으로 보내는 링크(초대 · 코스). 브라우저는 지금 주소, 앱은 서버가 띄워 주는 웹 앱 주소로 만든다.
+/// NEEDS BACKEND: 정식 링크 도메인 · 앱 링크(설치된 앱으로 바로 열기)
+String webAppLink(String route) {
+  final base = kIsWeb ? Uri.base : Uri.parse(Env.apiBaseUrl).replace(path: '/mobile-app/');
+  return base.replace(fragment: route).toString();
+}
+
 class PlatformPartyRepository implements PartyRepository {
   PlatformPartyRepository(this.c);
   final PlatformClient c;
@@ -533,28 +543,35 @@ class PlatformPartyRepository implements PartyRepository {
     return fetchParty(p['id'] as String);
   }
 
+  /// 파티 목록 API는 따로 없고 GET /me의 parties에 멤버까지 같이 온다
+  @override
+  Future<List<Party>> fetchMyParties() async {
+    final me = await c.me();
+    return [for (final p in me['parties'] as List) party(p['id'] as String, p['members'] as List)];
+  }
+
   @override
   Future<Party> fetchParty(String id) async {
     final p = await c.get('/parties/$id');
-    return Party(
-      id: id,
-      members: [
-        for (final m in p['members'] as List)
-          PartyMember(
-            id: m['id'] as String,
-            nickname: m['name'] as String,
-            isMe: m['id'] == c.currentUserId,
-          ),
-      ],
-    );
+    return party(id, p['members'] as List);
   }
+
+  Party party(String id, List members) => Party(
+    id: id,
+    members: [
+      for (final m in members)
+        PartyMember(
+          id: m['id'] as String,
+          nickname: m['name'] as String,
+          isMe: m['id'] == c.currentUserId,
+        ),
+    ],
+  );
 
   @override
   Future<InviteLink> createInviteLink(String id) async {
     final p = await c.post('/parties/$id/invites');
-    // 브라우저는 지금 주소, 앱은 서버가 띄워 주는 웹 앱 주소로 만든다. NEEDS BACKEND: 정식 초대 링크 도메인·앱 링크
-    final base = kIsWeb ? Uri.base : Uri.parse(Env.apiBaseUrl).replace(path: '/mobile-app/');
-    return InviteLink(url: base.replace(fragment: '/invites/${p['code']}').toString());
+    return InviteLink(url: webAppLink('/invites/${p['code']}'));
   }
 
   @override

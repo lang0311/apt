@@ -39,20 +39,21 @@ class _InviteBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final link = ref.watch(inviteLinkProvider(partyId));
 
+    // 링크를 아직 만드는 중이면 기다렸다가 복사한다(시트를 열자마자 눌러도 복사되게)
     Future<void> copy() async {
-      final url = link.value?.url;
-      if (url == null) {
-        showAppSnackBar(context, link.hasError ? failureMessage(link.error!) : '초대 링크를 만들고 있어요.');
-        return;
+      try {
+        final url = (await ref.read(inviteLinkProvider(partyId).future)).url;
+        await Clipboard.setData(ClipboardData(text: url));
+        if (context.mounted) showAppSnackBar(context, '초대 링크를 복사했어요.');
+      } catch (e) {
+        if (context.mounted) showAppSnackBar(context, failureMessage(e));
       }
-      await Clipboard.setData(ClipboardData(text: url));
-      if (context.mounted) showAppSnackBar(context, '초대 링크를 복사했어요.');
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _Option(
+        ShareOption(
           background: AppColors.kakaoSoft,
           leading: Container(
             width: 44,
@@ -67,7 +68,7 @@ class _InviteBody extends ConsumerWidget {
           onTap: () => showAppSnackBar(context, '카카오톡 공유는 준비 중이에요. 링크 복사를 이용해주세요.'),
         ),
         const SizedBox(height: AppSpacing.sm),
-        _Option(
+        ShareOption(
           background: AppColors.bg,
           leading: const IconCircle(icon: Icons.link_rounded),
           title: '초대 링크 복사',
@@ -79,8 +80,9 @@ class _InviteBody extends ConsumerWidget {
   }
 }
 
-class _Option extends StatelessWidget {
-  const _Option({required this.background, required this.leading, required this.title, required this.description, required this.onTap});
+/// 보내기 방법 한 줄(초대 · 코스 알리기 시트 공통)
+class ShareOption extends StatelessWidget {
+  const ShareOption({super.key, required this.background, required this.leading, required this.title, required this.description, required this.onTap});
   final Color background;
   final Widget leading;
   final String title;

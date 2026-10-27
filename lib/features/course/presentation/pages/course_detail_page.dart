@@ -18,6 +18,7 @@ import '../../../party/presentation/widgets/party_avatar_stack.dart';
 import '../../domain/course_models.dart';
 import '../course_providers.dart';
 import '../widgets/course_route_map.dart';
+import '../widgets/course_share_sheet.dart';
 import '../widgets/course_timeline.dart';
 
 /// #32 코스 상세 (보는 상태). 고치기는 일정 카드의 "편집" 하나로 들어간다(코스 편집 화면).
@@ -51,7 +52,9 @@ class CourseDetailPage extends ConsumerWidget {
               child: AsyncValueView<Course>(
                 value: course,
                 onRetry: () => ref.invalidate(courseDetailProvider(courseId)),
-                data: (c) => _Body(course: c, justSaved: justSaved),
+                data: (c) => justSaved && c.isParty && c.partyId != null
+                    ? _ShareAfterSave(course: c, child: _Body(course: c, justSaved: true))
+                    : _Body(course: c, justSaved: justSaved),
               ),
             ),
           ],
@@ -107,6 +110,38 @@ class _Body extends StatelessWidget {
   }
 }
 
+/// 파티 코스를 저장하고 들어오면 파티원에게 알릴지 한 번 묻는다
+class _ShareAfterSave extends ConsumerStatefulWidget {
+  const _ShareAfterSave({required this.course, required this.child});
+  final Course course;
+  final Widget child;
+
+  @override
+  ConsumerState<_ShareAfterSave> createState() => _ShareAfterSaveState();
+}
+
+class _ShareAfterSaveState extends ConsumerState<_ShareAfterSave> {
+  @override
+  void initState() {
+    super.initState();
+    _ask();
+  }
+
+  Future<void> _ask() async {
+    List<PartyMember>? members;
+    try {
+      members = (await ref.read(partyProvider(widget.course.partyId!).future)).members;
+    } catch (_) {} // 파티원 이름을 못 불러와도 묻는다
+    if (!mounted) return;
+    // 혼자 남은 새 파티면 알릴 사람이 없다
+    if (members != null && members.every((m) => m.isMe)) return;
+    await showCourseShareSheet(context, course: widget.course, members: members, afterSave: true);
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
 /// 파티원 한 줄 띠: 얼굴 묶음 + 이름. 누르면 파티원 시트(목록 + 초대).
 class _CrewStrip extends ConsumerWidget {
   const _CrewStrip({required this.course});
@@ -117,13 +152,13 @@ class _CrewStrip extends ConsumerWidget {
     final partyId = course.partyId;
     // NEEDS BACKEND: 코스 상세에 파티원 목록이 같이 오는지, 파티 API를 따로 부르는지
     final members = partyId == null ? null : ref.watch(partyProvider(partyId)).value?.members;
-    final names = members == null ? '파티 ${course.memberCount}명' : _names(members);
+    final names = members == null ? '파티 ${course.memberCount}명' : members.crewNames;
     return Material(
       color: AppColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: const BorderSide(color: AppColors.border)),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
-        onTap: members == null ? null : () => _showMembers(context, members, partyId!),
+        onTap: members == null ? null : () => _showMembers(context, members, partyId!, course),
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 48),
           child: Padding(
@@ -144,13 +179,8 @@ class _CrewStrip extends ConsumerWidget {
     );
   }
 
-  /// 한 줄을 넘지 않게: 세 명까지 이름, 넘치면 "외 n명"
-  static String _names(List<PartyMember> m) {
-    final shown = [for (final x in m.take(3)) x.isMe ? '나' : x.nickname];
-    return m.length > 3 ? '${shown.take(2).join(', ')} 외 ${m.length - 2}명' : shown.join(', ');
-  }
 
-  void _showMembers(BuildContext context, List<PartyMember> members, String partyId) {
+  void _showMembers(BuildContext context, List<PartyMember> members, String partyId, Course course) {
     showAppBottomSheet<void>(
       context,
       builder: (ctx) => Padding(
@@ -182,6 +212,16 @@ class _CrewStrip extends ConsumerWidget {
               label: const Text('초대하기'),
               style: TextButton.styleFrom(foregroundColor: AppColors.primary, alignment: Alignment.centerLeft, minimumSize: const Size(44, 48)),
             ),
+            if (members.any((m) => !m.isMe))
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  showCourseShareSheet(context, course: course, members: members);
+                },
+                icon: const Icon(Icons.ios_share_rounded),
+                label: const Text('코스 알리기'),
+                style: TextButton.styleFrom(foregroundColor: AppColors.primary, alignment: Alignment.centerLeft, minimumSize: const Size(44, 48)),
+              ),
           ],
         ),
       ),

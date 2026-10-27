@@ -33,6 +33,9 @@ abstract interface class CourseRepository {
 
   Future<Course> createCourse({required CourseDraft draft, required List<CourseStop> stops});
 
+  /// 파티원에게 보낼 코스 링크 (열면 코스 상세)
+  Future<String> courseLink(String courseId);
+
   /// 완성된 코스 수정 (순서 편집, 장소 추가, 재추천 반영)
   Future<Course> updateCourseStops({required String courseId, required List<CourseStop> stops});
 

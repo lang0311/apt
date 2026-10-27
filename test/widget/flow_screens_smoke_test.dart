@@ -2,6 +2,7 @@ import 'package:apt/app/theme/app_theme.dart';
 import 'package:apt/dev/mock/mock_fixtures.dart';
 import 'package:apt/features/auth/domain/auth_models.dart';
 import 'package:apt/features/auth/presentation/auth_controller.dart';
+import 'package:apt/features/course/domain/course_models.dart';
 import 'package:apt/features/course/presentation/course_draft_controller.dart';
 import 'package:apt/features/course/presentation/pages/add_places_page.dart';
 import 'package:apt/features/course/presentation/pages/ai_recommendation_page.dart';
@@ -28,6 +29,7 @@ void main() {
   final screens = <String, Widget Function()>{
     '1/4 기본 정보': () => const CourseInfoPage(),
     '2/4 동행 설정': () => const CompanionPage(),
+    '2/4 동행 설정(함께, 파티 목록)': () => const CompanionPage(),
     '3/4 장소 선택': () => const PlaceSelectionPage(),
     '4/4 AI 추천': () => const AiRecommendationPage(),
     '장소 추가': () => const AddPlacesPage(args: AddPlacesArgs()),
@@ -54,6 +56,9 @@ void main() {
         container.read(courseDraftProvider.notifier)
           ..start(places: [MockFixtures.place('p1'), MockFixtures.place('p4')])
           ..update((d) => d.copyWith(name: '가을 서울 카페 산책', date: DateTime(2026, 10, 12), startTime: const TimeOfDay(hour: 11, minute: 0)));
+        if (screen.key.contains('함께')) {
+          container.read(courseDraftProvider.notifier).update((d) => d.copyWith(companion: Companion.party, partyId: 'party1'));
+        }
         // Mock 지연은 실제 타이머라 fake async 밖에서 실행한다 (Google = 기존 회원 → 로그인 상태)
         await tester.runAsync(() => container.read(authControllerProvider.notifier).signInWithSocial(SocialProvider.google));
         expect(container.read(authControllerProvider).status, AuthStatus.authenticated);

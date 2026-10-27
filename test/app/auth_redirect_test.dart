@@ -44,4 +44,13 @@ void main() {
       expect(authRedirect(signedIn, AppRoutes.saved), isNull);
     });
   });
+
+  test('코스 링크만 로그인 후 열 코스로 본다', () {
+    expect(courseLinkId('/courses/c42'), 'c42');
+    expect(courseLinkId(AppRoutes.courses), isNull);
+    expect(courseLinkId(AppRoutes.courseNewInfo), isNull);
+    expect(courseLinkId('/courses/new'), isNull);
+    expect(courseLinkId(AppRoutes.pickPlaces), isNull);
+    expect(courseLinkId('/course-edit/c42'), isNull);
+  });
 }

@@ -10,21 +10,37 @@ class MockPartyRepository implements PartyRepository {
   MockPartyRepository(this._store);
   final MockStore _store;
 
-  static const _members = [
-    PartyMember(id: 'u1', nickname: '나', isMe: true),
-    PartyMember(id: 'u3', nickname: '민지'),
-    PartyMember(id: 'u4', nickname: '랑이'),
-  ];
+  static const _me = PartyMember(id: 'u1', nickname: '나', isMe: true);
+  static const _members = [_me, PartyMember(id: 'u3', nickname: '민지'), PartyMember(id: 'u4', nickname: '랑이')];
+
+  /// 이미 있는 파티(party1은 Mock 파티 코스의 파티). 새로 만든 파티는 나 혼자로 시작한다.
+  final Map<String, List<PartyMember>> _parties = {
+    'party1': _members,
+    'party2': const [_me, PartyMember(id: 'u5', nickname: '도윤')],
+    'party3': const [
+      _me,
+      PartyMember(id: 'u6', nickname: '김하늘바다'),
+      PartyMember(id: 'u7', nickname: '이서준'),
+      PartyMember(id: 'u8', nickname: '박지우'),
+      PartyMember(id: 'u9', nickname: '최유나'),
+    ],
+  };
+
+  Party _party(String id) =>
+      Party(id: id, members: _parties[id] ?? _members, preferenceSummary: const ['카페', '맛집', '자연']);
 
   @override
-  Future<Party> createParty() => _store.behavior.mutate(
-        () => Party(id: _store.nextId('party'), members: _members, preferenceSummary: const ['카페', '맛집', '자연']),
-      );
+  Future<Party> createParty() => _store.behavior.mutate(() {
+        final id = _store.nextId('party-new-'); // party1~3과 겹치지 않게
+        _parties[id] = const [_me];
+        return _party(id);
+      });
 
   @override
-  Future<Party> fetchParty(String partyId) => _store.behavior.query(
-        () => Party(id: partyId, members: _members, preferenceSummary: const ['카페', '맛집', '자연']),
-      );
+  Future<List<Party>> fetchMyParties() => _store.behavior.query(() => [for (final id in _parties.keys) _party(id)]);
+
+  @override
+  Future<Party> fetchParty(String partyId) => _store.behavior.query(() => _party(partyId));
 
   @override
   Future<InviteLink> createInviteLink(String partyId) =>
@@ -69,6 +85,8 @@ class ApiPartyRepository implements PartyRepository {
 
   @override
   Future<Party> createParty() async => throw _f;
+  @override
+  Future<List<Party>> fetchMyParties() async => throw _f;
   @override
   Future<Party> fetchParty(String partyId) async => throw _f;
   @override

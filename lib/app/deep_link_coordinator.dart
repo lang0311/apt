@@ -12,7 +12,7 @@ import 'routes.dart';
 
 final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
-/// 외부 진입(공유 수신, 초대 링크)을 받아 로그인 상태에 맞춰 이어서 처리한다.
+/// 외부 진입(공유 수신, 초대 링크, 코스 링크)을 받아 로그인 상태에 맞춰 이어서 처리한다.
 /// - 로그인 상태: 링크 입력을 건너뛰고 결과 화면에서 분석 자동 시작
 /// - 비로그인/가입 중: pending으로 보관 → 홈 진입 직후 재개 (docs/02 §5.2–5.3)
 class DeepLinkCoordinator extends ConsumerStatefulWidget {
@@ -61,6 +61,11 @@ class _DeepLinkCoordinatorState extends ConsumerState<DeepLinkCoordinator> {
     if (pending.inviteToken case final token?) {
       ref.read(pendingLinksProvider.notifier).clearInvite();
       router.push(AppRoutes.invite(token));
+      return;
+    }
+    if (pending.courseId case final id?) {
+      ref.read(pendingLinksProvider.notifier).clearCourse();
+      router.push(AppRoutes.course(id));
       return;
     }
     if (pending.shareUrl case final url?) {
