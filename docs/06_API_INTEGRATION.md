@@ -21,7 +21,7 @@
 | AI 추천 (job) | **서버** | `POST /jobs`, `GET /jobs/{job}`(status · stage → 화면 단계, 07 D33), `POST /jobs/{job}/cancel`, `GET /jobs`(진행 중 job, 취소 중이면 끝나길 기다림), `POST /recommend` |
 | 코스 장소 바꾸기·빼기·확정 | **서버** | `POST /courses/{course}/replace`, `DELETE /courses/{course}/places`, `GET .../places/{key}/selection`, `POST .../confirm` |
 | 추천하지 않는 장소(차단) | **서버** | `GET /me/blocks`, `DELETE /me/blocks/{key}` |
-| 파티·초대 | **서버** | `POST /parties`, `/parties/join`, `GET /parties/{party}`, `POST /parties/{party}/invites`, `GET /mobile/invites/{code}` |
+| 파티·초대 | **서버** | `POST /parties`, `/parties/join`, `GET /parties/{party}`, `POST /parties/{party}/invites`, `GET /mobile/invites/{code}`, 내 파티 목록 = `GET /me`의 `parties`(멤버 포함, 07 D34). 나가기 · 숨기기 · 푸시는 없음 |
 | 릴스 링크 추출 | 엑셀 참고 · `NEEDS BACKEND` | `POST /api/v1/places/share-link` |
 | 보관함 | 엑셀 참고 · `NEEDS BACKEND` | `/api/v1/user-lists` (만들기·내 목록·상세) |
 | 근처 저장 장소 (저장 지도) | 엑셀 참고 · `NEEDS BACKEND` | `GET /api/v1/places/nearby` |
