@@ -18,7 +18,7 @@
 | 장소 검색 | **서버** | `GET /places/search` (카카오 키 필요) |
 | 내 장소 저장·삭제 | **서버** | `POST /me/places`, `DELETE /me/places/{key}` |
 | 코스 목록·상세 | **서버** | `GET /courses`, `/courses/{course}`, `POST /mobile/courses/{course}` |
-| AI 추천 (job) | **서버** | `POST /jobs`, `GET /jobs/{job}`, `POST /jobs/{job}/cancel`, `POST /recommend` |
+| AI 추천 (job) | **서버** | `POST /jobs`, `GET /jobs/{job}`(status · stage → 화면 단계, 07 D33), `POST /jobs/{job}/cancel`, `GET /jobs`(진행 중 job, 취소 중이면 끝나길 기다림), `POST /recommend` |
 | 코스 장소 바꾸기·빼기·확정 | **서버** | `POST /courses/{course}/replace`, `DELETE /courses/{course}/places`, `GET .../places/{key}/selection`, `POST .../confirm` |
 | 추천하지 않는 장소(차단) | **서버** | `GET /me/blocks`, `DELETE /me/blocks/{key}` |
 | 파티·초대 | **서버** | `POST /parties`, `/parties/join`, `GET /parties/{party}`, `POST /parties/{party}/invites`, `GET /mobile/invites/{code}` |
