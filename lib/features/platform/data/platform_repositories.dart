@@ -281,10 +281,23 @@ class PlatformCourseRepository implements CourseRepository {
   Future<Recommendation> recommend({
     required CourseDraft draft,
     List<CourseStop> currentStops = const [],
+    void Function(RecommendationStage stage)? onStage,
   }) async {
-    final active = await c.get('/jobs') as List;
-    if (active.isNotEmpty) {
-      return recommendation(await c.poll(active.first['id'] as String));
+    c.cancelRequested = false;
+    void stage(String s) {
+      final mapped = recommendationStage(s);
+      if (mapped != null) onStage?.call(mapped);
+    }
+
+    onStage?.call(RecommendationStage.findCandidates);
+    final active = [for (final j in await c.get('/jobs') as List) Map<String, dynamic>.from(j as Map)];
+    // 방금 취소한 job은 서버가 멈출 때까지 기다린 뒤 새로 시작한다 (그 전에는 서버가 409)
+    for (final j in active.where((j) => j['status'] == 'cancelling')) {
+      await c.waitUntilSettled(j['id'] as String);
+    }
+    final running = active.where((j) => j['status'] != 'cancelling');
+    if (running.isNotEmpty) {
+      return recommendation(await c.poll(running.first['id'] as String, onStage: stage));
     }
     final previous = c.lastCourseId;
     final exclusionTokens = <String>[];
@@ -313,11 +326,12 @@ class PlatformCourseRepository implements CourseRepository {
       ];
       if (removed.length == 1 &&
           currentStops.length == (old['itinerary'] as List).length - 1) {
+        if (c.cancelRequested) throw const CancelledFailure();
         started = await c.post('/courses/$previous/replace', {
           'revision': old['revision'],
           'place_key': removed.first['key'],
         });
-        return recommendation(await c.poll(started['job_id'] as String));
+        return recommendation(await c.poll(started['job_id'] as String, onStage: stage));
       }
       // Persist local removals before replacement so the server retains exclusions.
       for (final p in List<dynamic>.from(old['itinerary'] as List)) {
@@ -335,6 +349,7 @@ class PlatformCourseRepository implements CourseRepository {
         }
       }
       c.courses[previous] = old;
+      if (c.cancelRequested) throw const CancelledFailure();
       started = await c.post('/courses/$previous/replace', {
         'revision': old['revision'],
       });
@@ -347,6 +362,7 @@ class PlatformCourseRepository implements CourseRepository {
         tokens.add(await c.token(p.id));
       }
       final address = draft.places.first.address.split(' ').take(2).join(' ');
+      if (c.cancelRequested) throw const CancelledFailure();
       started = await c.post('/jobs', {
         'area': address.isEmpty ? '서울 마포구' : address,
         'place_tokens': tokens,
@@ -355,8 +371,22 @@ class PlatformCourseRepository implements CourseRepository {
         'party_id': draft.companion == Companion.party ? draft.partyId : null,
       });
     }
-    return recommendation(await c.poll(started['job_id'] as String));
+    return recommendation(await c.poll(started['job_id'] as String, onStage: stage));
   }
+
+  @override
+  Future<void> cancelRecommendation() => c.cancelRecommendation();
+
+  /// 서버 job stage → 화면 단계. 화면은 앞으로만 진행하므로 순서가 오가도 괜찮다.
+  /// 모르는 값(queued 등)은 null — 지금 단계를 유지한다.
+  static RecommendationStage? recommendationStage(String stage) => switch (stage) {
+    'starting' || 'preparing' || 'searching' || 'searching_member_preferences' || 'refilling' =>
+      RecommendationStage.findCandidates,
+    'extracting_attributes' || 'verifying' => RecommendationStage.checkPlaces,
+    'balancing_group' => RecommendationStage.matchTaste,
+    'reviewing' || 'saving' => RecommendationStage.organize,
+    _ => null,
+  };
 
   Recommendation recommendation(Json p) => Recommendation(
     recommendationId: p['id'] as String,

@@ -21,7 +21,15 @@ abstract interface class CourseRepository {
   /// [CourseDraft.rejectedPlaceIds]는 이번 코스에서만 뺀 장소, 차단한 장소는 서버가 계정 기준으로 뺀다.
   /// NEEDS BACKEND: 입력 형식, 재추천 의미(AI 장소만 교체 vs 전체 재생성), 제외 목록 지원,
   /// 동기/비동기 응답, 횟수 제한 (docs/06 §3).
-  Future<Recommendation> recommend({required CourseDraft draft, List<CourseStop> currentStops = const []});
+  /// [onStage]: 진행 단계가 바뀔 때마다 부른다. [cancelRecommendation]으로 멈추면 [CancelledFailure]를 던진다.
+  Future<Recommendation> recommend({
+    required CourseDraft draft,
+    List<CourseStop> currentStops = const [],
+    void Function(RecommendationStage stage)? onStage,
+  });
+
+  /// 진행 중인 추천을 멈춘다. 진행 중인 추천이 없으면 아무것도 하지 않는다.
+  Future<void> cancelRecommendation();
 
   Future<Course> createCourse({required CourseDraft draft, required List<CourseStop> stops});
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/error/app_failure.dart';
@@ -72,8 +74,46 @@ class MockCourseRepository implements CourseRepository {
   @override
   Future<List<MoodOption>> fetchMoodOptions() => _store.behavior.query(() => MockFixtures.moods);
 
+  /// 진행 중인 Mock 추천을 멈추는 신호
+  Completer<void>? _cancel;
+
   @override
-  Future<Recommendation> recommend({required CourseDraft draft, List<CourseStop> currentStops = const []}) {
+  Future<Recommendation> recommend({
+    required CourseDraft draft,
+    List<CourseStop> currentStops = const [],
+    void Function(RecommendationStage stage)? onStage,
+  }) async {
+    final cancel = _cancel = Completer<void>();
+    // 실서버처럼 단계를 차례로 알린다 (파티 코스는 파티원 취향 단계를 거친다)
+    final stages = [
+      RecommendationStage.findCandidates,
+      RecommendationStage.checkPlaces,
+      if (draft.companion == Companion.party) RecommendationStage.matchTaste,
+      RecommendationStage.organize,
+    ];
+    final timers = [
+      for (final (i, s) in stages.indexed) Timer(Duration(milliseconds: 2400 * i ~/ stages.length), () => onStage?.call(s)),
+    ];
+    try {
+      return await Future.any([
+        _mockRecommend(draft),
+        cancel.future.then<Recommendation>((_) => throw const CancelledFailure()),
+      ]);
+    } finally {
+      for (final t in timers) {
+        t.cancel();
+      }
+      if (identical(_cancel, cancel)) _cancel = null;
+    }
+  }
+
+  @override
+  Future<void> cancelRecommendation() async {
+    final cancel = _cancel;
+    if (cancel != null && !cancel.isCompleted) cancel.complete();
+  }
+
+  Future<Recommendation> _mockRecommend(CourseDraft draft) {
     return _store.behavior.mutate(
       () {
         // 사용자 장소는 현재 순서 그대로 유지, AI 장소만 교체 (가정 A6)
@@ -191,7 +231,13 @@ class ApiCourseRepository implements CourseRepository {
   @override
   Future<List<MoodOption>> fetchMoodOptions() async => throw _f;
   @override
-  Future<Recommendation> recommend({required CourseDraft draft, List<CourseStop> currentStops = const []}) async => throw _f;
+  Future<Recommendation> recommend({
+    required CourseDraft draft,
+    List<CourseStop> currentStops = const [],
+    void Function(RecommendationStage stage)? onStage,
+  }) async => throw _f;
+  @override
+  Future<void> cancelRecommendation() async {}
   @override
   Future<Course> createCourse({required CourseDraft draft, required List<CourseStop> stops}) async => throw _f;
   @override

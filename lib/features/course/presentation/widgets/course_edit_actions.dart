@@ -51,7 +51,8 @@ Future<void> replaceStopWithUndo(BuildContext context, WidgetRef ref, CourseStop
 void _reportAgain(BuildContext context, WidgetRef ref, int? changed) {
   if (changed == null) {
     final e = ref.read(recommendationProvider).error;
-    showAppSnackBar(context, '다시 추천하지 못했어요. ${e == null ? '' : failureMessage(e)}'.trim());
+    if (e == null) return; // 취소함 — 취소 버튼이 따로 알린다
+    showAppSnackBar(context, '다시 추천하지 못했어요. ${failureMessage(e)}');
   } else if (changed == 0) {
     _undoSnack(context, ref, '바꿀 추천 장소를 찾지 못했어요');
   } else {
@@ -85,4 +86,11 @@ void showResultSheet(BuildContext context, WidgetRef ref, CourseStop stop) {
     onSwap: stop.isAi ? () => replaceStopWithUndo(context, ref, stop) : null,
     onBlock: stop.isAi ? () => blockStopWithUndo(context, ref, stop) : null,
   );
+}
+
+/// 추천 취소 (4단계 대기 화면 · 다시 추천 중 줄). 취소했으면 true.
+bool cancelRecommendationWithNotice(BuildContext context, WidgetRef ref) {
+  final cancelled = _rec(ref).cancel();
+  if (cancelled) showAppSnackBar(context, '추천을 취소했어요');
+  return cancelled;
 }

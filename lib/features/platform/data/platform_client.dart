@@ -117,23 +117,57 @@ class PlatformClient {
         aiReason: raw['saved'] == true ? null : raw['description'] as String?,
       ),
   ];
-  Future<Json> poll(String job) async {
+  /// 사용자가 추천 취소를 눌렀는지. 추천을 새로 시작할 때 끈다.
+  bool cancelRequested = false;
+
+  /// 지금 기다리는 추천 job
+  String? activeJob;
+
+  /// 추천 job이 끝날 때까지 기다린다. [onStage]에는 서버 stage 값을 그대로 넘긴다.
+  /// 취소를 누르면 서버에 취소를 보내고 바로 [CancelledFailure]를 던진다(서버가 멈출 때까지 기다리지 않음).
+  Future<Json> poll(String job, {void Function(String stage)? onStage}) async {
     // Reload resumes the same server job; never silently issue a second paid request.
-    for (var i = 0; i < 1200; i++) {
+    activeJob = job;
+    try {
+      for (var i = 0; i < 1200; i++) {
+        if (cancelRequested) throw const CancelledFailure();
+        final data = Map<String, dynamic>.from(await get('/jobs/$job') as Map);
+        if (data['status'] == 'completed') {
+          final result = Map<String, dynamic>.from(data['result'] as Map);
+          course(result);
+          lastCourseId = result['id'] as String;
+          return result;
+        }
+        if (data['status'] == 'cancelled' || cancelRequested) throw const CancelledFailure();
+        if (data['status'] == 'failed') {
+          throw ValidationFailure((data['error'] ?? '추천을 받지 못했어요.').toString());
+        }
+        if (data['stage'] != null) onStage?.call(data['stage'].toString());
+        await Future<void>.delayed(const Duration(seconds: 1));
+      }
+      await post('/jobs/$job/cancel');
+      throw const TimeoutFailure('추천 작업을 취소 요청했어요. 진행 중 요청의 비용은 발생할 수 있어요.');
+    } finally {
+      if (activeJob == job) activeJob = null;
+    }
+  }
+
+  /// 진행 중인 추천을 취소한다. job을 시작하기 전이면 시작하지 않게 표시만 한다.
+  Future<void> cancelRecommendation() async {
+    cancelRequested = true;
+    final job = activeJob;
+    if (job != null) await post('/jobs/$job/cancel');
+  }
+
+  /// 취소 중인 job이 끝날 때까지 기다린다. 서버는 그동안 새 추천을 409로 막는다.
+  Future<void> waitUntilSettled(String job) async {
+    for (var i = 0; i < 300; i++) {
+      if (cancelRequested) throw const CancelledFailure();
       final data = Map<String, dynamic>.from(await get('/jobs/$job') as Map);
-      if (data['status'] == 'completed') {
-        final result = Map<String, dynamic>.from(data['result'] as Map);
-        course(result);
-        lastCourseId = result['id'] as String;
-        return result;
-      }
-      if (data['status'] == 'failed' || data['status'] == 'cancelled') {
-        throw ValidationFailure((data['error'] ?? '추천이 취소됐어요.').toString());
-      }
+      if (!const {'queued', 'running', 'cancelling'}.contains(data['status'])) return;
       await Future<void>.delayed(const Duration(seconds: 1));
     }
-    await post('/jobs/$job/cancel');
-    throw const TimeoutFailure('추천 작업을 취소 요청했어요. 진행 중 요청의 비용은 발생할 수 있어요.');
+    throw const TimeoutFailure('이전 추천을 멈추는 중이에요. 잠시 후 다시 시도해주세요.');
   }
 
   Future<void> cancelActive() async {

@@ -127,7 +127,7 @@ void main() {
     expectNoErrors(tester);
   });
 
-  testWidgets('G. 코스 만들기: 1/4 → 2/4(함께) → 3/4(지도·목록) → 4/4 → 다시 추천 → 저장 → 상세', (tester) async {
+  testWidgets('G. 코스 만들기: 1/4 → 2/4(함께) → 3/4(지도·목록) → 4/4(추천 취소 → 다시) → 다시 추천 → 저장 → 상세', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '코스');
     await waitFor(tester, find.textContaining('내 코스', findRichText: true));
@@ -161,6 +161,14 @@ void main() {
     await waitFor(tester, find.text('2곳'));
     await tapText(tester, '코스 추천받기', scroll: false);
 
+    // 4/4 기다리는 중 — 단계 표시(파티 코스는 파티원 취향 단계) → 추천 취소 → 3/4로, 고른 장소 유지
+    await waitFor(tester, find.text('후보 장소 찾기'));
+    expect(find.text('파티원 취향 맞추기'), findsOneWidget);
+    await tapText(tester, '추천 취소', scroll: false);
+    await expectSnack(tester, '추천을 취소했어요');
+    await waitFor(tester, find.text('2곳'));
+    await tapText(tester, '코스 추천받기', scroll: false);
+
     // 4/4
     await waitFor(tester, find.text('코스 저장'), timeout: const Duration(seconds: 20));
     expect(find.text('일정'), findsOneWidget);
@@ -175,7 +183,7 @@ void main() {
     expectNoErrors(tester);
   });
 
-  testWidgets('H. 코스 상세 → 편집: 이번만 빼기 → 다시 추천 → 저장', (tester) async {
+  testWidgets('H. 코스 상세 → 편집: 이번만 빼기 → 다시 추천 취소 → 다시 추천 → 저장', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '코스');
     await tapText(tester, '서울 카페 투어');
@@ -186,6 +194,14 @@ void main() {
     final removeButtons = find.byWidgetPredicate((w) => w is IconButton && (w.tooltip?.endsWith(' 빼기') ?? false));
     await tapFinder(tester, removeButtons, scroll: false);
     await waitFor(tester, find.textContaining('이번 코스에서 뺐어요'));
+    await waitGone(tester, find.byType(SnackBar), timeout: const Duration(seconds: 8));
+
+    // 다시 추천 중 취소 → 이전 일정 그대로
+    await tapText(tester, '다시 추천', scroll: false);
+    await waitFor(tester, find.text('AI 장소를 다시 고르고 있어요'));
+    await tapText(tester, '취소', scroll: false);
+    await expectSnack(tester, '추천을 취소했어요');
+    expect(find.text('AI 장소를 다시 고르고 있어요'), findsNothing);
     await waitGone(tester, find.byType(SnackBar), timeout: const Duration(seconds: 8));
 
     await tapText(tester, '다시 추천', scroll: false);

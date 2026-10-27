@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,12 +17,14 @@ import '../../../../core/widgets/states.dart';
 import '../../../../core/widgets/surfaces.dart';
 import '../../../home/presentation/home_providers.dart';
 import '../../../place/domain/place.dart';
+import '../../domain/course_models.dart';
 import '../course_draft_controller.dart';
 import '../course_providers.dart';
 import '../recommendation_controller.dart';
 import '../widgets/course_edit_actions.dart';
 import '../widgets/course_route_map.dart';
 import '../widgets/course_timeline.dart';
+import '../widgets/recommending_banner.dart';
 
 /// #30 AI 추천 (4/4) — 결과는 코스 상세와 같은 화면(머리 · 지도 · 일정 카드 "편집").
 /// 장소를 누르면 시트(바꾸기 · 이번만 빼기 · 앞으로 추천하지 않기), "편집"은 상세 편집과 같은 목록.
@@ -59,6 +59,11 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
     if (picked == null || picked.isEmpty) return;
     _rec.addPlaces(picked);
     if (mounted) showAppSnackBar(context, '${picked.length}곳을 추가했어요');
+  }
+
+  /// 처음 추천을 취소하면 장소 고르기(3/4)로 돌아간다. 고른 장소는 그대로.
+  void _cancelFirst() {
+    if (cancelRecommendationWithNotice(context, ref) && context.canPop()) context.pop();
   }
 
   Future<void> _save() async {
@@ -96,7 +101,12 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
     if (!state.hasResult && state.error != null) {
       body = AppErrorState(error: state.error!, title: '추천을 받지 못했어요', onRetry: () => _rec.syncWithDraft());
     } else if (!state.hasResult) {
-      body = _Waiting(title: draft.name, date: draft.date);
+      body = _Waiting(
+        title: draft.name,
+        date: draft.date,
+        stage: state.stage,
+        isParty: draft.companion == Companion.party,
+      );
     } else {
       body = ListView(
         padding: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.lg),
@@ -122,16 +132,19 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                 if (_editing)
                   SectionCard(
                     title: '일정 편집',
-                    child: CourseEditList(
-                      stops: state.stops,
-                      enabled: !busy,
-                      addedIds: state.addedIds,
-                      highlightIds: state.changedIds,
-                      loadingIds: state.loadingIds,
-                      onReorder: _rec.moveStop,
-                      onRemove: (s) => removeStopWithUndo(context, ref, s),
-                      onTapTile: (s, i) => showEditTileSheet(context, ref, s, i),
-                      onAdd: _addPlaces,
+                    child: _WithBanner(
+                      show: state.loading,
+                      child: CourseEditList(
+                        stops: state.stops,
+                        enabled: !busy,
+                        addedIds: state.addedIds,
+                        highlightIds: state.changedIds,
+                        loadingIds: state.loadingIds,
+                        onReorder: _rec.moveStop,
+                        onRemove: (s) => removeStopWithUndo(context, ref, s),
+                        onTapTile: (s, i) => showEditTileSheet(context, ref, s, i),
+                        onAdd: _addPlaces,
+                      ),
                     ),
                   )
                 else
@@ -143,12 +156,15 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                             padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
                             child: Text('일정에 장소가 없어요. "편집"에서 장소를 추가해 주세요.', style: AppTypography.meta),
                           )
-                        : CourseTimeline(
-                            stops: state.stops,
-                            highlightIds: state.changedIds,
-                            loadingIds: state.loadingIds,
-                            onTapStop: busy ? null : (s, _) => showResultSheet(context, ref, s),
-                            onMore: busy ? null : (s, _) => showResultSheet(context, ref, s),
+                        : _WithBanner(
+                            show: state.loading,
+                            child: CourseTimeline(
+                              stops: state.stops,
+                              highlightIds: state.changedIds,
+                              loadingIds: state.loadingIds,
+                              onTapStop: busy ? null : (s, _) => showResultSheet(context, ref, s),
+                              onMore: busy ? null : (s, _) => showResultSheet(context, ref, s),
+                            ),
                           ),
                   ),
                 if (_editing)
@@ -206,6 +222,10 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                       ),
                     ],
                   ),
+                )
+              else if (state.loading)
+                BottomCta(
+                  child: AppButton(label: '추천 취소', variant: AppButtonVariant.white, onPressed: _cancelFirst),
                 ),
             ],
           ),
@@ -215,11 +235,32 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
   }
 }
 
+/// 다시 추천하는 동안 일정 위에 진행 줄(+ 취소)을 붙인다
+class _WithBanner extends ConsumerWidget {
+  const _WithBanner({required this.show, required this.child});
+  final bool show;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!show) return child;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        RecommendingBanner(onCancel: () => cancelRecommendationWithNotice(context, ref)),
+        child,
+      ],
+    );
+  }
+}
+
 /// 기다리는 동안: 결과와 같은 자리에 뼈대(제목 → 지도 자리의 단계 표시 → 일정)
 class _Waiting extends StatelessWidget {
-  const _Waiting({required this.title, required this.date});
+  const _Waiting({required this.title, required this.date, required this.stage, required this.isParty});
   final String title;
   final DateTime? date;
+  final RecommendationStage? stage;
+  final bool isParty;
 
   @override
   Widget build(BuildContext context) {
@@ -233,9 +274,9 @@ class _Waiting extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const AppCard(
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                child: SizedBox(height: 160, child: _Stages()),
+              AppCard(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                child: _Stages(stage: stage ?? RecommendationStage.findCandidates, isParty: isParty),
               ),
               const SizedBox(height: AppSpacing.sm),
               SectionCard(
@@ -271,56 +312,45 @@ class _Waiting extends StatelessWidget {
   }
 }
 
-/// 단계 표시 — 앱이 정한 안내 문구(서버 진행률 아님). 마지막 단계에서 멈춘다.
-class _Stages extends StatefulWidget {
-  const _Stages();
+/// 단계 표시 — 서버가 알려 주는 진행 단계(묶음). 파티 코스만 '파티원 취향 맞추기'를 거친다.
+class _Stages extends StatelessWidget {
+  const _Stages({required this.stage, required this.isParty});
+  final RecommendationStage stage;
+  final bool isParty;
 
-  @override
-  State<_Stages> createState() => _StagesState();
-}
-
-class _StagesState extends State<_Stages> {
-  static const _labels = ['장소 위치 확인', '취향 반영', '동선 정리'];
-  int _now = 0;
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer.periodic(const Duration(milliseconds: 1100), (_) {
-      if (_now < _labels.length - 1) setState(() => _now++);
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
+  static const _labels = {
+    RecommendationStage.findCandidates: '후보 장소 찾기',
+    RecommendationStage.checkPlaces: '장소 정보 확인',
+    RecommendationStage.matchTaste: '파티원 취향 맞추기',
+    RecommendationStage.organize: '동선 정리',
+  };
 
   @override
   Widget build(BuildContext context) {
+    final stages = [
+      for (final s in RecommendationStage.values)
+        if (isParty || s != RecommendationStage.matchTaste) s,
+    ];
     return Semantics(
       liveRegion: true,
-      label: '${_labels[_now]} 중',
+      label: '${_labels[stage]} 중',
       excludeSemantics: true,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (var i = 0; i < _labels.length; i++)
+          for (final s in stages)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(
                 children: [
                   SizedBox.square(
                     dimension: 20,
-                    child: i < _now
+                    child: s.index < stage.index
                         ? Container(
                             decoration: const BoxDecoration(color: AppColors.successSoft, shape: BoxShape.circle),
                             child: const Icon(Icons.check_rounded, size: 14, color: AppColors.success),
                           )
-                        : i == _now
+                        : s == stage
                             ? const CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)
                             : Container(
                                 decoration: BoxDecoration(
@@ -331,10 +361,10 @@ class _StagesState extends State<_Stages> {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    _labels[i],
+                    _labels[s]!,
                     style: AppTypography.bodyStrong.copyWith(
-                      color: i == _now ? AppColors.textPrimary : (i < _now ? AppColors.textSecondary : AppColors.textTertiary),
-                      fontWeight: i == _now ? FontWeight.w700 : FontWeight.w500,
+                      color: s == stage ? AppColors.textPrimary : (s.index < stage.index ? AppColors.textSecondary : AppColors.textTertiary),
+                      fontWeight: s == stage ? FontWeight.w700 : FontWeight.w500,
                     ),
                   ),
                 ],

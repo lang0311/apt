@@ -43,6 +43,11 @@ class SocialSdkFailure extends AppFailure {
   const SocialSdkFailure([super.message = '로그인 중 문제가 생겼어요. 잠시 후 다시 시도해주세요.']);
 }
 
+/// 사용자가 진행 중인 작업(AI 추천 등)을 취소한 경우. 오류로 보여 주지 않는다.
+class CancelledFailure extends AppFailure {
+  const CancelledFailure([super.message = '취소했어요.']);
+}
+
 /// API 명세가 아직 없어 실서버 연동이 구현되지 않은 경우.
 class NotImplementedFailure extends AppFailure {
   const NotImplementedFailure(String feature) : super('$feature 기능은 아직 준비 중이에요.');

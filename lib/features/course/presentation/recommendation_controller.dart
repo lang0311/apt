@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/repositories.dart';
+import '../../../core/error/app_failure.dart';
 import '../../place/domain/place.dart';
 import '../domain/course_draft.dart';
 import '../domain/course_models.dart';
@@ -17,6 +20,7 @@ class RecommendationState {
     this.basedOnPlaceIds,
     this.changedIds = const {},
     this.addedIds = const {},
+    this.stage,
   });
 
   /// 사용자가 편집 중인 현재 코스 (USER + AI)
@@ -34,6 +38,9 @@ class RecommendationState {
   /// 편집에서 방금 넣은 장소 ("새로 추가")
   final Set<String> addedIds;
 
+  /// 추천받는 동안 지금 단계 (앞으로만 진행한다)
+  final RecommendationStage? stage;
+
   bool get hasResult => recommendation != null;
 
   /// 다시 추천 중에 뼈대로 보여 줄 자리 (AI 장소)
@@ -48,6 +55,8 @@ class RecommendationState {
     Set<String>? basedOnPlaceIds,
     Set<String>? changedIds,
     Set<String>? addedIds,
+    RecommendationStage? stage,
+    bool clearStage = false,
   }) =>
       RecommendationState(
         stops: stops ?? this.stops,
@@ -57,6 +66,7 @@ class RecommendationState {
         basedOnPlaceIds: basedOnPlaceIds ?? this.basedOnPlaceIds,
         changedIds: changedIds ?? this.changedIds,
         addedIds: addedIds ?? this.addedIds,
+        stage: clearStage ? null : (stage ?? this.stage),
       );
 }
 
@@ -72,6 +82,12 @@ class _Snapshot {
 
 class RecommendationController extends Notifier<RecommendationState> {
   _Snapshot? _undo;
+
+  /// 요청마다 올린다. 취소하면 올려서 진행 중이던 요청의 결과를 버린다.
+  int _requestSeq = 0;
+
+  /// 진행 중인 요청을 취소하면 돌아갈 상태
+  _Snapshot? _beforeRequest;
 
   /// 편집을 시작할 때의 일정 (바꾼 게 있는지 비교용)
   List<String> _initialIds = const [];
@@ -126,23 +142,39 @@ class RecommendationController extends Notifier<RecommendationState> {
     if (state.loading) return null;
     if (remember) _remember();
     final before = {for (final s in state.stops) if (s.isAi) s.place.id};
+    // 취소하면 이 동작 전(바꾸기라면 빼기 전)으로 돌아간다
+    final revert = _undo;
     _draft.update((d) => d.copyWith(recommendationRound: d.recommendationRound + 1));
-    final ok = await _request(keepPrevious: true);
+    final ok = await _request(keepPrevious: true, revertTo: revert);
     if (!ok) return null;
     final changed = {for (final s in state.stops) if (s.isAi && !before.contains(s.place.id)) s.place.id};
     state = state.copyWith(changedIds: changed);
     return changed.length;
   }
 
-  Future<bool> _request({required bool keepPrevious}) async {
+  Future<bool> _request({required bool keepPrevious, _Snapshot? revertTo}) async {
     if (state.loading) return false;
     final previous = state;
+    final seq = ++_requestSeq;
+    // 처음 추천(또는 3단계에서 장소가 바뀌어 새로 받기)을 취소하면 결과 없이 돌아간다
+    _beforeRequest = revertTo ?? _Snapshot(keepPrevious ? previous : const RecommendationState(), ref.read(courseDraftProvider));
     state = keepPrevious
-        ? state.copyWith(loading: true, clearError: true)
+        ? state.copyWith(loading: true, clearError: true, clearStage: true)
         : RecommendationState(loading: true, stops: state.stops);
     final draft = ref.read(courseDraftProvider);
     try {
-      final rec = await ref.read(courseRepositoryProvider).recommend(draft: draft, currentStops: previous.stops);
+      final rec = await ref.read(courseRepositoryProvider).recommend(
+            draft: draft,
+            currentStops: previous.stops,
+            onStage: (s) {
+              final now = state.stage;
+              if (seq == _requestSeq && state.loading && (now == null || s.index > now.index)) {
+                state = state.copyWith(stage: s);
+              }
+            },
+          );
+      if (seq != _requestSeq) return false;
+      _beforeRequest = null;
       state = RecommendationState(
         stops: rec.stops,
         recommendation: rec,
@@ -151,10 +183,28 @@ class RecommendationController extends Notifier<RecommendationState> {
       );
       return true;
     } catch (e) {
+      // 취소한 요청이면 cancel()이 이미 화면을 되돌렸다
+      if (seq != _requestSeq || e is CancelledFailure) return false;
+      _beforeRequest = null;
       // 실패하면 이전 결과로 복구 + 재시도 가능
-      state = previous.copyWith(loading: false, error: e);
+      state = previous.copyWith(loading: false, error: e, clearStage: true);
       return false;
     }
+  }
+
+  /// 진행 중인 추천을 취소한다. 화면은 바로 요청 전으로 돌아가고(다시 추천·바꾸기라면 그 동작 전으로),
+  /// 서버 취소는 뒤에서 보낸다. 취소했으면 true.
+  bool cancel() {
+    final before = _beforeRequest;
+    if (!state.loading || before == null) return false;
+    _requestSeq++;
+    _beforeRequest = null;
+    if (identical(before, _undo)) _undo = null;
+    _draft.update((_) => before.draft);
+    state = before.state.copyWith(loading: false, clearError: true, clearStage: true, changedIds: const {});
+    // 서버 취소는 기다리지 않는다. 실패해도 다음 추천이 남은 job을 이어받거나 끝나길 기다린다.
+    unawaited(ref.read(courseRepositoryProvider).cancelRecommendation().catchError((Object _) {}));
+    return true;
   }
 
   /// 이 코스에서 빼기 (이번만). AI 장소는 이 코스를 다시 추천할 때도 나오지 않게 기록한다.

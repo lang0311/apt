@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:apt/app/di/repositories.dart';
 import 'package:apt/core/error/app_failure.dart';
 import 'package:apt/features/course/domain/course_draft.dart';
@@ -17,16 +19,30 @@ class _FakeCourseRepository implements CourseRepository {
   bool fail = false;
   CourseDraft? lastDraft;
 
+  /// 설정하면 이 Future가 끝날 때까지 응답을 미룬다 (진행 중 상태 확인용)
+  Future<void>? gate;
+  List<RecommendationStage> stages = const [];
+  int cancels = 0;
+
   @override
-  Future<Recommendation> recommend({required CourseDraft draft, List<CourseStop> currentStops = const []}) async {
+  Future<Recommendation> recommend({
+    required CourseDraft draft,
+    List<CourseStop> currentStops = const [],
+    void Function(RecommendationStage stage)? onStage,
+  }) async {
     calls++;
     lastDraft = draft;
+    stages.forEach(onStage ?? (_) {});
+    if (gate != null) await gate;
     if (fail) throw const ServerFailure();
     return Recommendation(stops: [
       for (final p in draft.places) CourseStop(place: p, source: PlaceSource.user),
       CourseStop(place: _p('ai$calls'), source: PlaceSource.ai, aiReason: '이유'),
     ]);
   }
+
+  @override
+  Future<void> cancelRecommendation() async => cancels++;
 
   final blocked = <String>{};
 
@@ -129,5 +145,72 @@ void main() {
     controller().removeStop(state().stops.last);
     expect(controller().isDirty, isTrue);
     expect(draft().rejectedPlaceIds, {'x'});
+  });
+
+  test('진행 단계는 앞으로만 간다 (서버 단계가 되돌아가도)', () async {
+    final gate = Completer<void>();
+    repo
+      ..gate = gate.future
+      ..stages = [RecommendationStage.checkPlaces, RecommendationStage.findCandidates];
+    final done = controller().syncWithDraft();
+    await Future<void>.delayed(Duration.zero);
+    expect(state().loading, isTrue);
+    expect(state().stage, RecommendationStage.checkPlaces);
+    gate.complete();
+    await done;
+    expect(state().stage, isNull);
+  });
+
+  test('처음 추천을 취소하면 결과 없이 바로 돌아가고, 늦게 온 응답은 버린다', () async {
+    final gate = Completer<void>();
+    repo.gate = gate.future;
+    final done = controller().syncWithDraft();
+    await Future<void>.delayed(Duration.zero);
+    expect(controller().cancel(), isTrue);
+    expect(state().loading, isFalse);
+    expect(state().hasResult, isFalse);
+    expect(state().error, isNull);
+    await Future<void>.delayed(Duration.zero);
+    expect(repo.cancels, 1);
+    gate.complete();
+    await done;
+    expect(state().hasResult, isFalse);
+    expect(state().loading, isFalse);
+  });
+
+  test('다시 추천을 취소하면 이전 결과와 라운드로 돌아가고 되돌리기는 남지 않는다', () async {
+    await controller().syncWithDraft();
+    final gate = Completer<void>();
+    repo.gate = gate.future;
+    final again = controller().recommendAgain();
+    await Future<void>.delayed(Duration.zero);
+    expect(draft().recommendationRound, 1);
+    controller().cancel();
+    expect(state().stops.map((s) => s.place.id), ['a', 'b', 'ai1']);
+    expect(draft().recommendationRound, 0);
+    expect(controller().canUndo, isFalse);
+    gate.complete();
+    expect(await again, isNull);
+    expect(state().stops.map((s) => s.place.id), ['a', 'b', 'ai1']);
+  });
+
+  test('바꾸기를 취소하면 뺀 AI 장소도 돌아온다', () async {
+    await controller().syncWithDraft();
+    final gate = Completer<void>();
+    repo.gate = gate.future;
+    final replace = controller().replaceAi(state().stops.last);
+    await Future<void>.delayed(Duration.zero);
+    controller().cancel();
+    expect(state().stops.map((s) => s.place.id), ['a', 'b', 'ai1']);
+    expect(draft().rejectedPlaceIds, isEmpty);
+    gate.complete();
+    await replace;
+    expect(state().stops.map((s) => s.place.id), ['a', 'b', 'ai1']);
+  });
+
+  test('진행 중이 아니면 취소는 아무것도 하지 않는다', () async {
+    await controller().syncWithDraft();
+    expect(controller().cancel(), isFalse);
+    expect(repo.cancels, 0);
   });
 }

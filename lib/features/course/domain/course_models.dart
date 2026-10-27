@@ -67,6 +67,10 @@ class Recommendation {
   final String? description;
 }
 
+/// AI 추천 진행 단계 (화면에 보여 주는 묶음). 서버의 세부 단계는 데이터 계층에서 이 값으로 묶는다.
+/// [matchTaste]는 파티 코스에서만 거친다.
+enum RecommendationStage { findCandidates, checkPlaces, matchTaste, organize }
+
 /// 추천하지 않는 장소 (사용자가 "앞으로 추천하지 않기"로 차단한 AI 추천 장소).
 /// 모든 코스 추천에서 제외된다. 이번 코스에서만 뺀 장소는 [CourseDraft.rejectedPlaceIds]에 둔다.
 class BlockedPlace {

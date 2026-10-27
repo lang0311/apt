@@ -19,6 +19,7 @@ import '../course_providers.dart';
 import '../recommendation_controller.dart';
 import '../widgets/course_edit_actions.dart';
 import '../widgets/course_timeline.dart';
+import '../widgets/recommending_banner.dart';
 
 /// 저장한 코스 편집 (상세 → "편집"). 4단계 편집과 같은 목록·시트를 쓴다.
 /// 빼기(X, 이번만) · 차단(타일 시트) · 순서 · 장소 추가 · 다시 추천을 하고 "저장"해야 코스에 반영된다.
@@ -121,16 +122,23 @@ class _CourseEditPageState extends ConsumerState<CourseEditPage> {
                             padding: AppSpacing.screenPadding,
                             child: SectionCard(
                               title: '일정 편집',
-                              child: CourseEditList(
-                                stops: state.stops,
-                                enabled: !busy,
-                                addedIds: state.addedIds,
-                                highlightIds: state.changedIds,
-                                loadingIds: state.loadingIds,
-                                onReorder: _rec.moveStop,
-                                onRemove: (s) => removeStopWithUndo(context, ref, s),
-                                onTapTile: (s, i) => showEditTileSheet(context, ref, s, i),
-                                onAdd: _addPlaces,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  if (state.loading)
+                                    RecommendingBanner(onCancel: () => cancelRecommendationWithNotice(context, ref)),
+                                  CourseEditList(
+                                    stops: state.stops,
+                                    enabled: !busy,
+                                    addedIds: state.addedIds,
+                                    highlightIds: state.changedIds,
+                                    loadingIds: state.loadingIds,
+                                    onReorder: _rec.moveStop,
+                                    onRemove: (s) => removeStopWithUndo(context, ref, s),
+                                    onTapTile: (s, i) => showEditTileSheet(context, ref, s, i),
+                                    onAdd: _addPlaces,
+                                  ),
+                                ],
                               ),
                             ),
                           ),

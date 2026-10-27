@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:apt/core/network/api_client.dart';
+import 'package:apt/features/course/domain/course_models.dart';
 import 'package:apt/features/platform/data/platform_client.dart';
 import 'package:apt/features/platform/data/platform_repositories.dart';
 
@@ -83,5 +84,14 @@ void main() {
     ], limit: 2);
     expect(recent.map((r) => r.place.id), ['b', 'd']);
     expect(recent.every((r) => r.place.isSaved), isTrue);
+  });
+  test('Server job stages collapse into the four screen stages', () {
+    RecommendationStage? m(String s) => PlatformCourseRepository.recommendationStage(s);
+    expect(m('preparing'), RecommendationStage.findCandidates);
+    expect(m('refilling'), RecommendationStage.findCandidates);
+    expect(m('verifying'), RecommendationStage.checkPlaces);
+    expect(m('balancing_group'), RecommendationStage.matchTaste);
+    expect(m('reviewing'), RecommendationStage.organize);
+    expect(m('queued'), isNull);
   });
 }
