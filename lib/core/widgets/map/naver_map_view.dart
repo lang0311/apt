@@ -86,7 +86,7 @@ class _NaverMapViewState extends State<NaverMapView> implements AptMapCommands {
     return NaverMap(
       options: NaverMapViewOptions(
         initialCameraPosition: NCameraPosition(
-          target: initial == null ? _seoulCityHall : _latLng(_center(initial)),
+          target: initial == null ? _seoulCityHall : _latLng(initial.center),
           zoom: 14,
         ),
         // 로고·축척·카메라 중심이 상단 칩/하단 시트에 가려지지 않게 한다 (logoMargin은 이 안쪽 기준)
@@ -189,9 +189,11 @@ class _NaverMapViewState extends State<NaverMapView> implements AptMapCommands {
 
   Future<void> _fitIfNeeded(NaverMapController c) async {
     final ids = {for (final m in widget.markers) m.id};
+    if (!widget.fitMarkersOnLoad || ids.isEmpty) return;
+    // 처음 맞춘 뒤에는 viewport 조회 화면이면 안 움직이고, 그 밖에는 마커 구성이 바뀔 때만 다시 맞춘다
     final firstFit = _fittedIds.isEmpty;
     final viewportDriven = widget.onCameraIdle != null;
-    if (!widget.fitMarkersOnLoad || ids.isEmpty || (!firstFit && (viewportDriven || _sameSet(ids, _fittedIds)))) return;
+    if (!firstFit && (viewportDriven || _sameSet(ids, _fittedIds))) return;
     _fittedIds = ids;
 
     await c.updateCamera(_fitUpdate([...widget.markers.map((m) => m.point), ...widget.route]));
@@ -230,9 +232,6 @@ class _NaverMapViewState extends State<NaverMapView> implements AptMapCommands {
   }
 
   static NLatLng _latLng(GeoPoint p) => NLatLng(p.lat, p.lng);
-
-  static GeoPoint _center(GeoBounds b) =>
-      GeoPoint((b.southWest.lat + b.northEast.lat) / 2, (b.southWest.lng + b.northEast.lng) / 2);
 
   static bool _sameSet(Set<String> a, Set<String> b) => a.length == b.length && a.containsAll(b);
 }

@@ -108,8 +108,8 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
     });
   }
 
-  void _onCameraIdle(GeoBounds b) {
-    final center = b.center;
+  void _onCameraIdle(GeoBounds bounds) {
+    final center = bounds.center;
     if (_fittedCenter == null) {
       _fittedCenter = center;
       return;
@@ -176,14 +176,15 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
       });
       final names = await _collectionNames(picked.collectionIds);
       if (!mounted) return;
-      showAppSnackBar(
-        context,
-        names.isEmpty
-            ? '저장됨에 추가했어요.'
-            : names.length == 1
-                ? '${names.first}에 저장했어요.'
-                : '보관함 ${names.length}곳에 저장했어요.',
-      );
+      final String message;
+      if (names.isEmpty) {
+        message = '저장됨에 추가했어요.';
+      } else if (names.length == 1) {
+        message = '${names.first}에 저장했어요.';
+      } else {
+        message = '보관함 ${names.length}곳에 저장했어요.';
+      }
+      showAppSnackBar(context, message);
     } catch (e) {
       if (mounted) showAppSnackBar(context, failureMessage(e));
     } finally {
@@ -232,7 +233,7 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
     ];
 
     return Scaffold(
-      body: LayoutBuilder(builder: (context, c) {
+      body: LayoutBuilder(builder: (context, constraints) {
         final top = MediaQuery.paddingOf(context).top;
         return Stack(
           children: [
@@ -240,18 +241,18 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
               child: AptMap(
                 markers: markers,
                 selectedId: _selectedId,
-                bottomPadding: _single ? 200 : c.maxHeight * _sheetInitial,
+                bottomPadding: _single ? 200 : constraints.maxHeight * _sheetInitial,
                 topPadding: top + 120,
                 onCameraIdle: _onCameraIdle,
-                onMarkerTap: (m) {
-                  final p = places.where((p) => p.id == m.id).firstOrNull;
-                  if (p != null) _select(p);
+                onMarkerTap: (marker) {
+                  final place = places.where((p) => p.id == marker.id).firstOrNull;
+                  if (place != null) _select(place);
                 },
                 controller: _map,
               ),
             ),
             SafeArea(child: _topBar(onMap: true)),
-            if (_single && selected != null) ...[
+            if (_single && selected != null)
               Positioned(
                 left: AppSpacing.md,
                 right: AppSpacing.md,
@@ -264,8 +265,8 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
                   clipBehavior: Clip.antiAlias,
                   child: _card(selected),
                 ),
-              ),
-            ] else
+              )
+            else
               DraggableScrollableSheet(
                 controller: _sheet,
                 initialChildSize: _sheetInitial,

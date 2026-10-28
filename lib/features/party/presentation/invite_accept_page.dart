@@ -89,19 +89,8 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
             Expanded(
               child: invitation.when(
                 loading: () => const AppLoading(),
-                // 초대 예외(만료·이미 참여·인원 초과)는 디자인 없음 → 공통 빈 상태로 임시 구현
-                error: (e, _) => e is InviteFailure
-                    ? Center(
-                        child: AppEmptyState(
-                          icon: Icons.mail_outline_rounded,
-                          title: e.kind.title,
-                          description: e.kind.description,
-                          actionLabel: e.kind == InviteFailureKind.alreadyJoined ? '코스 목록 보기' : '홈으로',
-                          onAction: () => context.go(e.kind == InviteFailureKind.alreadyJoined ? AppRoutes.courses : AppRoutes.home),
-                        ),
-                      )
-                    : AppErrorState(error: e, onRetry: () => ref.invalidate(invitationProvider(widget.token))),
-                data: (inv) => _content(inv),
+                error: (e, _) => _error(e),
+                data: _content,
               ),
             ),
             if (invitation.hasValue)
@@ -116,6 +105,23 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// 초대 예외(만료·이미 참여·인원 초과)는 디자인 없음 → 공통 빈 상태로 임시 구현
+  Widget _error(Object error) {
+    if (error is! InviteFailure) {
+      return AppErrorState(error: error, onRetry: () => ref.invalidate(invitationProvider(widget.token)));
+    }
+    final alreadyJoined = error.kind == InviteFailureKind.alreadyJoined;
+    return Center(
+      child: AppEmptyState(
+        icon: Icons.mail_outline_rounded,
+        title: error.kind.title,
+        description: error.kind.description,
+        actionLabel: alreadyJoined ? '코스 목록 보기' : '홈으로',
+        onAction: () => context.go(alreadyJoined ? AppRoutes.courses : AppRoutes.home),
       ),
     );
   }

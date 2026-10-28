@@ -47,7 +47,7 @@ class MyPage extends ConsumerWidget {
                 value: profile,
                 onRetry: () => ref.invalidate(myProfileProvider),
                 loading: const SkeletonList(count: 3),
-                data: (p) => _Profile(profile: p, onEdit: () => _todo(context, '프로필 편집')),
+                data: (data) => _Profile(profile: data, onEdit: () => _todo(context, '프로필 편집')),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
@@ -87,7 +87,6 @@ class _Profile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final p = profile;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -95,14 +94,14 @@ class _Profile extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, 0, AppSpacing.screenH, AppSpacing.md),
           child: Row(
             children: [
-              _Avatar(name: p.nickname, imageUrl: p.profileImageUrl),
+              _Avatar(name: profile.nickname, imageUrl: profile.profileImageUrl),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(p.nickname, style: AppTypography.section.copyWith(fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
-                    if (p.handle != null) Text(p.handle!, style: AppTypography.meta),
+                    Text(profile.nickname, style: AppTypography.section.copyWith(fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    if (profile.handle != null) Text(profile.handle!, style: AppTypography.meta),
                   ],
                 ),
               ),
@@ -132,9 +131,9 @@ class _Profile extends StatelessWidget {
                 child: DividedRows(
                   indent: AppSpacing.md,
                   children: [
-                    _MenuRow(label: '저장한 장소', count: p.savedPlaceCount, onTap: () => context.go(AppRoutes.saved)),
-                    _MenuRow(label: '만든 코스', count: p.createdCourseCount, onTap: () => context.go(AppRoutes.courses)),
-                    _MenuRow(label: '함께하는 코스', count: p.joinedCourseCount, onTap: () => context.go(AppRoutes.coursesParty)),
+                    _MenuRow(label: '저장한 장소', count: profile.savedPlaceCount, onTap: () => context.go(AppRoutes.saved)),
+                    _MenuRow(label: '만든 코스', count: profile.createdCourseCount, onTap: () => context.go(AppRoutes.courses)),
+                    _MenuRow(label: '함께하는 코스', count: profile.joinedCourseCount, onTap: () => context.go(AppRoutes.coursesParty)),
                   ],
                 ),
               ),
@@ -147,9 +146,9 @@ class _Profile extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.xs),
-                      child: p.preferenceLabels.isEmpty
+                      child: profile.preferenceLabels.isEmpty
                           ? Text('아직 고른 취향이 없어요.', style: AppTypography.meta)
-                          : Text(p.preferenceLabels.join(' · '), style: AppTypography.bodyStrong),
+                          : Text(profile.preferenceLabels.join(' · '), style: AppTypography.bodyStrong),
                     ),
                     const Divider(height: 1, thickness: 1, indent: AppSpacing.md, endIndent: AppSpacing.md, color: AppColors.divider),
                     // 개수는 목록을 받아 세지 않는다 (서버 aggregate 없음)

@@ -69,9 +69,11 @@ class GeolocatorLocationService implements LocationService {
   @override
   Future<void> openSettings(LocationStatus status) async {
     try {
-      status == LocationStatus.serviceOff
-          ? await Geolocator.openLocationSettings()
-          : await Geolocator.openAppSettings();
+      if (status == LocationStatus.serviceOff) {
+        await Geolocator.openLocationSettings();
+      } else {
+        await Geolocator.openAppSettings();
+      }
     } catch (_) {}
   }
 }
@@ -89,7 +91,8 @@ class MyLocationNotifier extends Notifier<LocationResult?> {
   Future<LocationResult> locate({bool request = true}) async {
     final result = await ref.read(locationServiceProvider).current(request: request);
     // 일시적으로 못 얻었으면(시간 초과 등) 직전 위치를 유지한다. 권한이 없어지면 지운다.
-    if (!(result.status == LocationStatus.unavailable && state?.point != null)) state = result;
+    final keepPrevious = result.status == LocationStatus.unavailable && state?.point != null;
+    if (!keepPrevious) state = result;
     return result;
   }
 }

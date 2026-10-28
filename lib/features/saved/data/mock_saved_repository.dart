@@ -32,9 +32,11 @@ class MockSavedRepository implements SavedRepository {
         ? _store.savedPlaces
         : [for (final id in _store.members[q.collectionId] ?? const <String>[]) _store.placeWithSaved(id)];
     if (q.categoryKey != null) places = places.where((p) => p.categoryKey == q.categoryKey).toList();
-    final k = q.keyword?.trim();
-    if (k != null && k.isNotEmpty) {
-      places = places.where((p) => p.name.contains(k) || p.address.contains(k) || p.keywords.any((w) => w.contains(k))).toList();
+    final keyword = q.keyword?.trim();
+    if (keyword != null && keyword.isNotEmpty) {
+      places = places
+          .where((p) => p.name.contains(keyword) || p.address.contains(keyword) || p.keywords.any((w) => w.contains(keyword)))
+          .toList();
     }
     final items = [
       for (var i = 0; i < places.length; i++)
@@ -60,9 +62,9 @@ class MockSavedRepository implements SavedRepository {
       _store.behavior.query(
         // 서버가 거리를 주지 않는다는 가정이라 거리 없이 장소만 돌려준다.
         () => [
-          for (final i in _filter(query))
-            if (i.place.location != null && center.distanceTo(i.place.location!) <= radiusMeters)
-              SavedPlaceItem(place: i.place),
+          for (final item in _filter(query))
+            if (item.place.location != null && center.distanceTo(item.place.location!) <= radiusMeters)
+              SavedPlaceItem(place: item.place),
         ],
         empty: () => const [],
         latency: const Duration(milliseconds: 300),

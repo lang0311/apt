@@ -21,8 +21,6 @@ Future<CourseWhen?> showCourseWhenSheet(BuildContext context, {DateTime? date, T
 const _chipDays = 14;
 const _minuteStep = 10;
 
-DateTime _dayOnly(DateTime d) => DateTime(d.year, d.month, d.day);
-
 class _CourseWhenSheet extends StatefulWidget {
   const _CourseWhenSheet({this.initialDate, this.initialTime});
   final DateTime? initialDate;
@@ -33,7 +31,7 @@ class _CourseWhenSheet extends StatefulWidget {
 }
 
 class _CourseWhenSheetState extends State<_CourseWhenSheet> {
-  late final DateTime _today = _dayOnly(DateTime.now());
+  late final DateTime _today = DateUtils.dateOnly(DateTime.now());
   late DateTime _date;
   late bool _pm;
   late int _hour12; // 1–12
@@ -42,13 +40,18 @@ class _CourseWhenSheetState extends State<_CourseWhenSheet> {
   @override
   void initState() {
     super.initState();
-    final initial = widget.initialDate == null ? null : _dayOnly(widget.initialDate!);
     // 기본값: 내일. 지난 날짜가 들어 있으면 오늘로 당긴다.
-    _date = initial == null ? _today.add(const Duration(days: 1)) : (initial.isBefore(_today) ? _today : initial);
-    final t = widget.initialTime ?? const TimeOfDay(hour: 11, minute: 0);
-    _pm = t.hour >= 12;
-    _hour12 = t.hour % 12 == 0 ? 12 : t.hour % 12;
-    _minute = (t.minute ~/ _minuteStep) * _minuteStep;
+    final initial = widget.initialDate;
+    if (initial == null) {
+      _date = _today.add(const Duration(days: 1));
+    } else {
+      final day = DateUtils.dateOnly(initial);
+      _date = day.isBefore(_today) ? _today : day;
+    }
+    final time = widget.initialTime ?? const TimeOfDay(hour: 11, minute: 0);
+    _pm = time.hour >= 12;
+    _hour12 = time.hour % 12 == 0 ? 12 : time.hour % 12;
+    _minute = (time.minute ~/ _minuteStep) * _minuteStep;
   }
 
   TimeOfDay get _time => TimeOfDay(hour: (_hour12 % 12) + (_pm ? 12 : 0), minute: _minute);
@@ -61,6 +64,17 @@ class _CourseWhenSheetState extends State<_CourseWhenSheet> {
       builder: (_) => _CalendarDialog(today: _today, selected: _date),
     );
     if (picked != null) setState(() => _date = picked);
+  }
+
+  /// 오늘부터 [offset]일 뒤 칩 ('오늘' · '내일' · 요일)
+  Widget _dayChip(int offset) {
+    final day = _today.add(Duration(days: offset));
+    return _DayChip(
+      top: switch (offset) { 0 => '오늘', 1 => '내일', _ => weekdayLabel(day) },
+      date: day,
+      selected: _date == day,
+      onTap: () => setState(() => _date = day),
+    );
   }
 
   @override
@@ -104,12 +118,7 @@ class _CourseWhenSheetState extends State<_CourseWhenSheet> {
                   const SizedBox(width: AppSpacing.xs),
                 ],
                 for (var i = 0; i < _chipDays; i++) ...[
-                  _DayChip(
-                    top: switch (i) { 0 => '오늘', 1 => '내일', _ => weekdayLabel(_today.add(Duration(days: i))) },
-                    date: _today.add(Duration(days: i)),
-                    selected: _date == _today.add(Duration(days: i)),
-                    onTap: () => setState(() => _date = _today.add(Duration(days: i))),
-                  ),
+                  _dayChip(i),
                   const SizedBox(width: AppSpacing.xs),
                 ],
                 _CalendarChip(onTap: _openCalendar),
@@ -406,14 +415,14 @@ class _CalendarDialogState extends State<_CalendarDialog> {
             const SizedBox(height: AppSpacing.xxs),
             Row(
               children: [
-                for (final (i, w) in const ['일', '월', '화', '수', '목', '금', '토'].indexed)
+                for (final (i, weekday) in const ['일', '월', '화', '수', '목', '금', '토'].indexed)
                   Expanded(
                     child: Center(
                       child: Text(
-                        w,
+                        weekday,
                         style: AppTypography.meta.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: i == 0 ? AppColors.danger : (i == 6 ? AppColors.primary : AppColors.textSecondary),
+                          color: switch (i) { 0 => AppColors.danger, 6 => AppColors.primary, _ => AppColors.textSecondary },
                         ),
                       ),
                     ),
@@ -454,15 +463,18 @@ class _CalendarDialogState extends State<_CalendarDialog> {
     final past = date.isBefore(widget.today);
     final isToday = date == widget.today;
     final isSelected = date == widget.selected;
-    final color = isSelected
-        ? Colors.white
-        : past
-            ? AppColors.textHint
-            : switch (date.weekday) {
-                DateTime.sunday => AppColors.danger,
-                DateTime.saturday => AppColors.primary,
-                _ => AppColors.textPrimary,
-              };
+    final Color color;
+    if (isSelected) {
+      color = Colors.white;
+    } else if (past) {
+      color = AppColors.textHint;
+    } else {
+      color = switch (date.weekday) {
+        DateTime.sunday => AppColors.danger,
+        DateTime.saturday => AppColors.primary,
+        _ => AppColors.textPrimary,
+      };
+    }
     return SizedBox(
       height: 44,
       child: Center(

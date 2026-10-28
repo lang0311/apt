@@ -29,18 +29,20 @@ class AppNetworkImage extends StatelessWidget {
       alignment: Alignment.center,
       child: Icon(placeholderIcon, color: AppColors.textHint, size: 22),
     );
+    final imageUrl = url;
+    final displayWidth = width;
     final dpr = MediaQuery.devicePixelRatioOf(context);
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
-      child: url == null || url!.isEmpty
+      child: imageUrl == null || imageUrl.isEmpty
           ? placeholder
           : Image.network(
-              url!,
+              imageUrl,
               width: width,
               height: height,
               fit: BoxFit.cover,
               // 썸네일 크기로 디코딩해 메모리 절약 (원본 무조건 사용 금지)
-              cacheWidth: width == null || !width!.isFinite ? null : (width! * dpr).round(),
+              cacheWidth: displayWidth == null || !displayWidth.isFinite ? null : (displayWidth * dpr).round(),
               errorBuilder: (_, _, _) => placeholder,
               frameBuilder: (_, child, frame, wasSync) =>
                   wasSync || frame != null ? child : placeholder,

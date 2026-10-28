@@ -28,9 +28,10 @@ class AptApp extends ConsumerWidget {
       builder: (context, child) {
         // 시스템 글꼴 배율은 존중하되 상한 1.3 (docs/03 §1)
         final mq = MediaQuery.of(context);
+        final page = child ?? const SizedBox.shrink();
         return MediaQuery(
           data: mq.copyWith(textScaler: mq.textScaler.clamp(maxScaleFactor: 1.3)),
-          child: DeepLinkCoordinator(child: kIsWeb ? _WebFrame(child: child) : child ?? const SizedBox.shrink()),
+          child: DeepLinkCoordinator(child: kIsWeb ? _WebFrame(child: page) : page),
         );
       },
     );
@@ -40,7 +41,7 @@ class AptApp extends ConsumerWidget {
 /// 웹(데스크톱 브라우저)에서 화면이 넓게 늘어나지 않게 가운데 560으로 묶는다 (07 D30). 앱에는 적용하지 않는다.
 class _WebFrame extends StatelessWidget {
   const _WebFrame({required this.child});
-  final Widget? child;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +50,7 @@ class _WebFrame extends StatelessWidget {
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560),
-          child: child ?? const SizedBox.shrink(),
+          child: child,
         ),
       ),
     );

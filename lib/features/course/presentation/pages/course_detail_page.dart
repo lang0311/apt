@@ -71,15 +71,14 @@ class _Body extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = course;
-    final days = c.date == null ? null : daysUntil(c.date!);
+    final date = course.date;
     return ListView(
       padding: const EdgeInsets.only(bottom: AppSpacing.xl),
       children: [
         CourseHero(
-          title: c.title,
-          meta: courseMetaLine(date: c.date, start: c.startTime, placeCount: c.stops.length, duration: c.totalDuration),
-          dday: days != null && days >= 0 ? ddayLabel(c.date!) : null,
+          title: course.title,
+          meta: courseMetaLine(date: course.date, start: course.startTime, placeCount: course.stops.length, duration: course.totalDuration),
+          dday: date != null && daysUntil(date) >= 0 ? ddayLabel(date) : null,
           savedNotice: justSaved,
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -88,17 +87,17 @@ class _Body extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (c.isParty) ...[
-                _CrewStrip(course: c),
+              if (course.isParty) ...[
+                _CrewStrip(course: course),
                 const SizedBox(height: AppSpacing.xs),
               ],
-              CourseRouteMap(stops: c.stops, height: c.isParty ? 120 : 160),
+              CourseRouteMap(stops: course.stops, height: course.isParty ? 120 : 160),
               const SizedBox(height: AppSpacing.sm),
               SectionCard(
                 title: '일정',
-                trailing: c.canEdit ? CourseEditButton(onPressed: () => context.push(AppRoutes.courseEdit(c.id))) : null,
+                trailing: course.canEdit ? CourseEditButton(onPressed: () => context.push(AppRoutes.courseEdit(course.id))) : null,
                 child: CourseTimeline(
-                  stops: c.stops,
+                  stops: course.stops,
                   onTapStop: (s, _) => context.push(AppRoutes.place(s.place.id)),
                 ),
               ),
@@ -158,7 +157,7 @@ class _CrewStrip extends ConsumerWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: const BorderSide(color: AppColors.border)),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
-        onTap: members == null ? null : () => _showMembers(context, members, partyId!, course),
+        onTap: members == null ? null : () => _showMembers(context, members, partyId!),
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 48),
           child: Padding(
@@ -179,8 +178,7 @@ class _CrewStrip extends ConsumerWidget {
     );
   }
 
-
-  void _showMembers(BuildContext context, List<PartyMember> members, String partyId, Course course) {
+  void _showMembers(BuildContext context, List<PartyMember> members, String partyId) {
     showAppBottomSheet<void>(
       context,
       builder: (ctx) => Padding(

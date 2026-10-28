@@ -14,13 +14,6 @@ import '../../../extraction/domain/extraction_models.dart';
 import '../../../place/domain/place.dart';
 import '../../../saved/presentation/widgets/place_image.dart';
 
-/// 홈 맨 위 카드 공통 테두리 (surface + border, radius 20)
-BoxDecoration _topCardDecoration() => BoxDecoration(
-      color: AppColors.surface,
-      borderRadius: AppRadius.cardAll,
-      border: Border.all(color: AppColors.border),
-    );
-
 /// ① 처음 써요 — 공유로 저장하는 3단계 + 링크 붙여넣기
 class HomeStartGuide extends StatelessWidget {
   const HomeStartGuide({super.key, required this.onPasteLink});
@@ -29,7 +22,11 @@ class HomeStartGuide extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: _topCardDecoration(),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: AppRadius.cardAll,
+        border: Border.all(color: AppColors.border),
+      ),
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -183,6 +180,25 @@ class HomeCourseCard extends StatelessWidget {
     final meta = '${date == null ? '날짜 미정' : formatMonthDayWeekday(date)} · ${course.placeCount}곳';
     final big = AppTypography.title.copyWith(fontSize: 22, fontWeight: FontWeight.w800, height: 1.1);
 
+    final Widget headline;
+    if (isToday) {
+      headline = Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: const BoxDecoration(color: AppColors.success, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 6),
+          Text('오늘', style: big.copyWith(color: AppColors.primary)),
+        ],
+      );
+    } else if (date == null) {
+      headline = Text('날짜 미정', style: big.copyWith(fontSize: 18, color: AppColors.textSecondary));
+    } else {
+      headline = Text(ddayLabel(date), style: big.copyWith(color: AppColors.primary));
+    }
+
     return Material(
       color: AppColors.surface,
       shape: RoundedRectangleBorder(borderRadius: AppRadius.cardAll, side: const BorderSide(color: AppColors.border)),
@@ -200,23 +216,7 @@ class HomeCourseCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (isToday)
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: const BoxDecoration(color: AppColors.success, shape: BoxShape.circle),
-                              ),
-                              const SizedBox(width: 6),
-                              Text('오늘', style: big.copyWith(color: AppColors.primary)),
-                            ],
-                          )
-                        else
-                          Text(
-                            date == null ? '날짜 미정' : ddayLabel(date),
-                            style: date == null ? big.copyWith(fontSize: 18, color: AppColors.textSecondary) : big.copyWith(color: AppColors.primary),
-                          ),
+                        headline,
                         const SizedBox(height: 6),
                         Text(course.title, style: AppTypography.cardTitle, maxLines: 1, overflow: TextOverflow.ellipsis),
                         const SizedBox(height: 2),
@@ -342,13 +342,13 @@ class RecentSavedStrip extends StatelessWidget {
   const RecentSavedStrip({super.key, required this.items});
   final List<RecentExtraction> items;
 
-  static const _w = 96.0;
-  static const _h = 128.0;
+  static const _tileWidth = 96.0;
+  static const _tileHeight = 128.0;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: _h,
+      height: _tileHeight,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
@@ -358,8 +358,8 @@ class RecentSavedStrip extends StatelessWidget {
           final item = items[i];
           return _PhotoTile(
             place: item.place,
-            width: _w,
-            height: _h,
+            width: _tileWidth,
+            height: _tileHeight,
             caption: formatRecentDate(item.extractedAt),
             onTap: () => context.push(AppRoutes.place(item.place.id)),
           );
@@ -385,7 +385,7 @@ class SuggestedCourseStrip extends StatelessWidget {
         itemCount: courses.length,
         separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
         itemBuilder: (_, i) {
-          final c = courses[i];
+          final course = courses[i];
           return SizedBox(
             width: 200,
             child: Material(
@@ -393,19 +393,19 @@ class SuggestedCourseStrip extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: AppColors.border)),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
-                onTap: () => onTap(c),
+                onTap: () => onTap(course),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppNetworkImage(url: c.imageUrl, width: 200, height: 96, radius: 0, placeholderIcon: Icons.route_rounded),
+                    AppNetworkImage(url: course.imageUrl, width: 200, height: 96, radius: 0, placeholderIcon: Icons.route_rounded),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(10, AppSpacing.xs, 10, 0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(c.title, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text(course.title, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
                           Text(
-                            ['${c.placeCount}곳', if (c.durationLabel != null) c.durationLabel!].join(' · '),
+                            ['${course.placeCount}곳', if (course.durationLabel != null) course.durationLabel!].join(' · '),
                             style: AppTypography.caption,
                           ),
                         ],
@@ -479,7 +479,7 @@ class _PhotoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasImage = place.imageUrl != null && place.imageUrl!.isNotEmpty;
-    final fg = hasImage ? Colors.white : AppColors.textPrimary;
+    final textColor = hasImage ? Colors.white : AppColors.textPrimary;
     return Semantics(
       button: true,
       label: '${place.name}, $caption',
@@ -525,7 +525,7 @@ class _PhotoTile extends StatelessWidget {
                     children: [
                       Text(
                         place.name,
-                        style: AppTypography.label.copyWith(color: fg, fontSize: 12),
+                        style: AppTypography.label.copyWith(color: textColor, fontSize: 12),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

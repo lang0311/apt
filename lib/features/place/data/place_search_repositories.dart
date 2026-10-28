@@ -13,14 +13,15 @@ class MockPlaceSearchRepository implements PlaceSearchRepository {
 
   @override
   Future<List<Place>> search(String query, {GeoPoint? near}) => _store.behavior.query(() {
-        final q = query.trim().toLowerCase();
+        final text = query.trim().toLowerCase();
         final found = [
           for (final p in MockFixtures.places)
-            if ([p.name, p.categoryLabel, p.address].any((t) => t.toLowerCase().contains(q))) _store.placeWithSaved(p.id),
+            if ([p.name, p.categoryLabel, p.address].any((field) => field.toLowerCase().contains(text)))
+              _store.placeWithSaved(p.id),
         ];
         if (near != null) {
-          double d(Place p) => p.location == null ? double.infinity : near.distanceTo(p.location!);
-          found.sort((a, b) => d(a).compareTo(d(b)));
+          double distanceOf(Place p) => p.location == null ? double.infinity : near.distanceTo(p.location!);
+          found.sort((a, b) => distanceOf(a).compareTo(distanceOf(b)));
         }
         return found;
       });

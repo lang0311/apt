@@ -30,12 +30,12 @@ class _SocialLoginPageState extends ConsumerState<SocialLoginPage> {
   final _password = TextEditingController();
   bool _obscure = true;
   bool _submitting = false;
-  SocialProvider? _loading;
+  SocialProvider? _signingInWith;
 
   /// 어느 칸이 틀렸는지 구분하지 않는다 — 비밀번호 칸 아래 한 줄
   String? _credentialError;
 
-  bool get _busy => _submitting || _loading != null;
+  bool get _busy => _submitting || _signingInWith != null;
 
   @override
   void dispose() {
@@ -63,7 +63,7 @@ class _SocialLoginPageState extends ConsumerState<SocialLoginPage> {
   }
 
   Future<void> _signIn(SocialProvider provider) async {
-    setState(() => _loading = provider);
+    setState(() => _signingInWith = provider);
     try {
       final result = await ref.read(authControllerProvider.notifier).signInWithSocial(provider);
       if (!mounted) return;
@@ -80,7 +80,7 @@ class _SocialLoginPageState extends ConsumerState<SocialLoginPage> {
     } catch (e) {
       if (mounted) context.push(AppRoutes.loginError, extra: failureMessage(e));
     } finally {
-      if (mounted) setState(() => _loading = null);
+      if (mounted) setState(() => _signingInWith = null);
     }
   }
 
@@ -90,10 +90,10 @@ class _SocialLoginPageState extends ConsumerState<SocialLoginPage> {
     return Scaffold(
       body: SafeArea(
         child: LayoutBuilder(
-          builder: (context, c) => SingleChildScrollView(
+          builder: (context, constraints) => SingleChildScrollView(
             padding: AppSpacing.screenPadding,
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: c.maxHeight),
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: IntrinsicHeight(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -176,7 +176,7 @@ class _SocialLoginPageState extends ConsumerState<SocialLoginPage> {
                               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                               child: SocialIconButton(
                                 provider: p,
-                                loading: _loading == p,
+                                loading: _signingInWith == p,
                                 onPressed: _busy ? null : () => _signIn(p),
                               ),
                             ),

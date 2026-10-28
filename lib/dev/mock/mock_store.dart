@@ -26,16 +26,17 @@ class MockStore {
   final Map<String, List<String>> members = {};
   final Map<String, Course> courses = {};
   final Map<String, DateTime> courseCreatedAt = {};
+  final Map<String, CourseSummaryMeta> courseMeta = {};
+
+  /// 추천하지 않는 장소 (placeId → 차단한 시각)
+  final Map<String, DateTime> blockedPlaces = {};
   Set<String> preferenceKeys = {...MockFixtures.selectedPreferenceKeys};
   bool autoAnalysis = true;
   int _seq = 100;
 
   String nextId(String prefix) => '$prefix${_seq++}';
 
-  Place placeWithSaved(String id) {
-    final p = MockFixtures.place(id);
-    return p.copyWith(isSaved: savedIds.contains(id));
-  }
+  Place placeWithSaved(String id) => MockFixtures.place(id).copyWith(isSaved: savedIds.contains(id));
 
   List<Place> get savedPlaces => [for (final id in savedIds) placeWithSaved(id)];
 
@@ -128,11 +129,6 @@ class MockStore {
       meta: const CourseSummaryMeta(region: '제주', tags: ['바다'], memberNames: ['나', '민지', '랑이']),
     );
   }
-
-  final Map<String, CourseSummaryMeta> courseMeta = {};
-
-  /// 추천하지 않는 장소 (placeId → 차단한 시각)
-  final Map<String, DateTime> blockedPlaces = {};
 }
 
 /// Mock 전용 코스 목록 메타 (서버 summary 흉내)

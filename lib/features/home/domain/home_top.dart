@@ -38,10 +38,10 @@ HomeTop resolveHomeTop({
   required DateTime? nudgeSeenAt,
   DateTime? now,
 }) {
-  final n = now ?? DateTime.now();
+  final current = now ?? DateTime.now();
   final dated = [
     for (final c in courses)
-      if (c.date != null && daysUntil(c.date!, now: n) >= 0) c,
+      if (c.date != null && daysUntil(c.date!, now: current) >= 0) c,
   ]..sort((a, b) => a.date!.compareTo(b.date!));
   final undated = [for (final c in courses) if (c.date == null) c];
   final upcoming = [...dated, ...undated];
@@ -50,7 +50,7 @@ HomeTop resolveHomeTop({
     final first = upcoming.first;
     return HomeTopCourse(
       course: first,
-      isToday: first.date != null && daysUntil(first.date!, now: n) == 0,
+      isToday: first.date != null && daysUntil(first.date!, now: current) == 0,
       moreCount: upcoming.length - 1,
     );
   }

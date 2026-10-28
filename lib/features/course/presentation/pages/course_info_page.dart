@@ -97,24 +97,24 @@ class _CourseInfoPageState extends ConsumerState<CourseInfoPage> {
                   ),
                   // 분위기 칩은 개수와 상관없이 한 줄, 가로로 넘긴다 (서버 키워드 그대로)
                   if (showMoods) ...[
-                  AsyncValueView(
-                    value: moods,
-                    compactError: true,
-                    loading: const Padding(padding: AppSpacing.screenPadding, child: SkeletonBox(height: 36)),
-                    onRetry: () => ref.invalidate(moodOptionsProvider),
-                    data: (list) =>
-                        _MoodRow(options: list, selected: draft.moodKeys, onToggle: (key) => _draft.update((d) => d.toggleMood(key))),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.sm, AppSpacing.screenH, 0),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.auto_awesome, size: 14, color: AppColors.ai),
-                        const SizedBox(width: 6),
-                        Text('선택한 분위기는 추천에 반영돼요.', style: AppTypography.caption),
-                      ],
+                    AsyncValueView(
+                      value: moods,
+                      compactError: true,
+                      loading: const Padding(padding: AppSpacing.screenPadding, child: SkeletonBox(height: 36)),
+                      onRetry: () => ref.invalidate(moodOptionsProvider),
+                      data: (list) =>
+                          _MoodRow(options: list, selected: draft.moodKeys, onToggle: (key) => _draft.update((d) => d.toggleMood(key))),
                     ),
-                  ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.sm, AppSpacing.screenH, 0),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.auto_awesome, size: 14, color: AppColors.ai),
+                          const SizedBox(width: 6),
+                          Text('선택한 분위기는 추천에 반영돼요.', style: AppTypography.caption),
+                        ],
+                      ),
+                    ),
                   ],
                 ],
               ),

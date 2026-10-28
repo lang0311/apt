@@ -11,28 +11,28 @@ class ApiSavedRepository implements SavedRepository {
   // ignore: unused_field
   final ApiClient _client;
 
-  static const _f = NotImplementedFailure('저장');
+  static const _notImplemented = NotImplementedFailure('저장');
 
   @override
-  Future<SavedSummary> fetchSummary() async => throw _f;
+  Future<SavedSummary> fetchSummary() async => throw _notImplemented;
   @override
-  Future<List<SavedPlaceItem>> fetchSavedPlaces(SavedPlaceQuery query) async => throw _f;
+  Future<List<SavedPlaceItem>> fetchSavedPlaces(SavedPlaceQuery query) async => throw _notImplemented;
   // GET /api/v1/places/nearby?lat&lng&radius → 받은 목록에 query(카테고리·보관함·검색어)를 적용한다.
   @override
   Future<List<SavedPlaceItem>> fetchSavedPlacesNearby(GeoPoint center, int radiusMeters, SavedPlaceQuery query) async =>
-      throw _f;
+      throw _notImplemented;
   @override
-  Future<List<PlaceCollection>> fetchCollections() async => throw _f;
+  Future<List<PlaceCollection>> fetchCollections() async => throw _notImplemented;
   @override
-  Future<PlaceCollection> fetchCollection(String collectionId) async => throw _f;
+  Future<PlaceCollection> fetchCollection(String collectionId) async => throw _notImplemented;
   @override
-  Future<PlaceCollection> createCollection(String name) async => throw _f;
+  Future<PlaceCollection> createCollection(String name) async => throw _notImplemented;
   @override
-  Future<void> savePlaces({required List<String> placeIds, required List<String> collectionIds}) async => throw _f;
+  Future<void> savePlaces({required List<String> placeIds, required List<String> collectionIds}) async => throw _notImplemented;
   @override
-  Future<void> setPlaceCollections({required String placeId, required List<String> collectionIds}) async => throw _f;
+  Future<void> setPlaceCollections({required String placeId, required List<String> collectionIds}) async => throw _notImplemented;
   @override
-  Future<List<String>> fetchPlaceCollectionIds(String placeId) async => throw _f;
+  Future<List<String>> fetchPlaceCollectionIds(String placeId) async => throw _notImplemented;
   @override
-  Future<void> addPlacesToCollection({required String collectionId, required List<String> placeIds}) async => throw _f;
+  Future<void> addPlacesToCollection({required String collectionId, required List<String> placeIds}) async => throw _notImplemented;
 }

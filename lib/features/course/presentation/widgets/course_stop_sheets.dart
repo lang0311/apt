@@ -83,20 +83,21 @@ class _ActionRow extends StatelessWidget {
   final StopSheetAction action;
   final BuildContext sheetContext;
 
+  /// 아이콘 원의 (바탕, 아이콘) 색. 바꾸기(AI 추천)는 주황.
+  (Color, Color) get _iconColors {
+    if (action.danger) return (AppColors.dangerSoft, AppColors.dangerText);
+    if (action.icon == Icons.swap_horiz_rounded) return (AppColors.aiSoft, AppColors.aiText);
+    if (action.chevron) return (AppColors.primarySoft, AppColors.primary);
+    return (AppColors.surfaceMuted, AppColors.textPrimary);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final a = action;
-    final (bg, fg) = a.danger
-        ? (AppColors.dangerSoft, AppColors.dangerText)
-        : a.icon == Icons.swap_horiz_rounded
-            ? (AppColors.aiSoft, AppColors.aiText)
-            : a.chevron
-                ? (AppColors.primarySoft, AppColors.primary)
-                : (AppColors.surfaceMuted, AppColors.textPrimary);
+    final (bg, fg) = _iconColors;
     return InkWell(
       onTap: () {
         Navigator.of(sheetContext).pop();
-        a.onTap();
+        action.onTap();
       },
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 56),
@@ -108,7 +109,7 @@ class _ActionRow extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
-                child: Icon(a.icon, size: 20, color: fg),
+                child: Icon(action.icon, size: 20, color: fg),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
@@ -120,11 +121,11 @@ class _ActionRow extends StatelessWidget {
                       children: [
                         Flexible(
                           child: Text(
-                            a.label,
-                            style: AppTypography.bodyStrong.copyWith(color: a.danger ? AppColors.dangerText : null),
+                            action.label,
+                            style: AppTypography.bodyStrong.copyWith(color: action.danger ? AppColors.dangerText : null),
                           ),
                         ),
-                        if (a.onceScope) ...[
+                        if (action.onceScope) ...[
                           const SizedBox(width: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
@@ -134,11 +135,11 @@ class _ActionRow extends StatelessWidget {
                         ],
                       ],
                     ),
-                    if (a.description != null) Text(a.description!, style: AppTypography.caption),
+                    if (action.description != null) Text(action.description!, style: AppTypography.caption),
                   ],
                 ),
               ),
-              if (a.chevron) const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+              if (action.chevron) const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
             ],
           ),
         ),

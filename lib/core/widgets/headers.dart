@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
@@ -10,7 +11,7 @@ void _defaultBack(BuildContext context) {
   if (context.canPop()) {
     context.pop();
   } else {
-    context.go('/home');
+    context.go(AppRoutes.home);
   }
 }
 
@@ -126,7 +127,12 @@ class PlainHeader extends StatelessWidget {
             Expanded(
               child: title == null
                   ? const SizedBox()
-                  : Text(title!, style: AppTypography.header.copyWith(fontSize: 17, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  : Text(
+                      title!,
+                      style: AppTypography.header.copyWith(fontSize: 17, fontWeight: FontWeight.w800),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
             ),
             ...actions,
             if (trailing != null) Padding(padding: const EdgeInsets.only(right: AppSpacing.sm), child: trailing),

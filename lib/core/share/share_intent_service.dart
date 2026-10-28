@@ -11,8 +11,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 ///
 /// 외부 패키지 대신 플랫폼 채널을 직접 쓴다. 수신 패키지를 채택하면 이 클래스 내부만 바꾼다.
 class ShareIntentService {
-  ShareIntentService();
-
   static const _method = MethodChannel('apt/share');
   static const _events = EventChannel('apt/share/events');
 

@@ -72,11 +72,14 @@ class _AppTextFieldState extends State<AppTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = widget.hasError
-        ? AppColors.danger
-        : _focus.hasFocus
-            ? AppColors.primary
-            : AppColors.border;
+    final Color borderColor;
+    if (widget.hasError) {
+      borderColor = AppColors.danger;
+    } else if (_focus.hasFocus) {
+      borderColor = AppColors.primary;
+    } else {
+      borderColor = AppColors.border;
+    }
 
     final field = AnimatedContainer(
       duration: const Duration(milliseconds: 150),

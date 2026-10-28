@@ -26,14 +26,17 @@ class PlatformClient {
   Future<dynamic> post(String path, [Json? body]) => client.run(
     (d) async => (await d.post<dynamic>(path, data: body ?? {})).data,
   );
+  Future<dynamic> delete(String path, [Json? body]) => client.run(
+    (d) async => (await d.delete<dynamic>(path, data: body)).data,
+  );
   Future<Json> me() async {
     final data = Map<String, dynamic>.from(await get('/me') as Map);
     currentUserId = (data['user'] as Map)['id'] as String;
-    for (final p in data['parties'] as List) {
-      partySizes[p['id'] as String] = (p['members'] as List).length;
+    for (final party in data['parties'] as List) {
+      partySizes[party['id'] as String] = (party['members'] as List).length;
     }
-    for (final p in data['places'] as List) {
-      place(Map<String, dynamic>.from(p as Map), saved: true);
+    for (final saved in data['places'] as List) {
+      place(Map<String, dynamic>.from(saved as Map), saved: true);
     }
     return data;
   }
@@ -63,19 +66,18 @@ class PlatformClient {
       if (near != null) ...{'lat': near.lat, 'lon': near.lng},
     });
     return [
-      for (final p in data['places'] as List)
-        place(Map<String, dynamic>.from(p as Map)),
+      for (final found in data['places'] as List)
+        place(Map<String, dynamic>.from(found as Map)),
     ];
   }
 
   Future<String> token(String id) async {
-    final p = places[id];
-    if (p?['selection_token'] is String) return p!['selection_token'] as String;
-    for (final c in courses.values) {
-      if ((c['itinerary'] as List).any(
-        (p) => (p['key'] ?? p['id']).toString() == id,
-      )) {
-        final result = await get('/courses/${c['id']}/places/$id/selection');
+    final cached = places[id];
+    if (cached?['selection_token'] is String) return cached!['selection_token'] as String;
+    for (final course in courses.values) {
+      final inCourse = (course['itinerary'] as List).any((stop) => (stop['key'] ?? stop['id']).toString() == id);
+      if (inCourse) {
+        final result = await get('/courses/${course['id']}/places/$id/selection');
         places[id]?['selection_token'] = result['token'];
         return result['token'] as String;
       }
@@ -91,32 +93,33 @@ class PlatformClient {
     await post('/me/places', {'token': await token(id)});
   }
 
-  Course course(Json c) {
-    courses[c['id'] as String] = c;
-    final time = (c['start_time'] as String?)?.split(':');
+  Course course(Json json) {
+    courses[json['id'] as String] = json;
+    final time = (json['start_time'] as String?)?.split(':');
     return Course(
-      id: c['id'] as String,
-      title: (c['title'] ?? '추천 코스').toString(),
-      date: DateTime.tryParse((c['date'] ?? '').toString()),
-      isParty: c['party_id'] != null,
-      partyId: c['party_id'] as String?,
+      id: json['id'] as String,
+      title: (json['title'] ?? '추천 코스').toString(),
+      date: DateTime.tryParse((json['date'] ?? '').toString()),
+      isParty: json['party_id'] != null,
+      partyId: json['party_id'] as String?,
       startTime: time == null
           ? null
           : TimeOfDay(hour: int.parse(time[0]), minute: int.parse(time[1])),
-      memberCount: c['party_id'] == null ? 1 : partySizes[c['party_id']] ?? 1,
-      canEdit: c['status'] != 'confirmed',
-      stops: stops(c),
+      memberCount: json['party_id'] == null ? 1 : partySizes[json['party_id']] ?? 1,
+      canEdit: json['status'] != 'confirmed',
+      stops: stops(json),
     );
   }
 
-  List<CourseStop> stops(Json c) => [
-    for (final raw in c['itinerary'] as List)
+  List<CourseStop> stops(Json course) => [
+    for (final stop in course['itinerary'] as List)
       CourseStop(
-        place: place(Map<String, dynamic>.from(raw as Map)),
-        source: raw['saved'] == true ? PlaceSource.user : PlaceSource.ai,
-        aiReason: raw['saved'] == true ? null : raw['description'] as String?,
+        place: place(Map<String, dynamic>.from(stop as Map)),
+        source: stop['saved'] == true ? PlaceSource.user : PlaceSource.ai,
+        aiReason: stop['saved'] == true ? null : stop['description'] as String?,
       ),
   ];
+
   /// 사용자가 추천 취소를 눌렀는지. 추천을 새로 시작할 때 끈다.
   bool cancelRequested = false;
 
@@ -126,7 +129,7 @@ class PlatformClient {
   /// 추천 job이 끝날 때까지 기다린다. [onStage]에는 서버 stage 값을 그대로 넘긴다.
   /// 취소를 누르면 서버에 취소를 보내고 바로 [CancelledFailure]를 던진다(서버가 멈출 때까지 기다리지 않음).
   Future<Json> poll(String job, {void Function(String stage)? onStage}) async {
-    // Reload resumes the same server job; never silently issue a second paid request.
+    // 새로고침해도 같은 서버 job을 이어서 기다린다. 비용이 드는 추천 요청을 몰래 다시 보내지 않는다.
     activeJob = job;
     try {
       for (var i = 0; i < 1200; i++) {
@@ -168,11 +171,5 @@ class PlatformClient {
       await Future<void>.delayed(const Duration(seconds: 1));
     }
     throw const TimeoutFailure('이전 추천을 멈추는 중이에요. 잠시 후 다시 시도해주세요.');
-  }
-
-  Future<void> cancelActive() async {
-    for (final job in await get('/jobs') as List) {
-      await post('/jobs/${job['id']}/cancel');
-    }
   }
 }

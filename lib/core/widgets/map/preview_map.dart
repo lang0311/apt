@@ -63,19 +63,15 @@ class _PreviewMapState extends State<PreviewMap> {
   void _reportBounds() {
     final b = _bounds;
     if (!mounted || b == null || widget.onCameraIdle == null) return;
-    if (_reported != null &&
-        _reported!.southWest == b.southWest &&
-        _reported!.northEast == b.northEast) {
-      return;
-    }
+    if (_reported == b) return;
     _reported = b;
     widget.onCameraIdle!(b);
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, c) {
-      final size = Size(c.maxWidth, c.maxHeight);
+    return LayoutBuilder(builder: (context, constraints) {
+      final size = Size(constraints.maxWidth, constraints.maxHeight);
       final top = widget.topPadding + 44;
       final usable = Rect.fromLTRB(44, top, size.width - 44, math.max(top + 60, size.height - widget.bottomPadding - 44));
       final bounds = _bounds;

@@ -102,7 +102,7 @@ class CourseEditButton extends StatelessWidget {
 }
 
 /// 장소 번호 원. 내가 고른 장소 = 진한 번호, AI 추천 = 주황 ✦.
-Widget _marker(CourseStop s, int? number) => StopMarker(source: s.source, number: number, size: 26, dark: !s.isAi);
+Widget _marker(CourseStop stop, int? number) => StopMarker(source: stop.source, number: number, size: 26, dark: !stop.isAi);
 
 /// 장소 이름 아래 줄. AI 추천은 "✦ 이유"(주황 글자), 내가 고른 장소는 카테고리 · 지역.
 class _StopText extends StatelessWidget {
@@ -113,9 +113,8 @@ class _StopText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final place = stop.place;
-    final sub = stop.isAi
-        ? '✦ ${stop.aiReason ?? 'AI 추천'}'
-        : [place.categoryLabel, if (_shortArea(place).isNotEmpty) _shortArea(place)].join(' · ');
+    final area = _shortArea(place);
+    final sub = stop.isAi ? '✦ ${stop.aiReason ?? 'AI 추천'}' : [place.categoryLabel, if (area.isNotEmpty) area].join(' · ');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -374,21 +373,22 @@ class CourseEditList extends StatelessWidget {
               child: child,
             ),
             itemBuilder: (_, i) {
-              final s = stops[i];
+              final stop = stops[i];
+              final id = stop.place.id;
               return Padding(
-                key: ValueKey(s.place.id),
+                key: ValueKey(id),
                 padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                child: loadingIds.contains(s.place.id)
+                child: loadingIds.contains(id)
                     ? const _SkeletonTile()
                     : _EditTile(
-                        stop: s,
+                        stop: stop,
                         index: i,
                         number: numbers[i],
-                        added: addedIds.contains(s.place.id),
-                        highlighted: highlightIds.contains(s.place.id),
+                        added: addedIds.contains(id),
+                        highlighted: highlightIds.contains(id),
                         enabled: enabled,
-                        onRemove: () => onRemove(s),
-                        onTap: () => onTapTile(s, i),
+                        onRemove: () => onRemove(stop),
+                        onTap: () => onTapTile(stop, i),
                       ),
               );
             },

@@ -57,6 +57,16 @@ class _CollectionPickerState extends ConsumerState<_CollectionPicker> {
     if (created != null) setState(() => _selected.add(created.id));
   }
 
+  void _toggle(String id) {
+    setState(() {
+      if (_selected.contains(id)) {
+        _selected.remove(id);
+      } else {
+        _selected.add(id);
+      }
+    });
+  }
+
   Future<void> _save() async {
     setState(() => _saving = true);
     final repo = ref.read(savedRepositoryProvider);
@@ -122,12 +132,12 @@ class _CollectionPickerState extends ConsumerState<_CollectionPicker> {
                     checked: true,
                     onTap: null,
                   ),
-                  for (final c in list)
+                  for (final collection in list)
                     _Row(
-                      title: c.name,
-                      subtitle: '${c.placeCount}곳',
-                      checked: _selected.contains(c.id),
-                      onTap: () => setState(() => _selected.contains(c.id) ? _selected.remove(c.id) : _selected.add(c.id)),
+                      title: collection.name,
+                      subtitle: '${collection.placeCount}곳',
+                      checked: _selected.contains(collection.id),
+                      onTap: () => _toggle(collection.id),
                     ),
                   InkWell(
                     onTap: _create,

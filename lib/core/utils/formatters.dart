@@ -34,8 +34,10 @@ String formatRelative(DateTime time, {DateTime? now}) {
 }
 
 /// 일주일 안은 '방금 · n분/시간/일 전', 그보다 오래면 '10월 12일' (홈·저장됨 공통)
-String formatRecentDate(DateTime at, {DateTime? now}) =>
-    (now ?? DateTime.now()).difference(at).inDays < 7 ? formatRelative(at, now: now) : '${at.month}월 ${at.day}일';
+String formatRecentDate(DateTime at, {DateTime? now}) {
+  final withinWeek = (now ?? DateTime.now()).difference(at).inDays < 7;
+  return withinWeek ? formatRelative(at, now: now) : '${at.month}월 ${at.day}일';
+}
 
 /// 5시간 20분
 String formatDuration(Duration d) {
@@ -52,24 +54,24 @@ String formatDistance(int meters) =>
 
 /// 날짜(시각 제외) 기준 D-day. 오늘=0, 미래=양수, 과거=음수.
 int daysUntil(DateTime target, {DateTime? now}) {
-  final n = now ?? DateTime.now();
-  final a = DateTime(n.year, n.month, n.day);
-  final b = DateTime(target.year, target.month, target.day);
-  return b.difference(a).inDays;
+  final today = now ?? DateTime.now();
+  final from = DateTime(today.year, today.month, today.day);
+  final to = DateTime(target.year, target.month, target.day);
+  return to.difference(from).inDays;
 }
 
 String ddayLabel(DateTime target, {DateTime? now}) {
-  final d = daysUntil(target, now: now);
-  if (d == 0) return 'D-DAY';
-  return d > 0 ? 'D-$d' : 'D+${-d}';
+  final days = daysUntil(target, now: now);
+  if (days == 0) return 'D-DAY';
+  return days > 0 ? 'D-$days' : 'D+${-days}';
 }
 
 /// 마지막 글자에 받침이 있는지 (한글이 아니면 숫자·영문 끝소리를 대략 따른다)
 bool _hasFinalConsonant(String word) {
   if (word.isEmpty) return false;
-  final c = word.runes.last;
-  if (c >= 0xAC00 && c <= 0xD7A3) return (c - 0xAC00) % 28 != 0;
-  return '013678LMNlmn'.contains(String.fromCharCode(c));
+  final last = word.runes.last;
+  if (last >= 0xAC00 && last <= 0xD7A3) return (last - 0xAC00) % 28 != 0;
+  return '013678LMNlmn'.contains(String.fromCharCode(last));
 }
 
 /// 성수 정원을 / 카페를

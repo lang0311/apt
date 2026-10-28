@@ -36,23 +36,23 @@ Future<void> blockStopWithUndo(BuildContext context, WidgetRef ref, CourseStop s
 
 /// 다시 추천 — 바뀐 자리 수를 알리고 되돌릴 수 있게 한다
 Future<void> recommendAgainWithUndo(BuildContext context, WidgetRef ref) async {
-  final n = await _rec(ref).recommendAgain();
+  final changed = await _rec(ref).recommendAgain();
   if (!context.mounted) return;
-  _reportAgain(context, ref, n);
+  _reportAgain(context, ref, changed);
 }
 
 /// AI 장소 다른 곳으로 바꾸기 (이번만 빼기 + 다시 추천)
 Future<void> replaceStopWithUndo(BuildContext context, WidgetRef ref, CourseStop stop) async {
-  final n = await _rec(ref).replaceAi(stop);
+  final changed = await _rec(ref).replaceAi(stop);
   if (!context.mounted) return;
-  _reportAgain(context, ref, n);
+  _reportAgain(context, ref, changed);
 }
 
 void _reportAgain(BuildContext context, WidgetRef ref, int? changed) {
   if (changed == null) {
-    final e = ref.read(recommendationProvider).error;
-    if (e == null) return; // 취소함 — 취소 버튼이 따로 알린다
-    showAppSnackBar(context, '다시 추천하지 못했어요. ${failureMessage(e)}');
+    final error = ref.read(recommendationProvider).error;
+    if (error == null) return; // 취소함 — 취소 버튼이 따로 알린다
+    showAppSnackBar(context, '다시 추천하지 못했어요. ${failureMessage(error)}');
   } else if (changed == 0) {
     _undoSnack(context, ref, '바꿀 추천 장소를 찾지 못했어요');
   } else {

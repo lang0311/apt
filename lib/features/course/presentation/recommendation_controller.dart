@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/repositories.dart';
@@ -98,14 +99,7 @@ class RecommendationController extends Notifier<RecommendationState> {
   CourseDraftController get _draft => ref.read(courseDraftProvider.notifier);
 
   /// 시작할 때와 장소·순서가 달라졌는지 (닫기 전 확인용)
-  bool get isDirty {
-    final now = [for (final s in state.stops) s.place.id];
-    if (now.length != _initialIds.length) return true;
-    for (var i = 0; i < now.length; i++) {
-      if (now[i] != _initialIds[i]) return true;
-    }
-    return false;
-  }
+  bool get isDirty => !listEquals([for (final s in state.stops) s.place.id], _initialIds);
 
   bool get canUndo => _undo != null;
 

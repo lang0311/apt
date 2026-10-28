@@ -68,6 +68,21 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
     }
   }
 
+  /// 고른 장소는 고른 순서 번호 핀, 아니면 카테고리 아이콘 핀
+  MapMarker _marker(Place place) {
+    final order = widget.selectedIds.indexOf(place.id);
+    if (order >= 0) {
+      return MapMarker(id: place.id, point: place.location!, kind: MapPinKind.numbered, number: order + 1);
+    }
+    return MapMarker(
+      id: place.id,
+      point: place.location!,
+      kind: MapPinKind.place,
+      icon: CategoryStyle.of(place.categoryKey).icon,
+      color: AppColors.primary,
+    );
+  }
+
   Future<void> _openFilter() async {
     final summary = ref.read(savedSummaryProvider).value;
     if (summary == null) return;
@@ -85,27 +100,20 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
         ? null
         : summary?.categories.where((c) => c.key == _categoryKey).firstOrNull?.label;
     final filterTop = _searchHeight + AppSpacing.xs * 2;
+    // 필터 칩이 있으면 그 아래부터 지도·목록을 쓴다
+    final contentTop = filterTop + (categoryLabel == null ? 0 : 36);
 
     return Stack(
       children: [
         Positioned.fill(
           child: AptMap(
             controller: _map,
-            topPadding: filterTop + (categoryLabel == null ? 0 : 36),
+            topPadding: contentTop,
             bottomPadding: _cardHeight + 60,
             selectedId: _focusedId,
             markers: [
               for (final p in places)
-                if (p.location != null && !widget.excludedIds.contains(p.id))
-                  selected.contains(p.id)
-                      ? MapMarker(id: p.id, point: p.location!, kind: MapPinKind.numbered, number: selected.indexOf(p.id) + 1)
-                      : MapMarker(
-                          id: p.id,
-                          point: p.location!,
-                          kind: MapPinKind.place,
-                          icon: CategoryStyle.of(p.categoryKey).icon,
-                          color: AppColors.primary,
-                        ),
+                if (p.location != null && !widget.excludedIds.contains(p.id)) _marker(p),
             ],
             onMarkerTap: (m) {
               final i = places.indexWhere((p) => p.id == m.id);
@@ -117,7 +125,7 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
         // 목록 상태: 검색창 아래를 목록으로 덮는다
         if (_listMode)
           Positioned.fill(
-            top: filterTop + (categoryLabel == null ? 0 : 36),
+            top: contentTop,
             child: _ListPanel(
               items: items,
               selectedIds: selected,
@@ -174,28 +182,29 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
               AsyncData() => Padding(
                   padding: const EdgeInsets.only(left: AppSpacing.sm),
                   child: PageView.builder(
-                  clipBehavior: Clip.none,
-                  controller: _pages,
-                  padEnds: false,
-                  itemCount: places.length,
-                  onPageChanged: (i) => _focus(places, i),
-                  itemBuilder: (_, i) {
-                    final p = places[i];
-                    return Padding(
-                      padding: const EdgeInsets.only(right: AppSpacing.xs),
-                      child: _PlaceCard(
-                        key: ValueKey(p.id),
-                        place: p,
-                        focused: p.id == _focusedId,
-                        number: selected.contains(p.id) ? selected.indexOf(p.id) + 1 : null,
-                        inCourse: widget.excludedIds.contains(p.id),
-                        excludedLabel: widget.excludedLabel,
-                        onTap: () => _focus(places, i, scrollCards: true),
-                        onToggle: () => widget.onToggle(p),
-                      ),
-                    );
-                  },
-                ),
+                    clipBehavior: Clip.none,
+                    controller: _pages,
+                    padEnds: false,
+                    itemCount: places.length,
+                    onPageChanged: (i) => _focus(places, i),
+                    itemBuilder: (_, i) {
+                      final place = places[i];
+                      final order = selected.indexOf(place.id);
+                      return Padding(
+                        padding: const EdgeInsets.only(right: AppSpacing.xs),
+                        child: _PlaceCard(
+                          key: ValueKey(place.id),
+                          place: place,
+                          focused: place.id == _focusedId,
+                          number: order < 0 ? null : order + 1,
+                          inCourse: widget.excludedIds.contains(place.id),
+                          excludedLabel: widget.excludedLabel,
+                          onTap: () => _focus(places, i, scrollCards: true),
+                          onToggle: () => widget.onToggle(place),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               AsyncError() => Center(
                   child: _Bubble(text: '장소를 불러오지 못했어요', onTap: () => ref.invalidate(savedPlacesProvider(_query))),
@@ -404,10 +413,11 @@ class _InCourseTag extends StatelessWidget {
   }
 }
 
-String _sub(Place p) {
-  final parts = p.displayArea.trim().split(RegExp(r'\s+'));
+/// '성수동 · 카페' (주소 마지막 단어 · 카테고리)
+String _areaAndCategory(Place place) {
+  final parts = place.displayArea.trim().split(RegExp(r'\s+'));
   final area = parts.isEmpty ? '' : parts.last;
-  return [if (area.isNotEmpty) area, p.categoryLabel].join(' · ');
+  return [if (area.isNotEmpty) area, place.categoryLabel].join(' · ');
 }
 
 /// 지도 아래 장소 카드 (높이 64, 사진 44). 카드를 누르면 지도가 그 장소로, 원을 누르면 고르기/빼기.
@@ -423,11 +433,11 @@ class _PlaceCard extends StatelessWidget {
     required this.onToggle,
   });
 
-  final String excludedLabel;
   final Place place;
   final bool focused;
   final int? number;
   final bool inCourse;
+  final String excludedLabel;
   final VoidCallback onTap;
   final VoidCallback onToggle;
 
@@ -459,7 +469,7 @@ class _PlaceCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(place.name, style: AppTypography.bodyStrong.copyWith(fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
-                      Text(_sub(place), style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text(_areaAndCategory(place), style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],
                   ),
                 ),
@@ -487,11 +497,10 @@ class _ListPanel extends StatelessWidget {
     required this.onRetry,
   });
 
-  final String excludedLabel;
-
   final AsyncValue<List<SavedPlaceItem>> items;
   final List<String> selectedIds;
   final Set<String> excludedIds;
+  final String excludedLabel;
   final ValueChanged<Place> onToggle;
   final VoidCallback onRetry;
 
@@ -528,7 +537,7 @@ class _ListPanel extends StatelessWidget {
                       itemBuilder: (_, i) {
                         final p = list[i].place;
                         final inCourse = excludedIds.contains(p.id);
-                        final n = selectedIds.indexOf(p.id);
+                        final order = selectedIds.indexOf(p.id);
                         return Opacity(
                           key: ValueKey(p.id),
                           opacity: inCourse ? 0.55 : 1,
@@ -545,14 +554,14 @@ class _ListPanel extends StatelessWidget {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(p.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
-                                        Text(_sub(p), style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
+                                        Text(_areaAndCategory(p), style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
                                       ],
                                     ),
                                   ),
                                   if (inCourse)
                                     Padding(padding: const EdgeInsets.all(10), child: _InCourseTag(excludedLabel))
                                   else
-                                    _SelectButton(number: n < 0 ? null : n + 1, name: p.name, onTap: () => onToggle(p)),
+                                    _SelectButton(number: order < 0 ? null : order + 1, name: p.name, onTap: () => onToggle(p)),
                                 ],
                               ),
                             ),

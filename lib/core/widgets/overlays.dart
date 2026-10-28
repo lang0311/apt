@@ -7,10 +7,11 @@ import 'buttons.dart';
 
 void showAppSnackBar(BuildContext context, String message, {String? actionLabel, VoidCallback? onAction}) {
   final action = actionLabel == null || onAction == null ? null : SnackBarAction(label: actionLabel, onPressed: onAction);
+  // 누를 버튼이 있으면 조금 더 오래 둔다
+  final duration = Duration(seconds: action == null ? 2 : 4);
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    // 누를 버튼이 있으면 조금 더 오래 둔다
-    ..showSnackBar(SnackBar(content: Text(message), action: action, duration: Duration(seconds: action == null ? 2 : 4)));
+    ..showSnackBar(SnackBar(content: Text(message), action: action, duration: duration));
 }
 
 /// 바텀시트 (상단 큰 radius + 핸들). 탭바를 덮도록 root navigator 사용.
@@ -183,17 +184,17 @@ Future<void> showActionSheet(BuildContext context, {String? title, required List
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
               child: Text(title, style: AppTypography.cardTitle),
             ),
-          for (final a in actions)
+          for (final action in actions)
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: Icon(a.icon, color: a.destructive ? AppColors.danger : AppColors.textPrimary),
+              leading: Icon(action.icon, color: action.destructive ? AppColors.danger : AppColors.textPrimary),
               title: Text(
-                a.label,
-                style: AppTypography.bodyStrong.copyWith(color: a.destructive ? AppColors.danger : null),
+                action.label,
+                style: AppTypography.bodyStrong.copyWith(color: action.destructive ? AppColors.danger : null),
               ),
               onTap: () {
                 Navigator.of(ctx).pop();
-                a.onTap();
+                action.onTap();
               },
             ),
         ],

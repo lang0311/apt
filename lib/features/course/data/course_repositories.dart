@@ -14,17 +14,17 @@ class MockCourseRepository implements CourseRepository {
   MockCourseRepository(this._store);
   final MockStore _store;
 
-  CourseSummary _summary(Course c) {
-    final meta = _store.courseMeta[c.id];
+  CourseSummary _summary(Course course) {
+    final meta = _store.courseMeta[course.id];
     return CourseSummary(
-      id: c.id,
-      title: c.title,
+      id: course.id,
+      title: course.title,
       regionLabel: meta?.region,
-      placeCount: c.stops.length,
-      date: c.date,
-      thumbnailUrl: c.stops.isEmpty ? null : c.stops.first.place.imageUrl,
-      isParty: c.isParty,
-      memberCount: c.memberCount,
+      placeCount: course.stops.length,
+      date: course.date,
+      thumbnailUrl: course.stops.isEmpty ? null : course.stops.first.place.imageUrl,
+      isParty: course.isParty,
+      memberCount: course.memberCount,
       memberNames: meta?.memberNames ?? const [],
       tags: meta?.tags ?? const [],
     );
@@ -66,9 +66,9 @@ class MockCourseRepository implements CourseRepository {
 
   @override
   Future<Course> fetchCourse(String courseId) => _store.behavior.query(() {
-        final c = _store.courses[courseId];
-        if (c == null) throw const NotFoundFailure();
-        return c;
+        final course = _store.courses[courseId];
+        if (course == null) throw const NotFoundFailure();
+        return course;
       });
 
   @override
@@ -175,21 +175,21 @@ class MockCourseRepository implements CourseRepository {
   @override
   Future<Course> updateCourseStops({required String courseId, required List<CourseStop> stops}) =>
       _store.behavior.mutate(() {
-        final c = _store.courses[courseId];
-        if (c == null) throw const NotFoundFailure();
+        final old = _store.courses[courseId];
+        if (old == null) throw const NotFoundFailure();
         final updated = Course(
-          id: c.id,
-          title: c.title,
-          date: c.date,
-          startTime: c.startTime,
-          isParty: c.isParty,
-          memberCount: c.memberCount,
+          id: old.id,
+          title: old.title,
+          date: old.date,
+          startTime: old.startTime,
+          isParty: old.isParty,
+          memberCount: old.memberCount,
           totalDuration: _duration(stops),
-          isShared: c.isShared,
+          isShared: old.isShared,
           stops: stops,
-          moodKeys: c.moodKeys,
-          partyId: c.partyId,
-          canEdit: c.canEdit,
+          moodKeys: old.moodKeys,
+          partyId: old.partyId,
+          canEdit: old.canEdit,
         );
         _store.courses[courseId] = updated;
         return updated;
@@ -197,12 +197,9 @@ class MockCourseRepository implements CourseRepository {
 
   @override
   Future<List<BlockedPlace>> fetchBlockedPlaces() => _store.behavior.query(
-        () {
-          final list = [
-            for (final e in _store.blockedPlaces.entries) BlockedPlace(place: MockFixtures.place(e.key), blockedAt: e.value),
-          ]..sort((a, b) => b.blockedAt!.compareTo(a.blockedAt!));
-          return list;
-        },
+        () => [
+          for (final e in _store.blockedPlaces.entries) BlockedPlace(place: MockFixtures.place(e.key), blockedAt: e.value),
+        ]..sort((a, b) => b.blockedAt!.compareTo(a.blockedAt!)),
         empty: () => const [],
       );
 
@@ -219,38 +216,38 @@ class ApiCourseRepository implements CourseRepository {
   // ignore: unused_field
   final ApiClient _client;
 
-  static const _f = NotImplementedFailure('코스');
+  static const _notImplemented = NotImplementedFailure('코스');
 
   @override
-  Future<List<CourseSummary>> fetchMyCourses() async => throw _f;
+  Future<List<CourseSummary>> fetchMyCourses() async => throw _notImplemented;
   @override
-  Future<List<CourseSummary>> fetchPartyCourses() async => throw _f;
+  Future<List<CourseSummary>> fetchPartyCourses() async => throw _notImplemented;
   @override
-  Future<List<CourseSummary>> fetchActiveCourses() async => throw _f;
+  Future<List<CourseSummary>> fetchActiveCourses() async => throw _notImplemented;
   @override
-  Future<List<SuggestedCourse>> fetchSuggestedCourses() async => throw _f;
+  Future<List<SuggestedCourse>> fetchSuggestedCourses() async => throw _notImplemented;
   @override
-  Future<Course> fetchCourse(String courseId) async => throw _f;
+  Future<Course> fetchCourse(String courseId) async => throw _notImplemented;
   @override
-  Future<List<MoodOption>> fetchMoodOptions() async => throw _f;
+  Future<List<MoodOption>> fetchMoodOptions() async => throw _notImplemented;
   @override
   Future<Recommendation> recommend({
     required CourseDraft draft,
     List<CourseStop> currentStops = const [],
     void Function(RecommendationStage stage)? onStage,
-  }) async => throw _f;
+  }) async => throw _notImplemented;
   @override
   Future<void> cancelRecommendation() async {}
   @override
-  Future<String> courseLink(String courseId) async => throw _f;
+  Future<String> courseLink(String courseId) async => throw _notImplemented;
   @override
-  Future<Course> createCourse({required CourseDraft draft, required List<CourseStop> stops}) async => throw _f;
+  Future<Course> createCourse({required CourseDraft draft, required List<CourseStop> stops}) async => throw _notImplemented;
   @override
-  Future<Course> updateCourseStops({required String courseId, required List<CourseStop> stops}) async => throw _f;
+  Future<Course> updateCourseStops({required String courseId, required List<CourseStop> stops}) async => throw _notImplemented;
   @override
-  Future<List<BlockedPlace>> fetchBlockedPlaces() async => throw _f;
+  Future<List<BlockedPlace>> fetchBlockedPlaces() async => throw _notImplemented;
   @override
-  Future<void> blockPlace(String placeId) async => throw _f;
+  Future<void> blockPlace(String placeId) async => throw _notImplemented;
   @override
-  Future<void> unblockPlace(String placeId) async => throw _f;
+  Future<void> unblockPlace(String placeId) async => throw _notImplemented;
 }

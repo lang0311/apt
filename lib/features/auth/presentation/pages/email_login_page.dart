@@ -41,16 +41,11 @@ class _EmailLoginPageState extends ConsumerState<EmailLoginPage> {
     super.dispose();
   }
 
-  void _clearErrors() {
-    if (_credentialError != null || _emailFormatError != null) {
-      setState(() {
+  /// 입력이 바뀌면 오류를 지우고 버튼 활성 상태를 다시 계산한다.
+  void _clearErrors() => setState(() {
         _credentialError = null;
         _emailFormatError = null;
       });
-    } else {
-      setState(() {});
-    }
-  }
 
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();

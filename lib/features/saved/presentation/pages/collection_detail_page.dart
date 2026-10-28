@@ -65,11 +65,11 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
       context,
       title: '정렬',
       actions: [
-        for (final s in SavedSort.values)
+        for (final sort in SavedSort.values)
           SheetAction(
-            label: s.label,
-            icon: s == _sort ? Icons.check_rounded : Icons.sort_rounded,
-            onTap: () => setState(() => _sort = s),
+            label: sort.label,
+            icon: sort == _sort ? Icons.check_rounded : Icons.sort_rounded,
+            onTap: () => setState(() => _sort = sort),
           ),
       ],
     );
@@ -77,17 +77,17 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final collection = ref.watch(collectionProvider(widget.collectionId));
+    final collectionValue = ref.watch(collectionProvider(widget.collectionId));
     return Scaffold(
       body: SafeArea(
         bottom: false,
         child: AsyncValueView<PlaceCollection>(
-          value: collection,
+          value: collectionValue,
           onRetry: () => ref.invalidate(collectionProvider(widget.collectionId)),
-          data: (c) => Column(
+          data: (collection) => Column(
             children: [
               SubPageHeader(
-                title: c.name,
+                title: collection.name,
                 trailing: IconButton(
                   tooltip: '보관함 메뉴',
                   icon: const Icon(Icons.more_horiz_rounded, color: AppColors.textPrimary),
@@ -95,7 +95,7 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
                   onPressed: () => showAppSnackBar(context, '보관함 관리 메뉴는 준비 중이에요.'),
                 ),
               ),
-              Expanded(child: c.placeCount == 0 ? _empty(c) : _detail(c)),
+              Expanded(child: collection.placeCount == 0 ? _empty(collection) : _detail(collection)),
             ],
           ),
         ),
@@ -103,8 +103,8 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
     );
   }
 
-  Widget _summaryCard(PlaceCollection c, {required bool empty}) {
-    final updated = c.updatedAt == null ? null : formatRelative(c.updatedAt!);
+  Widget _summaryCard(PlaceCollection collection, {required bool empty}) {
+    final updated = collection.updatedAt == null ? null : formatRelative(collection.updatedAt!);
     return AppCard(
       color: AppColors.primarySoft,
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -118,12 +118,12 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(c.name, style: AppTypography.section),
+                Text(collection.name, style: AppTypography.section),
                 const SizedBox(height: 4),
                 Text(
                   [
                     if (empty) '방금 생성됨' else if (updated != null) '최근 업데이트 $updated',
-                    '장소 ${c.placeCount}곳',
+                    '장소 ${collection.placeCount}곳',
                   ].join(' · '),
                   style: AppTypography.meta,
                 ),
@@ -139,18 +139,18 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
               label: '지도 보기',
               expand: false,
               height: 40,
-              onPressed: () => context.push(AppRoutes.collectionMap(collectionId: c.id)),
+              onPressed: () => context.push(AppRoutes.collectionMap(collectionId: collection.id)),
             ),
         ],
       ),
     );
   }
 
-  Widget _empty(PlaceCollection c) {
+  Widget _empty(PlaceCollection collection) {
     return ListView(
       padding: AppSpacing.screenPadding,
       children: [
-        _summaryCard(c, empty: true),
+        _summaryCard(collection, empty: true),
         AppEmptyState(
           title: '아직 저장된 장소가 없어요',
           description: '기존 저장 장소를 추가하거나\nSNS 링크에서 새로운 장소를 찾아보세요.',
@@ -163,7 +163,7 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
     );
   }
 
-  Widget _detail(PlaceCollection c) {
+  Widget _detail(PlaceCollection collection) {
     final places = ref.watch(savedPlacesProvider(_query));
     return Column(
       children: [
@@ -171,7 +171,7 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, 0, AppSpacing.screenH, AppSpacing.lg),
             children: [
-              _summaryCard(c, empty: false),
+              _summaryCard(collection, empty: false),
               const SizedBox(height: AppSpacing.md),
               AppSearchField(
                 hint: '보관함 안에서 장소 검색',
@@ -187,7 +187,7 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
               ),
               SectionHeader(
                 title: '저장된 장소',
-                trailingText: '${c.placeCount}곳',
+                trailingText: '${collection.placeCount}곳',
                 padding: const EdgeInsets.only(top: AppSpacing.xl, bottom: AppSpacing.sm),
                 trailing: IconButton(
                   tooltip: '장소 추가',

@@ -23,8 +23,8 @@ class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   /// 섹션 묶음 바깥 여백 (컨테이너 안 여백은 SectionCard.innerPadding)
-  static const _outer = AppSpacing.sm;
-  static const _gap = 10.0;
+  static const _outerPadding = AppSpacing.sm;
+  static const _sectionGap = 10.0;
 
   Future<void> _refresh(WidgetRef ref) async {
     ref.invalidate(homeStatsProvider);
@@ -106,8 +106,8 @@ class HomePage extends ConsumerWidget {
           onAction: () => context.go(AppRoutes.saved),
           loadingHeight: 128,
           onRetry: () => ref.invalidate(recentExtractionsProvider),
-          isEmpty: (l) => l.isEmpty,
-          builder: (l) => RecentSavedStrip(items: l),
+          isEmpty: (items) => items.isEmpty,
+          builder: (items) => RecentSavedStrip(items: items),
         ),
       if (!isFirstUse)
         ?_section(
@@ -115,9 +115,9 @@ class HomePage extends ConsumerWidget {
           title: '이런 코스는 어때요?',
           loadingHeight: 158,
           onRetry: () => ref.invalidate(suggestedCoursesProvider),
-          isEmpty: (l) => l.isEmpty,
+          isEmpty: (items) => items.isEmpty,
           // 추천 코스 상세 화면은 디자인 없음
-          builder: (l) => SuggestedCourseStrip(courses: l, onTap: (_) => showAppSnackBar(context, '추천 코스 상세는 준비 중이에요.')),
+          builder: (courses) => SuggestedCourseStrip(courses: courses, onTap: (_) => showAppSnackBar(context, '추천 코스 상세는 준비 중이에요.')),
         ),
       ?_section(
         value: trending,
@@ -126,8 +126,8 @@ class HomePage extends ConsumerWidget {
         onAction: () => showAppSnackBar(context, '전체 목록은 준비 중이에요.'),
         loadingHeight: 200,
         onRetry: () => ref.invalidate(trendingPlacesProvider),
-        isEmpty: (l) => l.isEmpty,
-        builder: (l) => TrendingPlaceGrid(places: l),
+        isEmpty: (items) => items.isEmpty,
+        builder: (places) => TrendingPlaceGrid(places: places),
       ),
     ];
 
@@ -150,12 +150,12 @@ class HomePage extends ConsumerWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: _outer),
+                padding: const EdgeInsets.symmetric(horizontal: _outerPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     for (var i = 0; i < sections.length; i++) ...[
-                      if (i > 0) const SizedBox(height: _gap),
+                      if (i > 0) const SizedBox(height: _sectionGap),
                       sections[i],
                     ],
                   ],

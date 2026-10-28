@@ -54,7 +54,15 @@ class _CollectionSelectState extends ConsumerState<_CollectionSelect> {
     if (created != null) setState(() => _selected.add(created.id));
   }
 
-  void _toggle(String id) => setState(() => _selected.contains(id) ? _selected.remove(id) : _selected.add(id));
+  void _toggle(String id) {
+    setState(() {
+      if (_selected.contains(id)) {
+        _selected.remove(id);
+      } else {
+        _selected.add(id);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,14 +96,14 @@ class _CollectionSelectState extends ConsumerState<_CollectionSelect> {
                     title: '새 보관함',
                     onTap: _create,
                   ),
-                  for (final c in list) ...[
+                  for (final collection in list) ...[
                     const Divider(height: 1, thickness: 1, color: AppColors.divider),
                     _Row(
-                      leading: MiniCollage(urls: c.thumbnailUrls, size: 44),
-                      title: c.name,
-                      subtitle: '${c.placeCount}곳',
-                      checked: _selected.contains(c.id),
-                      onTap: () => _toggle(c.id),
+                      leading: MiniCollage(urls: collection.thumbnailUrls, size: 44),
+                      title: collection.name,
+                      subtitle: '${collection.placeCount}곳',
+                      checked: _selected.contains(collection.id),
+                      onTap: () => _toggle(collection.id),
                     ),
                   ],
                 ],

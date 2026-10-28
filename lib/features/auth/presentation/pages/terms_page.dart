@@ -45,6 +45,7 @@ class _TermsPageState extends ConsumerState<TermsPage> {
   @override
   Widget build(BuildContext context) {
     final terms = ref.watch(termsProvider);
+    final requiredAgreed = terms.hasValue && terms.value!.where((t) => t.required).every((t) => _agreed.contains(t.id));
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -71,9 +72,7 @@ class _TermsPageState extends ConsumerState<TermsPage> {
               child: AppButton(
                 label: '동의하고 계속하기',
                 loading: _submitting,
-                onPressed: terms.hasValue && terms.value!.where((t) => t.required).every((t) => _agreed.contains(t.id))
-                    ? _submit
-                    : null,
+                onPressed: requiredAgreed ? _submit : null,
               ),
             ),
           ],

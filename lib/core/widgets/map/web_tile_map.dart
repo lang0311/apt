@@ -45,11 +45,13 @@ class WebTileMap extends StatefulWidget {
 }
 
 class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
-  final map = MapController();
-  bool ready = false;
-  GeoPoint? location;
-  Timer? idle;
-  LatLng point(GeoPoint p) => LatLng(p.lat, p.lng);
+  final _map = MapController();
+  bool _ready = false;
+  GeoPoint? _locationDot;
+  Timer? _idleTimer;
+
+  static LatLng _latLng(GeoPoint p) => LatLng(p.lat, p.lng);
+
   @override
   void initState() {
     super.initState();
@@ -58,9 +60,9 @@ class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
 
   @override
   void dispose() {
-    idle?.cancel();
+    _idleTimer?.cancel();
     widget.controller?.attach(null);
-    map.dispose();
+    _map.dispose();
     super.dispose();
   }
 
@@ -71,7 +73,7 @@ class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
       old.controller?.attach(null);
       widget.controller?.attach(this);
     }
-    if (ready &&
+    if (_ready &&
         widget.fitMarkersOnLoad &&
         old.markers.map((m) => m.id).join('|') !=
             widget.markers.map((m) => m.id).join('|')) {
@@ -83,16 +85,16 @@ class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
 
   @override
   void moveTo(GeoPoint target, {double zoom = 15}) {
-    if (ready) map.move(point(target), zoom);
+    if (_ready) _map.move(_latLng(target), zoom);
   }
 
   @override
   void fitTo(List<GeoPoint> points) {
-    if (!ready || points.isEmpty) return;
+    if (!_ready || points.isEmpty) return;
     final b = focusBounds(points)!;
-    map.fitCamera(
+    _map.fitCamera(
       CameraFit.bounds(
-        bounds: LatLngBounds(point(b.southWest), point(b.northEast)),
+        bounds: LatLngBounds(_latLng(b.southWest), _latLng(b.northEast)),
         padding: EdgeInsets.fromLTRB(
           40,
           40 + widget.topPadding,
@@ -105,13 +107,13 @@ class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
   }
 
   @override
-  void showLocationDot(GeoPoint? p) {
-    setState(() => location = p);
+  void showLocationDot(GeoPoint? point) {
+    setState(() => _locationDot = point);
   }
 
-  void changed(MapCamera camera) {
-    idle?.cancel();
-    idle = Timer(const Duration(milliseconds: 300), () {
+  void _onCameraChanged(MapCamera camera) {
+    _idleTimer?.cancel();
+    _idleTimer = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) return;
       final b = camera.visibleBounds;
       widget.onCameraIdle?.call(
@@ -129,27 +131,27 @@ class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
         ? focusBounds(widget.markers.map((m) => m.point).toList())
         : null;
     return FlutterMap(
-      mapController: map,
+      mapController: _map,
       options: MapOptions(
         initialCenter: widget.markers.isEmpty
             ? const LatLng(37.557, 126.925)
-            : point(widget.markers.first.point),
+            : _latLng(widget.markers.first.point),
         initialZoom: 14,
         initialCameraFit: initial == null
             ? null
             : CameraFit.bounds(
                 bounds: LatLngBounds(
-                  point(initial.southWest),
-                  point(initial.northEast),
+                  _latLng(initial.southWest),
+                  _latLng(initial.northEast),
                 ),
                 padding: const EdgeInsets.all(40),
                 maxZoom: 16,
               ),
         onMapReady: () {
-          ready = true;
-          changed(map.camera);
+          _ready = true;
+          _onCameraChanged(_map.camera);
         },
-        onPositionChanged: (camera, gesture) => changed(camera),
+        onPositionChanged: (camera, gesture) => _onCameraChanged(camera),
       ),
       children: [
         TileLayer(
@@ -164,7 +166,7 @@ class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
           PolylineLayer(
             polylines: [
               Polyline(
-                points: widget.route.map(point).toList(),
+                points: widget.route.map(_latLng).toList(),
                 strokeWidth: 5,
                 color: AppColors.primary,
               ),
@@ -174,7 +176,7 @@ class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
           markers: [
             for (final m in widget.markers)
               Marker(
-                point: point(m.point),
+                point: _latLng(m.point),
                 width: 60,
                 height: 52,
                 child: GestureDetector(
@@ -191,9 +193,9 @@ class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
                   ),
                 ),
               ),
-            if (location != null)
+            if (_locationDot != null)
               Marker(
-                point: point(location!),
+                point: _latLng(_locationDot!),
                 width: 16,
                 height: 16,
                 child: DecoratedBox(

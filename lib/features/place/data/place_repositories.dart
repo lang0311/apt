@@ -16,7 +16,10 @@ class MockPlaceRepository implements PlaceRepository {
           openStatusLabel: '영업 중',
           isOpen: true,
           closingLabel: '21:00 마감',
-          collectionIds: [for (final e in _store.members.entries) if (e.value.contains(placeId)) e.key],
+          collectionIds: [
+            for (final entry in _store.members.entries)
+              if (entry.value.contains(placeId)) entry.key,
+          ],
         );
       });
 }

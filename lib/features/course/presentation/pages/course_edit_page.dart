@@ -47,9 +47,9 @@ class _CourseEditPageState extends ConsumerState<CourseEditPage> {
   Future<void> _load() async {
     setState(() => _error = null);
     try {
-      final c = await ref.read(courseDetailProvider(widget.courseId).future);
-      _rec.startEditing(c);
-      if (mounted) setState(() => _course = c);
+      final course = await ref.read(courseDetailProvider(widget.courseId).future);
+      _rec.startEditing(course);
+      if (mounted) setState(() => _course = course);
     } catch (e) {
       if (mounted) setState(() => _error = e);
     }
@@ -94,11 +94,58 @@ class _CourseEditPageState extends ConsumerState<CourseEditPage> {
     if (mounted) showAppSnackBar(context, '${picked.length}곳을 추가했어요');
   }
 
+  Widget _editBody(Course course, RecommendationState state, bool busy) {
+    return ListView(
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+      children: [
+        CourseHero(title: course.title, meta: courseMetaLine(date: course.date, start: course.startTime)),
+        const SizedBox(height: AppSpacing.sm),
+        Padding(
+          padding: AppSpacing.screenPadding,
+          child: SectionCard(
+            title: '일정 편집',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (state.loading)
+                  RecommendingBanner(onCancel: () => cancelRecommendationWithNotice(context, ref)),
+                CourseEditList(
+                  stops: state.stops,
+                  enabled: !busy,
+                  addedIds: state.addedIds,
+                  highlightIds: state.changedIds,
+                  loadingIds: state.loadingIds,
+                  onReorder: _rec.moveStop,
+                  onRemove: (s) => removeStopWithUndo(context, ref, s),
+                  onTapTile: (s, i) => showEditTileSheet(context, ref, s, i),
+                  onAdd: _addPlaces,
+                ),
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.screenH + 6, AppSpacing.xs, AppSpacing.screenH, 0),
+          child: Text('시간과 이동 정보는 저장하면 다시 계산돼요.', style: AppTypography.caption),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(recommendationProvider);
-    final c = _course;
+    final course = _course;
     final busy = state.loading || _saving;
+
+    final Widget body;
+    if (course != null) {
+      body = _editBody(course, state, busy);
+    } else if (_error != null) {
+      body = AppErrorState(error: _error!, onRetry: _load);
+    } else {
+      body = const AppLoading();
+    }
 
     return PopScope(
       canPop: false,
@@ -110,46 +157,8 @@ class _CourseEditPageState extends ConsumerState<CourseEditPage> {
           child: Column(
             children: [
               PlainHeader(leadingIcon: Icons.close_rounded, leadingTooltip: '닫기', onLeading: _close),
-              Expanded(
-                child: c == null
-                    ? (_error == null ? const AppLoading() : AppErrorState(error: _error!, onRetry: _load))
-                    : ListView(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-                        children: [
-                          CourseHero(title: c.title, meta: courseMetaLine(date: c.date, start: c.startTime)),
-                          const SizedBox(height: AppSpacing.sm),
-                          Padding(
-                            padding: AppSpacing.screenPadding,
-                            child: SectionCard(
-                              title: '일정 편집',
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  if (state.loading)
-                                    RecommendingBanner(onCancel: () => cancelRecommendationWithNotice(context, ref)),
-                                  CourseEditList(
-                                    stops: state.stops,
-                                    enabled: !busy,
-                                    addedIds: state.addedIds,
-                                    highlightIds: state.changedIds,
-                                    loadingIds: state.loadingIds,
-                                    onReorder: _rec.moveStop,
-                                    onRemove: (s) => removeStopWithUndo(context, ref, s),
-                                    onTapTile: (s, i) => showEditTileSheet(context, ref, s, i),
-                                    onAdd: _addPlaces,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(AppSpacing.screenH + 6, AppSpacing.xs, AppSpacing.screenH, 0),
-                            child: Text('시간과 이동 정보는 저장하면 다시 계산돼요.', style: AppTypography.caption),
-                          ),
-                        ],
-                      ),
-              ),
-              if (c != null)
+              Expanded(child: body),
+              if (course != null)
                 BottomCta(
                   child: Row(
                     children: [

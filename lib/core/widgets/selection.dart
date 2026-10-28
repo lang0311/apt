@@ -13,6 +13,11 @@ class _CheckMark extends StatelessWidget {
   // 안 고른 상태의 회색 체크
   static const _off = Color(0xFFC3CBD7);
 
+  Color get _color {
+    if (checked) return AppColors.primary;
+    return enabled ? _off : AppColors.border;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -20,7 +25,7 @@ class _CheckMark extends StatelessWidget {
       height: size,
       child: TweenAnimationBuilder<Color?>(
         duration: const Duration(milliseconds: 150),
-        tween: ColorTween(end: checked ? AppColors.primary : (enabled ? _off : AppColors.border)),
+        tween: ColorTween(end: _color),
         builder: (_, color, _) => Icon(Icons.check_rounded, size: size, color: color, weight: 700),
       ),
     );

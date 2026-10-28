@@ -95,31 +95,27 @@ class _SavedPageState extends ConsumerState<SavedPage> {
 /// 상단바 '지도' 버튼. 저장한 곳이 없어도 켜 둔다 (07 D32).
 class _MapButton extends StatelessWidget {
   const _MapButton({required this.onPressed});
-  final VoidCallback? onPressed;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final enabled = onPressed != null;
-    return Opacity(
-      opacity: enabled ? 1 : 0.45,
-      child: Material(
-        color: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm), side: const BorderSide(color: AppColors.border)),
-        child: InkWell(
-          customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
-          onTap: onPressed,
-          child: SizedBox(
-            height: 44,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.map_outlined, size: 18, color: AppColors.textPrimary),
-                  const SizedBox(width: 5),
-                  Text('지도', style: AppTypography.label),
-                ],
-              ),
+    return Material(
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm), side: const BorderSide(color: AppColors.border)),
+      child: InkWell(
+        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
+        onTap: onPressed,
+        child: SizedBox(
+          height: 44,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.map_outlined, size: 18, color: AppColors.textPrimary),
+                const SizedBox(width: 5),
+                Text('지도', style: AppTypography.label),
+              ],
             ),
           ),
         ),
@@ -157,11 +153,14 @@ class _CategoryTab extends ConsumerWidget {
 
     // 거를 것이 없으면(저장한 곳이 한 카테고리뿐) 필터를 숨긴다
     final filterable = summary != null && summary.categories.where((c) => c.count > 0).length > 1;
-    final title = summary == null
-        ? '저장한 곳'
-        : selected == null
-            ? '전체 ${summary.totalCount}곳'
-            : '${selected.label} ${selected.count}곳';
+    final String title;
+    if (summary == null) {
+      title = '저장한 곳';
+    } else if (selected == null) {
+      title = '전체 ${summary.totalCount}곳';
+    } else {
+      title = '${selected.label} ${selected.count}곳';
+    }
 
     return SectionCard(
       title: title,
@@ -246,10 +245,10 @@ class _CollectionsTab extends ConsumerWidget {
             data: (list) => DividedRows(
               indent: 86,
               children: [
-                for (final c in list)
+                for (final collection in list)
                   CollectionRow(
-                    collection: c,
-                    onTap: () => context.push(AppRoutes.collection(c.id)),
+                    collection: collection,
+                    onTap: () => context.push(AppRoutes.collection(collection.id)),
                     // 보관함 ⋯ 메뉴(이름 변경·삭제)는 디자인/정책 확정 필요 (docs/07 §3)
                     onMore: () => showAppSnackBar(context, '보관함 관리 메뉴는 준비 중이에요.'),
                   ),

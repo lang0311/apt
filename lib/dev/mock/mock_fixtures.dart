@@ -181,7 +181,7 @@ abstract final class MockFixtures {
     'c3': ['p1', 'p2', 'p8'],
   };
 
-  static final moods = const [
+  static const moods = [
     MoodOption(key: 'emotional', label: '감성'),
     MoodOption(key: 'food', label: '맛집'),
     MoodOption(key: 'walk', label: '산책'),
@@ -189,7 +189,7 @@ abstract final class MockFixtures {
     MoodOption(key: 'photo', label: '사진 명소'),
   ];
 
-  static final preferenceGroups = const [
+  static const preferenceGroups = [
     PreferenceGroup(key: 'type', label: '장소 유형', items: [
       PreferenceItem(key: 'cafe', label: '카페'),
       PreferenceItem(key: 'restaurant', label: '맛집'),
@@ -234,7 +234,7 @@ abstract final class MockFixtures {
   ];
 
   static List<CourseStop> stopsFor(List<(String, PlaceSource, String?)> spec, {TimeOfDay start = const TimeOfDay(hour: 11, minute: 0)}) {
-    final out = <CourseStop>[];
+    final stops = <CourseStop>[];
     var minutes = start.hour * 60 + start.minute;
     const legs = [
       RouteLeg(mode: TransportMode.walk, minutes: 8),
@@ -244,7 +244,7 @@ abstract final class MockFixtures {
     ];
     for (var i = 0; i < spec.length; i++) {
       final (id, source, reason) = spec[i];
-      out.add(CourseStop(
+      stops.add(CourseStop(
         place: place(id),
         source: source,
         aiReason: reason,
@@ -253,6 +253,6 @@ abstract final class MockFixtures {
       ));
       minutes += 70;
     }
-    return out;
+    return stops;
   }
 }

@@ -72,18 +72,18 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
     final repo = ref.read(courseRepositoryProvider);
     setState(() => _saving = true);
     try {
+      final String courseId;
       if (draft.isEditingExisting) {
-        await repo.updateCourseStops(courseId: draft.courseId!, stops: stops);
-        invalidateCourseData(ref);
-        if (mounted) context.go(AppRoutes.course(draft.courseId!, justSaved: true));
+        courseId = draft.courseId!;
+        await repo.updateCourseStops(courseId: courseId, stops: stops);
       } else {
-        final course = await repo.createCourse(draft: draft, stops: stops);
-        invalidateCourseData(ref);
-        // 코스를 만들었으면 지금까지 저장한 곳은 홈 제안에서 뺀다
-        ref.read(homeNudgeSeenAtProvider.notifier).markSeen();
-        // 완료 화면 없이 바로 상세로 (위저드 화면은 스택에서 지워 뒤로 가면 코스 목록)
-        if (mounted) context.go(AppRoutes.course(course.id, justSaved: true));
+        courseId = (await repo.createCourse(draft: draft, stops: stops)).id;
       }
+      invalidateCourseData(ref);
+      // 코스를 만들었으면 지금까지 저장한 곳은 홈 제안에서 뺀다
+      if (!draft.isEditingExisting) ref.read(homeNudgeSeenAtProvider.notifier).markSeen();
+      // 완료 화면 없이 바로 상세로 (위저드 화면은 스택에서 지워 뒤로 가면 코스 목록)
+      if (mounted) context.go(AppRoutes.course(courseId, justSaved: true));
     } catch (e) {
       if (mounted) showAppSnackBar(context, failureMessage(e));
     } finally {
@@ -325,6 +325,29 @@ class _Stages extends StatelessWidget {
     RecommendationStage.organize: '동선 정리',
   };
 
+  /// 끝난 단계 = 체크, 지금 단계 = 진행 원, 남은 단계 = 빈 원
+  Widget _icon(RecommendationStage s) {
+    if (s.index < stage.index) {
+      return Container(
+        decoration: const BoxDecoration(color: AppColors.successSoft, shape: BoxShape.circle),
+        child: const Icon(Icons.check_rounded, size: 14, color: AppColors.success),
+      );
+    }
+    if (s == stage) return const CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary);
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: AppColors.progressInactive, width: 2),
+      ),
+    );
+  }
+
+  Color _textColor(RecommendationStage s) {
+    if (s == stage) return AppColors.textPrimary;
+    if (s.index < stage.index) return AppColors.textSecondary;
+    return AppColors.textTertiary;
+  }
+
   @override
   Widget build(BuildContext context) {
     final stages = [
@@ -343,27 +366,12 @@ class _Stages extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(
                 children: [
-                  SizedBox.square(
-                    dimension: 20,
-                    child: s.index < stage.index
-                        ? Container(
-                            decoration: const BoxDecoration(color: AppColors.successSoft, shape: BoxShape.circle),
-                            child: const Icon(Icons.check_rounded, size: 14, color: AppColors.success),
-                          )
-                        : s == stage
-                            ? const CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)
-                            : Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: AppColors.progressInactive, width: 2),
-                                ),
-                              ),
-                  ),
+                  SizedBox.square(dimension: 20, child: _icon(s)),
                   const SizedBox(width: 10),
                   Text(
                     _labels[s]!,
                     style: AppTypography.bodyStrong.copyWith(
-                      color: s == stage ? AppColors.textPrimary : (s.index < stage.index ? AppColors.textSecondary : AppColors.textTertiary),
+                      color: _textColor(s),
                       fontWeight: s == stage ? FontWeight.w700 : FontWeight.w500,
                     ),
                   ),

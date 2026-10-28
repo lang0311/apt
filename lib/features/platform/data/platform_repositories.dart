@@ -4,9 +4,9 @@ import 'package:flutter/material.dart' show DateUtils;
 
 import '../../../core/config/env.dart';
 import '../../../core/error/app_failure.dart';
+import '../../../core/models/geo_point.dart';
 import '../../../core/network/api_client.dart';
 import '../../auth/data/auth_repositories.dart' show IdSignupRules;
-import '../../../core/models/geo_point.dart';
 import '../../auth/domain/auth_models.dart';
 import '../../auth/domain/auth_repository.dart';
 import '../../saved/data/api_saved_repository.dart';
@@ -28,18 +28,22 @@ import '../../preference/domain/preference_models.dart';
 import '../../preference/domain/preference_repository.dart';
 import 'platform_client.dart';
 
+/// 코스 안 장소의 키. 서버는 `key`(정규 키)를 주고, 없으면 `id`를 쓴다.
+String _placeKey(dynamic stop) => (stop['key'] ?? stop['id']).toString();
+
 class PlatformAuthRepository implements AuthRepository {
-  PlatformAuthRepository(this.c);
-  final PlatformClient c;
-  AuthUser user(dynamic p) => AuthUser(
-    id: p['id'] as String,
-    nickname: p['name'] as String,
-    handle: p['login'] as String?,
+  PlatformAuthRepository(this._platform);
+  final PlatformClient _platform;
+  AuthUser _user(dynamic json) => AuthUser(
+    id: json['id'] as String,
+    nickname: json['name'] as String,
+    handle: json['login'] as String?,
   );
+
   @override
   Future<AuthUser?> restoreSession() async {
     try {
-      return user((await c.me())['user']);
+      return _user((await _platform.me())['user']);
     } on UnauthorizedFailure {
       return null;
     }
@@ -51,12 +55,12 @@ class PlatformAuthRepository implements AuthRepository {
     required String password,
   }) async {
     try {
-      final p = await c.post('/auth/login', {
+      final userJson = await _platform.post('/auth/login', {
         'login': login.trim(),
         'password': password,
       });
-      _start(p);
-      return SignedIn(user(p));
+      _startSession(userJson);
+      return SignedIn(_user(userJson));
     } on UnauthorizedFailure {
       return const InvalidCredentials();
     }
@@ -72,14 +76,14 @@ class PlatformAuthRepository implements AuthRepository {
     final errors = IdSignupRules.validate(login: login, password: password, nickname: nickname);
     if (errors.isNotEmpty) throw ValidationFailure(errors.values.first, fieldErrors: errors);
     try {
-      final res = await c.client.dio.post<dynamic>('/auth/register', data: {
+      final res = await _platform.client.dio.post<dynamic>('/auth/register', data: {
         'login': login.trim().toLowerCase(),
         'password': password,
         'name': nickname.trim(),
       });
-      final p = res.data;
-      _start(p);
-      return user(p);
+      final userJson = res.data;
+      _startSession(userJson);
+      return _user(userJson);
     } on DioException catch (e) {
       throw switch (e.response?.statusCode) {
         409 => const ValidationFailure(IdSignupRules.loginTaken, fieldErrors: {'login': IdSignupRules.loginTaken}),
@@ -90,12 +94,12 @@ class PlatformAuthRepository implements AuthRepository {
   }
 
   /// 새 로그인 — 이전 사용자 캐시를 비운다.
-  void _start(dynamic p) {
-    c.places.clear();
-    c.courses.clear();
-    c.partySizes.clear();
-    c.lastCourseId = null;
-    c.currentUserId = p['id'] as String;
+  void _startSession(dynamic userJson) {
+    _platform.places.clear();
+    _platform.courses.clear();
+    _platform.partySizes.clear();
+    _platform.lastCourseId = null;
+    _platform.currentUserId = userJson['id'] as String;
   }
 
   @override
@@ -106,11 +110,11 @@ class PlatformAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {
-    await c.post('/auth/logout');
-    c.places.clear();
-    c.courses.clear();
-    c.lastCourseId = null;
-    c.currentUserId = null;
+    await _platform.post('/auth/logout');
+    _platform.places.clear();
+    _platform.courses.clear();
+    _platform.lastCourseId = null;
+    _platform.currentUserId = null;
   }
 
   @override
@@ -133,19 +137,19 @@ class PlatformAuthRepository implements AuthRepository {
 }
 
 class PlatformSavedRepository extends ApiSavedRepository {
-  PlatformSavedRepository(this.c) : super(c.client);
-  final PlatformClient c;
+  PlatformSavedRepository(this._platform) : super(_platform.client);
+  final PlatformClient _platform;
   @override
   Future<SavedSummary> fetchSummary() async {
-    final p = await c.get('/mobile/summary');
+    final summary = await _platform.get('/mobile/summary');
     return SavedSummary(
-      totalCount: p['saved_count'] as int,
+      totalCount: summary['saved_count'] as int,
       categories: [
-        for (final v in p['categories'] as List)
+        for (final category in summary['categories'] as List)
           PlaceCategory(
-            key: v['key'] as String,
-            label: v['label'] as String,
-            count: v['count'] as int,
+            key: category['key'] as String,
+            label: category['label'] as String,
+            count: category['count'] as int,
           ),
       ],
     );
@@ -154,16 +158,14 @@ class PlatformSavedRepository extends ApiSavedRepository {
   @override
   Future<List<SavedPlaceItem>> fetchSavedPlaces(SavedPlaceQuery query) async {
     if (query.collectionId != null) throw const NotImplementedFailure('보관함');
-    final data = await c.me();
+    final me = await _platform.me();
+    bool matches(dynamic place) =>
+        (query.categoryKey == null || place['category'] == query.categoryKey) &&
+        (query.keyword == null || place['name'].toString().contains(query.keyword!));
     return [
-      for (final raw in data['places'] as List)
-        if ((query.categoryKey == null ||
-                raw['category'] == query.categoryKey) &&
-            (query.keyword == null ||
-                raw['name'].toString().contains(query.keyword!)))
-          SavedPlaceItem(
-            place: c.place(Map<String, dynamic>.from(raw as Map), saved: true),
-          ),
+      for (final place in me['places'] as List)
+        if (matches(place))
+          SavedPlaceItem(place: _platform.place(Map<String, dynamic>.from(place as Map), saved: true)),
     ];
   }
 
@@ -173,11 +175,7 @@ class PlatformSavedRepository extends ApiSavedRepository {
     int radiusMeters,
     SavedPlaceQuery query,
   ) async => (await fetchSavedPlaces(query))
-      .where(
-        (i) =>
-            i.place.location != null &&
-            center.distanceTo(i.place.location!) <= radiusMeters,
-      )
+      .where((item) => item.place.location != null && center.distanceTo(item.place.location!) <= radiusMeters)
       .toList();
   @override
   Future<List<PlaceCollection>> fetchCollections() async => [];
@@ -190,84 +188,86 @@ class PlatformSavedRepository extends ApiSavedRepository {
   }) async {
     if (collectionIds.isNotEmpty) throw const NotImplementedFailure('보관함');
     for (final id in placeIds) {
-      await c.save(id);
+      await _platform.save(id);
     }
   }
 }
 
 class PlatformPlaceRepository implements PlaceRepository {
-  PlatformPlaceRepository(this.c);
-  final PlatformClient c;
+  PlatformPlaceRepository(this._platform);
+  final PlatformClient _platform;
   @override
   Future<PlaceDetail> fetchPlace(String placeId) async {
-    await c.me();
-    final p = c.places[placeId];
-    if (p == null) throw const NotFoundFailure();
-    return PlaceDetail(place: c.place(p));
+    await _platform.me();
+    final place = _platform.places[placeId];
+    if (place == null) throw const NotFoundFailure();
+    return PlaceDetail(place: _platform.place(place));
   }
 }
 
 /// 지도에서 검색하기: GET /places/search. 저장 상태를 맞추려고 먼저 /me를 읽는다.
 class PlatformPlaceSearchRepository implements PlaceSearchRepository {
-  PlatformPlaceSearchRepository(this.c);
-  final PlatformClient c;
+  PlatformPlaceSearchRepository(this._platform);
+  final PlatformClient _platform;
   @override
   Future<List<Place>> search(String query, {GeoPoint? near}) async {
-    await c.me();
-    return c.search(query, near: near);
+    await _platform.me();
+    return _platform.search(query, near: near);
   }
 }
 
 class PlatformCourseRepository implements CourseRepository {
-  PlatformCourseRepository(this.c);
-  final PlatformClient c;
-  CourseSummary summary(Json p) => CourseSummary(
-    id: p['id'] as String,
-    title: (p['title'] ?? '추천 코스').toString(),
-    placeCount: (p['itinerary'] as List).length,
-    isParty: p['party_id'] != null,
-    date: DateTime.tryParse((p['date'] ?? '').toString()),
-    memberCount: p['party_id'] == null ? 1 : c.partySizes[p['party_id']] ?? 1,
+  PlatformCourseRepository(this._platform);
+  final PlatformClient _platform;
+  CourseSummary _summary(Json course) => CourseSummary(
+    id: course['id'] as String,
+    title: (course['title'] ?? '추천 코스').toString(),
+    placeCount: (course['itinerary'] as List).length,
+    isParty: course['party_id'] != null,
+    date: DateTime.tryParse((course['date'] ?? '').toString()),
+    memberCount: course['party_id'] == null ? 1 : _platform.partySizes[course['party_id']] ?? 1,
   );
-  Future<List<Json>> rows([String? party]) async => [
-    for (final p
-        in await c.get('/courses', party == null ? null : {'party_id': party})
-            as List)
-      Map<String, dynamic>.from(p as Map),
-  ];
+
+  Future<List<Json>> _courseRows([String? partyId]) async {
+    final rows = await _platform.get('/courses', partyId == null ? null : {'party_id': partyId}) as List;
+    return [for (final row in rows) Map<String, dynamic>.from(row as Map)];
+  }
+
   /// 서버는 추천을 받을 때마다 결과를 초안(draft)으로 저장한다. 사용자가 저장한 코스는 확정(confirmed)이라
   /// 목록 · 홈에는 확정한 코스만 쓴다 (저장하지 않은 추천 결과는 보이지 않게).
-  static bool isSaved(Json p) => p['status'] == 'confirmed';
+  static bool isSaved(Json course) => course['status'] == 'confirmed';
 
   /// 홈 맨 위 카드용: 저장한 코스 중 오늘 이후(오늘 포함) 날짜, 날짜가 없으면 포함 (Mock과 같은 기준, 07 D20)
-  static bool isUpcoming(Json p, DateTime today) {
-    if (!isSaved(p)) return false;
-    final date = DateTime.tryParse((p['date'] ?? '').toString());
+  static bool isUpcoming(Json course, DateTime today) {
+    if (!isSaved(course)) return false;
+    final date = DateTime.tryParse((course['date'] ?? '').toString());
     return date == null || !DateUtils.dateOnly(date).isBefore(today);
   }
 
-  Future<List<Json>> partyRows() async {
-    final me = await c.me();
+  Future<List<Json>> _partyCourseRows() async {
+    final me = await _platform.me();
     return [
-      for (final party in me['parties'] as List) ...await rows(party['id'] as String),
+      for (final party in me['parties'] as List) ...await _courseRows(party['id'] as String),
     ];
   }
 
   @override
   Future<List<CourseSummary>> fetchMyCourses() async => [
-    for (final p in await rows()) if (isSaved(p)) summary(p),
+    for (final course in await _courseRows()) if (isSaved(course)) _summary(course),
   ];
+
   @override
   Future<List<CourseSummary>> fetchPartyCourses() async => [
-    for (final p in await partyRows()) if (isSaved(p)) summary(p),
+    for (final course in await _partyCourseRows()) if (isSaved(course)) _summary(course),
   ];
 
   /// 개인 코스(GET /courses)에는 파티 코스가 없어 파티별로 따로 받아 합친다.
   @override
   Future<List<CourseSummary>> fetchActiveCourses() async {
     final today = DateUtils.dateOnly(DateTime.now());
+    final courses = [...await _courseRows(), ...await _partyCourseRows()];
     return [
-      for (final p in [...await rows(), ...await partyRows()]) if (isUpcoming(p, today)) summary(p),
+      for (final course in courses) if (isUpcoming(course, today)) _summary(course),
     ];
   }
   @override
@@ -276,39 +276,40 @@ class PlatformCourseRepository implements CourseRepository {
   Future<List<MoodOption>> fetchMoodOptions() async => [];
   @override
   Future<Course> fetchCourse(String id) async =>
-      c.course(Map<String, dynamic>.from(await c.get('/courses/$id') as Map));
+      _platform.course(Map<String, dynamic>.from(await _platform.get('/courses/$id') as Map));
   @override
   Future<Recommendation> recommend({
     required CourseDraft draft,
     List<CourseStop> currentStops = const [],
     void Function(RecommendationStage stage)? onStage,
   }) async {
-    c.cancelRequested = false;
-    void stage(String s) {
-      final mapped = recommendationStage(s);
+    _platform.cancelRequested = false;
+    void onServerStage(String serverStage) {
+      final mapped = recommendationStage(serverStage);
       if (mapped != null) onStage?.call(mapped);
     }
 
     onStage?.call(RecommendationStage.findCandidates);
-    final active = [for (final j in await c.get('/jobs') as List) Map<String, dynamic>.from(j as Map)];
+    final jobs = [for (final job in await _platform.get('/jobs') as List) Map<String, dynamic>.from(job as Map)];
     // 방금 취소한 job은 서버가 멈출 때까지 기다린 뒤 새로 시작한다 (그 전에는 서버가 409)
-    for (final j in active.where((j) => j['status'] == 'cancelling')) {
-      await c.waitUntilSettled(j['id'] as String);
+    for (final job in jobs.where((job) => job['status'] == 'cancelling')) {
+      await _platform.waitUntilSettled(job['id'] as String);
     }
-    final running = active.where((j) => j['status'] != 'cancelling');
+    final running = jobs.where((job) => job['status'] != 'cancelling');
     if (running.isNotEmpty) {
-      return recommendation(await c.poll(running.first['id'] as String, onStage: stage));
+      return _recommendation(await _platform.poll(running.first['id'] as String, onStage: onServerStage));
     }
-    final previous = c.lastCourseId;
+    final previous = _platform.lastCourseId;
     final exclusionTokens = <String>[];
     for (final id in draft.rejectedPlaceIds) {
-      exclusionTokens.add(await c.token(id));
+      exclusionTokens.add(await _platform.token(id));
     }
+    // 지난 추천에서 내가 고른 장소(saved)들. 이번 초안과 같으면 새로 만들지 않고 지난 코스를 바꾼다.
     final previousAnchors = previous == null
         ? <String>{}
         : {
-            for (final p in c.courses[previous]?['itinerary'] as List? ?? [])
-              if (p['saved'] == true) (p['key'] ?? p['id']).toString(),
+            for (final stop in _platform.courses[previous]?['itinerary'] as List? ?? [])
+              if (stop['saved'] == true) _placeKey(stop),
           };
     final sameAnchors =
         previousAnchors.length == draft.placeIds.length &&
@@ -317,40 +318,33 @@ class PlatformCourseRepository implements CourseRepository {
     if (previous != null &&
         sameAnchors &&
         draft.recommendationRound > 0 &&
-        c.courses[previous]?['status'] != 'confirmed') {
-      var old = c.courses[previous]!;
+        _platform.courses[previous]?['status'] != 'confirmed') {
+      var old = _platform.courses[previous]!;
       final removed = [
-        for (final p in old['itinerary'] as List)
-          if (draft.rejectedPlaceIds.contains((p['key'] ?? p['id']).toString()))
-            p,
+        for (final stop in old['itinerary'] as List)
+          if (draft.rejectedPlaceIds.contains(_placeKey(stop))) stop,
       ];
       if (removed.length == 1 &&
           currentStops.length == (old['itinerary'] as List).length - 1) {
-        if (c.cancelRequested) throw const CancelledFailure();
-        started = await c.post('/courses/$previous/replace', {
+        if (_platform.cancelRequested) throw const CancelledFailure();
+        started = await _platform.post('/courses/$previous/replace', {
           'revision': old['revision'],
           'place_key': removed.first['key'],
         });
-        return recommendation(await c.poll(started['job_id'] as String, onStage: stage));
+        return _recommendation(await _platform.poll(started['job_id'] as String, onStage: onServerStage));
       }
-      // Persist local removals before replacement so the server retains exclusions.
-      for (final p in List<dynamic>.from(old['itinerary'] as List)) {
-        final id = (p['key'] ?? p['id']).toString();
+      // 다시 추천하기 전에 앱에서 뺀 장소를 서버 코스에서도 빼 둔다 — 그래야 서버가 제외 목록을 유지한다.
+      for (final stop in List<dynamic>.from(old['itinerary'] as List)) {
+        final id = _placeKey(stop);
         if (draft.rejectedPlaceIds.contains(id)) {
           old = Map<String, dynamic>.from(
-            await c.client.run(
-                  (d) async => (await d.delete<dynamic>(
-                    '/courses/$previous/places',
-                    data: {'revision': old['revision'], 'place_key': id},
-                  )).data,
-                )
-                as Map,
+            await _platform.delete('/courses/$previous/places', {'revision': old['revision'], 'place_key': id}) as Map,
           );
         }
       }
-      c.courses[previous] = old;
-      if (c.cancelRequested) throw const CancelledFailure();
-      started = await c.post('/courses/$previous/replace', {
+      _platform.courses[previous] = old;
+      if (_platform.cancelRequested) throw const CancelledFailure();
+      started = await _platform.post('/courses/$previous/replace', {
         'revision': old['revision'],
       });
     } else {
@@ -359,11 +353,11 @@ class PlatformCourseRepository implements CourseRepository {
       }
       final tokens = <String>[];
       for (final p in draft.places) {
-        tokens.add(await c.token(p.id));
+        tokens.add(await _platform.token(p.id));
       }
       final address = draft.places.first.address.split(' ').take(2).join(' ');
-      if (c.cancelRequested) throw const CancelledFailure();
-      started = await c.post('/jobs', {
+      if (_platform.cancelRequested) throw const CancelledFailure();
+      started = await _platform.post('/jobs', {
         'area': address.isEmpty ? '서울 마포구' : address,
         'place_tokens': tokens,
         'excluded_place_tokens': exclusionTokens,
@@ -371,11 +365,11 @@ class PlatformCourseRepository implements CourseRepository {
         'party_id': draft.companion == Companion.party ? draft.partyId : null,
       });
     }
-    return recommendation(await c.poll(started['job_id'] as String, onStage: stage));
+    return _recommendation(await _platform.poll(started['job_id'] as String, onStage: onServerStage));
   }
 
   @override
-  Future<void> cancelRecommendation() => c.cancelRecommendation();
+  Future<void> cancelRecommendation() => _platform.cancelRecommendation();
 
   @override
   Future<String> courseLink(String courseId) async => webAppLink('/courses/$courseId');
@@ -391,64 +385,65 @@ class PlatformCourseRepository implements CourseRepository {
     _ => null,
   };
 
-  Recommendation recommendation(Json p) => Recommendation(
-    recommendationId: p['id'] as String,
-    stops: c.stops(p),
+  Recommendation _recommendation(Json course) => Recommendation(
+    recommendationId: course['id'] as String,
+    stops: _platform.stops(course),
     headline: '코스를 확인해주세요',
     description: [
-      p['recommendation_reason'],
-      ...(p['warnings'] as List? ?? []),
+      course['recommendation_reason'],
+      ...(course['warnings'] as List? ?? []),
     ].whereType<String>().join('\n'),
   );
+
   @override
   Future<Course> createCourse({
     required CourseDraft draft,
     required List<CourseStop> stops,
   }) async {
-    final id = c.lastCourseId;
+    final id = _platform.lastCourseId;
     if (id == null) throw const ValidationFailure('추천을 먼저 받아주세요.');
-    final old = c.courses[id]!;
+    final old = _platform.courses[id]!;
+    final startTime = draft.startTime;
     final changed = Map<String, dynamic>.from(
-      await c.post('/mobile/courses/$id', {
+      await _platform.post('/mobile/courses/$id', {
             'revision': old['revision'],
             'title': draft.name,
             'date': draft.date?.toIso8601String(),
-            'start_time': draft.startTime == null
+            'start_time': startTime == null
                 ? null
-                : '${draft.startTime!.hour.toString().padLeft(2, '0')}:${draft.startTime!.minute.toString().padLeft(2, '0')}',
+                : '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}',
             'ordered_keys': stops.map((s) => s.place.id).toList(),
           })
           as Map,
     );
-    final confirmed = await c.post('/courses/$id/confirm', {
+    final confirmed = await _platform.post('/courses/$id/confirm', {
       'revision': changed['revision'],
     });
-    return c.course(Map<String, dynamic>.from(confirmed as Map));
+    return _platform.course(Map<String, dynamic>.from(confirmed as Map));
   }
 
   /// 차단 목록. 서버는 차단한 날을 주지 않는다 (NEEDS BACKEND).
   @override
   Future<List<BlockedPlace>> fetchBlockedPlaces() async => [
-    for (final raw in await c.get('/me/blocks') as List)
-      BlockedPlace(place: c.place(Map<String, dynamic>.from(raw as Map))),
+    for (final raw in await _platform.get('/me/blocks') as List)
+      BlockedPlace(place: _platform.place(Map<String, dynamic>.from(raw as Map))),
   ];
 
   /// 서버에는 따로 차단하는 API가 없고, 코스에서 장소를 뺄 때 `block_future`로만 차단한다.
   /// 그 장소가 든 추천 코스를 찾아 서버에서도 빼면서 차단한다. 코스가 없으면 NEEDS BACKEND.
   @override
   Future<void> blockPlace(String placeId) async {
-    for (final course in [?c.lastCourseId, ...c.courses.keys]) {
-      final old = c.courses[course];
+    for (final course in [?_platform.lastCourseId, ..._platform.courses.keys]) {
+      final old = _platform.courses[course];
       if (old == null || old['status'] == 'confirmed') continue;
-      final hit = (old['itinerary'] as List).any((p) => (p['key'] ?? p['id']).toString() == placeId);
-      if (!hit) continue;
-      c.courses[course] = Map<String, dynamic>.from(
-        await c.client.run(
-              (d) async => (await d.delete<dynamic>(
-                '/courses/$course/places',
-                data: {'revision': old['revision'], 'place_key': placeId, 'block_future': true},
-              )).data,
-            )
+      final hasPlace = (old['itinerary'] as List).any((stop) => _placeKey(stop) == placeId);
+      if (!hasPlace) continue;
+      _platform.courses[course] = Map<String, dynamic>.from(
+        await _platform.delete('/courses/$course/places', {
+              'revision': old['revision'],
+              'place_key': placeId,
+              'block_future': true,
+            })
             as Map,
       );
       return;
@@ -457,8 +452,9 @@ class PlatformCourseRepository implements CourseRepository {
   }
 
   @override
-  Future<void> unblockPlace(String placeId) =>
-      c.client.run((d) => d.delete<dynamic>('/me/blocks/$placeId'));
+  Future<void> unblockPlace(String placeId) async {
+    await _platform.delete('/me/blocks/$placeId');
+  }
 
   @override
   Future<Course> updateCourseStops({
@@ -466,11 +462,11 @@ class PlatformCourseRepository implements CourseRepository {
     required List<CourseStop> stops,
   }) async {
     final old =
-        c.courses[courseId] ??
-        Map<String, dynamic>.from(await c.get('/courses/$courseId') as Map);
-    return c.course(
+        _platform.courses[courseId] ??
+        Map<String, dynamic>.from(await _platform.get('/courses/$courseId') as Map);
+    return _platform.course(
       Map<String, dynamic>.from(
-        await c.post('/mobile/courses/$courseId', {
+        await _platform.post('/mobile/courses/$courseId', {
               'revision': old['revision'],
               'ordered_keys': stops.map((s) => s.place.id).toList(),
             })
@@ -481,14 +477,14 @@ class PlatformCourseRepository implements CourseRepository {
 }
 
 class PlatformHomeRepository implements HomeRepository {
-  PlatformHomeRepository(this.c);
-  final PlatformClient c;
+  PlatformHomeRepository(this._platform);
+  final PlatformClient _platform;
   @override
   Future<HomeStats> fetchStats() async {
-    final p = await c.get('/mobile/summary');
+    final summary = await _platform.get('/mobile/summary');
     return HomeStats(
-      savedPlaceCount: p['saved_count'] as int,
-      activeCourseCount: p['active_course_count'] as int,
+      savedPlaceCount: summary['saved_count'] as int,
+      activeCourseCount: summary['active_course_count'] as int,
       recentExtractionCount: 0,
     );
   }
@@ -498,23 +494,24 @@ class PlatformHomeRepository implements HomeRepository {
 }
 
 class PlatformMyRepository implements MyRepository {
-  PlatformMyRepository(this.c);
-  final PlatformClient c;
+  PlatformMyRepository(this._platform);
+  final PlatformClient _platform;
   @override
   Future<MyProfile> fetchProfile() async {
-    final p = await c.get('/mobile/summary');
+    final summary = await _platform.get('/mobile/summary');
     return MyProfile(
-      nickname: p['name'] as String,
-      savedPlaceCount: p['saved_count'] as int,
-      createdCourseCount: p['created_course_count'] as int,
-      joinedCourseCount: p['joined_course_count'] as int,
+      nickname: summary['name'] as String,
+      savedPlaceCount: summary['saved_count'] as int,
+      createdCourseCount: summary['created_course_count'] as int,
+      joinedCourseCount: summary['joined_course_count'] as int,
     );
   }
 }
 
 class PlatformPreferenceRepository implements PreferenceRepository {
-  PlatformPreferenceRepository(this.c);
-  final PlatformClient c;
+  PlatformPreferenceRepository(this._platform);
+  // ignore: unused_field
+  final PlatformClient _platform;
   @override
   Future<List<PreferenceGroup>> fetchGroups() async => [];
   @override
@@ -535,53 +532,55 @@ String webAppLink(String route) {
 }
 
 class PlatformPartyRepository implements PartyRepository {
-  PlatformPartyRepository(this.c);
-  final PlatformClient c;
+  PlatformPartyRepository(this._platform);
+  final PlatformClient _platform;
   @override
   Future<Party> createParty() async {
-    final p = await c.post('/parties', {'name': '함께 만드는 코스'});
-    return fetchParty(p['id'] as String);
+    final created = await _platform.post('/parties', {'name': '함께 만드는 코스'});
+    return fetchParty(created['id'] as String);
   }
 
   /// 파티 목록 API는 따로 없고 GET /me의 parties에 멤버까지 같이 온다
   @override
   Future<List<Party>> fetchMyParties() async {
-    final me = await c.me();
-    return [for (final p in me['parties'] as List) party(p['id'] as String, p['members'] as List)];
+    final me = await _platform.me();
+    return [
+      for (final party in me['parties'] as List) _party(party['id'] as String, party['members'] as List),
+    ];
   }
 
   @override
   Future<Party> fetchParty(String id) async {
-    final p = await c.get('/parties/$id');
-    return party(id, p['members'] as List);
+    final party = await _platform.get('/parties/$id');
+    return _party(id, party['members'] as List);
   }
 
-  Party party(String id, List members) => Party(
+  Party _party(String id, List members) => Party(
     id: id,
     members: [
-      for (final m in members)
+      for (final member in members)
         PartyMember(
-          id: m['id'] as String,
-          nickname: m['name'] as String,
-          isMe: m['id'] == c.currentUserId,
+          id: member['id'] as String,
+          nickname: member['name'] as String,
+          isMe: member['id'] == _platform.currentUserId,
         ),
     ],
   );
 
   @override
   Future<InviteLink> createInviteLink(String id) async {
-    final p = await c.post('/parties/$id/invites');
-    return InviteLink(url: webAppLink('/invites/${p['code']}'));
+    final invite = await _platform.post('/parties/$id/invites');
+    return InviteLink(url: webAppLink('/invites/${invite['code']}'));
   }
 
   @override
   Future<Invitation> fetchInvitation(String token) async {
-    final p = await c.get('/mobile/invites/$token');
+    final invite = await _platform.get('/mobile/invites/$token');
     return Invitation(
       token: token,
-      inviterName: p['inviter'] as String,
-      courseTitle: p['name'] as String,
-      memberCount: p['member_count'] as int,
+      inviterName: invite['inviter'] as String,
+      courseTitle: invite['name'] as String,
+      memberCount: invite['member_count'] as int,
     );
   }
 
@@ -593,18 +592,17 @@ class PlatformPartyRepository implements PartyRepository {
     if (!shareMyPreferences) {
       throw const ValidationFailure('현재 서버의 파티 추천은 참여자 저장 취향을 함께 사용해요.');
     }
-    await c.post('/parties/join', {'code': token});
+    await _platform.post('/parties/join', {'code': token});
   }
 
   @override
   Future<void> declineInvitation(String token) async {}
 }
 
-/// 팀 서버에는 링크 추출 기능이 없다 (NEEDS BACKEND). 추출 기록은 없는 것으로 보고 빈 목록을 준다 —
-/// 홈의 "최근 저장한 곳"이 오류 칸 대신 숨겨진다. Mock 결과로 대신하지 않는다.
+/// 팀 서버에는 링크 추출 기능이 없다 (NEEDS BACKEND). Mock 결과로 대신하지 않는다.
 class PlatformExtractionRepository implements ExtractionRepository {
-  PlatformExtractionRepository(this.c);
-  final PlatformClient c;
+  PlatformExtractionRepository(this._platform);
+  final PlatformClient _platform;
 
   @override
   Future<ExtractionResult> extract(String url) async => throw const NotImplementedFailure('링크로 장소 찾기');
@@ -612,18 +610,22 @@ class PlatformExtractionRepository implements ExtractionRepository {
   /// 서버에는 추출 기록이 없어, 저장 장소(/me)를 저장한 시각(saved_at) 순으로 대신 쓴다 (홈 '최근 저장한 곳').
   @override
   Future<List<RecentExtraction>> fetchRecent({int limit = 2}) async => recentFrom(
-        [for (final p in (await c.me())['places'] as List) Map<String, dynamic>.from(p as Map)],
+        [for (final place in (await _platform.me())['places'] as List) Map<String, dynamic>.from(place as Map)],
         limit: limit,
       );
 
   List<RecentExtraction> recentFrom(List<Json> places, {required int limit}) {
     final dated = [
-      for (final p in places)
-        if (DateTime.tryParse((p['saved_at'] ?? '').toString()) case final at?) (p, at.toLocal()),
+      for (final place in places)
+        if (DateTime.tryParse((place['saved_at'] ?? '').toString()) case final savedAt?) (place, savedAt.toLocal()),
     ]..sort((a, b) => b.$2.compareTo(a.$2));
     return [
-      for (final (p, at) in dated.take(limit))
-        RecentExtraction(place: c.place(p, saved: true), sourceUrl: (p['place_url'] ?? '').toString(), extractedAt: at),
+      for (final (place, savedAt) in dated.take(limit))
+        RecentExtraction(
+          place: _platform.place(place, saved: true),
+          sourceUrl: (place['place_url'] ?? '').toString(),
+          extractedAt: savedAt,
+        ),
     ];
   }
 }

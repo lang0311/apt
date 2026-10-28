@@ -21,25 +21,24 @@ class CourseSummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = course;
-    final where = [?c.regionLabel, '${c.placeCount}곳'].join(' · ');
+    final where = [?course.regionLabel, '${course.placeCount}곳'].join(' · ');
     return InkWell(
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: 10),
         child: Row(
           children: [
-            AppNetworkImage(url: c.thumbnailUrl, width: 48, height: 48, radius: 12),
+            AppNetworkImage(url: course.thumbnailUrl, width: 48, height: 48, radius: 12),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 이름은 두 줄까지, 파티원·지역 줄은 한 줄로 줄인다
-                  Text(c.title, style: AppTypography.bodyStrong, maxLines: 2, overflow: TextOverflow.ellipsis),
-                  if (c.isParty) ...[
+                  Text(course.title, style: AppTypography.bodyStrong, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  if (course.isParty) ...[
                     const SizedBox(height: 3),
-                    _People(names: c.memberNames, count: c.memberCount),
+                    _People(names: course.memberNames, count: course.memberCount),
                   ],
                   const SizedBox(height: 2),
                   Text(where, style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -47,7 +46,7 @@ class CourseSummaryRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
-            if (c.date != null) _When(date: c.date!, now: now),
+            if (course.date != null) _When(date: course.date!, now: now),
           ],
         ),
       ),

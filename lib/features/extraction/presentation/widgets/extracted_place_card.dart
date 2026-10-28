@@ -125,22 +125,22 @@ class ExtractedPlaceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final p = item.place;
+    final place = item.place;
     final saved = item.alreadySaved;
-    final area = SavedPlaceRow.shortArea(p);
+    final area = SavedPlaceRow.shortArea(place);
     final row = Padding(
       padding: const EdgeInsets.fromLTRB(AppSpacing.md, 10, AppSpacing.xs, 10),
       child: Row(
         children: [
-          PlaceImage(place: p, width: 48, height: 48, radius: 12),
+          PlaceImage(place: place, width: 48, height: 48, radius: 12),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(p.name, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(place.name, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 2),
-                Text([p.categoryLabel, if (area.isNotEmpty) area].join(' · '), style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text([place.categoryLabel, if (area.isNotEmpty) area].join(' · '), style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
                 if (collectionLabel != null && !saved) ...[
                   const SizedBox(height: 2),
                   Text(collectionLabel!, style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -152,10 +152,10 @@ class ExtractedPlaceRow extends StatelessWidget {
           if (saved)
             const Padding(padding: EdgeInsets.only(right: AppSpacing.xs), child: AppTag('저장됨'))
           else ...[
-            _CollectionButton(active: collectionLabel != null, onTap: onPickCollection, placeName: p.name),
+            _CollectionButton(active: collectionLabel != null, onTap: onPickCollection, placeName: place.name),
             Semantics(
               selected: selected,
-              label: '${p.name} 저장',
+              label: '${place.name} 저장',
               button: true,
               child: InkResponse(
                 onTap: onToggle,

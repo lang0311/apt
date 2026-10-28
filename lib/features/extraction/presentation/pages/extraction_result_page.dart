@@ -32,6 +32,7 @@ class ExtractionResultPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final result = ref.watch(extractionProvider(url));
     final handle = result.value?.sourceHandle;
+    void retry() => ref.invalidate(extractionProvider(url));
     return Scaffold(
       body: SafeArea(
         bottom: false,
@@ -51,11 +52,11 @@ class ExtractionResultPage extends ConsumerWidget {
                 loading: () => const _Searching(),
                 error: (e, _) => _Failure(
                   kind: e is ExtractionFailure ? e.kind : ExtractionFailureKind.failed,
-                  onRetry: () => ref.invalidate(extractionProvider(url)),
+                  onRetry: retry,
                 ),
-                data: (r) => r.places.isEmpty
-                    ? _Failure(kind: ExtractionFailureKind.noPlaceFound, onRetry: () => ref.invalidate(extractionProvider(url)))
-                    : _Review(result: r),
+                data: (data) => data.places.isEmpty
+                    ? _Failure(kind: ExtractionFailureKind.noPlaceFound, onRetry: retry)
+                    : _Review(result: data),
               ),
             ),
           ],
@@ -72,19 +73,26 @@ class _SourceRow extends StatelessWidget {
   final String url;
   final String? handle;
 
+  /// '@'를 붙인 계정 이름. 받지 못했으면 null.
+  String? get _displayHandle {
+    final raw = handle;
+    if (raw == null || raw.isEmpty) return null;
+    return raw.startsWith('@') ? raw : '@$raw';
+  }
+
   @override
   Widget build(BuildContext context) {
     final kind = url.contains('/reel') ? '릴스' : '게시물';
-    final h = handle == null || handle!.isEmpty ? null : (handle!.startsWith('@') ? handle! : '@$handle');
+    final displayHandle = _displayHandle;
     final shortUrl = url.replaceFirst(RegExp(r'^https?://(www\.)?'), '');
     return ExtractSourceRow(
-      leading: h == null ? const LinkTile() : const InstagramTile(),
+      leading: displayHandle == null ? const LinkTile() : const InstagramTile(),
       action: SourceRowAction(label: '게시물 보기', onPressed: () => openExternalLink(context, url)),
-      child: h == null
+      child: displayHandle == null
           ? Text(shortUrl, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis)
           : Text.rich(
               TextSpan(children: [
-                TextSpan(text: h, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w700)),
+                TextSpan(text: displayHandle, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w700)),
                 TextSpan(text: ' · $kind', style: AppTypography.meta),
               ]),
               maxLines: 1,
@@ -232,7 +240,15 @@ class _ReviewState extends ConsumerState<_Review> {
 
   List<ExtractedPlace> get _selectable => widget.result.places.where((p) => !_isSaved(p)).toList();
 
-  void _toggle(String id) => setState(() => _selected.contains(id) ? _selected.remove(id) : _selected.add(id));
+  void _toggle(String id) {
+    setState(() {
+      if (_selected.contains(id)) {
+        _selected.remove(id);
+      } else {
+        _selected.add(id);
+      }
+    });
+  }
 
   Future<void> _pickCollections(ExtractedPlace item) async {
     final id = item.place.id;
@@ -267,40 +283,50 @@ class _ReviewState extends ConsumerState<_Review> {
     ];
     // 같은 보관함 조합끼리 묶어서 보낸다 (보관함 없음도 한 묶음).
     // NEEDS BACKEND: 장소별 보관함을 한 번에 받는 API가 있으면 한 번에, 일부만 실패했을 때 처리 방식 확인.
-    final groups = <String, List<String>>{};
-    final groupIds = <String, List<String>>{};
-    for (final p in places) {
-      final ids = (_collections[p.id] ?? const <String>{}).toList()..sort();
-      final key = ids.join(',');
-      groups.putIfAbsent(key, () => []).add(p.id);
-      groupIds[key] = ids;
+    // 묶음 키(보관함 id를 정렬해 이은 문자열) → 장소 id / 보관함 id
+    final placeIdsByGroup = <String, List<String>>{};
+    final collectionIdsByGroup = <String, List<String>>{};
+    for (final place in places) {
+      final collectionIds = (_collections[place.id] ?? const <String>{}).toList()..sort();
+      final key = collectionIds.join(',');
+      placeIdsByGroup.putIfAbsent(key, () => []).add(place.id);
+      collectionIdsByGroup[key] = collectionIds;
     }
     setState(() => _saving = true);
     final repo = ref.read(savedRepositoryProvider);
     final router = GoRouter.of(context);
     try {
-      for (final e in groups.entries) {
-        await repo.savePlaces(placeIds: e.value, collectionIds: groupIds[e.key]!);
+      for (final MapEntry(key: groupKey, value: placeIds) in placeIdsByGroup.entries) {
+        await repo.savePlaces(placeIds: placeIds, collectionIds: collectionIdsByGroup[groupKey]!);
         // 묶음마다 반영해 두면 중간에 실패해도 이미 저장한 곳은 '저장됨'으로 남는다
         setState(() {
-          _savedNow.addAll(e.value);
-          _selected.removeAll(e.value);
+          _savedNow.addAll(placeIds);
+          _selected.removeAll(placeIds);
         });
       }
       invalidateSavedData(ref);
       if (!mounted) return;
       // 저장 뒤에는 결과 화면에 남고 스낵바 (07 D26 ①)
       final names = {for (final c in ref.read(collectionsProvider).value ?? []) c.id: c.name};
-      final onlyGroup = groupIds.length == 1 ? groupIds.values.single : const <String>[];
+      final onlyGroup = collectionIdsByGroup.length == 1 ? collectionIdsByGroup.values.single : const <String>[];
       final oneCollection = onlyGroup.length == 1 && names.containsKey(onlyGroup.single) ? onlyGroup.single : null;
-      final n = places.length;
+      final count = places.length;
+
+      void openSaved() {
+        if (count == 1) {
+          router.push(AppRoutes.place(places.single.id));
+        } else if (oneCollection == null) {
+          router.go(AppRoutes.saved);
+        } else {
+          router.go(AppRoutes.collection(oneCollection));
+        }
+      }
+
       showAppSnackBar(
         context,
-        oneCollection == null ? '$n곳을 저장했어요' : '$n곳을 ${names[oneCollection]}에 저장했어요',
+        oneCollection == null ? '$count곳을 저장했어요' : '$count곳을 ${names[oneCollection]}에 저장했어요',
         actionLabel: '보기',
-        onAction: () => n == 1
-            ? router.push(AppRoutes.place(places.single.id))
-            : router.go(oneCollection == null ? AppRoutes.saved : AppRoutes.collection(oneCollection)),
+        onAction: openSaved,
       );
     } catch (e) {
       invalidateSavedData(ref);
@@ -310,12 +336,35 @@ class _ReviewState extends ConsumerState<_Review> {
     }
   }
 
+  void _toggleAll(bool allSelected) {
+    setState(() {
+      if (allSelected) {
+        _selected.clear();
+      } else {
+        _selected.addAll(_selectable.map((p) => p.place.id));
+      }
+    });
+  }
+
+  Widget _bottomButton({required bool allSaved}) {
+    // 이 화면에서 남은 장소까지 다 저장했으면 '완료'
+    if (allSaved && _savedNow.isNotEmpty) {
+      return AppButton.outline(label: '완료', onPressed: () => context.go(AppRoutes.extract));
+    }
+    if (allSaved) {
+      return AppButton(label: '저장됨에서 보기', variant: AppButtonVariant.soft, onPressed: () => context.go(AppRoutes.saved));
+    }
+    return AppButton(
+      label: '${_selected.length}곳 저장',
+      loading: _saving,
+      onPressed: _selected.isEmpty ? null : _save,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final r = widget.result;
+    final result = widget.result;
     final allSaved = _selectable.isEmpty;
-    // 이 화면에서 남은 장소까지 다 저장했으면 '완료'
-    final finished = allSaved && _savedNow.isNotEmpty;
     final allSelected = !allSaved && _selectable.every((p) => _selected.contains(p.place.id));
     final names = <String, String>{for (final c in ref.watch(collectionsProvider).value ?? []) c.id: c.name};
 
@@ -326,19 +375,17 @@ class _ReviewState extends ConsumerState<_Review> {
             padding: const EdgeInsets.fromLTRB(AppSpacing.sm, 0, AppSpacing.sm, AppSpacing.lg),
             children: [
               SectionCard(
-                title: '찾은 장소 ${r.places.length}',
+                title: '찾은 장소 ${result.places.length}',
                 trailing: allSaved
                     ? null
                     : AppTextLink(
                         label: allSelected ? '모두 해제' : '모두 선택',
-                        onPressed: () => setState(() {
-                          allSelected ? _selected.clear() : _selected.addAll(_selectable.map((p) => p.place.id));
-                        }),
+                        onPressed: () => _toggleAll(allSelected),
                       ),
                 child: DividedRows(
                   indent: AppSpacing.md,
                   children: [
-                    for (final item in r.places)
+                    for (final item in result.places)
                       ExtractedPlaceRow(
                         item: _savedNow.contains(item.place.id) ? ExtractedPlace(place: item.place, alreadySaved: true) : item,
                         selected: _selected.contains(item.place.id),
@@ -352,17 +399,7 @@ class _ReviewState extends ConsumerState<_Review> {
             ],
           ),
         ),
-        BottomCta(
-          child: finished
-              ? AppButton.outline(label: '완료', onPressed: () => context.go(AppRoutes.extract))
-              : allSaved
-              ? AppButton(label: '저장됨에서 보기', variant: AppButtonVariant.soft, onPressed: () => context.go(AppRoutes.saved))
-              : AppButton(
-                  label: '${_selected.length}곳 저장',
-                  loading: _saving,
-                  onPressed: _selected.isEmpty ? null : _save,
-                ),
-        ),
+        BottomCta(child: _bottomButton(allSaved: allSaved)),
       ],
     );
   }

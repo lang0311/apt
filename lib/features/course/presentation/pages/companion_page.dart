@@ -38,7 +38,7 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
 
   CourseDraftController get _draft => ref.read(courseDraftProvider.notifier);
 
-  void _setCompanion(Companion c) => _draft.update((d) => d.copyWith(companion: c));
+  void _setCompanion(Companion companion) => _draft.update((d) => d.copyWith(companion: companion));
 
   void _pickParty(String id) {
     setState(() => _newParty = false);
@@ -82,6 +82,8 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
   Widget build(BuildContext context) {
     final draft = ref.watch(courseDraftProvider);
     final isParty = draft.companion == Companion.party;
+    // 함께 가요를 골라도 초대 수락을 기다리지 않고 넘어간다
+    final canNext = !_creatingParty && (!isParty || draft.partyId != null || _newParty);
 
     return Scaffold(
       body: SafeArea(
@@ -132,8 +134,7 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
               child: AppButton(
                 label: '다음',
                 loading: _creatingParty,
-                // 함께 가요를 골라도 초대 수락을 기다리지 않고 넘어간다
-                onPressed: !_creatingParty && (!isParty || draft.partyId != null || _newParty) ? _next : null,
+                onPressed: canNext ? _next : null,
               ),
             ),
           ],

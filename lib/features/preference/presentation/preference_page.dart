@@ -113,19 +113,7 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
                     ? null
                     : Text('${_selected!.length}개 선택', style: AppTypography.label.copyWith(color: AppColors.textSecondary)),
               ),
-              Expanded(
-                child: groups.hasError || mine.hasError
-                    ? AppErrorState(
-                        error: (groups.error ?? mine.error)!,
-                        onRetry: () {
-                          ref.invalidate(preferenceGroupsProvider);
-                          ref.invalidate(myPreferencesProvider);
-                        },
-                      )
-                    : !groups.hasValue || _selected == null
-                        ? const _Skeleton()
-                        : _content(groups.value!),
-              ),
+              Expanded(child: _body(groups, mine)),
               BottomCta(
                 child: AppButton(label: '취향 저장하기', loading: _saving, onPressed: _dirty ? _save : null),
               ),
@@ -134,6 +122,20 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
         ),
       ),
     );
+  }
+
+  Widget _body(AsyncValue<List<PreferenceGroup>> groups, AsyncValue<MyPreferences> mine) {
+    if (groups.hasError || mine.hasError) {
+      return AppErrorState(
+        error: (groups.error ?? mine.error)!,
+        onRetry: () {
+          ref.invalidate(preferenceGroupsProvider);
+          ref.invalidate(myPreferencesProvider);
+        },
+      );
+    }
+    if (!groups.hasValue || _selected == null) return const _Skeleton();
+    return _content(groups.value!);
   }
 
   Widget _content(List<PreferenceGroup> groups) {

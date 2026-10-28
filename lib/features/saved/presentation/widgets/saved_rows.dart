@@ -18,17 +18,19 @@ class SavedPlaceRow extends StatelessWidget {
   final VoidCallback onTap;
 
   /// '서울 성동구 성수동' → '성수동'
-  static String shortArea(Place p) {
-    final parts = p.displayArea.trim().split(RegExp(r'\s+'));
-    return parts.isEmpty ? '' : parts.last;
+  static String shortArea(Place p) => p.displayArea.trim().split(RegExp(r'\s+')).last;
+
+  /// 출처 계정을 '@계정' 꼴로. 없으면 null.
+  static String? _handleOf(Place place) {
+    final handle = place.sourceHandle;
+    if (handle == null || handle.isEmpty) return null;
+    return handle.startsWith('@') ? handle : '@$handle';
   }
 
   @override
   Widget build(BuildContext context) {
     final area = shortArea(place);
-    final handle = place.sourceHandle == null || place.sourceHandle!.isEmpty
-        ? null
-        : (place.sourceHandle!.startsWith('@') ? place.sourceHandle! : '@${place.sourceHandle}');
+    final handle = _handleOf(place);
     final hasThird = place.rating != null || handle != null;
 
     return Semantics(
@@ -93,10 +95,9 @@ class CollectionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = collection;
     final meta = [
-      '${c.placeCount}곳',
-      if (c.updatedAt != null) '${formatRecentDate(c.updatedAt!)} 수정',
+      '${collection.placeCount}곳',
+      if (collection.updatedAt != null) '${formatRecentDate(collection.updatedAt!)} 수정',
     ].join(' · ');
     return InkWell(
       onTap: onTap,
@@ -106,17 +107,22 @@ class CollectionRow extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(AppSpacing.md, 10, AppSpacing.xxs, 10),
           child: Row(
             children: [
-              MiniCollage(urls: c.thumbnailUrls),
+              MiniCollage(urls: collection.thumbnailUrls),
               const SizedBox(width: 14),
               Expanded(
                 child: Semantics(
                   button: true,
-                  label: '${c.name}, $meta',
+                  label: '${collection.name}, $meta',
                   excludeSemantics: true,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(c.name, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text(
+                        collection.name,
+                        style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w800),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       const SizedBox(height: 3),
                       Text(meta, style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],
@@ -125,7 +131,7 @@ class CollectionRow extends StatelessWidget {
               ),
               IconButton(
                 onPressed: onMore,
-                tooltip: '${c.name} 메뉴',
+                tooltip: '${collection.name} 메뉴',
                 icon: const Icon(Icons.more_horiz_rounded, color: AppColors.textSecondary),
                 constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
               ),
@@ -154,9 +160,10 @@ class MiniCollage extends StatelessWidget {
       );
     }
     final cell = (size - 1.5) / 2;
-    Widget tile(int i) => i < urls.length
-        ? AppNetworkImage(url: urls[i], width: cell, height: cell, radius: 0)
-        : Container(width: cell, height: cell, color: AppColors.surfaceMuted);
+    Widget tile(int index) {
+      if (index < urls.length) return AppNetworkImage(url: urls[index], width: cell, height: cell, radius: 0);
+      return Container(width: cell, height: cell, color: AppColors.surfaceMuted);
+    }
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.thumb),
       child: SizedBox(
@@ -334,13 +341,13 @@ Future<CategoryPick?> showCategoryFilterSheet(
             selected: selectedKey == null,
             onTap: () => Navigator.of(ctx).pop((key: null)),
           ),
-          for (final c in summary.categories)
+          for (final category in summary.categories)
             _CategoryOption(
-              label: c.label,
-              count: c.count,
-              style: CategoryStyle.of(c.key),
-              selected: selectedKey == c.key,
-              onTap: c.count == 0 ? null : () => Navigator.of(ctx).pop((key: c.key)),
+              label: category.label,
+              count: category.count,
+              style: CategoryStyle.of(category.key),
+              selected: selectedKey == category.key,
+              onTap: category.count == 0 ? null : () => Navigator.of(ctx).pop((key: category.key)),
             ),
         ],
       ),

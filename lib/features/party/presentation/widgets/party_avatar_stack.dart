@@ -24,23 +24,26 @@ class PartyAvatarStack extends StatelessWidget {
     (AppColors.extractSoft, AppColors.extract),
   ];
 
-  Widget _face(int i, PartyMember m) => Container(
-        width: size,
-        height: size,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: _palette[(i + colorOffset) % _palette.length].$1,
-          shape: BoxShape.circle,
-          border: overlap ? Border.all(color: AppColors.surface, width: 1.5) : null,
+  Widget _face(int index, PartyMember member) {
+    final (background, foreground) = _palette[(index + colorOffset) % _palette.length];
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: background,
+        shape: BoxShape.circle,
+        border: overlap ? Border.all(color: AppColors.surface, width: 1.5) : null,
+      ),
+      child: Text(
+        member.initial,
+        style: AppTypography.label.copyWith(
+          color: foreground,
+          fontSize: size < 30 ? size * 0.45 : null,
         ),
-        child: Text(
-          m.initial,
-          style: AppTypography.label.copyWith(
-            color: _palette[(i + colorOffset) % _palette.length].$2,
-            fontSize: size < 30 ? size * 0.45 : null,
-          ),
-        ),
-      );
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

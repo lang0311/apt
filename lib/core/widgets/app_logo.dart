@@ -34,15 +34,15 @@ class AppLogo extends StatelessWidget {
 class _LogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final p = Paint()
+    final stroke = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.width * 0.045
       ..strokeCap = StrokeCap.round;
-    final c = Offset(size.width / 2, size.height * 0.58);
-    final r = size.width * 0.27;
-    canvas.drawArc(Rect.fromCircle(center: c, radius: r), 3.4, 2.62, false, p);
-    canvas.drawLine(Offset(c.dx, size.height * 0.27), Offset(c.dx, size.height * 0.75), p);
+    final center = Offset(size.width / 2, size.height * 0.58);
+    final radius = size.width * 0.27;
+    canvas.drawArc(Rect.fromCircle(center: center, radius: radius), 3.4, 2.62, false, stroke);
+    canvas.drawLine(Offset(center.dx, size.height * 0.27), Offset(center.dx, size.height * 0.75), stroke);
   }
 
   @override

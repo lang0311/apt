@@ -40,10 +40,10 @@ class _IdSignupPageState extends ConsumerState<IdSignupPage> {
     super.dispose();
   }
 
-  void _edited(String field) {
-    if (_errors.containsKey(field)) setState(() => _errors = {..._errors}..remove(field));
-    setState(() {});
-  }
+  /// 고친 칸의 오류를 지우고 버튼 활성 상태를 다시 계산한다.
+  void _edited(String field) => setState(() {
+        if (_errors.containsKey(field)) _errors = {..._errors}..remove(field);
+      });
 
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();

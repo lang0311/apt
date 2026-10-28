@@ -27,10 +27,10 @@ class AccountConflictPage extends ConsumerStatefulWidget {
 class _AccountConflictPageState extends ConsumerState<AccountConflictPage> {
   bool _linking = false;
 
-  Future<void> _link(AccountConflict c) async {
+  Future<void> _link(AccountConflict conflict) async {
     setState(() => _linking = true);
     try {
-      await ref.read(authControllerProvider.notifier).linkExistingAccount(c);
+      await ref.read(authControllerProvider.notifier).linkExistingAccount(conflict);
     } catch (e) {
       if (mounted) showAppSnackBar(context, failureMessage(e));
     } finally {
@@ -40,7 +40,7 @@ class _AccountConflictPageState extends ConsumerState<AccountConflictPage> {
 
   @override
   Widget build(BuildContext context) {
-    final c = widget.conflict;
+    final conflict = widget.conflict;
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -54,20 +54,20 @@ class _AccountConflictPageState extends ConsumerState<AccountConflictPage> {
                   StatusCard(
                     icon: Icons.priority_high_rounded,
                     title: '이미 가입된 이메일이에요',
-                    description: '기존 계정과 ${c?.provider.label ?? '소셜'} 계정을 연결할까요?',
+                    description: '기존 계정과 ${conflict?.provider.label ?? '소셜'} 계정을 연결할까요?',
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  if (c != null)
+                  if (conflict != null)
                     AppCard(
                       padding: const EdgeInsets.all(AppSpacing.lg),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(c.maskedEmail, style: AppTypography.cardTitle.copyWith(fontSize: 17)),
+                          Text(conflict.maskedEmail, style: AppTypography.cardTitle.copyWith(fontSize: 17)),
                           const SizedBox(height: 4),
-                          Text(c.existingMethodLabel, style: AppTypography.body),
+                          Text(conflict.existingMethodLabel, style: AppTypography.body),
                           const SizedBox(height: AppSpacing.md),
-                          Text('연결하면 다음부터 ${c.provider.label}로 로그인할 수 있어요.', style: AppTypography.meta),
+                          Text('연결하면 다음부터 ${conflict.provider.label}로 로그인할 수 있어요.', style: AppTypography.meta),
                         ],
                       ),
                     ),
@@ -80,7 +80,7 @@ class _AccountConflictPageState extends ConsumerState<AccountConflictPage> {
                   AppButton(
                     label: '기존 계정과 연결하기',
                     loading: _linking,
-                    onPressed: c == null ? null : () => _link(c),
+                    onPressed: conflict == null ? null : () => _link(conflict),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   AppTextLink(
