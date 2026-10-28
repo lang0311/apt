@@ -1297,7 +1297,7 @@ module.exports = [
     title: '코드 정리(리팩터)',
     date: '2026-10-28',
     status: '완료',
-    commits: ['caa4eba'],
+    commits: ['caa4eba', 'a66ff03'],
     goal: '과하게 구현했거나 읽기 어려운 코드를 알아보기 쉽게 정리한다. 기능 · 화면은 그대로 둔다.',
     work: [
       'code-simplifier 플러그인 에이전트 5개로 영역을 나눠 정리(app·core·dev / course / saved·place / auth·platform·party / home·extraction·my·preference). 라이브러리 사용법 확인은 context7 · SDK 소스',
@@ -1305,6 +1305,7 @@ module.exports = [
       '쓰는 곳 없는 CoursePlaceRow · DragHandle · PlatformClient.cancelActive 삭제, 03 컴포넌트 목록을 StopMarker로 고침',
       'public API · 서버 경로 · JSON 키 · 화면 값은 그대로. 추천 컨트롤러 취소 · 되돌리기, 공유 수신 흐름은 위험해서 손대지 않음',
       '59개 파일. flutter analyze 0, flutter test 136개 통과(작업 전과 같음)',
+      '2차: 쓰는 곳 없는 StagedLoading · ScrollWithBottomCta, 아무도 넘기지 않는 위젯 옵션 17개(헤더 subtitle · showBack, StepHeader.total, PlaceSearchPage.initialQuery 등) 삭제. 같은 모양의 지도 알약 버튼 2벌(_MapPill · _AreaSearchButton) 합치기는 모양이 조금 바뀌어 보류',
     ],
     problems: [],
     decisions: [],
