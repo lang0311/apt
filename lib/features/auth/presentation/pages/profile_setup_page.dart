@@ -43,7 +43,7 @@ class _ProfileSetupPageState extends ConsumerState<ProfileSetupPage> {
       // 성공 시 라우터 redirect가 가입 완료(#4)로 보낸다.
       await ref.read(authControllerProvider.notifier).completeProfile(_nickname.text);
     } on ValidationFailure catch (e) {
-      setState(() => _error = e.message);
+      if (mounted) setState(() => _error = e.message);
     } catch (e) {
       if (mounted) showAppSnackBar(context, failureMessage(e));
     } finally {

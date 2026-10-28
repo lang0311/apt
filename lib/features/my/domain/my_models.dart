@@ -6,7 +6,6 @@ class MyProfile {
     required this.savedPlaceCount,
     required this.createdCourseCount,
     required this.joinedCourseCount,
-    this.preferenceLabels = const [],
   });
 
   final String nickname;
@@ -17,7 +16,6 @@ class MyProfile {
   final int savedPlaceCount;
   final int createdCourseCount;
   final int joinedCourseCount;
-  final List<String> preferenceLabels;
 }
 
 abstract interface class MyRepository {

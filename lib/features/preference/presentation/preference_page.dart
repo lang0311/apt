@@ -14,7 +14,6 @@ import '../../../core/widgets/chips.dart';
 import '../../../core/widgets/headers.dart';
 import '../../../core/widgets/overlays.dart';
 import '../../../core/widgets/states.dart';
-import '../../my/presentation/my_providers.dart';
 import '../domain/preference_models.dart';
 import 'preference_providers.dart';
 
@@ -30,21 +29,19 @@ class PreferencePage extends ConsumerStatefulWidget {
 
 class _PreferencePageState extends ConsumerState<PreferencePage> {
   Set<String>? _selected;
-  bool? _autoAnalysis;
+
+  /// 마지막으로 서버에 저장된 값 (변경 여부 비교 기준)
   MyPreferences? _initial;
   bool _saving = false;
 
   bool get _dirty =>
       _initial != null &&
-      (_autoAnalysis != _initial!.autoAnalysisEnabled ||
-          _selected!.length != _initial!.selectedKeys.length ||
-          !_selected!.containsAll(_initial!.selectedKeys));
+      (_selected!.length != _initial!.selectedKeys.length || !_selected!.containsAll(_initial!.selectedKeys));
 
   void _init(MyPreferences mine) {
     if (_initial != null) return;
     _initial = mine;
     _selected = {...mine.selectedKeys};
-    _autoAnalysis = mine.autoAnalysisEnabled;
   }
 
   void _leave() {
@@ -58,15 +55,15 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
   Future<void> _save() async {
     setState(() => _saving = true);
     try {
-      await ref.read(preferenceRepositoryProvider).save(selectedKeys: _selected!, autoAnalysisEnabled: _autoAnalysis!);
-      ref.invalidate(myPreferencesProvider);
-      ref.invalidate(myProfileProvider);
-      // 저장한 값을 새 기준으로 — 변경 없음 상태가 되어 이탈 확인이 뜨지 않는다
       final saved = _initial!;
+      // 자동 분석은 화면에 없는 기능 (07 §3) — 서버에서 받은 값을 그대로 다시 보낸다
+      await ref.read(preferenceRepositoryProvider).save(selectedKeys: _selected!, autoAnalysisEnabled: saved.autoAnalysisEnabled);
+      ref.invalidate(myPreferencesProvider);
+      // 저장한 값을 새 기준으로 — 변경 없음 상태가 되어 이탈 확인이 뜨지 않는다
       _initial = MyPreferences(
         selectedKeys: {..._selected!},
         autoAnalysisSupported: saved.autoAnalysisSupported,
-        autoAnalysisEnabled: _autoAnalysis!,
+        autoAnalysisEnabled: saved.autoAnalysisEnabled,
         analyzedLabels: saved.analyzedLabels,
         analysisBasisCount: saved.analysisBasisCount,
       );
@@ -174,7 +171,6 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
             ],
           ),
         ],
-        // '저장한 장소로 취향 자동 분석'은 나중에 넣을 기능 (07 §3) — 값은 서버에 받은 그대로 다시 보낸다
       ],
     );
   }

@@ -13,6 +13,7 @@ import '../../../core/widgets/overlays.dart';
 import '../../../core/widgets/states.dart';
 import '../../../core/widgets/surfaces.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../preference/presentation/preference_providers.dart';
 import '../domain/my_models.dart';
 import 'my_providers.dart';
 
@@ -37,6 +38,7 @@ class MyPage extends ConsumerWidget {
         child: RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(myProfileProvider);
+            ref.invalidate(myPreferencesProvider);
             await ref.read(myProfileProvider.future).then((_) {}, onError: (_) {});
           },
           child: ListView(
@@ -146,9 +148,7 @@ class _Profile extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.xs),
-                      child: profile.preferenceLabels.isEmpty
-                          ? Text('아직 고른 취향이 없어요.', style: AppTypography.meta)
-                          : Text(profile.preferenceLabels.join(' · '), style: AppTypography.bodyStrong),
+                      child: const _PreferenceSummary(),
                     ),
                     const Divider(height: 1, thickness: 1, indent: AppSpacing.md, endIndent: AppSpacing.md, color: AppColors.divider),
                     // 개수는 목록을 받아 세지 않는다 (서버 aggregate 없음)
@@ -161,6 +161,21 @@ class _Profile extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+/// 고른 취향 이름 (다섯 개까지). 로딩 중엔 빈 줄
+class _PreferenceSummary extends ConsumerWidget {
+  const _PreferenceSummary();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final labels = ref.watch(myPreferenceLabelsProvider);
+    if (labels.hasError) return Text('취향을 불러오지 못했어요.', style: AppTypography.meta);
+    if (!labels.hasValue) return Text('', style: AppTypography.meta);
+    final shown = labels.value!.take(5);
+    if (shown.isEmpty) return Text('아직 고른 취향이 없어요.', style: AppTypography.meta);
+    return Text(shown.join(' · '), style: AppTypography.bodyStrong);
   }
 }
 

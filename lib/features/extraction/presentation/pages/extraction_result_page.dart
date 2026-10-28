@@ -24,9 +24,8 @@ import '../widgets/extracted_place_card.dart';
 /// #11 찾은 장소. 공유로 들어오면 링크 입력(#10)을 건너뛰고 여기서 분석을 자동 시작한다.
 /// 찾는 중 · 결과 · 실패 모두 맨 위 링크 줄은 그대로 두고 아래 카드만 바꾼다 (07 D26).
 class ExtractionResultPage extends ConsumerWidget {
-  const ExtractionResultPage({super.key, required this.url, this.fromShare = false});
+  const ExtractionResultPage({super.key, required this.url});
   final String url;
-  final bool fromShare;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -298,6 +297,7 @@ class _ReviewState extends ConsumerState<_Review> {
     try {
       for (final MapEntry(key: groupKey, value: placeIds) in placeIdsByGroup.entries) {
         await repo.savePlaces(placeIds: placeIds, collectionIds: collectionIdsByGroup[groupKey]!);
+        if (!mounted) return;
         // 묶음마다 반영해 두면 중간에 실패해도 이미 저장한 곳은 '저장됨'으로 남는다
         setState(() {
           _savedNow.addAll(placeIds);

@@ -13,8 +13,11 @@ final myPreferencesProvider = FutureProvider.autoDispose<MyPreferences>(
 
 /// 내가 선택한 취향의 표시 이름 (서버 키워드 체계 기준)
 final myPreferenceLabelsProvider = FutureProvider.autoDispose<List<String>>((ref) async {
-  final groups = await ref.watch(preferenceGroupsProvider.future);
-  final mine = await ref.watch(myPreferencesProvider.future);
+  // 두 요청을 동시에 보낸다
+  final groupsFuture = ref.watch(preferenceGroupsProvider.future);
+  final mineFuture = ref.watch(myPreferencesProvider.future);
+  final groups = await groupsFuture;
+  final mine = await mineFuture;
   return [
     for (final g in groups)
       for (final i in g.items)

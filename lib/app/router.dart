@@ -182,10 +182,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               routes: [
                 GoRoute(
                   path: 'result',
-                  builder: (_, s) => ExtractionResultPage(
-                    url: s.uri.queryParameters['url'] ?? '',
-                    fromShare: s.uri.queryParameters['from'] == 'share',
-                  ),
+                  builder: (_, s) => ExtractionResultPage(url: s.uri.queryParameters['url'] ?? ''),
                 ),
               ],
             ),

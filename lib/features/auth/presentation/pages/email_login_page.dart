@@ -56,7 +56,7 @@ class _EmailLoginPageState extends ConsumerState<EmailLoginPage> {
     setState(() => _submitting = true);
     try {
       final result = await ref.read(authControllerProvider.notifier).signInWithEmail(_email.text.trim(), _password.text);
-      if (result is InvalidCredentials) setState(() => _credentialError = '이메일 또는 비밀번호가 올바르지 않아요.');
+      if (result is InvalidCredentials && mounted) setState(() => _credentialError = '이메일 또는 비밀번호가 올바르지 않아요.');
     } catch (e) {
       if (mounted) showAppSnackBar(context, failureMessage(e));
     } finally {

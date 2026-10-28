@@ -70,7 +70,7 @@ class _DeepLinkCoordinatorState extends ConsumerState<DeepLinkCoordinator> {
     }
     if (pending.shareUrl case final url?) {
       ref.read(pendingLinksProvider.notifier).clearShare();
-      router.go(AppRoutes.extractResult(url, fromShare: true));
+      router.go(AppRoutes.extractResult(url));
       _toast('공유한 게시물에서 장소를 찾고 있어요.');
     }
   }

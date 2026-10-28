@@ -19,8 +19,7 @@ abstract final class AppRoutes {
 
   /// 지도에서 검색하기 (하단 탭 없이 전체 화면, 07 D32)
   static const placeSearch = '/place-search';
-  static String extractResult(String url, {bool fromShare = false}) =>
-      Uri(path: '/extract/result', queryParameters: {'url': url, if (fromShare) 'from': 'share'}).toString();
+  static String extractResult(String url) => Uri(path: '/extract/result', queryParameters: {'url': url}).toString();
 
   static const saved = '/saved';
   static String collection(String id) => '/saved/collections/$id';
