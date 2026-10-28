@@ -8,7 +8,7 @@ import '../../domain/course_models.dart';
 /// 코스 동선 지도: 선택 장소 = 번호 핀, AI 추천 = 주황 ✦ 핀, 순서대로 경로선.
 /// 경로선은 도로를 따르는 polyline이 의도 — 데이터 제공 주체는 미정 (NEEDS BACKEND).
 class CourseRouteMap extends StatelessWidget {
-  const CourseRouteMap({super.key, required this.stops, this.height = 220});
+  const CourseRouteMap({super.key, required this.stops, required this.height});
   final List<CourseStop> stops;
   final double height;
 

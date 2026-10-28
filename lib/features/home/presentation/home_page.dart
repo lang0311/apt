@@ -106,7 +106,6 @@ class HomePage extends ConsumerWidget {
           onAction: () => context.go(AppRoutes.saved),
           loadingHeight: 128,
           onRetry: () => ref.invalidate(recentExtractionsProvider),
-          isEmpty: (items) => items.isEmpty,
           builder: (items) => RecentSavedStrip(items: items),
         ),
       if (!isFirstUse)
@@ -115,7 +114,6 @@ class HomePage extends ConsumerWidget {
           title: '이런 코스는 어때요?',
           loadingHeight: 158,
           onRetry: () => ref.invalidate(suggestedCoursesProvider),
-          isEmpty: (items) => items.isEmpty,
           // 추천 코스 상세 화면은 디자인 없음
           builder: (courses) => SuggestedCourseStrip(courses: courses, onTap: (_) => showAppSnackBar(context, '추천 코스 상세는 준비 중이에요.')),
         ),
@@ -126,7 +124,6 @@ class HomePage extends ConsumerWidget {
         onAction: () => showAppSnackBar(context, '전체 목록은 준비 중이에요.'),
         loadingHeight: 200,
         onRetry: () => ref.invalidate(trendingPlacesProvider),
-        isEmpty: (items) => items.isEmpty,
         builder: (places) => TrendingPlaceGrid(places: places),
       ),
     ];
@@ -170,21 +167,20 @@ class HomePage extends ConsumerWidget {
 
   /// 섹션 하나 = SectionCard 하나. 데이터가 비면 섹션째 숨기고, 실패하면 그 컨테이너 안에만 오류를 보여 준다.
   Widget? _section<T>({
-    required AsyncValue<T> value,
+    required AsyncValue<List<T>> value,
     required String title,
     required double loadingHeight,
     required VoidCallback onRetry,
-    required bool Function(T) isEmpty,
-    required Widget Function(T) builder,
+    required Widget Function(List<T>) builder,
     String? actionLabel,
     VoidCallback? onAction,
   }) {
-    if (value.hasValue && isEmpty(value.value as T)) return null;
+    if (value.hasValue && value.value!.isEmpty) return null;
     return SectionCard(
       title: title,
       actionLabel: value.hasValue ? actionLabel : null,
       onAction: onAction,
-      child: AsyncValueView<T>(
+      child: AsyncValueView<List<T>>(
         value: value,
         compactError: true,
         onRetry: onRetry,

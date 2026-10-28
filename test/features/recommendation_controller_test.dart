@@ -143,7 +143,7 @@ void main() {
     ]);
     controller().startEditing(course);
     expect(controller().isDirty, isFalse);
-    expect(draft().courseId, 'k1');
+    expect(draft().name, '코스');
     controller().removeStop(state().stops.last);
     expect(controller().isDirty, isTrue);
     expect(draft().rejectedPlaceIds, {'x'});

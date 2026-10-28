@@ -163,7 +163,7 @@ class _RadioRow extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 14),
           child: Row(
             children: [
-              RadioDot(selected: selected),
+              CheckMark(checked: selected),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
@@ -269,7 +269,7 @@ class _PartyRow extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
             child: Row(
               children: [
-                RadioDot(selected: selected),
+                CheckMark(checked: selected),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(

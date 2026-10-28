@@ -7,6 +7,20 @@ import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/overlays.dart';
 import '../../domain/course_models.dart';
 
+/// 장소 시트 한 줄의 색 구분
+enum StopSheetTone {
+  normal,
+
+  /// AI 추천 동작(바꾸기) — 주황 아이콘
+  ai,
+
+  /// 다른 화면으로 가는 동작 — 파랑 아이콘
+  link,
+
+  /// 차단처럼 되돌리기 어려운 동작 — 빨간 아이콘·글자, 따로 떼어 둔다
+  danger,
+}
+
 /// 장소 시트의 한 줄
 class StopSheetAction {
   const StopSheetAction({
@@ -15,7 +29,7 @@ class StopSheetAction {
     required this.onTap,
     this.description,
     this.onceScope = false,
-    this.danger = false,
+    this.tone = StopSheetTone.normal,
     this.chevron = false,
   });
 
@@ -26,9 +40,7 @@ class StopSheetAction {
 
   /// "이번만" 표시 (이 코스에서만 빼는 동작)
   final bool onceScope;
-
-  /// 차단처럼 되돌리기 어려운 동작 — 빨간 글자, 따로 떼어 둔다
-  final bool danger;
+  final StopSheetTone tone;
   final bool chevron;
 }
 
@@ -83,13 +95,13 @@ class _ActionRow extends StatelessWidget {
   final StopSheetAction action;
   final BuildContext sheetContext;
 
-  /// 아이콘 원의 (바탕, 아이콘) 색. 바꾸기(AI 추천)는 주황.
-  (Color, Color) get _iconColors {
-    if (action.danger) return (AppColors.dangerSoft, AppColors.dangerText);
-    if (action.icon == Icons.swap_horiz_rounded) return (AppColors.aiSoft, AppColors.aiText);
-    if (action.chevron) return (AppColors.primarySoft, AppColors.primary);
-    return (AppColors.surfaceMuted, AppColors.textPrimary);
-  }
+  /// 아이콘 원의 (바탕, 아이콘) 색
+  (Color, Color) get _iconColors => switch (action.tone) {
+        StopSheetTone.danger => (AppColors.dangerSoft, AppColors.dangerText),
+        StopSheetTone.ai => (AppColors.aiSoft, AppColors.aiText),
+        StopSheetTone.link => (AppColors.primarySoft, AppColors.primary),
+        StopSheetTone.normal => (AppColors.surfaceMuted, AppColors.textPrimary),
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +134,7 @@ class _ActionRow extends StatelessWidget {
                         Flexible(
                           child: Text(
                             action.label,
-                            style: AppTypography.bodyStrong.copyWith(color: action.danger ? AppColors.dangerText : null),
+                            style: AppTypography.bodyStrong.copyWith(color: action.tone == StopSheetTone.danger ? AppColors.dangerText : null),
                           ),
                         ),
                         if (action.onceScope) ...[
@@ -159,7 +171,7 @@ Future<void> showResultStopSheet(
   VoidCallback? onSwap,
   VoidCallback? onBlock,
 }) {
-  final info = StopSheetAction(label: '장소 정보 보기', icon: Icons.place_outlined, onTap: onInfo, chevron: true);
+  final info = StopSheetAction(label: '장소 정보 보기', icon: Icons.place_outlined, onTap: onInfo, tone: StopSheetTone.link, chevron: true);
   if (!stop.isAi) {
     return showStopSheet(context, stop: stop, groups: [
       [info, _removeOwn(onRemove)],
@@ -172,6 +184,7 @@ Future<void> showResultStopSheet(
           label: '다른 곳으로 바꾸기',
           description: '이 자리에 다른 장소를 추천해요',
           icon: Icons.swap_horiz_rounded,
+          tone: StopSheetTone.ai,
           onceScope: true,
           onTap: onSwap,
         ),
@@ -220,6 +233,6 @@ StopSheetAction _block(VoidCallback onTap) => StopSheetAction(
       label: '앞으로 추천하지 않기',
       description: '모든 코스 추천에서 이 장소를 빼요',
       icon: Icons.block_rounded,
-      danger: true,
+      tone: StopSheetTone.danger,
       onTap: onTap,
     );

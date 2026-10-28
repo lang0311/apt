@@ -151,7 +151,6 @@ class AppIconBox extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.size = AppSpacing.backButtonSize,
-    this.color = AppColors.textPrimary,
     this.background = AppColors.surface,
     this.tooltip,
   });
@@ -159,7 +158,6 @@ class AppIconBox extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onPressed;
   final double size;
-  final Color color;
   final Color background;
   final String? tooltip;
 
@@ -171,7 +169,7 @@ class AppIconBox extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(size / 3),
         onTap: onPressed,
-        child: SizedBox.square(dimension: size, child: Icon(icon, size: size * 0.55, color: color)),
+        child: SizedBox.square(dimension: size, child: Icon(icon, size: size * 0.55, color: AppColors.textPrimary)),
       ),
     );
     return tooltip == null ? box : Tooltip(message: tooltip!, child: box);

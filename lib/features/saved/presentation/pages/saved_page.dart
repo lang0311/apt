@@ -67,7 +67,6 @@ class _SavedPageState extends ConsumerState<SavedPage> {
                 child: SegmentedTabs(
                   labels: const ['카테고리', '내 보관함'],
                   selectedIndex: _tab,
-                  style: SegmentedStyle.underline,
                   onChanged: (i) => setState(() => _tab = i),
                 ),
               ),
@@ -171,10 +170,12 @@ class _CategoryTab extends ConsumerWidget {
               icon: Icons.tune_rounded,
               active: selected != null,
               semanticLabel: selected == null ? '카테고리 필터' : '카테고리 필터, ${selected.label} 적용됨',
-              onPressed: () async {
-                final pick = await showCategoryFilterSheet(context, summary: summary, selectedKey: selectedKey);
-                if (pick != null) ref.read(savedCategoryFilterProvider.notifier).select(pick.key);
-              },
+              onPressed: () => showCategoryFilterSheet(
+                context,
+                summary: summary,
+                selectedKey: selectedKey,
+                onSelected: (key) => ref.read(savedCategoryFilterProvider.notifier).select(key),
+              ),
             ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

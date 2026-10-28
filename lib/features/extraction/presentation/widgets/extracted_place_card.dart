@@ -160,7 +160,7 @@ class ExtractedPlaceRow extends StatelessWidget {
               child: InkResponse(
                 onTap: onToggle,
                 radius: 22,
-                child: SizedBox(width: 40, height: 44, child: Center(child: RadioDot(selected: selected))),
+                child: SizedBox(width: 40, height: 44, child: Center(child: CheckMark(checked: selected))),
               ),
             ),
           ],

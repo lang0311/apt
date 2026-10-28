@@ -198,7 +198,7 @@ class _Row extends StatelessWidget {
                   ],
                 ),
               ),
-              Opacity(opacity: onTap == null ? 0.6 : 1, child: SquareCheck(checked: checked)),
+              Opacity(opacity: onTap == null ? 0.6 : 1, child: CheckMark(checked: checked)),
             ],
           ),
         ),

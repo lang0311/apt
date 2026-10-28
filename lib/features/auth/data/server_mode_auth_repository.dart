@@ -39,8 +39,7 @@ class ServerModeAuthRepository implements AuthRepository {
   Future<void> agreeTerms(Set<String> agreedIds) => mock.agreeTerms(agreedIds);
 
   @override
-  Future<AuthUser> completeProfile({required String nickname, String? imagePath}) =>
-      mock.completeProfile(nickname: nickname, imagePath: imagePath);
+  Future<AuthUser> completeProfile({required String nickname}) => mock.completeProfile(nickname: nickname);
 
   @override
   Future<void> signOut() => isSocialSession() ? mock.signOut() : server.signOut();

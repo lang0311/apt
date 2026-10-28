@@ -14,10 +14,4 @@ abstract final class InstagramUrl {
   }
 
   static bool isValid(String? text) => extract(text) != null;
-
-  /// 표시용: instagram.com/p/C3k9...
-  static String shortLabel(String url, {int maxLength = 24}) {
-    final noScheme = url.replaceFirst(RegExp(r'^https?://(www\.)?'), '');
-    return noScheme.length <= maxLength ? noScheme : '${noScheme.substring(0, maxLength)}...';
-  }
 }

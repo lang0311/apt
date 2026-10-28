@@ -72,18 +72,12 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
     final repo = ref.read(courseRepositoryProvider);
     setState(() => _saving = true);
     try {
-      final String courseId;
-      if (draft.isEditingExisting) {
-        courseId = draft.courseId!;
-        await repo.updateCourseStops(courseId: courseId, stops: stops);
-      } else {
-        courseId = (await repo.createCourse(draft: draft, stops: stops)).id;
-      }
+      final course = await repo.createCourse(draft: draft, stops: stops);
       invalidateCourseData(ref);
-      // 코스를 만들었으면 지금까지 저장한 곳은 홈 제안에서 뺀다
-      if (!draft.isEditingExisting) ref.read(homeNudgeSeenAtProvider.notifier).markSeen();
+      // 코스를 만들었으니 지금까지 저장한 곳은 홈 제안에서 뺀다
+      ref.read(homeNudgeSeenAtProvider.notifier).markSeen();
       // 완료 화면 없이 바로 상세로 (위저드 화면은 스택에서 지워 뒤로 가면 코스 목록)
-      if (mounted) context.go(AppRoutes.course(courseId, justSaved: true));
+      if (mounted) context.go(AppRoutes.course(course.id, justSaved: true));
     } catch (e) {
       if (mounted) showAppSnackBar(context, failureMessage(e));
     } finally {
@@ -162,8 +156,8 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                               stops: state.stops,
                               highlightIds: state.changedIds,
                               loadingIds: state.loadingIds,
-                              onTapStop: busy ? null : (s, _) => showResultSheet(context, ref, s),
-                              onMore: busy ? null : (s, _) => showResultSheet(context, ref, s),
+                              onTapStop: busy ? null : (s) => showResultSheet(context, ref, s),
+                              onMore: busy ? null : (s) => showResultSheet(context, ref, s),
                             ),
                           ),
                   ),

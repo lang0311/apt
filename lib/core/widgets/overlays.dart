@@ -18,12 +18,11 @@ void showAppSnackBar(BuildContext context, String message, {String? actionLabel,
 Future<T?> showAppBottomSheet<T>(
   BuildContext context, {
   required WidgetBuilder builder,
-  bool isScrollControlled = true,
 }) {
   return showModalBottomSheet<T>(
     context: context,
     useRootNavigator: true,
-    isScrollControlled: isScrollControlled,
+    isScrollControlled: true,
     backgroundColor: AppColors.surface,
     barrierColor: AppColors.scrim,
     shape: const RoundedRectangleBorder(
@@ -64,7 +63,6 @@ class SheetHandle extends StatelessWidget {
 Future<T?> showAppModal<T>(
   BuildContext context, {
   required String title,
-  String? subtitle,
   required WidgetBuilder builder,
 }) {
   return showDialog<T>(
@@ -92,10 +90,6 @@ Future<T?> showAppModal<T>(
                 ),
               ],
             ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 6),
-              Text(subtitle, style: AppTypography.meta),
-            ],
             const SizedBox(height: AppSpacing.lg),
             builder(ctx),
           ],

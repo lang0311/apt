@@ -100,7 +100,7 @@ class _TermsList extends StatelessWidget {
           onTap: () => onChanged(all ? {} : items.map((t) => t.id).toSet()),
           child: Row(
             children: [
-              CircleCheck(checked: all),
+              CheckMark(checked: all),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
@@ -129,7 +129,7 @@ class _TermsList extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xxs),
                     child: Row(
                       children: [
-                        CircleCheck(checked: agreed.contains(t.id)),
+                        CheckMark(checked: agreed.contains(t.id)),
                         const SizedBox(width: AppSpacing.sm),
                         Expanded(
                           child: Text('${t.title} (${t.required ? '필수' : '선택'})', style: AppTypography.bodyStrong),

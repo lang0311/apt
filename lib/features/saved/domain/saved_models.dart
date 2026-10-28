@@ -30,7 +30,7 @@ class PlaceCollection {
   final String name;
   final int placeCount;
 
-  /// 콜라주 썸네일 (최대 3장 사용)
+  /// 콜라주 썸네일 (최대 4장 사용)
   final List<String> thumbnailUrls;
   final DateTime? updatedAt;
   final DateTime? createdAt;

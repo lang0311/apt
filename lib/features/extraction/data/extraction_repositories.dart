@@ -35,7 +35,7 @@ class MockExtractionRepository implements ExtractionRepository {
   }
 
   @override
-  Future<List<RecentExtraction>> fetchRecent({int limit = 2}) => _store.behavior.query(
+  Future<List<RecentExtraction>> fetchRecent({required int limit}) => _store.behavior.query(
         () => [
           for (final (id, url, days) in const [
             ('p1', 'https://www.instagram.com/p/C3k9xYzAbcD/', 2),
@@ -65,5 +65,5 @@ class ApiExtractionRepository implements ExtractionRepository {
   @override
   Future<ExtractionResult> extract(String url) async => throw _f;
   @override
-  Future<List<RecentExtraction>> fetchRecent({int limit = 2}) async => throw _f;
+  Future<List<RecentExtraction>> fetchRecent({required int limit}) async => throw _f;
 }

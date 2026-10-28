@@ -7,7 +7,6 @@ import 'course_models.dart';
 /// 정보(1) → 동행(2) → 장소(3) → AI 추천(4) ⇄ [장소 수정 → 재추천]
 class CourseDraft {
   const CourseDraft({
-    this.courseId,
     this.name = '',
     this.date,
     this.startTime,
@@ -19,8 +18,6 @@ class CourseDraft {
     this.recommendationRound = 0,
   });
 
-  /// 완성된 코스를 다시 편집하는 경우(코스 상세 → 다른 추천 받기) 원본 코스 ID
-  final String? courseId;
   final String name;
   final DateTime? date;
   final TimeOfDay? startTime;
@@ -36,7 +33,6 @@ class CourseDraft {
   final Set<String> rejectedPlaceIds;
   final int recommendationRound;
 
-  bool get isEditingExisting => courseId != null;
   bool get infoComplete => name.trim().isNotEmpty && date != null && startTime != null;
   bool get hasPlaces => places.isNotEmpty;
   Set<String> get placeIds => places.map((p) => p.id).toSet();
@@ -54,7 +50,6 @@ class CourseDraft {
     int? recommendationRound,
   }) {
     return CourseDraft(
-      courseId: courseId,
       name: name ?? this.name,
       date: date ?? this.date,
       startTime: startTime ?? this.startTime,
@@ -93,10 +88,7 @@ class CourseDraft {
 
   CourseDraft reject(String placeId) => copyWith(rejectedPlaceIds: {...rejectedPlaceIds, placeId});
 
-  CourseDraft unreject(String placeId) => copyWith(rejectedPlaceIds: {...rejectedPlaceIds}..remove(placeId));
-
   static CourseDraft fromCourse(Course course) => CourseDraft(
-        courseId: course.id,
         name: course.title,
         date: course.date,
         startTime: course.startTime,

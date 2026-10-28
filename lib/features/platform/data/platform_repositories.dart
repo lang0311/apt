@@ -130,10 +130,7 @@ class PlatformAuthRepository implements AuthRepository {
   Future<void> agreeTerms(Set<String> ids) async =>
       throw const NotImplementedFailure('약관');
   @override
-  Future<AuthUser> completeProfile({
-    required String nickname,
-    String? imagePath,
-  }) async => throw const NotImplementedFailure('프로필 수정');
+  Future<AuthUser> completeProfile({required String nickname}) async => throw const NotImplementedFailure('프로필 수정');
 }
 
 class PlatformSavedRepository extends ApiSavedRepository {
@@ -609,7 +606,7 @@ class PlatformExtractionRepository implements ExtractionRepository {
 
   /// 서버에는 추출 기록이 없어, 저장 장소(/me)를 저장한 시각(saved_at) 순으로 대신 쓴다 (홈 '최근 저장한 곳').
   @override
-  Future<List<RecentExtraction>> fetchRecent({int limit = 2}) async => recentFrom(
+  Future<List<RecentExtraction>> fetchRecent({required int limit}) async => recentFrom(
         [for (final place in (await _platform.me())['places'] as List) Map<String, dynamic>.from(place as Map)],
         limit: limit,
       );

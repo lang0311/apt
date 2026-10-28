@@ -47,7 +47,7 @@ class _Recorder implements AuthRepository {
   @override
   Future<void> agreeTerms(Set<String> agreedIds) async => calls.add('agree');
   @override
-  Future<AuthUser> completeProfile({required String nickname, String? imagePath}) async =>
+  Future<AuthUser> completeProfile({required String nickname}) async =>
       const AuthUser(id: 'x', nickname: 'x');
   @override
   Future<void> signOut() async => calls.add('signOut');

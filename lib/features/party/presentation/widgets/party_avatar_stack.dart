@@ -6,7 +6,7 @@ import '../../domain/party_models.dart';
 
 /// 파티원 아바타 (이니셜 원). 프로필 이미지가 생기면 이미지로 교체한다.
 class PartyAvatarStack extends StatelessWidget {
-  const PartyAvatarStack({super.key, required this.members, this.size = 48, this.max = 4, this.colorOffset = 0, this.overlap = false});
+  const PartyAvatarStack({super.key, required this.members, required this.size, required this.max, this.colorOffset = 0, this.overlap = false});
   final List<PartyMember> members;
   final double size;
   final int max;

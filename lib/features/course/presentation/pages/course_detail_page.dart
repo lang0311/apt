@@ -98,7 +98,7 @@ class _Body extends StatelessWidget {
                 trailing: course.canEdit ? CourseEditButton(onPressed: () => context.push(AppRoutes.courseEdit(course.id))) : null,
                 child: CourseTimeline(
                   stops: course.stops,
-                  onTapStop: (s, _) => context.push(AppRoutes.place(s.place.id)),
+                  onTapStop: (s) => context.push(AppRoutes.place(s.place.id)),
                 ),
               ),
             ],

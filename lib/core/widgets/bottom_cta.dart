@@ -7,15 +7,14 @@ import '../../app/theme/app_spacing.dart';
 /// Scaffold(resizeToAvoidBottomInset: true, 기본값)의 bottomNavigationBar 대신
 /// body Column 하단에 두면 키보드가 올라와도 가려지지 않는다.
 class BottomCta extends StatelessWidget {
-  const BottomCta({super.key, required this.child, this.background = AppColors.bg});
+  const BottomCta({super.key, required this.child});
 
   final Widget child;
-  final Color background;
 
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: background,
+      color: AppColors.bg,
       child: SafeArea(
         top: false,
         minimum: const EdgeInsets.only(bottom: AppSpacing.md),

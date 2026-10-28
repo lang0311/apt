@@ -15,9 +15,6 @@ class Party {
 
   /// 파티원 취향 종합 키워드 (서버 집계)
   final List<String> preferenceSummary;
-
-  /// 나를 뺀 파티원
-  List<PartyMember> get others => [for (final m in members) if (!m.isMe) m];
 }
 
 extension PartyMemberNames on List<PartyMember> {
@@ -67,8 +64,7 @@ class Invitation {
 enum InviteFailureKind {
   expired('초대가 만료됐어요', '초대한 친구에게 새 링크를 요청해주세요.'),
   alreadyJoined('이미 참여한 코스예요', '코스 목록의 모임/파티 코스에서 확인할 수 있어요.'),
-  full('참여 인원이 가득 찼어요', '코스를 만든 친구에게 문의해주세요.'),
-  notFound('초대를 찾을 수 없어요', '링크가 올바른지 확인해주세요.');
+  full('참여 인원이 가득 찼어요', '코스를 만든 친구에게 문의해주세요.');
 
   const InviteFailureKind(this.title, this.description);
   final String title;

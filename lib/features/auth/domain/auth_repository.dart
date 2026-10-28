@@ -16,7 +16,7 @@ abstract interface class AuthRepository {
   Future<void> agreeTerms(Set<String> agreedIds);
 
   /// 닉네임 규칙/중복은 서버 기준. 실패 시 ValidationFailure.
-  Future<AuthUser> completeProfile({required String nickname, String? imagePath});
+  Future<AuthUser> completeProfile({required String nickname});
 
   Future<void> signOut();
 

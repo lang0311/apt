@@ -173,22 +173,22 @@ class AuthHeader extends StatelessWidget {
 
 /// 코스 만들기 위저드 헤더: 배경 없는 뒤로 + "코스 만들기" + n / 4 + 4분할 진행 바 (1–4단계 같은 모양)
 class StepHeader extends StatelessWidget {
-  const StepHeader({super.key, this.title = '코스 만들기', required this.step, this.onBack, this.trailing});
+  const StepHeader({super.key, required this.step, this.onBack});
 
-  final String title;
   final int step;
   final VoidCallback? onBack;
-  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         PlainHeader(
-          title: title,
+          title: '코스 만들기',
           onLeading: onBack,
-          trailing: trailing ??
-              Text('$step / 4', style: AppTypography.label.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+          trailing: Text(
+            '$step / 4',
+            style: AppTypography.label.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH),
@@ -200,17 +200,18 @@ class StepHeader extends StatelessWidget {
 }
 
 class StepProgressBar extends StatelessWidget {
-  const StepProgressBar({super.key, required this.step, this.total = 4});
+  const StepProgressBar({super.key, required this.step});
   final int step;
-  final int total;
+
+  static const _total = 4;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: '$total단계 중 $step단계',
+      label: '$_total단계 중 $step단계',
       child: Row(
         children: [
-          for (var i = 0; i < total; i++) ...[
+          for (var i = 0; i < _total; i++) ...[
             if (i > 0) const SizedBox(width: 10),
             Expanded(
               child: Container(
@@ -228,21 +229,17 @@ class StepProgressBar extends StatelessWidget {
   }
 }
 
-/// 섹션 제목 + 우측 액션("전체 보기 ›") 또는 보조 텍스트("4개")
+/// 섹션 제목 + 우측 위젯 또는 보조 텍스트("4곳")
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
     super.key,
     required this.title,
-    this.actionLabel,
-    this.onAction,
     this.trailingText,
     this.trailing,
     this.padding = const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.xl, AppSpacing.screenH, AppSpacing.sm),
   });
 
   final String title;
-  final String? actionLabel;
-  final VoidCallback? onAction;
   final String? trailingText;
   final Widget? trailing;
   final EdgeInsets padding;
@@ -256,14 +253,6 @@ class SectionHeader extends StatelessWidget {
           Expanded(child: Text(title, style: AppTypography.section)),
           if (trailing != null) trailing!,
           if (trailingText != null) Text(trailingText!, style: AppTypography.label.copyWith(color: AppColors.textSecondary)),
-          if (actionLabel != null)
-            AppTextLink(
-              label: actionLabel!,
-              onPressed: onAction,
-              color: AppColors.textSecondary,
-              style: AppTypography.meta,
-              trailingChevron: true,
-            ),
         ],
       ),
     );

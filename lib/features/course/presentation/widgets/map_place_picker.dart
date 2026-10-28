@@ -86,8 +86,12 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
   Future<void> _openFilter() async {
     final summary = ref.read(savedSummaryProvider).value;
     if (summary == null) return;
-    final pick = await showCategoryFilterSheet(context, summary: summary, selectedKey: _categoryKey);
-    if (pick != null) setState(() => _categoryKey = pick.key);
+    await showCategoryFilterSheet(
+      context,
+      summary: summary,
+      selectedKey: _categoryKey,
+      onSelected: (key) => setState(() => _categoryKey = key),
+    );
   }
 
   @override

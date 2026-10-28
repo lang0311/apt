@@ -102,7 +102,7 @@ class CourseEditButton extends StatelessWidget {
 }
 
 /// 장소 번호 원. 내가 고른 장소 = 진한 번호, AI 추천 = 주황 ✦.
-Widget _marker(CourseStop stop, int? number) => StopMarker(source: stop.source, number: number, size: 26, dark: !stop.isAi);
+Widget _marker(CourseStop stop, int? number) => StopMarker(source: stop.source, number: number);
 
 /// 장소 이름 아래 줄. AI 추천은 "✦ 이유"(주황 글자), 내가 고른 장소는 카테고리 · 지역.
 class _StopText extends StatelessWidget {
@@ -158,10 +158,10 @@ class CourseTimeline extends StatelessWidget {
   });
 
   final List<CourseStop> stops;
-  final void Function(CourseStop stop, int index)? onTapStop;
+  final void Function(CourseStop stop)? onTapStop;
 
   /// AI 장소 행 끝의 ⋯ (없으면 표시하지 않음)
-  final void Function(CourseStop stop, int index)? onMore;
+  final void Function(CourseStop stop)? onMore;
 
   /// 다시 추천으로 바뀐 장소 (주황 바탕)
   final Set<String> highlightIds;
@@ -185,8 +185,8 @@ class CourseTimeline extends StatelessWidget {
                 stop: stops[i],
                 number: numbers[i],
                 highlighted: highlightIds.contains(stops[i].place.id),
-                onTap: onTapStop == null ? null : () => onTapStop!(stops[i], i),
-                onMore: onMore == null || !stops[i].isAi ? null : () => onMore!(stops[i], i),
+                onTap: onTapStop == null ? null : () => onTapStop!(stops[i]),
+                onMore: onMore == null || !stops[i].isAi ? null : () => onMore!(stops[i]),
               ),
             if (i < stops.length - 1) _LegRow(leg: stops[i].nextLeg),
           ],

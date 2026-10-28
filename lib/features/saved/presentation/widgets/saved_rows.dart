@@ -11,7 +11,7 @@ import '../../domain/saved_models.dart';
 import 'category_style.dart';
 import 'place_image.dart';
 
-/// 저장 장소 한 행: 사진 56 · 이름 · '카테고리 · 동네' · ★평점/@출처(둘 다 없으면 줄째 생략)
+/// 저장 장소 한 행: 사진 56 · 이름 · '카테고리 · 동네' · ★평점/@출처(둘 다 없으면 셋째 줄 생략)
 class SavedPlaceRow extends StatelessWidget {
   const SavedPlaceRow({super.key, required this.place, required this.onTap});
   final Place place;
@@ -314,16 +314,20 @@ class AppliedFilterChip extends StatelessWidget {
   }
 }
 
-/// 카테고리 시트 결과. 시트를 그냥 닫으면 null, '전체'를 고르면 key가 null인 값.
-typedef CategoryPick = ({String? key});
-
-/// 카테고리 시트: 전체 + 서버 대분류(아이콘·개수). 하나를 누르면 바로 닫히며 적용된다. 0곳은 누를 수 없다.
-Future<CategoryPick?> showCategoryFilterSheet(
+/// 카테고리 시트: 전체 + 서버 대분류(아이콘·개수). 하나를 누르면 바로 닫히며 [onSelected]를 부른다. 0곳은 누를 수 없다.
+/// '전체'는 null로 선택, 그냥 닫으면 아무 일도 없다.
+Future<void> showCategoryFilterSheet(
   BuildContext context, {
   required SavedSummary summary,
   required String? selectedKey,
+  required ValueChanged<String?> onSelected,
 }) {
-  return showAppBottomSheet<CategoryPick>(
+  void select(BuildContext ctx, String? key) {
+    Navigator.of(ctx).pop();
+    onSelected(key);
+  }
+
+  return showAppBottomSheet<void>(
     context,
     builder: (ctx) => SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -339,7 +343,7 @@ Future<CategoryPick?> showCategoryFilterSheet(
             count: summary.totalCount,
             style: const CategoryStyle(Icons.format_list_bulleted_rounded, AppColors.primary),
             selected: selectedKey == null,
-            onTap: () => Navigator.of(ctx).pop((key: null)),
+            onTap: () => select(ctx, null),
           ),
           for (final category in summary.categories)
             _CategoryOption(
@@ -347,7 +351,7 @@ Future<CategoryPick?> showCategoryFilterSheet(
               count: category.count,
               style: CategoryStyle.of(category.key),
               selected: selectedKey == category.key,
-              onTap: category.count == 0 ? null : () => Navigator.of(ctx).pop((key: category.key)),
+              onTap: category.count == 0 ? null : () => select(ctx, category.key),
             ),
         ],
       ),

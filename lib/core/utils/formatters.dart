@@ -34,9 +34,9 @@ String formatRelative(DateTime time, {DateTime? now}) {
 }
 
 /// 일주일 안은 '방금 · n분/시간/일 전', 그보다 오래면 '10월 12일' (홈·저장됨 공통)
-String formatRecentDate(DateTime at, {DateTime? now}) {
-  final withinWeek = (now ?? DateTime.now()).difference(at).inDays < 7;
-  return withinWeek ? formatRelative(at, now: now) : '${at.month}월 ${at.day}일';
+String formatRecentDate(DateTime at) {
+  final withinWeek = DateTime.now().difference(at).inDays < 7;
+  return withinWeek ? formatRelative(at) : '${at.month}월 ${at.day}일';
 }
 
 /// 5시간 20분

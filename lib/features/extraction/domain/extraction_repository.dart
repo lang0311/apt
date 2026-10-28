@@ -7,5 +7,5 @@ abstract interface class ExtractionRepository {
   /// 실패 시 [ExtractionFailure].
   Future<ExtractionResult> extract(String url);
 
-  Future<List<RecentExtraction>> fetchRecent({int limit = 2});
+  Future<List<RecentExtraction>> fetchRecent({required int limit});
 }

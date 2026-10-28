@@ -34,16 +34,12 @@ abstract final class AppRadius {
 
   static final inputAll = BorderRadius.circular(input);
   static final buttonAll = BorderRadius.circular(button);
-  static final thumbAll = BorderRadius.circular(thumb);
   static final cardAll = BorderRadius.circular(card);
   static final pillAll = BorderRadius.circular(pill);
 }
 
-/// 디자인 토큰 — 그림자 (카드는 거의 없음, 플로팅 요소만)
+/// 디자인 토큰 — 그림자 (카드는 거의 없음, 떠 있는 요소만)
 abstract final class AppShadow {
-  static const floating = [
-    BoxShadow(color: Color(0x2914223A), blurRadius: 18, offset: Offset(0, 6)),
-  ];
   static const soft = [
     BoxShadow(color: Color(0x0F14223A), blurRadius: 12, offset: Offset(0, 2)),
   ];

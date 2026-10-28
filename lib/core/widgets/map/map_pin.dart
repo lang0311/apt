@@ -13,9 +13,6 @@ enum MapPinKind {
   /// 저장 장소 핀 (카테고리 색 + 아이콘)
   place,
 
-  /// 묶음 (N곳)
-  cluster,
-
   /// 찾은 장소 (흰 원 + 업종 색 테두리·아이콘). 저장하면 [place]로 바뀐다.
   result,
 }
@@ -46,11 +43,6 @@ class MapPin extends StatelessWidget {
           Text('${number ?? ''}', style: AppTypography.bodyStrong.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
         ),
       MapPinKind.ai => _circle(AppColors.ai, const Icon(Icons.auto_awesome, color: Colors.white, size: 18)),
-      MapPinKind.cluster => _circle(
-          color ?? AppColors.primary,
-          Text('${number ?? ''}', style: AppTypography.label.copyWith(color: Colors.white)),
-          size: 34,
-        ),
       MapPinKind.place => _teardrop(),
       MapPinKind.result => _result(),
     };
@@ -75,10 +67,10 @@ class MapPin extends StatelessWidget {
     );
   }
 
-  Widget _circle(Color bg, Widget child, {double size = 38}) {
+  Widget _circle(Color bg, Widget child) {
     return Container(
-      width: size,
-      height: size,
+      width: 38,
+      height: 38,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: bg,

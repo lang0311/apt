@@ -119,7 +119,7 @@ class _CollectionSelectState extends ConsumerState<_CollectionSelect> {
                   constraints: const BoxConstraints(minHeight: 48),
                   child: Row(
                     children: [
-                      SquareCheck(checked: _applyAll),
+                      CheckMark(checked: _applyAll),
                       const SizedBox(width: AppSpacing.xs),
                       Text('${widget.applyAllCount}곳 모두 적용', style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w500)),
                     ],
@@ -172,7 +172,7 @@ class _Row extends StatelessWidget {
                   ],
                 ),
               ),
-              if (checked != null) SquareCheck(checked: checked!),
+              if (checked != null) CheckMark(checked: checked!),
             ],
           ),
         ),

@@ -60,7 +60,7 @@ class MockAuthRepository implements AuthRepository {
   Future<void> agreeTerms(Set<String> agreedIds) => _store.behavior.mutate(() {});
 
   @override
-  Future<AuthUser> completeProfile({required String nickname, String? imagePath}) =>
+  Future<AuthUser> completeProfile({required String nickname}) =>
       _store.behavior.mutate(() {
         final n = nickname.trim();
         if (n.length < 2) throw const ValidationFailure('닉네임은 2자 이상 입력해주세요.');
@@ -138,7 +138,7 @@ class ApiAuthRepository implements AuthRepository {
   @override
   Future<void> agreeTerms(Set<String> agreedIds) async => throw _f;
   @override
-  Future<AuthUser> completeProfile({required String nickname, String? imagePath}) async => throw _f;
+  Future<AuthUser> completeProfile({required String nickname}) async => throw _f;
 
   @override
   Future<void> signOut() => _tokens.clear();

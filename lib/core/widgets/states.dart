@@ -8,31 +8,23 @@ import '../error/app_failure.dart';
 import 'buttons.dart';
 import 'surfaces.dart';
 
-/// 로딩 (선택적으로 단계 메시지)
+/// 로딩
 class AppLoading extends StatelessWidget {
-  const AppLoading({super.key, this.message, this.padding = const EdgeInsets.all(AppSpacing.xxl)});
-  final String? message;
+  const AppLoading({super.key, this.padding = const EdgeInsets.all(AppSpacing.xxl)});
   final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: padding,
-      child: Center(
+      child: const Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox.square(
+            SizedBox.square(
               dimension: 28,
               child: CircularProgressIndicator(strokeWidth: 3, color: AppColors.primary),
             ),
-            if (message != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 250),
-                child: Text(message!, key: ValueKey(message), style: AppTypography.body, textAlign: TextAlign.center),
-              ),
-            ],
           ],
         ),
       ),

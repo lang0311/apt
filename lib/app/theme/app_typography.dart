@@ -41,6 +41,4 @@ abstract final class AppTypography {
 
   /// 캡션 (최소 11)
   static final caption = _s(11, FontWeight.w500, color: AppColors.textSecondary);
-
-  static final statNumber = _s(28, FontWeight.w800, height: 1.1);
 }

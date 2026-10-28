@@ -86,7 +86,6 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
                     labels: const ['내 코스', '함께하는 코스'],
                     counts: [mine.value!.length, party.value!.length],
                     selectedIndex: _tab,
-                    style: SegmentedStyle.underline,
                     onChanged: (i) => setState(() => _tab = i),
                   ),
                 ),
