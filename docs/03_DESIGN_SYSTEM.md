@@ -94,7 +94,7 @@
 **기본**: `AppPrimaryButton` `AppDarkButton` `AppOutlineButton` `AppTextButton` `AppIconButton(back)` `AppTextField(+error)` `AppChip(선택/비선택)` `AppSwitch` `AppBottomSheet` `AppModal` `AppEmptyState` `AppErrorState` `AppLoading` `AppSnackBar`
 **섹션·사진**: `SectionCard`(섹션 컨테이너, 제목 줄 오른쪽 `trailing`) `PlaceImage`(사진 없으면 카테고리 색 칸 + 아이콘, 같은 크기 유지) `DividedRows`(컨테이너 안 구분선 행) `HeaderTextButton`(제목 줄 글자 버튼)
 **탭**: `SegmentedTabs` — track(회색 트랙) / pills / **underline**(저장됨, 2026-10-20). 걸린 필터 표시는 남색 `AppliedFilterChip`
-**도메인**: `SocialLoginButton` `SegmentedTabs` `SavedPlaceRow` `CollectionRow(2×2 미니 콜라주)` `PlaceListTile` `PlaceCardSmall` `ExtractedPlaceCard` `CourseCard` `StatTile` `StepHeader(뒤로+타이틀+n/4)` `StepProgressBar` `CoursePlaceRow(번호·드래그·⋮)` `AiBadge(✦)` `PartyAvatarStack` `RouteSegmentChip(도보/버스 N분)` `PreferenceChipGroup` `AppBottomNav`
+**도메인**: `SocialLoginButton` `SegmentedTabs` `SavedPlaceRow` `CollectionRow(2×2 미니 콜라주)` `PlaceListTile` `PlaceCardSmall` `ExtractedPlaceCard` `CourseCard` `StatTile` `StepHeader(뒤로+타이틀+n/4)` `StepProgressBar` `StopMarker(번호/✦ 표시)` `AiBadge(✦)` `PartyAvatarStack` `RouteSegmentChip(도보/버스 N분)` `PreferenceChipGroup` `AppBottomNav`
 **지도**: `AptMap` `MapPin(번호/선택/AI/내 위치)` `MapBottomSheet` `MapPlacePicker`(지도 위 장소 고르기: 반투명 검색 · 필터 칩 · 카드 한 줄 · 목록 전환, 3단계·장소 추가 공용)
 **코스 (2026-10-21)**: `CourseHero`(이름 + 한 줄 정보) `CourseTimeline`(보기: 시각 · 번호/✦ · 이름 · 이유 · 점선 이동 줄, 바뀐 자리 주황·뼈대) `CourseEditList`(편집: 손잡이 · X · 장소 추가, 새로 추가 파란 테두리) `CourseEditButton` 장소 시트(`showResultStopSheet` / `showEditStopSheet` — 이번만 표시, 차단은 빨간 글자로 떼어 둠) `CourseSummaryRow` `PickedTray`
 

@@ -1292,4 +1292,25 @@ module.exports = [
       '파티 나가기 · 숨기기 API 없음(파티가 쌓이면 목록이 길어짐), 앱 푸시 알림 · 실시간 함께 편집은 추가 가능',
     ],
   },
+  {
+    id: 39,
+    title: '코드 정리(리팩터)',
+    date: '2026-10-28',
+    status: '완료',
+    commits: ['caa4eba'],
+    goal: '과하게 구현했거나 읽기 어려운 코드를 알아보기 쉽게 정리한다. 기능 · 화면은 그대로 둔다.',
+    work: [
+      'code-simplifier 플러그인 에이전트 5개로 영역을 나눠 정리(app·core·dev / course / saved·place / auth·platform·party / home·extraction·my·preference). 라이브러리 사용법 확인은 context7 · SDK 소스',
+      '넓은 범위의 한 글자 이름 변경, 중첩 삼항과 부수효과 있는 삼항을 if/else · 작은 메서드로 풀기, 반복 코드 합치기(PlatformClient.delete 등)',
+      '쓰는 곳 없는 CoursePlaceRow · DragHandle · PlatformClient.cancelActive 삭제, 03 컴포넌트 목록을 StopMarker로 고침',
+      'public API · 서버 경로 · JSON 키 · 화면 값은 그대로. 추천 컨트롤러 취소 · 되돌리기, 공유 수신 흐름은 위험해서 손대지 않음',
+      '59개 파일. flutter analyze 0, flutter test 136개 통과(작업 전과 같음)',
+    ],
+    problems: [],
+    decisions: [],
+    pending: [
+      'Pixel_6_Pro 에뮬레이터 확인 · 통합 테스트 A–L은 돌리지 않음',
+      '코스 정보 단계 "선택한 분위기는 추천에 반영돼요" 줄의 주황 ✦가 07 D17(AI 추천 표시로만)에 어긋나 보임 — 화면 변경이라 보류',
+    ],
+  },
 ];
