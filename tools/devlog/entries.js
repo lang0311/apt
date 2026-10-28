@@ -1297,7 +1297,7 @@ module.exports = [
     title: '코드 정리(리팩터)',
     date: '2026-10-28',
     status: '완료',
-    commits: ['caa4eba', 'a66ff03'],
+    commits: ['caa4eba', 'a66ff03', 'd2c96b7', 'da71f7b'],
     goal: '과하게 구현했거나 읽기 어려운 코드를 알아보기 쉽게 정리한다. 기능 · 화면은 그대로 둔다.',
     work: [
       'code-simplifier 플러그인 에이전트 5개로 영역을 나눠 정리(app·core·dev / course / saved·place / auth·platform·party / home·extraction·my·preference). 라이브러리 사용법 확인은 context7 · SDK 소스',
@@ -1306,10 +1306,26 @@ module.exports = [
       'public API · 서버 경로 · JSON 키 · 화면 값은 그대로. 추천 컨트롤러 취소 · 되돌리기, 공유 수신 흐름은 위험해서 손대지 않음',
       '59개 파일. flutter analyze 0, flutter test 136개 통과(작업 전과 같음)',
       '2차: 쓰는 곳 없는 StagedLoading · ScrollWithBottomCta, 아무도 넘기지 않는 위젯 옵션 17개(헤더 subtitle · showBack, StepHeader.total, PlaceSearchPage.initialQuery 등) 삭제. 같은 모양의 지도 알약 버튼 2벌(_MapPill · _AreaSearchButton) 합치기는 모양이 조금 바뀌어 보류',
+      '3차(code-simplifier 전체 검토 후): 실행될 수 없는 4단계 기존 코스 수정 분기, SegmentedTabs track·pills, AppLoading.message, 안 쓰는 토큰·옵션 삭제, 체크 위젯 3개를 CheckMark 하나로, CategoryPick 레코드 → onSelected 콜백, 시트 버튼 색을 tone으로',
     ],
-    problems: [],
+    problems: [
+      {
+        problem: '서버 모드에서 마이에 고른 취향이 안 보임',
+        cause: '마이가 MyProfile.preferenceLabels를 썼는데 이 값은 Mock만 채우고 Platform 연동은 채우지 않음',
+        solution: '동행 화면과 같은 myPreferenceLabelsProvider를 보게 바꾸고 MyProfile.preferenceLabels 삭제. 두 요청은 동시에 보냄',
+        status: '해결',
+      },
+      {
+        problem: '저장 · 제출 중 화면을 나가면 setState 예외가 날 수 있음',
+        cause: '추출 결과 묶음 저장, 프로필 설정, 이메일 로그인에서 await 뒤 mounted 확인이 없었음',
+        solution: 'await 뒤 mounted 확인 추가',
+        status: '해결',
+      },
+    ],
     decisions: [],
     pending: [
+      '마이 취향 오류 문구 "취향을 불러오지 못했어요." 새로 넣음 — 사용자 확인 필요',
+      '중복 합치기(4단계 ↔ 코스 편집, 보관함 시트 2벌, 지도 화면 공통 부분, 별점 · 동네 이름 · 외 n명 헬퍼)와 서버에 있을 수 있는 안 읽는 필드 정리는 보류',
       'Pixel_6_Pro 에뮬레이터 확인 · 통합 테스트 A–L은 돌리지 않음',
       '코스 정보 단계 "선택한 분위기는 추천에 반영돼요" 줄의 주황 ✦가 07 D17(AI 추천 표시로만)에 어긋나 보임 — 화면 변경이라 보류',
     ],
