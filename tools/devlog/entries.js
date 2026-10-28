@@ -1307,6 +1307,8 @@ module.exports = [
       '59개 파일. flutter analyze 0, flutter test 136개 통과(작업 전과 같음)',
       '2차: 쓰는 곳 없는 StagedLoading · ScrollWithBottomCta, 아무도 넘기지 않는 위젯 옵션 17개(헤더 subtitle · showBack, StepHeader.total, PlaceSearchPage.initialQuery 등) 삭제. 같은 모양의 지도 알약 버튼 2벌(_MapPill · _AreaSearchButton) 합치기는 모양이 조금 바뀌어 보류',
       '3차(code-simplifier 전체 검토 후): 실행될 수 없는 4단계 기존 코스 수정 분기, SegmentedTabs track·pills, AppLoading.message, 안 쓰는 토큰·옵션 삭제, 체크 위젯 3개를 CheckMark 하나로, CategoryPick 레코드 → onSelected 콜백, 시트 버튼 색을 tone으로',
+      '마이 취향 오류 문구는 동행 화면과 같게 "취향을 불러오지 못했어요"(마침표 없음)로 맞춤',
+      'Pixel_6_Pro에서 통합 테스트 A–L 12개 통과',
     ],
     problems: [
       {
@@ -1324,9 +1326,8 @@ module.exports = [
     ],
     decisions: [],
     pending: [
-      '마이 취향 오류 문구 "취향을 불러오지 못했어요." 새로 넣음 — 사용자 확인 필요',
       '중복 합치기(4단계 ↔ 코스 편집, 보관함 시트 2벌, 지도 화면 공통 부분, 별점 · 동네 이름 · 외 n명 헬퍼)와 서버에 있을 수 있는 안 읽는 필드 정리는 보류',
-      'Pixel_6_Pro 에뮬레이터 확인 · 통합 테스트 A–L은 돌리지 않음',
+      '에뮬레이터 화면 캡처로 직접 보기는 안 함(통합 테스트로만 확인)',
       '코스 정보 단계 "선택한 분위기는 추천에 반영돼요" 줄의 주황 ✦가 07 D17(AI 추천 표시로만)에 어긋나 보임 — 화면 변경이라 보류',
     ],
   },
