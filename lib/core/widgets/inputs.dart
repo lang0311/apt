@@ -24,7 +24,6 @@ class AppTextField extends StatefulWidget {
     this.showCounter = false,
     this.autofocus = false,
     this.enabled = true,
-    this.fillColor = AppColors.surface,
     this.autofillHints,
   });
 
@@ -43,7 +42,6 @@ class AppTextField extends StatefulWidget {
   final bool showCounter;
   final bool autofocus;
   final bool enabled;
-  final Color fillColor;
 
   /// 비밀번호 관리자 자동 입력 (예: [AutofillHints.username]). 붙여넣기는 막지 않는다.
   final Iterable<String>? autofillHints;
@@ -86,7 +84,7 @@ class _AppTextFieldState extends State<AppTextField> {
       constraints: const BoxConstraints(minHeight: AppSpacing.inputHeight),
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       decoration: BoxDecoration(
-        color: widget.fillColor,
+        color: AppColors.surface,
         borderRadius: AppRadius.inputAll,
         border: Border.all(color: borderColor, width: widget.hasError || _focus.hasFocus ? 1.4 : 1),
       ),

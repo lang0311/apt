@@ -12,12 +12,9 @@ import '../../domain/course_models.dart';
 
 /// 코스 목록 행 (SectionCard 안 구분선 행): 사진 · 이름 · (파티원 한 줄) · 지역 · n곳 · 오른쪽 날짜
 class CourseSummaryRow extends StatelessWidget {
-  const CourseSummaryRow({super.key, required this.course, required this.onTap, this.now});
+  const CourseSummaryRow({super.key, required this.course, required this.onTap});
   final CourseSummary course;
   final VoidCallback onTap;
-
-  /// 테스트용 기준 날짜
-  final DateTime? now;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +43,7 @@ class CourseSummaryRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
-            if (course.date != null) _When(date: course.date!, now: now),
+            if (course.date != null) _When(date: course.date!),
           ],
         ),
       ),
@@ -88,19 +85,18 @@ class _People extends StatelessWidget {
 
 /// 오른쪽 날짜: 다가오는 코스 = D-day(파랑) + "11.02 월", 지난 코스 = 회색 "10.12" + "일요일"
 class _When extends StatelessWidget {
-  const _When({required this.date, this.now});
+  const _When({required this.date});
   final DateTime date;
-  final DateTime? now;
 
   @override
   Widget build(BuildContext context) {
     final mmdd = '${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}';
-    final upcoming = daysUntil(date, now: now) >= 0;
+    final upcoming = daysUntil(date) >= 0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: upcoming
           ? [
-              Text(ddayLabel(date, now: now), style: AppTypography.label.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
+              Text(ddayLabel(date), style: AppTypography.label.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
               const SizedBox(height: 2),
               Text('$mmdd ${weekdayLabel(date)}', style: AppTypography.caption),
             ]

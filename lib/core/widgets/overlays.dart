@@ -163,11 +163,10 @@ Future<bool> showConfirmDialog(
 
 /// 액션 시트 항목
 class SheetAction {
-  const SheetAction({required this.label, required this.icon, required this.onTap, this.destructive = false});
+  const SheetAction({required this.label, required this.icon, required this.onTap});
   final String label;
   final IconData icon;
   final VoidCallback onTap;
-  final bool destructive;
 }
 
 Future<void> showActionSheet(BuildContext context, {String? title, required List<SheetAction> actions}) {
@@ -187,11 +186,8 @@ Future<void> showActionSheet(BuildContext context, {String? title, required List
           for (final action in actions)
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: Icon(action.icon, color: action.destructive ? AppColors.danger : AppColors.textPrimary),
-              title: Text(
-                action.label,
-                style: AppTypography.bodyStrong.copyWith(color: action.destructive ? AppColors.danger : null),
-              ),
+              leading: Icon(action.icon, color: AppColors.textPrimary),
+              title: Text(action.label, style: AppTypography.bodyStrong),
               onTap: () {
                 Navigator.of(ctx).pop();
                 action.onTap();

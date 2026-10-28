@@ -92,7 +92,6 @@ class AppCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(AppSpacing.md),
     this.color = AppColors.surface,
     this.onTap,
-    this.borderColor,
     this.radius = AppRadius.card,
   });
 
@@ -100,14 +99,13 @@ class AppCard extends StatelessWidget {
   final EdgeInsets padding;
   final Color color;
   final VoidCallback? onTap;
-  final Color? borderColor;
   final double radius;
 
   @override
   Widget build(BuildContext context) {
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(radius),
-      side: borderColor == null ? const BorderSide(color: AppColors.border) : BorderSide(color: borderColor!, width: 1.4),
+      side: const BorderSide(color: AppColors.border),
     );
     return Material(
       color: color,
@@ -147,42 +145,27 @@ class IconCircle extends StatelessWidget {
   }
 }
 
-/// primarySoft 배경 안내 카드 (아이콘 + 제목 + 설명)
+/// primarySoft 배경 안내 카드 (제목 + 설명)
 class InfoCard extends StatelessWidget {
   const InfoCard({
     super.key,
     required this.title,
     this.description,
-    this.icon,
-    this.iconColor = AppColors.primary,
     this.titleColor = AppColors.textPrimary,
-    this.background = AppColors.primarySoft,
-    this.trailing,
-    this.onTap,
   });
 
   final String title;
   final String? description;
-  final IconData? icon;
-  final Color iconColor;
   final Color titleColor;
-  final Color background;
-  final Widget? trailing;
-  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      color: background,
-      onTap: onTap,
+      color: AppColors.primarySoft,
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (icon != null) ...[
-            Icon(icon, color: iconColor, size: 24),
-            const SizedBox(width: AppSpacing.sm),
-          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,7 +178,6 @@ class InfoCard extends StatelessWidget {
               ],
             ),
           ),
-          if (trailing != null) trailing!,
         ],
       ),
     );
@@ -209,14 +191,12 @@ class StatusCard extends StatelessWidget {
     required this.icon,
     required this.title,
     this.description,
-    this.iconColor = AppColors.primary,
     this.iconBackground = AppColors.primarySoft,
   });
 
   final IconData icon;
   final String title;
   final String? description;
-  final Color iconColor;
   final Color iconBackground;
 
   @override
@@ -227,7 +207,7 @@ class StatusCard extends StatelessWidget {
         width: double.infinity,
         child: Column(
           children: [
-            IconCircle(icon: icon, size: 40, color: iconColor, background: iconBackground),
+            IconCircle(icon: icon, size: 40, background: iconBackground),
             const SizedBox(height: AppSpacing.sm),
             Text(title, style: AppTypography.cardTitle.copyWith(fontSize: 17), textAlign: TextAlign.center),
             if (description != null) ...[

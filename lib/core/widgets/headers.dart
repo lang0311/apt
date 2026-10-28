@@ -15,36 +15,26 @@ void _defaultBack(BuildContext context) {
   }
 }
 
-/// 탭 루트 화면 상단: 큰 제목 + 설명 + 우측 액션 (홈·코스·저장됨·추출·마이)
+/// 탭 루트 화면 상단: 큰 제목 + 우측 액션 (홈·코스·저장됨·추출·마이)
 class PageTitleHeader extends StatelessWidget {
-  const PageTitleHeader({super.key, required this.title, this.subtitle, this.trailing, this.overline});
+  const PageTitleHeader({super.key, required this.title, this.trailing});
 
   final String title;
-  final String? subtitle;
   final Widget? trailing;
-  final String? overline;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.md, AppSpacing.screenH, AppSpacing.md),
       child: Row(
-        // 제목 한 줄만 있으면 오른쪽 버튼과 가운데를 맞춘다
-        crossAxisAlignment: subtitle == null && overline == null ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+        // 제목과 오른쪽 버튼의 가운데를 맞춘다
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (overline != null) ...[
-                  Text(overline!, style: AppTypography.cardTitle),
-                  const SizedBox(height: 4),
-                ],
                 Text(title, style: AppTypography.display),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 4),
-                  Text(subtitle!, style: AppTypography.body),
-                ],
               ],
             ),
           ),
@@ -57,12 +47,10 @@ class PageTitleHeader extends StatelessWidget {
 
 /// 서브 화면 헤더: 36×36 흰 뒤로 버튼 + 20px 타이틀 + 우측 액션
 class SubPageHeader extends StatelessWidget {
-  const SubPageHeader({super.key, required this.title, this.trailing, this.onBack, this.showBack = true});
+  const SubPageHeader({super.key, required this.title, this.trailing});
 
   final String title;
   final Widget? trailing;
-  final VoidCallback? onBack;
-  final bool showBack;
 
   @override
   Widget build(BuildContext context) {
@@ -70,15 +58,12 @@ class SubPageHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.screenH, AppSpacing.sm),
       child: Row(
         children: [
-          if (showBack) ...[
-            AppIconBox(
-              icon: Icons.chevron_left_rounded,
-              tooltip: '뒤로',
-              onPressed: onBack ?? () => _defaultBack(context),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-          ] else
-            const SizedBox(width: 4),
+          AppIconBox(
+            icon: Icons.chevron_left_rounded,
+            tooltip: '뒤로',
+            onPressed: () => _defaultBack(context),
+          ),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(title, style: AppTypography.header, maxLines: 1, overflow: TextOverflow.ellipsis),
           ),
@@ -145,11 +130,10 @@ class PlainHeader extends StatelessWidget {
 
 /// 인증 화면: 테두리 없는 뒤로 아이콘 + 큰 제목 + 설명
 class AuthHeader extends StatelessWidget {
-  const AuthHeader({super.key, required this.title, this.subtitle, this.showBack = true, this.onBack});
+  const AuthHeader({super.key, required this.title, this.subtitle, this.onBack});
 
   final String title;
   final String? subtitle;
-  final bool showBack;
   final VoidCallback? onBack;
 
   @override
@@ -162,14 +146,11 @@ class AuthHeader extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (showBack)
-              IconButton(
-                onPressed: onBack ?? () => _defaultBack(context),
-                icon: const Icon(Icons.chevron_left_rounded, size: 32, color: AppColors.textPrimary),
-                tooltip: '뒤로',
-              )
-            else
-              const SizedBox(height: 48),
+            IconButton(
+              onPressed: onBack ?? () => _defaultBack(context),
+              icon: const Icon(Icons.chevron_left_rounded, size: 32, color: AppColors.textPrimary),
+              tooltip: '뒤로',
+            ),
             Padding(
               padding: const EdgeInsets.only(left: AppSpacing.sm),
               child: Column(
@@ -192,11 +173,10 @@ class AuthHeader extends StatelessWidget {
 
 /// 코스 만들기 위저드 헤더: 배경 없는 뒤로 + "코스 만들기" + n / 4 + 4분할 진행 바 (1–4단계 같은 모양)
 class StepHeader extends StatelessWidget {
-  const StepHeader({super.key, this.title = '코스 만들기', required this.step, this.total = 4, this.onBack, this.trailing});
+  const StepHeader({super.key, this.title = '코스 만들기', required this.step, this.onBack, this.trailing});
 
   final String title;
   final int step;
-  final int total;
   final VoidCallback? onBack;
   final Widget? trailing;
 
@@ -208,11 +188,11 @@ class StepHeader extends StatelessWidget {
           title: title,
           onLeading: onBack,
           trailing: trailing ??
-              Text('$step / $total', style: AppTypography.label.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+              Text('$step / 4', style: AppTypography.label.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH),
-          child: StepProgressBar(step: step, total: total),
+          child: StepProgressBar(step: step),
         ),
       ],
     );

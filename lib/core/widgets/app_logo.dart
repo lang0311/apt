@@ -5,9 +5,8 @@ import '../../app/theme/app_typography.dart';
 
 /// 앱 로고 (다크 라운드 사각 + 우산형 심볼) + 카피
 class AppLogo extends StatelessWidget {
-  const AppLogo({super.key, this.size = 56, this.showCopy = true});
+  const AppLogo({super.key, this.size = 56});
   final double size;
-  final bool showCopy;
 
   static const copy = '가고 싶은 곳을, 하나의 코스로.';
 
@@ -22,10 +21,8 @@ class AppLogo extends StatelessWidget {
           decoration: BoxDecoration(color: AppColors.ink, borderRadius: BorderRadius.circular(size * 0.3)),
           child: CustomPaint(painter: _LogoPainter()),
         ),
-        if (showCopy) ...[
-          const SizedBox(height: 18),
-          Text(copy, style: AppTypography.cardTitle.copyWith(fontSize: 17), textAlign: TextAlign.center),
-        ],
+        const SizedBox(height: 18),
+        Text(copy, style: AppTypography.cardTitle.copyWith(fontSize: 17), textAlign: TextAlign.center),
       ],
     );
   }

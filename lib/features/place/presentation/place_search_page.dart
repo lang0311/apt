@@ -24,10 +24,7 @@ import 'place_search_providers.dart';
 /// 지도에서 검색하기 (추출 탭, 07 D32). 찾은 곳을 지도 핀과 카드 목록으로 보여 주고,
 /// 카드에서 바로 저장하거나 보관함에 담는다. 카드 모양은 이름·설명·주소·버튼 + 오른쪽 이미지.
 class PlaceSearchPage extends ConsumerStatefulWidget {
-  const PlaceSearchPage({super.key, this.initialQuery});
-
-  /// 들어오자마자 찾을 검색어 (없으면 검색칸에 커서를 두고 기다린다)
-  final String? initialQuery;
+  const PlaceSearchPage({super.key});
 
   @override
   ConsumerState<PlaceSearchPage> createState() => _PlaceSearchPageState();
@@ -56,16 +53,6 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
 
   static const _sheetInitial = 0.5;
   static const _moveThresholdMeters = 300.0;
-
-  @override
-  void initState() {
-    super.initState();
-    final q = widget.initialQuery?.trim();
-    if (q != null && q.isNotEmpty) {
-      _text.text = q;
-      _query = PlaceSearchQuery(q);
-    }
-  }
 
   @override
   void dispose() {
