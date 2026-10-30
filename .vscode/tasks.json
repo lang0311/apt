@@ -1,0 +1,16 @@
+{
+    // Ctrl+Shift+B: 팀 서버 켜기 (tools/start_server.ps1). 서버 연결 실행 항목을 쓰기 전에 켠다.
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "팀 서버 켜기",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/tools/start_server.ps1"],
+            "isBackground": true,
+            "problemMatcher": [],
+            "group": { "kind": "build", "isDefault": true },
+            "presentation": { "panel": "dedicated", "reveal": "always", "clear": true }
+        }
+    ]
+}
