@@ -141,7 +141,7 @@ CourseDraft { name, date, startTime, moods[], places[ {placeId, source: USER|AI,
 
 ## 10. 개발 단계
 
-> 상태 (2026-10-25): **1–8 완료**(Mock 기준, 2026-10-22 5개 탭 리디자인 포함). 남은 것은 실제 API 연동과 실기기·iOS 검증. 지금은 남은 화면 리디자인(장소 상세·보관함 상세·초대 수락·로그인/가입)과 백엔드 연동을 하고, 그다음 9.
+> 상태 (2026-10-30): **1–8 완료**(Mock 기준). 5개 탭(10-22)과 탭 밖 화면(10-30, 07 D37)까지 새 디자인 언어로 리디자인 끝. 서버 모드는 팀 서버에 있는 기능을 모두 연동했다(06 §0 '앱 연동' 열). 지금은 **9 폴리시**, 남은 것은 서버에 없는 기능의 연동(`NEEDS BACKEND`)과 실기기 · iOS 검증.
 
 | Phase | 내용 | 비고 |
 |-------|------|------|
@@ -153,7 +153,7 @@ CourseDraft { name, date, startTime, moods[], places[ {placeId, source: USER|AI,
 | 6 ✅ | 코스 목록 + 위저드 1–3단계 (#21–#26, #29) | `CourseDraft` |
 | 7 ✅ | 파티·초대 (#27, #28) + AI 추천 루프·완료·상세 (#30–#32) | LLM 지연 UX |
 | 8 ✅ | 마이 + 취향 설정 (#33, #34) | 취향 항목은 서버 키워드 |
-| 9 | 폴리시: 접근성, 오류/빈 상태 점검, 성능 | |
+| 9 ▶ | 폴리시: 접근성, 오류/빈 상태 점검, 성능 | 진행 중 |
 
 API가 없는 단계는 **Repository Interface + Mock Repository**로 UI를 먼저 완성하고, 명세 수령 후 실제 연동으로 교체한다. Widget 내부에 mock JSON을 넣지 않는다.
 
@@ -177,6 +177,9 @@ API가 없는 단계는 **Repository Interface + Mock Repository**로 UI를 먼�
    - `config/dev.example.json`을 `config/dev.json`으로 복사하고 값을 채운다.
    - iOS: `ios/Flutter/Secrets.xcconfig.example`을 `ios/Flutter/Secrets.xcconfig`로 복사하고 값을 채운다.
    - `flutter run --dart-define-from-file=config/dev.json`
+3. **팀 서버에 연결해 실행 (서버 모드)**: `--dart-define=APT_BACKEND=true --dart-define=USE_MOCK=false --dart-define=API_BASE_URL=…`
+   - 서버 켜기 · 에뮬레이터(`10.0.2.2`) · 웹(포트 5173) 실행법과 연결된 기능 · 미연동 기능은 [LOCAL_BACKEND.md](LOCAL_BACKEND.md)
+   - VS Code 실행 및 디버그: `apt (서버 연결, 에뮬레이터)` / `apt (서버 연결, 웹)`
 
 | 항목 (`config/dev.json`) | 용도 | 비어 있으면 |
 |---|---|---|

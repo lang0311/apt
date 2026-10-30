@@ -8,27 +8,27 @@
 
 ## 0. 기능별 기준 출처
 
-2026-10-25 `origin/main`(7d06d02) 기준. 서버 엔드포인트 28개, 엑셀 16개 — 겹치는 것은 코스 상세 정도다.
+2026-10-25 `origin/main`(7d06d02) 기준(10-30 `6414415`까지 확인: 추천 점수 가중치 파라미터화뿐, 엔드포인트 변화 없음). 서버 엔드포인트 28개, 엑셀 16개 — 겹치는 것은 코스 상세 정도다. '앱 연동'은 2026-10-30 서버 모드(`APT_BACKEND=true`) 기준: ✅ 연동 · ◐ 일부 · — 안 함.
 
-| 기능 | 기준 | 서버 엔드포인트 / 엑셀 참고 |
-|------|------|-----------------------------|
-| 가입·로그인·로그아웃 | **서버** | `POST /auth/register`, `/auth/login`, `/auth/logout` (아이디·비밀번호 쿠키 세션). 소셜 로그인은 서버에 없음 → `NEEDS BACKEND` |
-| 내 정보·사용량 | **서버** | `GET /me`, `/me/usage` |
-| 홈 요약 | **서버** | `GET /mobile/summary` |
-| 장소 검색 | **서버** | `GET /places/search` (카카오 키 필요) |
-| 내 장소 저장·삭제 | **서버** | `POST /me/places`, `DELETE /me/places/{key}` |
-| 코스 목록·상세 | **서버** | `GET /courses`, `/courses/{course}`, `POST /mobile/courses/{course}` |
-| AI 추천 (job) | **서버** | `POST /jobs`, `GET /jobs/{job}`(status · stage → 화면 단계, 07 D33), `POST /jobs/{job}/cancel`, `GET /jobs`(진행 중 job, 취소 중이면 끝나길 기다림), `POST /recommend` |
-| 코스 장소 바꾸기·빼기·확정 | **서버** | `POST /courses/{course}/replace`, `DELETE /courses/{course}/places`, `GET .../places/{key}/selection`, `POST .../confirm` |
-| 추천하지 않는 장소(차단) | **서버** | `GET /me/blocks`, `DELETE /me/blocks/{key}` |
-| 파티·초대 | **서버** | `POST /parties`, `/parties/join`, `GET /parties/{party}`, `POST /parties/{party}/invites`, `GET /mobile/invites/{code}`, 내 파티 목록 = `GET /me`의 `parties`(멤버 포함, 07 D34). 나가기 · 숨기기 · 푸시는 없음 |
-| 릴스 링크 추출 | 엑셀 참고 · `NEEDS BACKEND` | `POST /api/v1/places/share-link` |
-| 보관함 | 엑셀 참고 · `NEEDS BACKEND` | `/api/v1/user-lists` (만들기·내 목록·상세) |
-| 근처 저장 장소 (저장 지도) | 엑셀 참고 · `NEEDS BACKEND` | `GET /api/v1/places/nearby` |
-| 장소 상세·AI 키워드 | 엑셀 참고 · `NEEDS BACKEND` | `GET /api/v1/places/{placeId}` |
-| 프로필 수정 | 엑셀 참고 · `NEEDS BACKEND` | `PUT /api/v1/users/profile` |
-| 사용자 검색·팔로우 | 앱 범위 밖 | 엑셀에만 있음, 앱 화면 없음 |
-| 약관·트렌딩·취향 수동 설정 | 둘 다 없음 · `NEEDS BACKEND` | — |
+| 기능 | 기준 | 서버 엔드포인트 / 엑셀 참고 | 앱 연동 |
+|------|------|-----------------------------|---------|
+| 가입·로그인·로그아웃 | **서버** | `POST /auth/register`, `/auth/login`, `/auth/logout` (아이디·비밀번호 쿠키 세션). 소셜 로그인은 서버에 없음 → `NEEDS BACKEND` | ✅ 아이디 가입 · 로그인 · 로그아웃(소셜은 앱 안 Mock, 07 D28) |
+| 내 정보·사용량 | **서버** | `GET /me`, `/me/usage` | ✅ `/me` · `/me/usage`는 안 씀 |
+| 홈 요약 | **서버** | `GET /mobile/summary` | ✅ |
+| 장소 검색 | **서버** | `GET /places/search` (카카오 키 필요) | ✅ 지도에서 검색하기(07 D32) |
+| 내 장소 저장·삭제 | **서버** | `POST /me/places`, `DELETE /me/places/{key}` | ◐ 저장만(앱에 저장 취소 화면 없음) |
+| 코스 목록·상세 | **서버** | `GET /courses`, `/courses/{course}`, `POST /mobile/courses/{course}` | ✅ |
+| AI 추천 (job) | **서버** | `POST /jobs`, `GET /jobs/{job}`(status · stage → 화면 단계, 07 D33), `POST /jobs/{job}/cancel`, `GET /jobs`(진행 중 job, 취소 중이면 끝나길 기다림), `POST /recommend` | ✅ job 폴링 · 단계 · 취소(`/recommend`는 안 씀) |
+| 코스 장소 바꾸기·빼기·확정 | **서버** | `POST /courses/{course}/replace`, `DELETE /courses/{course}/places`, `GET .../places/{key}/selection`, `POST .../confirm` | ✅ (`.../selection`은 안 씀) |
+| 추천하지 않는 장소(차단) | **서버** | `GET /me/blocks`, `DELETE /me/blocks/{key}` | ✅ |
+| 파티·초대 | **서버** | `POST /parties`, `/parties/join`, `GET /parties/{party}`, `POST /parties/{party}/invites`, `GET /mobile/invites/{code}`, 내 파티 목록 = `GET /me`의 `parties`(멤버 포함, 07 D34). 나가기 · 숨기기 · 푸시는 없음 | ✅ 만들기 · 초대 · 참여 · 기존 파티 고르기 |
+| 릴스 링크 추출 | 엑셀 참고 · `NEEDS BACKEND` | `POST /api/v1/places/share-link` | — Mock(서버 없음) |
+| 보관함 | 엑셀 참고 · `NEEDS BACKEND` | `/api/v1/user-lists` (만들기·내 목록·상세) | — Mock(서버 없음, 서버 모드는 준비 중 안내) |
+| 근처 저장 장소 (저장 지도) | 엑셀 참고 · `NEEDS BACKEND` | `GET /api/v1/places/nearby` | ◐ 서버 모드는 `/me` 장소를 앱에서 거리로 거름 |
+| 장소 상세·AI 키워드 | 엑셀 참고 · `NEEDS BACKEND` | `GET /api/v1/places/{placeId}` | ◐ 서버 모드는 `/me` 장소 정보로 표시 |
+| 프로필 수정 | 엑셀 참고 · `NEEDS BACKEND` | `PUT /api/v1/users/profile` | — Mock(서버 없음) |
+| 사용자 검색·팔로우 | 앱 범위 밖 | 엑셀에만 있음, 앱 화면 없음 | — |
+| 약관·트렌딩·취향 수동 설정 | 둘 다 없음 · `NEEDS BACKEND` | — | — Mock(서버 없음) |
 
 서버 공통 규칙: POST/PATCH/PUT/DELETE는 `X-APT-Request: 1` 헤더 필수, 쿠키 `apt_session`, 호스트는 한 가지로 통일(`127.0.0.1`과 `localhost`를 섞으면 쿠키가 안 붙음). 응답 필드는 서버 코드(`src/platform_api.py` 등)를 정본으로 보고 이 문서에는 옮겨 적지 않는다.
 

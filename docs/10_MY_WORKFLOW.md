@@ -48,3 +48,9 @@
   - **개인 작업 결정**(규칙 정리, 팀 레포 운영, 테스트 계획 등) → Claude 메모리 `next-session-todo`
 - 기능 묶음 하나를 마칠 때 메모리에서 끝난 항목을 정리한다. 해결된 건 "해결됨"에 한 줄로, 긴 기록은 메모리 `archive/`로 옮긴다.
 - 팀 레포 반영은 작업 끝에 **제안만** 한다(실행은 요청 받은 뒤, `09`).
+
+## 6. 도구 (개인 레포)
+
+- 팀 서버 켜기: VS Code `Ctrl+Shift+B` → `tools/start_server.ps1`(`apt` 옆 `team/`의 `.venv`로 `127.0.0.1:8000`, 이미 켜져 있으면 다시 켜지 않음). 그다음 실행 및 디버그에서 `apt (서버 연결, …)`
+- 개발 일지: `tools/devlog/entries.js` → `cd tools/devlog && npm run build` (§4)
+- 시안 캡처: Edge headless `--screenshot` (§1). 앱 화면 캡처는 Pixel_6_Pro + `adb exec-out screencap`, 여러 화면은 임시 통합 테스트로 이동하며 캡처하고 테스트 파일은 커밋하지 않는다
