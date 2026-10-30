@@ -13,6 +13,7 @@
 | [04_UX_FLOWS.md](04_UX_FLOWS.md) | 사용자 흐름: 인증 · 공유 추출 · 저장 · 코스 루프 · 파티 · 취향 | 화면 연결/네비게이션 구현 시 |
 | [05_SCREEN_SPEC.md](05_SCREEN_SPEC.md) | 화면 34개 명세 (라우트 · UI · 데이터 · 상태) | 화면 단위 구현 시 |
 | [06_API_INTEGRATION.md](06_API_INTEGRATION.md) | 백엔드 연동 원칙 · 필요 데이터 목록 · Mock 전략 | API 연동/백엔드 협의 시 |
+| [../README.md](../README.md) | **실행 방법**: 준비물 · 키 파일 · Mock / 서버 연결(에뮬레이터 · 웹 · `run.cmd`) · Mock 확인 규칙 · 테스트 · 자주 막히는 것 | 처음 받아서 실행할 때 |
 | [LOCAL_BACKEND.md](LOCAL_BACKEND.md) | 팀 Python 서버에 붙여 실행하기(웹 · Android), 연결된 기능 · 미연동 기능 | 서버 모드로 실행 · 시연할 때 |
 | [API/](API/) | 엑셀 API 초안 (응답 형식 없음, 서버와 작성자 다름) — **서버에 없는 기능만 참고**. 백엔드 기준은 팀 서버 코드(06 §0) | API 연동/백엔드 협의 시 |
 | [07_DECISIONS_AND_OPEN_ITEMS.md](07_DECISIONS_AND_OPEN_ITEMS.md) | 확정 결정(D1–) · 가정 · 미해결 항목 | 막혔을 때 / 범위 확인 시 |

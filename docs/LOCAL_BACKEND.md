@@ -47,7 +47,7 @@ flutter run --dart-define=APT_BACKEND=true --dart-define=USE_MOCK=false --dart-d
 ```
 
 - VS Code에서는 실행 및 디버그의 `apt (서버 연결, 에뮬레이터)`를 고릅니다. 웹은 `apt (서버 연결, 웹)`(포트 5173 — 서버 CORS가 `127.0.0.1:5173`만 허용).
-- `config/dev.json`은 지도·소셜 로그인 키 파일로 커밋하지 않습니다(만드는 법은 02 §12). 없으면 그 옵션을 빼고 실행해도 서버 연결은 됩니다(지도는 미리보기, 소셜 로그인은 Mock SDK).
+- `config/dev.json`은 지도·소셜 로그인 키 파일로 커밋하지 않습니다(만드는 법은 `README.md` §3). 없으면 그 옵션을 빼고 실행해도 서버 연결은 됩니다(지도는 미리보기, 소셜 로그인은 Mock SDK).
 - 초대 링크는 `API_BASE_URL` 기준 웹 주소(`…/mobile-app/#/invites/코드`)로 만들어져, 에뮬레이터에서 만든 링크는 에뮬레이터에서만 열립니다.
 
 ## 인증·데이터 보호
