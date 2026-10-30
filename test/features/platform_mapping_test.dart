@@ -94,4 +94,9 @@ void main() {
     expect(m('reviewing'), RecommendationStage.organize);
     expect(m('queued'), isNull);
   });
+  test('파티 이름은 만든 사람 이름으로, 서버 길이 제한 60자 안', () {
+    expect(partyNameFor('김랑'), '김랑님의 파티');
+    expect(partyNameFor('  '), '새 파티');
+    expect(partyNameFor('가' * 60).length, 60);
+  });
 }

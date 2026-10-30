@@ -18,7 +18,7 @@ class Party {
 }
 
 extension PartyMemberNames on List<PartyMember> {
-  /// 한 줄을 넘지 않게: 나를 맨 앞에, 세 명까지 이름, 넘치면 "외 n명". 서버 파티 이름은 모두 같아서 이름으로 구분한다.
+  /// 한 줄을 넘지 않게: 나를 맨 앞에, 세 명까지 이름, 넘치면 "외 n명". 서버 파티 이름은 만든 사람 이름이라(07 D38) 파티원 이름으로 구분한다.
   String get crewNames {
     final sorted = [...where((m) => m.isMe), ...where((m) => !m.isMe)];
     final shown = [for (final m in sorted.take(3)) m.isMe ? '나' : m.nickname];

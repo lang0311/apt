@@ -36,6 +36,9 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
   bool _newParty = false;
   bool _creatingParty = false;
 
+  /// 이 화면에서 만든 새 파티. 다른 파티를 골랐다가 '새 파티 만들기'로 돌아와도 다시 만들지 않고 이걸 쓴다.
+  String? _createdPartyId;
+
   CourseDraftController get _draft => ref.read(courseDraftProvider.notifier);
 
   void _setCompanion(Companion companion) => _draft.update((d) => d.copyWith(companion: companion));
@@ -47,7 +50,8 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
 
   void _pickNewParty() {
     setState(() => _newParty = true);
-    _draft.update((d) => d.copyWith(clearPartyId: true));
+    final created = _createdPartyId;
+    _draft.update((d) => created == null ? d.copyWith(clearPartyId: true) : d.copyWith(partyId: created));
   }
 
   /// 새 파티를 아직 안 만들었으면 만든다. 실패하면 null.
@@ -57,6 +61,7 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
     setState(() => _creatingParty = true);
     try {
       final party = await ref.read(partyRepositoryProvider).createParty();
+      _createdPartyId = party.id;
       _draft.update((d) => d.copyWith(partyId: party.id));
       return party.id;
     } catch (e) {

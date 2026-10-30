@@ -21,7 +21,7 @@
 | AI 추천 (job) | **서버** | `POST /jobs`, `GET /jobs/{job}`(status · stage → 화면 단계, 07 D33), `POST /jobs/{job}/cancel`, `GET /jobs`(진행 중 job, 취소 중이면 끝나길 기다림), `POST /recommend` | ✅ job 폴링 · 단계 · 취소(`/recommend`는 안 씀) |
 | 코스 장소 바꾸기·빼기·확정 | **서버** | `POST /courses/{course}/replace`, `DELETE /courses/{course}/places`, `GET .../places/{key}/selection`, `POST .../confirm` | ✅ (`.../selection`은 안 씀) |
 | 추천하지 않는 장소(차단) | **서버** | `GET /me/blocks`, `DELETE /me/blocks/{key}` | ✅ |
-| 파티·초대 | **서버** | `POST /parties`, `/parties/join`, `GET /parties/{party}`, `POST /parties/{party}/invites`, `GET /mobile/invites/{code}`, 내 파티 목록 = `GET /me`의 `parties`(멤버 포함, 07 D34). 나가기 · 숨기기 · 푸시는 없음 | ✅ 만들기 · 초대 · 참여 · 기존 파티 고르기 |
+| 파티·초대 | **서버** | `POST /parties`, `/parties/join`, `GET /parties/{party}`, `POST /parties/{party}/invites`, `GET /mobile/invites/{code}`, 내 파티 목록 = `GET /me`의 `parties`(멤버 포함, 07 D34). 앱은 파티 이름을 `{만든 사람}님의 파티`로 보낸다(07 D38). 이름 수정 · 나가기 · 숨기기 · 삭제 · 푸시는 없음 | ✅ 만들기 · 초대 · 참여 · 기존 파티 고르기 |
 | 릴스 링크 추출 | 엑셀 참고 · `NEEDS BACKEND` | `POST /api/v1/places/share-link` | — Mock(서버 없음) |
 | 보관함 | 엑셀 참고 · `NEEDS BACKEND` | `/api/v1/user-lists` (만들기·내 목록·상세) | — Mock(서버 없음, 서버 모드는 준비 중 안내) |
 | 근처 저장 장소 (저장 지도) | 엑셀 참고 · `NEEDS BACKEND` | `GET /api/v1/places/nearby` | ◐ 서버 모드는 `/me` 장소를 앱에서 거리로 거름 |

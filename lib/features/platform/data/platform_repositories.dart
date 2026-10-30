@@ -528,12 +528,24 @@ String webAppLink(String route) {
   return base.replace(fragment: route).toString();
 }
 
+/// 서버 파티 이름. 만들 때 한 번 정해지고 바꿀 수 없어서, 바뀌지 않는 만든 사람 이름으로 짓는다 (07 D38).
+/// NEEDS BACKEND: 파티 이름 수정 API가 생기면 사용자가 이름을 정하게 바꾼다.
+String partyNameFor(String ownerName) {
+  final name = ownerName.trim();
+  if (name.isEmpty) return '새 파티';
+  const suffix = '님의 파티';
+  const max = 60 - suffix.length; // 서버 이름 길이 제한 60자
+  return '${name.length > max ? name.substring(0, max) : name}$suffix';
+}
+
 class PlatformPartyRepository implements PartyRepository {
   PlatformPartyRepository(this._platform);
   final PlatformClient _platform;
   @override
   Future<Party> createParty() async {
-    final created = await _platform.post('/parties', {'name': '함께 만드는 코스'});
+    final me = await _platform.me();
+    final owner = ((me['user'] as Map)['name'] ?? '').toString();
+    final created = await _platform.post('/parties', {'name': partyNameFor(owner)});
     return fetchParty(created['id'] as String);
   }
 
