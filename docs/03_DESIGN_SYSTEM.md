@@ -91,7 +91,7 @@
 
 ## 4. 공통 컴포넌트
 
-**기본**: `AppPrimaryButton` `AppDarkButton` `AppOutlineButton` `AppTextButton` `AppIconButton(back)` `AppTextField(+error)` `AppChip(선택/비선택)` `AppSwitch` `AppBottomSheet` `AppModal` `AppEmptyState` `AppErrorState` `AppLoading` `AppSnackBar` `KakaoSymbol`
+**기본**: `AppPrimaryButton` `AppDarkButton` `AppOutlineButton` `AppTextButton` `AppIconButton(back)` `AppTextField(+error)` `AppChip(선택/비선택)` `AppSwitch` `AppBottomSheet` `AppModal` `AppEmptyState` `AppErrorState` `AppLoading` `AppSnackBar`(하단 고정 버튼이 있으면 그 위 8에 뜸, 07 D36) `KakaoSymbol`
 **섹션·사진**: `SectionCard`(섹션 컨테이너, 제목 줄 오른쪽 `trailing`) `PlaceImage`(사진 없으면 카테고리 색 칸 + 아이콘, 같은 크기 유지) `DividedRows`(컨테이너 안 구분선 행) `HeaderTextButton`(제목 줄 글자 버튼)
 **탭**: `SegmentedTabs` — track(회색 트랙) / pills / **underline**(저장됨, 2026-10-20). 걸린 필터 표시는 남색 `AppliedFilterChip`
 **도메인**: `SocialLoginButton` `SegmentedTabs` `SavedPlaceRow` `CollectionRow(2×2 미니 콜라주)` `PlaceListTile` `PlaceCardSmall` `ExtractedPlaceCard` `CourseCard` `StatTile` `StepHeader(뒤로+타이틀+n/4)` `StepProgressBar` `StopMarker(번호/✦ 표시)` `AiBadge(✦)` `PartyAvatarStack` `RouteSegmentChip(도보/버스 N분)` `PreferenceChipGroup` `AppBottomNav`
