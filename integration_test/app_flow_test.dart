@@ -82,7 +82,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     await tapText(tester, '보관함 만들기');
 
-    await waitFor(tester, find.text('아직 저장된 장소가 없어요'));
+    await waitFor(tester, find.text('아직 담은 장소가 없어요'));
     await tapText(tester, '저장한 장소에서 추가하기');
     await waitFor(tester, find.text('보관함에 장소 추가'));
     await tapFinder(tester, find.textContaining('목록 '), scroll: false);

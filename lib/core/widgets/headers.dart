@@ -5,7 +5,6 @@ import '../../app/routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
-import 'buttons.dart';
 
 /// 뒤로 갈 곳이 없으면(딥링크로 바로 들어온 경우) 홈으로
 void popOrGoHome(BuildContext context) {
@@ -46,37 +45,8 @@ class PageTitleHeader extends StatelessWidget {
   }
 }
 
-/// 서브 화면 헤더: 36×36 흰 뒤로 버튼 + 20px 타이틀 + 우측 액션
-class SubPageHeader extends StatelessWidget {
-  const SubPageHeader({super.key, required this.title, this.trailing});
-
-  final String title;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.screenH, AppSpacing.sm),
-      child: Row(
-        children: [
-          AppIconBox(
-            icon: Icons.chevron_left_rounded,
-            tooltip: '뒤로',
-            onPressed: () => popOrGoHome(context),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(title, style: AppTypography.header, maxLines: 1, overflow: TextOverflow.ellipsis),
-          ),
-          if (trailing != null) trailing!,
-        ],
-      ),
-    );
-  }
-}
-
 /// 배경 없는 아이콘 헤더: 왼쪽 아이콘(뒤로/닫기) + 제목 17 + 오른쪽 아이콘들. 누르는 영역은 48.
-/// 코스 화면(상세 · 편집 · 만들기)에서 쓴다.
+/// 코스 화면(상세 · 편집 · 만들기)과 보관함 상세에서 쓴다.
 class PlainHeader extends StatelessWidget {
   const PlainHeader({
     super.key,

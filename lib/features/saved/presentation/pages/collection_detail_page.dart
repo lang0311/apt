@@ -12,7 +12,6 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/bottom_cta.dart';
 import '../../../../core/widgets/buttons.dart';
 import '../../../../core/widgets/headers.dart';
-import '../../../../core/widgets/inputs.dart';
 import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/states.dart';
 import '../../../../core/widgets/surfaces.dart';
@@ -33,14 +32,8 @@ class CollectionDetailPage extends ConsumerStatefulWidget {
 }
 
 class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
-  String _keyword = '';
-  SavedSort _sort = SavedSort.recent;
-
-  SavedPlaceQuery get _query => SavedPlaceQuery(
-        collectionId: widget.collectionId,
-        keyword: _keyword.isEmpty ? null : _keyword,
-        sort: _sort,
-      );
+  // 보관함 안 검색 · 정렬은 서버 보관함 API가 생기면 다시 넣는다 (NEEDS BACKEND)
+  SavedPlaceQuery get _query => SavedPlaceQuery(collectionId: widget.collectionId);
 
   Future<void> _addFromSaved(List<String> existing) async {
     final picked = await context.push<List<Place>>(
@@ -60,21 +53,6 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
     }
   }
 
-  void _pickSort() {
-    showActionSheet(
-      context,
-      title: '정렬',
-      actions: [
-        for (final sort in SavedSort.values)
-          SheetAction(
-            label: sort.label,
-            icon: sort == _sort ? Icons.check_rounded : Icons.sort_rounded,
-            onTap: () => setState(() => _sort = sort),
-          ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final collectionValue = ref.watch(collectionProvider(widget.collectionId));
@@ -86,14 +64,16 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
           onRetry: () => ref.invalidate(collectionProvider(widget.collectionId)),
           data: (collection) => Column(
             children: [
-              SubPageHeader(
+              PlainHeader(
                 title: collection.name,
-                trailing: IconButton(
-                  tooltip: '보관함 메뉴',
-                  icon: const Icon(Icons.more_horiz_rounded, color: AppColors.textPrimary),
-                  // 보관함 ⋯ 메뉴(이름 변경·삭제)는 디자인/정책 확정 필요 (docs/07 §3)
-                  onPressed: () => showAppSnackBar(context, '보관함 관리 메뉴는 준비 중이에요.'),
-                ),
+                actions: [
+                  IconButton(
+                    tooltip: '보관함 메뉴',
+                    icon: const Icon(Icons.more_horiz_rounded, color: AppColors.textPrimary),
+                    // 보관함 ⋯ 메뉴(이름 변경·삭제)는 디자인/정책 확정 필요 (docs/07 §3)
+                    onPressed: () => showAppSnackBar(context, '보관함 관리 메뉴는 준비 중이에요.'),
+                  ),
+                ],
               ),
               Expanded(child: collection.placeCount == 0 ? _empty(collection) : _detail(collection)),
             ],
@@ -103,17 +83,14 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
     );
   }
 
-  Widget _summaryCard(PlaceCollection collection, {required bool empty}) {
+  /// 이름 · 업데이트 · 장소 개수 · 지도 보기. 비어 있을 때와 장소가 있을 때 같은 모양이다.
+  Widget _summaryCard(PlaceCollection collection) {
+    final empty = collection.placeCount == 0;
     final updated = collection.updatedAt == null ? null : formatRelative(collection.updatedAt!);
     return AppCard(
-      color: AppColors.primarySoft,
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Row(
         children: [
-          if (empty) ...[
-            const IconCircle(icon: Icons.folder_outlined, size: 48, background: AppColors.surface),
-            const SizedBox(width: AppSpacing.md),
-          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,20 +104,45 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
                   ].join(' · '),
                   style: AppTypography.meta,
                 ),
-                if (empty) ...[
-                  const SizedBox(height: 4),
-                  Text('코스 만들 때 이 보관함을 불러올 수 있어요.', style: AppTypography.caption),
-                ],
               ],
             ),
           ),
-          if (!empty)
-            AppButton.dark(
-              label: '지도 보기',
-              expand: false,
-              height: 40,
-              onPressed: () => context.push(AppRoutes.collectionMap(collectionId: collection.id)),
-            ),
+          // 저장한 곳이 없어도 지도는 열 수 있다 (07 D32)
+          AppButton(
+            label: '지도 보기',
+            variant: AppButtonVariant.soft,
+            icon: Icons.map_outlined,
+            expand: false,
+            height: 40,
+            onPressed: () => context.push(AppRoutes.collectionMap(collectionId: collection.id)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _placesHeader(PlaceCollection collection, {required VoidCallback onAdd}) {
+    return SectionHeader(
+      title: '저장된 장소',
+      trailingText: '${collection.placeCount}곳',
+      padding: const EdgeInsets.only(top: AppSpacing.xl, bottom: AppSpacing.sm),
+      trailing: IconButton(tooltip: '장소 추가', icon: const Icon(Icons.add_rounded, color: AppColors.primary), onPressed: onAdd),
+    );
+  }
+
+  /// 빈 안내: 장소 카드가 들어갈 자리에 같은 카드로 둔다
+  Widget _emptyCard() {
+    return AppCard(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xl, AppSpacing.lg, AppSpacing.lg),
+      child: Column(
+        children: [
+          Text('아직 담은 장소가 없어요', style: AppTypography.cardTitle, textAlign: TextAlign.center),
+          const SizedBox(height: AppSpacing.xs),
+          Text('저장한 장소에서 고르거나\n링크로 새 장소를 찾아 담을 수 있어요.', style: AppTypography.meta, textAlign: TextAlign.center),
+          const SizedBox(height: AppSpacing.lg),
+          AppButton(label: '저장한 장소에서 추가하기', onPressed: () => _addFromSaved(const [])),
+          const SizedBox(height: AppSpacing.xs),
+          AppButton.outline(label: '링크로 장소 찾기', onPressed: () => context.go(AppRoutes.extract)),
         ],
       ),
     );
@@ -148,17 +150,11 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
 
   Widget _empty(PlaceCollection collection) {
     return ListView(
-      padding: AppSpacing.screenPadding,
+      padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, 0, AppSpacing.screenH, AppSpacing.lg),
       children: [
-        _summaryCard(collection, empty: true),
-        AppEmptyState(
-          title: '아직 저장된 장소가 없어요',
-          description: '기존 저장 장소를 추가하거나\nSNS 링크에서 새로운 장소를 찾아보세요.',
-          actionLabel: '저장한 장소에서 추가하기',
-          onAction: () => _addFromSaved(const []),
-          secondaryLabel: 'SNS 링크에서 새 장소 추출하기',
-          onSecondary: () => context.go(AppRoutes.extract),
-        ),
+        _summaryCard(collection),
+        _placesHeader(collection, onAdd: () => _addFromSaved(const [])),
+        _emptyCard(),
       ],
     );
   }
@@ -171,29 +167,10 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, 0, AppSpacing.screenH, AppSpacing.lg),
             children: [
-              _summaryCard(collection, empty: false),
-              const SizedBox(height: AppSpacing.md),
-              AppSearchField(
-                hint: '보관함 안에서 장소 검색',
-                bordered: true,
-                onChanged: (v) => setState(() => _keyword = v.trim()),
-                trailing: AppButton(
-                  label: _sort.label,
-                  variant: AppButtonVariant.soft,
-                  expand: false,
-                  height: 36,
-                  onPressed: _pickSort,
-                ),
-              ),
-              SectionHeader(
-                title: '저장된 장소',
-                trailingText: '${collection.placeCount}곳',
-                padding: const EdgeInsets.only(top: AppSpacing.xl, bottom: AppSpacing.sm),
-                trailing: IconButton(
-                  tooltip: '장소 추가',
-                  icon: const Icon(Icons.add_rounded, color: AppColors.primary),
-                  onPressed: () => _addFromSaved(places.value?.map((i) => i.place.id).toList() ?? const []),
-                ),
+              _summaryCard(collection),
+              _placesHeader(
+                collection,
+                onAdd: () => _addFromSaved(places.value?.map((i) => i.place.id).toList() ?? const []),
               ),
               AsyncValueView<List<SavedPlaceItem>>(
                 value: places,
@@ -201,7 +178,7 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
                 loading: const SkeletonList(padding: EdgeInsets.zero),
                 onRetry: () => ref.invalidate(savedPlacesProvider(_query)),
                 isEmpty: (l) => l.isEmpty,
-                empty: const AppEmptyState(compact: true, icon: Icons.search_off_rounded, title: '검색 결과가 없어요'),
+                empty: _emptyCard(),
                 data: (list) => Column(
                   children: [
                     for (final item in list)
