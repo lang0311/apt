@@ -7,7 +7,8 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 import 'buttons.dart';
 
-void _defaultBack(BuildContext context) {
+/// 뒤로 갈 곳이 없으면(딥링크로 바로 들어온 경우) 홈으로
+void popOrGoHome(BuildContext context) {
   if (context.canPop()) {
     context.pop();
   } else {
@@ -61,7 +62,7 @@ class SubPageHeader extends StatelessWidget {
           AppIconBox(
             icon: Icons.chevron_left_rounded,
             tooltip: '뒤로',
-            onPressed: () => _defaultBack(context),
+            onPressed: () => popOrGoHome(context),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -106,7 +107,7 @@ class PlainHeader extends StatelessWidget {
           children: [
             IconButton(
               tooltip: leadingTooltip,
-              onPressed: onLeading ?? () => _defaultBack(context),
+              onPressed: onLeading ?? () => popOrGoHome(context),
               icon: Icon(leadingIcon, size: leadingIcon == Icons.chevron_left_rounded ? 30 : 24, color: AppColors.textPrimary),
             ),
             Expanded(
@@ -147,7 +148,7 @@ class AuthHeader extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             IconButton(
-              onPressed: onBack ?? () => _defaultBack(context),
+              onPressed: onBack ?? () => popOrGoHome(context),
               icon: const Icon(Icons.chevron_left_rounded, size: 32, color: AppColors.textPrimary),
               tooltip: '뒤로',
             ),

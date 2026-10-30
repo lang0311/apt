@@ -63,7 +63,8 @@ void main() {
     await tapText(tester, '연남식당');
 
     await waitFor(tester, find.text('장소 정보'));
-    await tapText(tester, '보관함 변경');
+    // 담은 보관함 카드의 '변경'
+    await tapText(tester, '변경');
     await waitFor(tester, find.text('보관함 변경하기'));
     await tapText(tester, '조용한 카페');
     await tapText(tester, '보관함 변경하기');
@@ -110,7 +111,7 @@ void main() {
     await waitFor(tester, find.text('1곳을 저장했어요'));
     expect(find.text('완료'), findsOneWidget);
     await tapText(tester, '보기', scroll: false);
-    await waitFor(tester, find.text('장소 상세'));
+    await waitFor(tester, find.text('장소 정보'));
     await waitFor(tester, find.text('한강 노을 포인트'));
     expectNoErrors(tester);
   });
