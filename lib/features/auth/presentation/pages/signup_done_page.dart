@@ -3,10 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
-import '../../../../core/widgets/app_logo.dart';
+import '../../../../app/theme/app_typography.dart';
 import '../../../../core/widgets/bottom_cta.dart';
 import '../../../../core/widgets/buttons.dart';
-import '../../../../core/widgets/surfaces.dart';
 import '../auth_controller.dart';
 
 /// #4 가입 완료. 시작하기 → 홈 (보류된 공유 URL이 있으면 이어서 추출)
@@ -20,19 +19,23 @@ class SignupDonePage extends ConsumerWidget {
         child: Column(
           children: [
             Expanded(
-              child: ListView(
-                padding: AppSpacing.screenPadding,
-                children: const [
-                  SizedBox(height: 80),
-                  AppLogo(),
-                  SizedBox(height: 56),
-                  StatusCard(
-                    icon: Icons.check_rounded,
-                    iconBackground: AppColors.successSoft,
-                    title: '가입이 완료됐어요',
-                    description: '저장한 장소부터 취향을 만들어볼까요?',
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: AppSpacing.screenPadding,
+                  child: Column(
+                    children: [
+                      const Icon(Icons.check_circle_rounded, size: 48, color: AppColors.primary),
+                      const SizedBox(height: AppSpacing.md),
+                      Text('가입이 완료됐어요', style: AppTypography.title, textAlign: TextAlign.center),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        '릴스에서 공유를 누르고 APT를 고르면\n게시물 속 장소를 찾아 저장할 수 있어요.',
+                        style: AppTypography.body,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
             BottomCta(

@@ -13,6 +13,7 @@ import '../../../../core/widgets/headers.dart';
 import '../../../../core/widgets/inputs.dart';
 import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/surfaces.dart';
+import '../../../preference/presentation/preference_providers.dart';
 import '../auth_controller.dart';
 
 /// #3 프로필 설정. 닉네임 규칙/중복은 서버 기준 (검증 오류는 인라인 표시).
@@ -59,27 +60,21 @@ class _ProfileSetupPageState extends ConsumerState<ProfileSetupPage> {
       body: SafeArea(
         child: Column(
           children: [
-            const AuthHeader(title: '프로필 설정', subtitle: '앱에서 사용할 정보를 확인해주세요.'),
+            const AuthHeader(title: '프로필 설정', subtitle: '코스와 파티에서 다른 사람에게 보이는 이름이에요.'),
             Expanded(
               child: ListView(
                 padding: AppSpacing.screenPadding,
                 children: [
                   Center(
                     child: Container(
-                      width: 100,
-                      height: 100,
+                      width: 84,
+                      height: 84,
                       alignment: Alignment.center,
                       decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
                       child: Text(initial, style: AppTypography.title.copyWith(color: AppColors.primary)),
                     ),
                   ),
-                  Center(
-                    child: AppTextLink(
-                      label: '프로필 사진 변경',
-                      // NEEDS: 이미지 선택 패키지(image_picker) 도입 + 업로드 API (NEEDS BACKEND)
-                      onPressed: () => showAppSnackBar(context, '프로필 사진 변경은 준비 중이에요.'),
-                    ),
-                  ),
+                  // 프로필 사진 변경은 이미지 선택 패키지 + 업로드 API가 생기면 넣는다 (NEEDS BACKEND)
                   const SizedBox(height: AppSpacing.lg),
                   AppTextField(
                     controller: _nickname,
@@ -89,27 +84,10 @@ class _ProfileSetupPageState extends ConsumerState<ProfileSetupPage> {
                     maxLength: 20,
                     onChanged: (_) => setState(() => _error = null),
                   ),
-                  if (_error != null) ...[const SizedBox(height: AppSpacing.xs), AppFieldError(_error!)],
+                  const SizedBox(height: AppSpacing.xs),
+                  if (_error != null) AppFieldError(_error!) else Text('나중에 마이에서 바꿀 수 있어요.', style: AppTypography.meta),
                   const SizedBox(height: AppSpacing.xl),
-                  AppCard(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    onTap: () => context.push(AppRoutes.preferencesOnboarding),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('추천에 사용할 기본 취향', style: AppTypography.bodyStrong),
-                              const SizedBox(height: 6),
-                              Text('나중에 마이페이지에서 변경할 수 있어요.', style: AppTypography.meta),
-                            ],
-                          ),
-                        ),
-                        Text('설정하기 ›', style: AppTypography.label.copyWith(color: AppColors.primary)),
-                      ],
-                    ),
-                  ),
+                  const _PreferenceCard(),
                 ],
               ),
             ),
@@ -121,6 +99,45 @@ class _ProfileSetupPageState extends ConsumerState<ProfileSetupPage> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 추천에 쓸 취향: 고른 키워드 한 줄 + 오른쪽 '고르기'
+class _PreferenceCard extends ConsumerWidget {
+  const _PreferenceCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 불러오는 중이거나 실패해도 가입은 막지 않는다: 고르지 않은 것으로 보여 준다
+    final labels = ref.watch(myPreferenceLabelsProvider).value ?? const <String>[];
+    Future<void> pick() async {
+      await context.push(AppRoutes.preferencesOnboarding);
+      ref.invalidate(myPreferencesProvider);
+    }
+
+    return SectionCard(
+      title: '추천에 쓸 취향',
+      child: InkWell(
+        onTap: pick,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: AppSpacing.xs),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  labels.isEmpty ? '아직 고르지 않았어요' : labels.join(' · '),
+                  style: AppTypography.meta,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(labels.isEmpty ? '고르기' : '바꾸기', style: AppTypography.label.copyWith(color: AppColors.primary)),
+            ],
+          ),
         ),
       ),
     );

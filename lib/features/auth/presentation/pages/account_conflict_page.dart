@@ -45,30 +45,28 @@ class _AccountConflictPageState extends ConsumerState<AccountConflictPage> {
       body: SafeArea(
         child: Column(
           children: [
-            const AuthHeader(title: '계정 연결 확인'),
+            AuthHeader(
+              title: '이미 가입된 이메일이에요',
+              subtitle: '이 이메일은 다른 방법으로 가입돼 있어요. '
+                  '연결하면 다음부터 ${conflict?.provider.label ?? '소셜 계정'}로도 로그인할 수 있어요.',
+            ),
             Expanded(
               child: ListView(
-                padding: AppSpacing.screenPadding,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                 children: [
-                  const SizedBox(height: AppSpacing.lg),
-                  StatusCard(
-                    icon: Icons.priority_high_rounded,
-                    title: '이미 가입된 이메일이에요',
-                    description: '기존 계정과 ${conflict?.provider.label ?? '소셜'} 계정을 연결할까요?',
-                  ),
-                  const SizedBox(height: AppSpacing.md),
                   if (conflict != null)
-                    AppCard(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(conflict.maskedEmail, style: AppTypography.cardTitle.copyWith(fontSize: 17)),
-                          const SizedBox(height: 4),
-                          Text(conflict.existingMethodLabel, style: AppTypography.body),
-                          const SizedBox(height: AppSpacing.md),
-                          Text('연결하면 다음부터 ${conflict.provider.label}로 로그인할 수 있어요.', style: AppTypography.meta),
-                        ],
+                    SectionCard(
+                      title: '기존 계정',
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(conflict.maskedEmail, style: AppTypography.bodyStrong),
+                            const SizedBox(height: 2),
+                            Text(conflict.existingMethodLabel, style: AppTypography.meta),
+                          ],
+                        ),
                       ),
                     ),
                 ],

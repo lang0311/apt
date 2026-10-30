@@ -184,39 +184,3 @@ class InfoCard extends StatelessWidget {
   }
 }
 
-/// 상태 안내 카드 — 아이콘 원 + 제목 + 설명 (계정 충돌, 인증 오류, 가입 완료)
-class StatusCard extends StatelessWidget {
-  const StatusCard({
-    super.key,
-    required this.icon,
-    required this.title,
-    this.description,
-    this.iconBackground = AppColors.primarySoft,
-  });
-
-  final IconData icon;
-  final String title;
-  final String? description;
-  final Color iconBackground;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xl),
-      child: SizedBox(
-        width: double.infinity,
-        child: Column(
-          children: [
-            IconCircle(icon: icon, size: 40, background: iconBackground),
-            const SizedBox(height: AppSpacing.sm),
-            Text(title, style: AppTypography.cardTitle.copyWith(fontSize: 17), textAlign: TextAlign.center),
-            if (description != null) ...[
-              const SizedBox(height: 6),
-              Text(description!, style: AppTypography.meta, textAlign: TextAlign.center),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}

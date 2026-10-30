@@ -52,7 +52,7 @@ class _TermsPageState extends ConsumerState<TermsPage> {
           children: [
             AuthHeader(
               title: '약관 동의',
-              subtitle: '서비스 이용을 위해 아래 내용을 확인해주세요.',
+              subtitle: '서비스를 쓰려면 필수 약관에 동의해 주세요.',
               onBack: () => ref.read(authControllerProvider.notifier).cancelSignup(),
             ),
             Expanded(
@@ -92,65 +92,93 @@ class _TermsList extends StatelessWidget {
   Widget build(BuildContext context) {
     final all = items.every((t) => agreed.contains(t.id));
     return ListView(
-      padding: AppSpacing.screenPadding,
+      padding: const EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.xs, AppSpacing.sm, AppSpacing.lg),
       children: [
+        // 전체 동의도 같은 카드의 맨 위 행으로 둔다
         AppCard(
-          color: AppColors.primarySoft,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
-          onTap: () => onChanged(all ? {} : items.map((t) => t.id).toSet()),
-          child: Row(
+          padding: EdgeInsets.zero,
+          child: DividedRows(
+            indent: 0,
             children: [
-              CheckMark(checked: all),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('전체 동의', style: AppTypography.cardTitle),
-                    const SizedBox(height: 2),
-                    Text('선택 항목을 포함해 모두 동의합니다.', style: AppTypography.meta),
-                  ],
-                ),
+              _TermsRow(
+                checked: all,
+                title: Text('전체 동의', style: AppTypography.cardTitle),
+                subtitle: '선택 항목까지 모두 동의해요',
+                onTap: () => onChanged(all ? {} : items.map((t) => t.id).toSet()),
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        AppCard(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-          child: Column(
-            children: [
               for (final t in items)
-                InkWell(
-                  onTap: () => onChanged(agreed.contains(t.id) ? ({...agreed}..remove(t.id)) : {...agreed, t.id}),
-                  child: Container(
-                    // › 버튼(48) 유무와 관계없이 모든 행 높이를 같게 맞춘다
-                    constraints: const BoxConstraints(minHeight: 56),
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xxs),
-                    child: Row(
+                _TermsRow(
+                  checked: agreed.contains(t.id),
+                  title: Text.rich(
+                    TextSpan(
+                      text: t.title,
                       children: [
-                        CheckMark(checked: agreed.contains(t.id)),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: Text('${t.title} (${t.required ? '필수' : '선택'})', style: AppTypography.bodyStrong),
+                        TextSpan(
+                          text: '  ${t.required ? '필수' : '선택'}',
+                          style: AppTypography.meta.copyWith(fontWeight: FontWeight.w500),
                         ),
-                        if (t.contentUrl != null)
-                          IconButton(
-                            tooltip: '약관 보기',
-                            icon: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
-                            // NEEDS BACKEND: 약관 본문 URL 정책 확정 후 웹뷰/외부 브라우저로 연다.
-                            onPressed: () => showAppSnackBar(context, '약관 본문은 준비 중이에요.'),
-                          )
-                        else
-                          const SizedBox(width: 48),
                       ],
                     ),
+                    style: AppTypography.bodyStrong,
                   ),
+                  onTap: () => onChanged(agreed.contains(t.id) ? ({...agreed}..remove(t.id)) : {...agreed, t.id}),
+                  // 본문이 있는 약관만 › (행을 누르면 체크, ›를 누르면 본문)
+                  onOpen: t.contentUrl == null
+                      ? null
+                      // NEEDS BACKEND: 약관 본문 URL 정책 확정 후 웹뷰/외부 브라우저로 연다.
+                      : () => showAppSnackBar(context, '약관 본문은 준비 중이에요.'),
                 ),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+class _TermsRow extends StatelessWidget {
+  const _TermsRow({required this.checked, required this.title, required this.onTap, this.subtitle, this.onOpen});
+  final bool checked;
+  final Widget title;
+  final String? subtitle;
+  final VoidCallback onTap;
+  final VoidCallback? onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        // › 버튼(48) 유무와 관계없이 모든 행 높이를 같게 맞춘다
+        constraints: const BoxConstraints(minHeight: 56),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.xxs, AppSpacing.xs),
+        child: Row(
+          children: [
+            CheckMark(checked: checked),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  title,
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(subtitle!, style: AppTypography.meta),
+                  ],
+                ],
+              ),
+            ),
+            if (onOpen != null)
+              IconButton(
+                tooltip: '약관 보기',
+                icon: const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+                onPressed: onOpen,
+              )
+            else
+              const SizedBox(width: 48),
+          ],
+        ),
+      ),
     );
   }
 }

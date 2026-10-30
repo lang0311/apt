@@ -21,28 +21,24 @@ class SocialAuthErrorPage extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            const AuthHeader(title: '로그인할 수 없어요'),
+            AuthHeader(
+              title: '로그인할 수 없어요',
+              subtitle: message ?? '일시적인 오류가 발생했어요. 잠시 후 다시 시도해주세요.',
+            ),
             Expanded(
               child: ListView(
-                padding: AppSpacing.screenPadding,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                 children: [
-                  const SizedBox(height: AppSpacing.xl),
-                  StatusCard(
-                    icon: Icons.priority_high_rounded,
-                    title: '소셜 인증이 완료되지 않았어요',
-                    description: message ?? '일시적인 오류가 발생했어요.\n잠시 후 다시 시도해주세요.',
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  AppCard(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  SectionCard(
+                    title: '이렇게 해 보세요',
+                    child: DividedRows(
+                      indent: SectionCard.innerPadding,
                       children: [
-                        Text('해결 방법', style: AppTypography.bodyStrong),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text('· 인터넷 연결 상태를 확인해주세요.', style: AppTypography.body),
-                        const SizedBox(height: 4),
-                        Text('· 소셜 계정 접근 권한을 허용해주세요.', style: AppTypography.body),
+                        for (final tip in const ['인터넷 연결 상태를 확인해 주세요', '소셜 계정 접근 권한을 허용해 주세요'])
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: AppSpacing.sm),
+                            child: Text(tip, style: AppTypography.body),
+                          ),
                       ],
                     ),
                   ),
