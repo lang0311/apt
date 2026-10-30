@@ -54,3 +54,4 @@
 - 팀 서버 켜기: VS Code `Ctrl+Shift+B` → `tools/start_server.ps1`(`apt` 옆 `team/`의 `.venv`로 `127.0.0.1:8000`, 이미 켜져 있으면 다시 켜지 않음). 그다음 실행 및 디버그에서 `apt (서버 연결, …)`
 - 개발 일지: `tools/devlog/entries.js` → `cd tools/devlog && npm run build` (§4)
 - 시안 캡처: Edge headless `--screenshot` (§1). 앱 화면 캡처는 Pixel_6_Pro + `adb exec-out screencap`, 여러 화면은 임시 통합 테스트로 이동하며 캡처하고 테스트 파일은 커밋하지 않는다
+- Figma(개인 파일 `1HIjbBK2F8H6RQUwUCqTO9`, 페이지 `initial` · `revised` · `revised 2`): `revised 2`에 2026-10-30 샘플 — 코스 만들기 흐름(에뮬레이터 캡처 8장 + 화살표 · 동작 · 쓰인 컴포넌트), 변수 모음 `APT 토큰`(코드 토큰과 같은 값), 컴포넌트 `AppButton`(5종 × 기본/비활성) · `SectionCard` · `BottomCta`. 계속할지(다른 흐름 · 컴포넌트 추가)는 사용자 결정 대기. 에뮬레이터 캡처는 이미지라 컴포넌트가 나뉘지 않고, 컴포넌트는 Figma 레이어로 따로 만든다
