@@ -10,9 +10,9 @@ import '../../../app/theme/app_typography.dart';
 import '../../../core/error/app_failure.dart';
 import '../../../core/share/pending_links.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../core/widgets/app_network_image.dart';
 import '../../../core/widgets/bottom_cta.dart';
 import '../../../core/widgets/buttons.dart';
+import '../../../core/widgets/headers.dart';
 import '../../../core/widgets/overlays.dart';
 import '../../../core/widgets/states.dart';
 import '../../../core/widgets/surfaces.dart';
@@ -82,10 +82,7 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: Text('코스 초대', style: AppTypography.header),
-            ),
+            PlainHeader(leadingIcon: Icons.close_rounded, leadingTooltip: '닫기', onLeading: () => context.go(AppRoutes.home)),
             Expanded(
               child: invitation.when(
                 loading: () => const AppLoading(),
@@ -99,7 +96,7 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
                   children: [
                     AppButton(label: '코스에 참여하기', loading: _submitting, onPressed: _accept),
                     const SizedBox(height: AppSpacing.xs),
-                    AppTextLink(label: '이번에는 참여하지 않기', color: AppColors.textSecondary, onPressed: _submitting ? null : _decline),
+                    AppTextLink(label: '참여하지 않기', color: AppColors.textSecondary, onPressed: _submitting ? null : _decline),
                   ],
                 ),
               ),
@@ -128,84 +125,71 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
 
   Widget _content(Invitation inv) {
     return ListView(
-      padding: AppSpacing.screenPadding,
+      padding: const EdgeInsets.fromLTRB(AppSpacing.sm, 0, AppSpacing.sm, AppSpacing.lg),
       children: [
-        AppCard(
-          padding: const EdgeInsets.all(AppSpacing.xl),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.xxs, AppSpacing.sm, AppSpacing.lg),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 56,
-                height: 56,
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
-                child: Text('${inv.memberCount}', style: AppTypography.title.copyWith(color: AppColors.primary)),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text('${inv.inviterName}님이 코스에 초대했어요', style: AppTypography.section, textAlign: TextAlign.center),
-              const SizedBox(height: 4),
-              Text('함께 취향을 모아 AI 코스를 만들어요.', style: AppTypography.body, textAlign: TextAlign.center),
-              const SizedBox(height: AppSpacing.lg),
-              Text(inv.courseTitle, style: AppTypography.cardTitle),
-              const SizedBox(height: 2),
-              Text(
-                [if (inv.courseDate != null) formatDate(inv.courseDate!), '현재 ${inv.memberCount}명'].join(' · '),
-                style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700),
-              ),
+              Text('${inv.inviterName}님이 코스에 초대했어요', style: AppTypography.display),
+              const SizedBox(height: 6),
+              // 초대된 파티원도 장소를 추가·편집할 수 있다 (07 D23)
+              Text('참여하면 같이 장소를 고르고 코스를 고칠 수 있어요.', style: AppTypography.body),
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.lg),
-        Text('미리 보기', style: AppTypography.section),
-        const SizedBox(height: AppSpacing.sm),
         AppCard(
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  AppNetworkImage(url: inv.previewImageUrl, width: 84, height: 84, radius: 16),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('선택된 장소 ${inv.selectedPlaceCount}곳', style: AppTypography.bodyStrong),
-                        const SizedBox(height: 4),
-                        Text(inv.previewPlaceNames.join(' · '), style: AppTypography.meta),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const Padding(padding: EdgeInsets.symmetric(vertical: AppSpacing.sm), child: Divider()),
-              InkWell(
-                onTap: () => setState(() => _sharePreferences = !_sharePreferences),
-                child: Semantics(
-                  checked: _sharePreferences,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                    child: Row(
-                      children: [
-                        Expanded(child: Text('내 저장 장소와 취향을 추천에 반영', style: AppTypography.label)),
-                        Icon(
-                          _sharePreferences ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                          color: _sharePreferences ? AppColors.primary : AppColors.controlBorder,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              Text(inv.courseTitle, style: AppTypography.cardTitle),
+              const SizedBox(height: 4),
+              Text(
+                [if (inv.courseDate != null) formatMonthDayWeekday(inv.courseDate!), '${inv.memberCount}명 참여 중'].join(' · '),
+                style: AppTypography.meta,
               ),
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.md),
-        // 공개 범위는 서버 정책과 일치해야 한다 (docs/06 §4)
-        const InfoCard(
-          title: '참여하면 공개되는 정보',
-          titleColor: AppColors.primary,
-          description: '취향 키워드와 코스에 선택한 장소만 공유돼요.',
+        if (inv.previewPlaceNames.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sm),
+          SectionCard(
+            title: '고른 장소 ${inv.selectedPlaceCount}',
+            // 서버는 장소 이름 목록만 준다(장소별 사진 없음)
+            child: DividedRows(
+              indent: SectionCard.innerPadding,
+              children: [
+                for (final name in inv.previewPlaceNames)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: AppSpacing.sm),
+                    child: Text(name, style: AppTypography.body),
+                  ),
+              ],
+            ),
+          ),
+        ],
+        const SizedBox(height: AppSpacing.sm),
+        AppCard(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.xs, AppSpacing.sm),
+          onTap: () => setState(() => _sharePreferences = !_sharePreferences),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('내 저장 장소와 취향 반영', style: AppTypography.bodyStrong),
+                    const SizedBox(height: 2),
+                    // 공개 범위는 서버 정책과 일치해야 한다 (docs/06 §4)
+                    Text('파티원에게는 취향 키워드와 고른 장소만 보여요', style: AppTypography.meta),
+                  ],
+                ),
+              ),
+              Switch(value: _sharePreferences, onChanged: (v) => setState(() => _sharePreferences = v)),
+            ],
+          ),
         ),
       ],
     );
