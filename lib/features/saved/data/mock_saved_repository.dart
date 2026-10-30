@@ -38,13 +38,11 @@ class MockSavedRepository implements SavedRepository {
           .where((p) => p.name.contains(keyword) || p.address.contains(keyword) || p.keywords.any((w) => w.contains(keyword)))
           .toList();
     }
-    final items = [
-      for (var i = 0; i < places.length; i++)
-        SavedPlaceItem(place: places[i], distanceMeters: 350 + i * 420, walkMinutes: 5 + i * 6),
-    ];
+    // 서버처럼 거리 · 도보 시간은 주지 않는다. 거리와 가까운 순 정렬은 앱이 내 위치로 계산한다.
+    final items = [for (final place in places) SavedPlaceItem(place: place)];
     switch (q.sort) {
       case SavedSort.nearest:
-        items.sort((a, b) => a.distanceMeters!.compareTo(b.distanceMeters!));
+        break;
       case SavedSort.rating:
         items.sort((a, b) => (b.place.rating ?? 0).compareTo(a.place.rating ?? 0));
       case SavedSort.recent:

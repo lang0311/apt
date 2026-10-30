@@ -48,9 +48,14 @@ String formatDuration(Duration d) {
   return '$h시간 $m분';
 }
 
-/// 1.4km / 850m
-String formatDistance(int meters) =>
-    meters >= 1000 ? '${(meters / 1000).toStringAsFixed(1)}km' : '${meters}m';
+/// 850m / 1.4km / 325km / 9,073km — 10km부터는 정수
+String formatDistance(int meters) {
+  if (meters < 1000) return '${meters}m';
+  if (meters < 10000) return '${(meters / 1000).toStringAsFixed(1)}km';
+  final km = (meters / 1000).round().toString();
+  final grouped = km.replaceAllMapped(RegExp(r'\B(?=(\d{3})+$)'), (_) => ',');
+  return '${grouped}km';
+}
 
 /// 날짜(시각 제외) 기준 D-day. 오늘=0, 미래=양수, 과거=음수.
 int daysUntil(DateTime target, {DateTime? now}) {

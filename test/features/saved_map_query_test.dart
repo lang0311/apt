@@ -109,4 +109,16 @@ void main() {
     await notifier.locate();
     expect(c.read(myLocationProvider)?.point, isNull);
   });
+  test('자동 검색을 끈 전체 목록도 같은 규칙: 위치를 모르면 거리 없음, 알면 직선거리 + 가까운 순', () {
+    const me = GeoPoint(37.5446, 127.0557);
+    final items = [SavedPlaceItem(place: far), SavedPlaceItem(place: near)];
+
+    expect(withDistanceFrom(null, items, SavedSort.nearest).every((i) => i.distanceMeters == null), isTrue);
+
+    final sorted = withDistanceFrom(me, items, SavedSort.nearest);
+    expect(sorted.map((i) => i.place.id), ['near', 'far']);
+    expect(sorted.first.distanceMeters, me.distanceTo(near.location!).round());
+    // 최근 순이면 순서는 그대로
+    expect(withDistanceFrom(me, items, SavedSort.recent).map((i) => i.place.id), ['far', 'near']);
+  });
 }

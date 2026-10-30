@@ -171,7 +171,10 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
     });
 
     final all = ref.watch(savedPlacesProvider(_query));
-    final visible = _autoSearch && _bounds != null ? ref.watch(savedPlacesInBoundsProvider(MapQuery(_bounds!, _query))) : all;
+    final me = ref.read(myLocationProvider)?.point;
+    final visible = _autoSearch && _bounds != null
+        ? ref.watch(savedPlacesInBoundsProvider(MapQuery(_bounds!, _query)))
+        : all.whenData((items) => withDistanceFrom(me, items, _query.sort));
     final markers = [
       for (final item in all.value ?? const <SavedPlaceItem>[])
         if (item.place.location != null)

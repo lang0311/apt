@@ -38,21 +38,33 @@ final savedPlacesInBoundsProvider = FutureProvider.autoDispose.family<List<Saved
       .watch(savedRepositoryProvider)
       .fetchSavedPlacesNearby(bounds.center, bounds.radiusMeters.ceil(), mapQuery.query);
 
-  final visible = <SavedPlaceItem>[];
-  for (final item in items) {
-    final location = item.place.location;
-    if (location == null || !bounds.contains(location)) continue;
-    if (me == null) {
-      visible.add(item);
-    } else {
-      visible.add(SavedPlaceItem(place: item.place, distanceMeters: me.distanceTo(location).round()));
-    }
-  }
-  if (mapQuery.query.sort == SavedSort.nearest && me != null) {
-    visible.sort((a, b) => a.distanceMeters!.compareTo(b.distanceMeters!));
-  }
-  return visible;
+  final visible = [
+    for (final item in items)
+      if (item.place.location != null && bounds.contains(item.place.location!)) item,
+  ];
+  return withDistanceFrom(me, visible, mapQuery.query.sort);
 });
+
+/// 내 위치에서 직선거리를 붙이고, 가까운 순이면 정렬한다. 위치를 모르면 거리 없이 그대로.
+/// 서버는 거리를 주지 않고 거리순 정렬도 하지 않는다. 도보 시간은 서버가 줄 때만 표시한다(NEEDS BACKEND).
+List<SavedPlaceItem> withDistanceFrom(GeoPoint? me, List<SavedPlaceItem> items, SavedSort sort) {
+  if (me == null) return items;
+  final measured = [
+    for (final item in items)
+      item.place.location == null
+          ? item
+          : SavedPlaceItem(
+              place: item.place,
+              distanceMeters: me.distanceTo(item.place.location!).round(),
+              walkMinutes: item.walkMinutes,
+            ),
+  ];
+  if (sort == SavedSort.nearest) {
+    // 위치가 없는 장소는 맨 뒤
+    measured.sort((a, b) => (a.distanceMeters ?? 1 << 30).compareTo(b.distanceMeters ?? 1 << 30));
+  }
+  return measured;
+}
 
 /// 저장됨 카테고리 필터(대분류 키, null=전체). 탭을 바꾸거나 상세에 다녀와도 유지하고, 앱을 다시 켜면 풀린다.
 final savedCategoryFilterProvider = NotifierProvider<SavedCategoryFilter, String?>(SavedCategoryFilter.new);

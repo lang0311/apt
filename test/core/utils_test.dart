@@ -34,6 +34,10 @@ void main() {
       expect(formatDuration(const Duration(minutes: 50)), '50분');
       expect(formatDistance(1400), '1.4km');
       expect(formatDistance(850), '850m');
+      expect(formatDistance(9949), '9.9km');
+      expect(formatDistance(10000), '10km');
+      expect(formatDistance(325400), '325km');
+      expect(formatDistance(9073500), '9,074km');
     });
 
     test('D-day는 날짜 기준으로 계산한다 (시각 무시)', () {
