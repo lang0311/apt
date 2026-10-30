@@ -1,8 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
+import 'bottom_cta.dart';
 import 'buttons.dart';
 
 void showAppSnackBar(
@@ -15,9 +18,41 @@ void showAppSnackBar(
   final action = actionLabel == null || onAction == null ? null : SnackBarAction(label: actionLabel, onPressed: onAction);
   // 누를 버튼이 있으면 조금 더 오래 둔다
   final shown = duration ?? Duration(seconds: action == null ? 2 : 4);
+  final lift = _bottomCtaLift(context);
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(message), action: action, duration: shown));
+    ..showSnackBar(SnackBar(
+      content: Text(message),
+      action: action,
+      duration: shown,
+      // 기본 여백(15, 5, 15, 10)에서 아래만 하단 버튼 위로 올린다
+      margin: lift == null ? null : EdgeInsets.fromLTRB(15, 5, 15, lift),
+    ));
+}
+
+/// 화면에 하단 고정 버튼(BottomCta)이 있으면 스낵바를 그 위(8)로 띄울 아래 여백. 없으면 null.
+/// BottomCta는 키보드 때문에 body 안에 두어 Scaffold가 모르므로, 그대로 두면 스낵바가 버튼을 덮는다.
+double? _bottomCtaLift(BuildContext context) {
+  RenderBox? cta;
+  void find(Element element) {
+    if (cta != null) return;
+    final box = element.widget is BottomCta ? element.renderObject : null;
+    if (box is RenderBox && box.attached && box.hasSize) {
+      cta = box;
+    } else {
+      element.visitChildren(find);
+    }
+  }
+
+  context.visitChildElements(find);
+  final box = cta;
+  if (box == null) return null;
+  final top = box.localToGlobal(Offset.zero).dy;
+  // Scaffold는 떠 있는 스낵바를 body 아래 끝(하단 탭이 있으면 그 위)과 화면 안전 영역 중 더 위쪽 기준으로 놓는다.
+  // BottomCta는 body 맨 아래에 있으니 그 아래 끝이 body 아래 끝이다.
+  final view = MediaQueryData.fromView(View.of(context));
+  final base = math.min(top + box.size.height, view.size.height - view.viewPadding.bottom);
+  return math.max(10, base - top + AppSpacing.xs);
 }
 
 /// 바텀시트 (상단 큰 radius + 핸들). 탭바를 덮도록 root navigator 사용.
