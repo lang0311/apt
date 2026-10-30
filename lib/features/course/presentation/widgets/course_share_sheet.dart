@@ -10,6 +10,7 @@ import '../../../../core/error/app_failure.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/surfaces.dart';
+import '../../../../core/widgets/kakao_symbol.dart';
 import '../../../party/domain/party_models.dart';
 import '../../../party/presentation/widgets/invite_modal.dart';
 import '../../domain/course_models.dart';
@@ -76,7 +77,7 @@ class _ShareBody extends ConsumerWidget {
             height: 44,
             alignment: Alignment.center,
             decoration: const BoxDecoration(color: AppColors.kakao, shape: BoxShape.circle),
-            child: const Icon(Icons.chat_bubble_rounded, color: Color(0xFF191919), size: 20),
+            child: const KakaoSymbol(size: 20),
           ),
           title: '카카오톡으로 보내기',
           description: '단톡방에 코스 보내기',

@@ -3,9 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/widgets/kakao_symbol.dart';
 import '../../domain/auth_models.dart';
 
-/// 간편 로그인 아이콘 버튼: 카카오(노랑 원) / Google(흰 원 + 공식 G) / Apple(검정 원).
+/// 간편 로그인 아이콘 버튼: 카카오(노랑 원 + 공식 말풍선) / Google(흰 원 + 공식 G) / Apple(검정 원).
 /// 누르는 영역 48, 화면 낭독기 이름은 "○○로 로그인".
 class SocialIconButton extends StatelessWidget {
   const SocialIconButton({super.key, required this.provider, required this.onPressed, this.loading = false});
@@ -24,7 +25,7 @@ class SocialIconButton extends StatelessWidget {
       SocialProvider.apple => (AppColors.ink, Colors.white, null),
     };
     final Widget icon = switch (provider) {
-      SocialProvider.kakao => Icon(Icons.chat_bubble_rounded, color: fg, size: 22),
+      SocialProvider.kakao => const KakaoSymbol(size: 22),
       SocialProvider.google => const SizedBox.square(dimension: 22, child: CustomPaint(painter: _GoogleMarkPainter())),
       SocialProvider.apple => Icon(Icons.apple, color: fg, size: 26),
     };

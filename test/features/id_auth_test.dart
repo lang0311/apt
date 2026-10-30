@@ -1,10 +1,16 @@
+import 'package:apt/app/di/repositories.dart';
+import 'package:apt/app/theme/app_theme.dart';
 import 'package:apt/core/error/app_failure.dart';
 import 'package:apt/dev/mock/mock_store.dart';
 import 'package:apt/features/auth/data/auth_repositories.dart';
 import 'package:apt/features/auth/data/server_mode_auth_repository.dart';
 import 'package:apt/features/auth/domain/auth_models.dart';
 import 'package:apt/features/auth/domain/auth_repository.dart';
+import 'package:apt/features/auth/presentation/pages/social_login_page.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// 어느 메서드가 불렸는지만 기록한다.
 class _Recorder implements AuthRepository {
@@ -126,5 +132,23 @@ void main() {
       expect(server.calls, ['signOut']);
       expect(mock.calls, ['signOut']);
     });
+  });
+
+  testWidgets('소셜 로그인을 취소하면 로그인 화면에 남고 스낵바만 1.5초 띄운다', (tester) async {
+    GoogleFonts.config.allowRuntimeFetching = false;
+    final repo = _Recorder('mock');
+    await tester.pumpWidget(ProviderScope(
+      overrides: [authRepositoryProvider.overrideWithValue(repo)],
+      child: MaterialApp(theme: AppTheme.light(), home: const SocialLoginPage()),
+    ));
+
+    await tester.tap(find.bySemanticsLabel('카카오로 로그인'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(repo.calls, contains('social'));
+    expect(find.byType(SocialLoginPage), findsOneWidget);
+    expect(find.text('카카오 로그인을 취소했어요'), findsOneWidget);
+    expect(tester.widget<SnackBar>(find.byType(SnackBar)).duration, const Duration(milliseconds: 1500));
   });
 }

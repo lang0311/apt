@@ -71,7 +71,12 @@ class _SocialLoginPageState extends ConsumerState<SocialLoginPage> {
         case AccountConflict():
           context.push(AppRoutes.loginConflict, extra: result);
         case SignInCancelled():
-          context.push(AppRoutes.loginError);
+          // 직접 취소한 것은 오류가 아니다: 로그인 화면에 남고 짧게 알린다
+          showAppSnackBar(
+            context,
+            '${provider.label} 로그인을 취소했어요',
+            duration: const Duration(milliseconds: 1500),
+          );
         case SignInFailed(:final message):
           context.push(AppRoutes.loginError, extra: message);
         default:

@@ -55,7 +55,7 @@
 | `dangerText` | `#C8463C` | 차단·삭제 같은 위험 동작의 **글자** (흰 배경 약 5:1, 2026-10-21). 시트에서는 구분선 아래 따로 떼어 두고 아이콘과 함께 쓴다 |
 | `success` | `#16A07D` | 완료 |
 | `extract` | `#8A63E6` | 추출 계열 보조(보라) |
-| `kakao` | `#FEE500` | 카카오 버튼 |
+| `kakao` | `#FEE500` | 카카오 버튼 (아이콘은 공식 말풍선 심볼 `KakaoSymbol`, 검정. 로그인 · 공유 모두) |
 
 > `ai` 색은 **AI가 추천한 것에만** 쓴다 (선택 장소와의 시각적 구분이 핵심).
 
@@ -91,7 +91,7 @@
 
 ## 4. 공통 컴포넌트
 
-**기본**: `AppPrimaryButton` `AppDarkButton` `AppOutlineButton` `AppTextButton` `AppIconButton(back)` `AppTextField(+error)` `AppChip(선택/비선택)` `AppSwitch` `AppBottomSheet` `AppModal` `AppEmptyState` `AppErrorState` `AppLoading` `AppSnackBar`
+**기본**: `AppPrimaryButton` `AppDarkButton` `AppOutlineButton` `AppTextButton` `AppIconButton(back)` `AppTextField(+error)` `AppChip(선택/비선택)` `AppSwitch` `AppBottomSheet` `AppModal` `AppEmptyState` `AppErrorState` `AppLoading` `AppSnackBar` `KakaoSymbol`
 **섹션·사진**: `SectionCard`(섹션 컨테이너, 제목 줄 오른쪽 `trailing`) `PlaceImage`(사진 없으면 카테고리 색 칸 + 아이콘, 같은 크기 유지) `DividedRows`(컨테이너 안 구분선 행) `HeaderTextButton`(제목 줄 글자 버튼)
 **탭**: `SegmentedTabs` — track(회색 트랙) / pills / **underline**(저장됨, 2026-10-20). 걸린 필터 표시는 남색 `AppliedFilterChip`
 **도메인**: `SocialLoginButton` `SegmentedTabs` `SavedPlaceRow` `CollectionRow(2×2 미니 콜라주)` `PlaceListTile` `PlaceCardSmall` `ExtractedPlaceCard` `CourseCard` `StatTile` `StepHeader(뒤로+타이틀+n/4)` `StepProgressBar` `StopMarker(번호/✦ 표시)` `AiBadge(✦)` `PartyAvatarStack` `RouteSegmentChip(도보/버스 N분)` `PreferenceChipGroup` `AppBottomNav`

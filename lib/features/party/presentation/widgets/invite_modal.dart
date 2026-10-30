@@ -6,6 +6,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/error/app_failure.dart';
+import '../../../../core/widgets/kakao_symbol.dart';
 import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/surfaces.dart';
 import '../party_providers.dart';
@@ -60,7 +61,7 @@ class _InviteBody extends ConsumerWidget {
             height: 44,
             alignment: Alignment.center,
             decoration: const BoxDecoration(color: AppColors.kakao, shape: BoxShape.circle),
-            child: const Icon(Icons.chat_bubble_rounded, color: Color(0xFF191919), size: 20),
+            child: const KakaoSymbol(size: 20),
           ),
           title: '카카오톡으로 보내기',
           description: '친구에게 초대 메시지 보내기',

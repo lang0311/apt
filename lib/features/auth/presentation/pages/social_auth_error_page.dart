@@ -10,7 +10,7 @@ import '../../../../core/widgets/headers.dart';
 import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/surfaces.dart';
 
-/// #6 소셜 인증 오류 (취소/실패)
+/// #6 소셜 인증 오류 (실패만. 사용자가 취소하면 로그인 화면에 남는다)
 class SocialAuthErrorPage extends StatelessWidget {
   const SocialAuthErrorPage({super.key, this.message});
   final String? message;
@@ -30,7 +30,7 @@ class SocialAuthErrorPage extends StatelessWidget {
                   StatusCard(
                     icon: Icons.priority_high_rounded,
                     title: '소셜 인증이 완료되지 않았어요',
-                    description: message ?? '로그인을 취소했거나 일시적인 오류가 발생했어요.',
+                    description: message ?? '일시적인 오류가 발생했어요.\n잠시 후 다시 시도해주세요.',
                   ),
                   const SizedBox(height: AppSpacing.md),
                   AppCard(

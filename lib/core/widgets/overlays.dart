@@ -5,13 +5,19 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 import 'buttons.dart';
 
-void showAppSnackBar(BuildContext context, String message, {String? actionLabel, VoidCallback? onAction}) {
+void showAppSnackBar(
+  BuildContext context,
+  String message, {
+  String? actionLabel,
+  VoidCallback? onAction,
+  Duration? duration,
+}) {
   final action = actionLabel == null || onAction == null ? null : SnackBarAction(label: actionLabel, onPressed: onAction);
   // 누를 버튼이 있으면 조금 더 오래 둔다
-  final duration = Duration(seconds: action == null ? 2 : 4);
+  final shown = duration ?? Duration(seconds: action == null ? 2 : 4);
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(message), action: action, duration: duration));
+    ..showSnackBar(SnackBar(content: Text(message), action: action, duration: shown));
 }
 
 /// 바텀시트 (상단 큰 radius + 핸들). 탭바를 덮도록 root navigator 사용.
