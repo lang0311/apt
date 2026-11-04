@@ -6,6 +6,7 @@ import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 import '../error/app_failure.dart';
 import 'buttons.dart';
+import 'overlays.dart';
 import 'surfaces.dart';
 
 /// 로딩
@@ -183,7 +184,8 @@ class AppErrorState extends StatelessWidget {
 }
 
 /// AsyncValue → loading / error / empty / data 공통 처리.
-/// refreshing(재요청 중)에는 이전 데이터를 유지한다 (Riverpod 기본 동작).
+/// refreshing(재요청 중)에는 이전 데이터를 유지하고, 새로고침이 실패해도 이전 데이터가 있으면
+/// 오류 화면으로 바꾸지 않는다 (실패 알림은 [awaitRefresh]의 스낵바).
 class AsyncValueView<T> extends StatelessWidget {
   const AsyncValueView({
     super.key,
@@ -207,6 +209,7 @@ class AsyncValueView<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return value.when(
+      skipError: true,
       data: (loaded) {
         final showEmpty = (isEmpty?.call(loaded) ?? false) && empty != null;
         return showEmpty ? empty! : data(loaded);
@@ -215,4 +218,12 @@ class AsyncValueView<T> extends StatelessWidget {
       error: (e, _) => AppErrorState(error: e, onRetry: onRetry, compact: compactError),
     );
   }
+}
+
+/// 당겨서 새로고침: 다시 불러온 것을 모두 기다린 뒤, 하나라도 실패하면 이유를 스낵바로 알린다.
+/// 보이던 데이터는 그대로 남는다 ([AsyncValueView]).
+Future<void> awaitRefresh(BuildContext context, Iterable<Future<Object?>> futures) async {
+  final errors = await Future.wait(futures.map((f) => f.then<Object?>((_) => null, onError: (Object e) => e)));
+  final error = errors.nonNulls.firstOrNull;
+  if (error != null && context.mounted) showAppSnackBar(context, failureMessage(error));
 }

@@ -38,9 +38,14 @@ class _SavedPageState extends ConsumerState<SavedPage> {
     if (created != null && mounted) context.push(AppRoutes.collection(created.id));
   }
 
-  Future<void> _refresh() async {
+  Future<void> _refresh() {
     invalidateSavedData(ref);
-    await ref.read(savedSummaryProvider.future).catchError((_) => const SavedSummary(totalCount: 0, categories: []));
+    final category = ref.read(savedCategoryFilterProvider);
+    return awaitRefresh(context, [
+      ref.read(savedSummaryProvider.future),
+      if (_tab == 0) ref.read(savedPlacesProvider(SavedPlaceQuery(categoryKey: category)).future),
+      if (_tab == 1) ref.read(collectionsProvider.future),
+    ]);
   }
 
   void _openMap() {

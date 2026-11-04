@@ -122,7 +122,7 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
   }
 
   Widget _body(AsyncValue<List<PreferenceGroup>> groups, AsyncValue<MyPreferences> mine) {
-    if (groups.hasError || mine.hasError) {
+    if ((groups.hasError && !groups.hasValue) || (mine.hasError && !mine.hasValue)) {
       return AppErrorState(
         error: (groups.error ?? mine.error)!,
         onRetry: () {

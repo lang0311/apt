@@ -56,9 +56,9 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
-          onRefresh: () async {
+          onRefresh: () {
             retry();
-            await ref.read(myCoursesProvider.future).then((_) {}, onError: (_) {});
+            return awaitRefresh(context, [ref.read(myCoursesProvider.future), ref.read(partyCoursesProvider.future)]);
           },
           child: ListView(
             padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
@@ -73,7 +73,8 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
                         icon: const Icon(Icons.add_rounded, size: 26, color: AppColors.textPrimary),
                       ),
               ),
-              if (mine.hasError || party.hasError)
+              // 새로고침이 실패해도 이전 목록이 있으면 그대로 둔다 (알림은 스낵바)
+              if (!loaded && (mine.hasError || party.hasError))
                 AppErrorState(error: (mine.error ?? party.error)!, onRetry: retry)
               else if (!loaded)
                 const SkeletonList()

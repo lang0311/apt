@@ -36,10 +36,10 @@ class MyPage extends ConsumerWidget {
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
-          onRefresh: () async {
+          onRefresh: () {
             ref.invalidate(myProfileProvider);
             ref.invalidate(myPreferencesProvider);
-            await ref.read(myProfileProvider.future).then((_) {}, onError: (_) {});
+            return awaitRefresh(context, [ref.read(myProfileProvider.future), ref.read(myPreferenceLabelsProvider.future)]);
           },
           child: ListView(
             padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
@@ -171,8 +171,9 @@ class _PreferenceSummary extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final labels = ref.watch(myPreferenceLabelsProvider);
-    if (labels.hasError) return Text('취향을 불러오지 못했어요', style: AppTypography.meta);
-    if (!labels.hasValue) return Text('', style: AppTypography.meta);
+    if (!labels.hasValue) {
+      return Text(labels.hasError ? '취향을 불러오지 못했어요' : '', style: AppTypography.meta);
+    }
     final shown = labels.value!.take(5);
     if (shown.isEmpty) return Text('아직 고른 취향이 없어요.', style: AppTypography.meta);
     return Text(shown.join(' · '), style: AppTypography.bodyStrong);

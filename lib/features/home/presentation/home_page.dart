@@ -26,13 +26,19 @@ class HomePage extends ConsumerWidget {
   static const _outerPadding = AppSpacing.sm;
   static const _sectionGap = 10.0;
 
-  Future<void> _refresh(WidgetRef ref) async {
+  Future<void> _refresh(BuildContext context, WidgetRef ref) {
     ref.invalidate(homeStatsProvider);
     ref.invalidate(recentExtractionsProvider);
     ref.invalidate(trendingPlacesProvider);
     ref.invalidate(suggestedCoursesProvider);
     ref.invalidate(activeCoursesProvider);
-    await ref.read(activeCoursesProvider.future).then((_) {}, onError: (_) {});
+    return awaitRefresh(context, [
+      ref.read(activeCoursesProvider.future),
+      ref.read(homeStatsProvider.future),
+      ref.read(recentExtractionsProvider.future),
+      ref.read(trendingPlacesProvider.future),
+      ref.read(suggestedCoursesProvider.future),
+    ]);
   }
 
   Future<void> _dismissNudge(BuildContext context, WidgetRef ref) async {
@@ -57,7 +63,9 @@ class HomePage extends ConsumerWidget {
 
     // 맨 위 자리는 코스·저장 수·최근 저장·제안 기록이 모두 있어야 고를 수 있다.
     // 통계·최근 저장이 실패해도 코스가 있으면 코스 카드는 보여 준다.
-    final topReady = courses.hasValue && !stats.isLoading && !recent.isLoading && !seenAt.isLoading;
+    // 새로고침 중(isLoading이어도 이전 값이 있음)에는 뼈대로 바꾸지 않는다.
+    bool settled(AsyncValue<Object?> v) => v.hasValue || v.hasError;
+    final topReady = courses.hasValue && settled(stats) && settled(recent) && settled(seenAt);
     final HomeTop? top = topReady
         ? resolveHomeTop(
             courses: courses.value!,
@@ -132,7 +140,7 @@ class HomePage extends ConsumerWidget {
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
-          onRefresh: () => _refresh(ref),
+          onRefresh: () => _refresh(context, ref),
           child: ListView(
             padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
             children: [
