@@ -118,8 +118,13 @@ class AuthController extends Notifier<AuthState> {
   /// 가입 도중 로그인 화면으로 돌아갈 때
   void cancelSignup() => state = AuthState.signedOut;
 
+  /// 서버 로그아웃 요청이 실패해도(오프라인 등) 앱 안의 세션은 지우고 로그인 화면으로 보낸다.
   Future<void> signOut() async {
-    await ref.read(authRepositoryProvider).signOut();
+    try {
+      await ref.read(authRepositoryProvider).signOut();
+    } catch (_) {
+      // 서버 세션은 만료되면 서버가 정리한다.
+    }
     _clearSession();
     state = AuthState.signedOut;
   }

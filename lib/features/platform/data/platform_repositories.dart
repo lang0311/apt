@@ -110,11 +110,15 @@ class PlatformAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {
-    await _platform.post('/auth/logout');
-    _platform.places.clear();
-    _platform.courses.clear();
-    _platform.lastCourseId = null;
-    _platform.currentUserId = null;
+    try {
+      await _platform.post('/auth/logout');
+    } finally {
+      // 요청이 실패해도 앱에 남은 이 계정의 데이터는 지운다.
+      _platform.places.clear();
+      _platform.courses.clear();
+      _platform.lastCourseId = null;
+      _platform.currentUserId = null;
+    }
   }
 
   @override
