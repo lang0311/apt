@@ -2,6 +2,7 @@
 /tools/devlog/ export-ignore
 /tools/sync_team.sh export-ignore
 /tools/start_server.ps1 export-ignore
+/tools/start_server.cmd export-ignore
 /.vscode/tasks.json export-ignore
 /tools/hooks/ export-ignore
 /docs/08_DEV_LOG.docx export-ignore
