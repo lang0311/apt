@@ -116,9 +116,15 @@ class PlatformClient {
       CourseStop(
         place: place(Map<String, dynamic>.from(stop as Map)),
         source: stop['saved'] == true ? PlaceSource.user : PlaceSource.ai,
-        aiReason: stop['saved'] == true ? null : stop['description'] as String?,
+        aiReason: stop['saved'] == true ? null : _reason(stop['description']),
       ),
   ];
+
+  /// 서버가 추천 이유를 빈 문자열로 줄 수 있다(팀 8b58c46~). 빈 값은 null로 넘겨 '추천 이유 보기' 줄이 안 뜨게 한다 (07 D40).
+  static String? _reason(Object? description) {
+    final text = description is String ? description.trim() : '';
+    return text.isEmpty ? null : text;
+  }
 
   /// 사용자가 추천 취소를 눌렀는지. 추천을 새로 시작할 때 끈다.
   bool cancelRequested = false;

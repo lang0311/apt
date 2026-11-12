@@ -44,7 +44,7 @@ class StopSheetAction {
   final bool chevron;
 }
 
-/// 장소 머리(사진 · 이름 · 부제 · AI 이유) + 묶음별 동작. 묶음 사이는 바탕색 띠로 나눈다.
+/// 장소 머리(사진 · 이름 · 부제) + (AI 장소) 추천 이유 보기 + 묶음별 동작. 묶음 사이는 바탕색 띠로 나눈다.
 Future<void> showStopSheet(BuildContext context, {required CourseStop stop, required List<List<StopSheetAction>> groups}) {
   final place = stop.place;
   return showAppBottomSheet<void>(
@@ -72,14 +72,13 @@ Future<void> showStopSheet(BuildContext context, {required CourseStop stop, requ
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      if (stop.isAi && stop.aiReason != null)
-                        Text('✦ ${stop.aiReason}', style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w700)),
                     ],
                   ),
                 ),
               ],
             ),
           ),
+          if (stop.isAi && stop.aiReason != null) _ReasonRow(reason: stop.aiReason!),
           for (var g = 0; g < groups.length; g++) ...[
             if (g > 0) Container(height: 6, color: AppColors.bg, margin: const EdgeInsets.symmetric(vertical: 4)),
             for (final a in groups[g]) _ActionRow(action: a, sheetContext: ctx),
@@ -88,6 +87,62 @@ Future<void> showStopSheet(BuildContext context, {required CourseStop stop, requ
       ),
     ),
   );
+}
+
+/// '추천 이유 보기': 누르면 시트를 닫지 않고 아래에 이유를 펼친다 (07 D40).
+/// 서버가 주는 이유가 길어서 일정에서는 빼고 여기서만 보여 준다.
+class _ReasonRow extends StatefulWidget {
+  const _ReasonRow({required this.reason});
+  final String reason;
+
+  @override
+  State<_ReasonRow> createState() => _ReasonRowState();
+}
+
+class _ReasonRowState extends State<_ReasonRow> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Semantics(
+          button: true,
+          expanded: _open,
+          child: InkWell(
+            onTap: () => setState(() => _open = !_open),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 56),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH, vertical: 8),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(color: AppColors.aiSoft, borderRadius: BorderRadius.circular(12)),
+                      child: const Icon(Icons.auto_awesome, size: 20, color: AppColors.aiText),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(child: Text('추천 이유 보기', style: AppTypography.bodyStrong)),
+                    Icon(_open ? Icons.expand_less_rounded : Icons.expand_more_rounded, color: AppColors.textSecondary),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (_open)
+          Padding(
+            // 아이콘(36) + 간격만큼 들여 써서 줄 제목 아래에 맞춘다
+            padding: const EdgeInsets.fromLTRB(AppSpacing.screenH + 36 + AppSpacing.sm, 0, AppSpacing.screenH, AppSpacing.sm),
+            child: Text(widget.reason, style: AppTypography.body.copyWith(color: AppColors.textPrimary, height: 1.55)),
+          ),
+      ],
+    );
+  }
 }
 
 class _ActionRow extends StatelessWidget {

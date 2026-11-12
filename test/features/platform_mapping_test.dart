@@ -48,6 +48,23 @@ void main() {
     expect(course.canEdit, isFalse);
     expect(course.stops.last.nextLeg, isNull);
   });
+  test('빈 추천 이유는 null로 넘긴다 (시트에 추천 이유 보기가 안 뜨게)', () {
+    final c = PlatformClient(ApiClient(Dio()));
+    final course = c.course({
+      'id': 'course',
+      'status': 'draft',
+      'party_id': null,
+      'itinerary': [
+        {'key': 'a', 'name': '빈 이유', 'address': '서울', 'saved': false, 'description': ''},
+        {'key': 'b', 'name': '공백 이유', 'address': '서울', 'saved': false, 'description': '  '},
+        {'key': 'c', 'name': '이유 없음', 'address': '서울', 'saved': false},
+      ],
+    });
+    for (final stop in course.stops) {
+      expect(stop.isAi, isTrue);
+      expect(stop.aiReason, isNull);
+    }
+  });
   test('Selected place tokens are sent unchanged', () async {
     final c = PlatformClient(ApiClient(Dio()));
     c.place({

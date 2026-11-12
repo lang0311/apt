@@ -104,7 +104,8 @@ class CourseEditButton extends StatelessWidget {
 /// 장소 번호 원. 내가 고른 장소 = 진한 번호, AI 추천 = 주황 ✦.
 Widget _marker(CourseStop stop, int? number) => StopMarker(source: stop.source, number: number);
 
-/// 장소 이름 아래 줄. AI 추천은 "✦ 이유"(주황 글자), 내가 고른 장소는 카테고리 · 지역.
+/// 장소 이름 아래 줄: 카테고리 · 지역. AI 추천 여부는 번호 원(주황 ✦)으로 구분하고,
+/// 추천 이유는 장소를 눌렀을 때 시트의 '추천 이유 보기'에서 보여 준다 (07 D40).
 class _StopText extends StatelessWidget {
   const _StopText({required this.stop, this.prefix});
   final CourseStop stop;
@@ -114,7 +115,7 @@ class _StopText extends StatelessWidget {
   Widget build(BuildContext context) {
     final place = stop.place;
     final area = _shortArea(place);
-    final sub = stop.isAi ? '✦ ${stop.aiReason ?? 'AI 추천'}' : [place.categoryLabel, if (area.isNotEmpty) area].join(' · ');
+    final sub = [place.categoryLabel, if (area.isNotEmpty) area].join(' · ');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -127,10 +128,7 @@ class _StopText extends StatelessWidget {
               TextSpan(text: '$prefix · ', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700)),
             TextSpan(text: sub),
           ]),
-          style: AppTypography.caption.copyWith(
-            color: stop.isAi ? AppColors.aiText : null,
-            fontWeight: stop.isAi ? FontWeight.w700 : null,
-          ),
+          style: AppTypography.caption,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -139,10 +137,15 @@ class _StopText extends StatelessWidget {
   }
 }
 
-/// '서울 성동구 성수동' → '성수동'
+/// 주소에서 동네 이름만 뽑는다: '서울 성동구 성수동' → '성수동', '서울 마포구 서교동 367-5' → '서교동',
+/// 도로명 주소 '서울 마포구 토정로 56' → '마포구'. 서버 주소는 번지 · 건물 번호로 끝나므로 마지막 낱말을 그대로 쓰지 않는다.
 String _shortArea(Place p) {
-  final parts = p.displayArea.trim().split(RegExp(r'\s+'));
-  return parts.isEmpty ? '' : parts.last;
+  final parts = p.displayArea.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+  for (final pattern in [RegExp(r'^[가-힣]+\d*[동읍면리가]$'), RegExp(r'^[가-힣]+[구군시]$')]) {
+    final found = parts.lastWhere(pattern.hasMatch, orElse: () => '');
+    if (found.isNotEmpty) return found;
+  }
+  return '';
 }
 
 /// 일정 타임라인 (보는 상태). 장소 행은 옅은 흰 바탕으로 나누고, 행 사이 점선에 이동 정보를 둔다.
