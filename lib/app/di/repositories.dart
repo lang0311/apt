@@ -4,6 +4,7 @@ import '../../core/config/env.dart';
 import '../../core/network/api_client.dart';
 import '../../core/storage/token_storage.dart';
 import '../../dev/mock/mock_store.dart';
+import '../../dev/mock/party_mock_repositories.dart';
 import '../../features/auth/data/auth_repositories.dart';
 import '../../features/auth/data/server_mode_auth_repository.dart';
 import '../../features/auth/data/social_auth_sdk.dart';
@@ -36,6 +37,7 @@ import 'data_source.dart';
 /// - Api: `USE_MOCK=false` — API 명세 수령 후 Api* 클래스만 채우면 되고, 화면/Provider 코드는 바뀌지 않는다
 /// - 서버: `APT_BACKEND=true` — 팀 Python 서버(Platform*). 서버에 없는 기능(추출 등)은 Mock으로 대신하지 않고 준비 중으로 둔다.
 ///   소셜로 로그인하면 Mock으로 바뀐다 (07 D28).
+///   `PARTY_MOCK=true`를 같이 주면 서버 파티에 Mock 파티원만 덧붙여 보여 준다. 파티 · 초대 · 코스는 모두 서버 (시연용, 07 D39).
 
 /// 키가 있는 공급자만 실제 SDK, 나머지는 Mock SDK. 서버 토큰 교환은 [authRepositoryProvider]가 결정한다.
 final socialAuthProvider = Provider<SocialAuthProvider>(
@@ -92,12 +94,16 @@ final homeRepositoryProvider = Provider<HomeRepository>((ref) => switch (ref.wat
 final courseRepositoryProvider = Provider<CourseRepository>((ref) => switch (ref.watch(dataSourceProvider)) {
       DataSource.mock => MockCourseRepository(ref.watch(mockStoreProvider)),
       DataSource.api => ApiCourseRepository(ref.watch(apiClientProvider)),
+      DataSource.server when Env.partyMock =>
+        MockMembersCourseRepository(PlatformCourseRepository(ref.watch(platformClientProvider))),
       DataSource.server => PlatformCourseRepository(ref.watch(platformClientProvider)),
     });
 
 final partyRepositoryProvider = Provider<PartyRepository>((ref) => switch (ref.watch(dataSourceProvider)) {
       DataSource.mock => MockPartyRepository(ref.watch(mockStoreProvider)),
       DataSource.api => ApiPartyRepository(ref.watch(apiClientProvider)),
+      DataSource.server when Env.partyMock =>
+        MockMembersPartyRepository(PlatformPartyRepository(ref.watch(platformClientProvider))),
       DataSource.server => PlatformPartyRepository(ref.watch(platformClientProvider)),
     });
 

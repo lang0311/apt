@@ -9,6 +9,10 @@ abstract final class Env {
   /// `--dart-define=APT_BACKEND=true --dart-define=USE_MOCK=false --dart-define=API_BASE_URL=http://10.0.2.2:8000`
   static const localBackend = bool.fromEnvironment('APT_BACKEND', defaultValue: false);
 
+  /// 서버 모드에서 파티원만 Mock으로 채운다 (시연용, 07 D39). 파티 만들기 · 초대 · 파티 코스 추천 · 저장은 모두
+  /// 팀 서버이고, 서버가 준 파티원 뒤에 Mock 파티원을 덧붙여 보여 준다. `APT_BACKEND=true`일 때만 뜻이 있다.
+  static const partyMock = bool.fromEnvironment('PARTY_MOCK', defaultValue: false);
+
   /// Mock Repository 사용 여부. API 명세 수령 전까지 기본 true.
   static const useMock = bool.fromEnvironment('USE_MOCK', defaultValue: true);
 

@@ -120,6 +120,7 @@ flutter run -d chrome --web-hostname=127.0.0.1 --web-port=5173 --dart-define=APT
 | `apt (dev)` | Mock + `config/dev.json` 키 |
 | `apt (서버 연결, 에뮬레이터)` | 4-2 A와 같음 |
 | `apt (서버 연결, 웹)` | 4-2 B와 같음 |
+| `apt (서버 연결 + 파티원 Mock, 에뮬레이터)` | 4-2 A + `PARTY_MOCK=true` (시연용: 전부 서버, 파티원만 Mock으로 덧붙임) |
 | `apt (dev, profile)` | 성능 확인용 profile 모드 |
 
 ### 4-4. 서버 모드에서 되는 것 / 안 되는 것
@@ -162,6 +163,7 @@ Apple 로그인과 이메일 로그인은 숨겨져 있습니다(`APPLE_AUTH`, `
 |------|--------|------|
 | `APT_BACKEND` | `false` | `true`면 팀 서버(Python)에 연결 |
 | `USE_MOCK` | `true` | 서버 연결 시 `false` |
+| `PARTY_MOCK` | `false` | 서버 연결 시 `true`면 서버 파티에 Mock 파티원(민지 · 랑이)을 덧붙여 보여 줌. 시연용 |
 | `API_BASE_URL` | – | 서버 주소. 에뮬레이터 `http://10.0.2.2:8000`, 웹 · PC `http://127.0.0.1:8000` |
 | `MOCK_SCENARIO` | `normal` | `normal` / `empty` / `error` |
 | `MOCK_LATENCY_MS` | `600` | Mock 응답 지연(ms) |

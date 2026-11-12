@@ -24,6 +24,20 @@
             ]
         },
         {
+            // 시연용: 전부 팀 서버, 파티원만 Mock으로 덧붙여 보여 준다 (07 D39)
+            "name": "apt (서버 연결 + 파티원 Mock, 에뮬레이터)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "toolArgs": [
+                "--dart-define-from-file=config/dev.json",
+                "--dart-define=APT_BACKEND=true",
+                "--dart-define=USE_MOCK=false",
+                "--dart-define=PARTY_MOCK=true",
+                "--dart-define=API_BASE_URL=http://10.0.2.2:8000"
+            ]
+        },
+        {
             // 웹은 서버 CORS가 127.0.0.1:5173만 허용한다. 주소를 localhost로 바꾸면 로그인이 유지되지 않는다.
             "name": "apt (서버 연결, 웹)",
             "request": "launch",
