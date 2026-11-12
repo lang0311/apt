@@ -23,6 +23,9 @@ abstract interface class SavedRepository {
   /// 장소들을 저장하고 지정한 보관함에 넣는다. [collectionIds]가 비어 있으면 "전체 저장 장소"에만 저장.
   Future<void> savePlaces({required List<String> placeIds, required List<String> collectionIds});
 
+  /// 저장을 해제한다 (보관함에서도 빠진다). 팀 서버: `DELETE /me/places/{key}`
+  Future<void> unsavePlace(String placeId);
+
   /// 한 장소의 보관함 소속을 교체한다 (보관함 변경)
   Future<void> setPlaceCollections({required String placeId, required List<String> collectionIds});
 

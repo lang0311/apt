@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 
 import '../../../app/di/repositories.dart';
 import '../../../app/di/data_source.dart';
@@ -92,15 +93,20 @@ final placeDetailProvider = FutureProvider.autoDispose.family<PlaceDetail, Strin
 final collectionsSupportedProvider = Provider<bool>((ref) => ref.watch(dataSourceProvider) != DataSource.server);
 
 /// 저장 관련 변경 후 영향을 받는 조회를 새로 고친다.
-void invalidateSavedData(WidgetRef ref) {
-  ref.invalidate(savedSummaryProvider);
-  ref.invalidate(savedPlacesProvider);
-  ref.invalidate(savedPlacesInBoundsProvider);
-  ref.invalidate(collectionsProvider);
-  ref.invalidate(collectionProvider);
-  ref.invalidate(placeDetailProvider);
+void invalidateSavedData(WidgetRef ref) => _savedData.forEach(ref.invalidate);
+
+/// 화면이 사라진 뒤에도(스낵바의 되돌리기 등) 쓸 수 있게 컨테이너로 새로 고친다.
+void invalidateSavedDataIn(ProviderContainer container) => _savedData.forEach(container.invalidate);
+
+final _savedData = <ProviderOrFamily>[
+  savedSummaryProvider,
+  savedPlacesProvider,
+  savedPlacesInBoundsProvider,
+  collectionsProvider,
+  collectionProvider,
+  placeDetailProvider,
   // 저장 수가 바뀌면 홈 통계/최근 추출의 저장 상태도 바뀐다
-  ref.invalidate(homeStatsProvider);
-  ref.invalidate(recentExtractionsProvider);
-  ref.invalidate(trendingPlacesProvider);
-}
+  homeStatsProvider,
+  recentExtractionsProvider,
+  trendingPlacesProvider,
+];

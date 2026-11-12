@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/di/repositories.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/app_typography.dart';
+import '../../../core/error/app_failure.dart';
 import '../../../core/utils/external_link.dart';
 import '../../../core/widgets/bottom_cta.dart';
 import '../../../core/widgets/buttons.dart';
@@ -103,6 +105,39 @@ class _Body extends ConsumerWidget {
     if (ok == true && context.mounted) showAppSnackBar(context, place.isSaved ? '보관함을 변경했어요.' : '장소를 저장했어요.');
   }
 
+  /// 저장 버튼. 보관함이 없는 서버 모드에서 저장된 장소는 바로 저장을 해제하고 되돌리기를 준다 (07 D41).
+  /// 그 밖에는 보관함 시트(저장 · 변경)를 연다.
+  Future<void> _onSaveButton(BuildContext context, WidgetRef ref) async {
+    if (!place.isSaved || ref.read(collectionsSupportedProvider)) return _changeCollections(context);
+    // 해제 뒤 화면이 새로 그려져도 되돌리기가 동작하도록 미리 잡아 둔다
+    final container = ProviderScope.containerOf(context, listen: false);
+    final messenger = ScaffoldMessenger.of(context);
+    final repo = ref.read(savedRepositoryProvider);
+    final id = place.id;
+    try {
+      await repo.unsavePlace(id);
+    } catch (e) {
+      if (context.mounted) showAppSnackBar(context, failureMessage(e));
+      return;
+    }
+    if (context.mounted) {
+      showAppSnackBar(
+        context,
+        '저장을 해제했어요.',
+        actionLabel: '되돌리기',
+        onAction: () async {
+          try {
+            await repo.savePlaces(placeIds: [id], collectionIds: const []);
+            invalidateSavedDataIn(container);
+          } catch (e) {
+            messenger.showSnackBar(SnackBar(content: Text(failureMessage(e))));
+          }
+        },
+      );
+    }
+    invalidateSavedDataIn(container);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 서버 모드에는 보관함이 없다(목록이 비면 카드를 숨긴다)
@@ -136,7 +171,7 @@ class _Body extends ConsumerWidget {
                   Padding(
                     // 사진 아래쪽에 28만큼 겹친다
                     padding: const EdgeInsets.fromLTRB(AppSpacing.sm, PlaceDetailPage._photoHeight - 28, AppSpacing.sm, 0),
-                    child: _TitleCard(detail: detail, onSave: () => _changeCollections(context)),
+                    child: _TitleCard(detail: detail, onSave: () => _onSaveButton(context, ref)),
                   ),
                 ],
               ),

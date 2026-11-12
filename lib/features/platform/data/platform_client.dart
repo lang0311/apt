@@ -93,6 +93,24 @@ class PlatformClient {
     await post('/me/places', {'token': await token(id)});
   }
 
+  /// 저장 해제. 서버는 저장 장소를 `key`로 지운다. 검색 결과에서 온 장소는 id가 카카오 장소 id라서
+  /// 같은 `place_url`의 저장 기록에서 key를 찾는다. 장소 토큰은 캐시에 남겨 둬서 바로 다시 저장할 수 있다.
+  Future<void> unsave(String id) async {
+    final cached = places[id];
+    final url = cached?['place_url'];
+    final sameSaved = [
+      for (final entry in places.entries)
+        if (entry.value['key'] is String && (entry.key == id || (url is String && url.isNotEmpty && entry.value['place_url'] == url)))
+          entry,
+    ];
+    final key = sameSaved.isEmpty ? id : sameSaved.first.value['key'] as String;
+    await delete('/me/places/$key');
+    cached?['is_saved'] = false;
+    for (final entry in sameSaved) {
+      entry.value['is_saved'] = false;
+    }
+  }
+
   Course course(Json json) {
     courses[json['id'] as String] = json;
     final time = (json['start_time'] as String?)?.split(':');

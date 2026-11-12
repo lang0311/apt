@@ -183,6 +183,8 @@ class PlatformSavedRepository extends ApiSavedRepository {
   @override
   Future<List<String>> fetchPlaceCollectionIds(String placeId) async => [];
   @override
+  Future<void> unsavePlace(String placeId) => _platform.unsave(placeId);
+  @override
   Future<void> savePlaces({
     required List<String> placeIds,
     required List<String> collectionIds,

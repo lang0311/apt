@@ -16,7 +16,7 @@
 | 내 정보·사용량 | **서버** | `GET /me`, `/me/usage` | ✅ `/me` · `/me/usage`는 안 씀 |
 | 홈 요약 | **서버** | `GET /mobile/summary` | ✅ |
 | 장소 검색 | **서버** | `GET /places/search` (카카오 키 필요) | ✅ 지도에서 검색하기(07 D32) |
-| 내 장소 저장·삭제 | **서버** | `POST /me/places`, `DELETE /me/places/{key}` | ◐ 저장만(앱에 저장 취소 화면 없음) |
+| 내 장소 저장·삭제 | **서버** | `POST /me/places`, `DELETE /me/places/{key}` | ✅ 저장 · 해제(해제는 장소 상세의 `저장됨` 버튼, 07 D41) |
 | 코스 목록·상세 | **서버** | `GET /courses`, `/courses/{course}`, `POST /mobile/courses/{course}` | ✅ |
 | AI 추천 (job) | **서버** | `POST /jobs`, `GET /jobs/{job}`(status · stage → 화면 단계, 07 D33), `POST /jobs/{job}/cancel`, `GET /jobs`(진행 중 job, 취소 중이면 끝나길 기다림), `POST /recommend` | ✅ job 폴링 · 단계 · 취소(`/recommend`는 안 씀) |
 | 코스 장소 바꾸기·빼기·확정 | **서버** | `POST /courses/{course}/replace`, `DELETE /courses/{course}/places`, `GET .../places/{key}/selection`, `POST .../confirm` | ✅ (`.../selection`은 안 씀) |

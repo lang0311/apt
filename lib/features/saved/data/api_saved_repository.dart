@@ -30,6 +30,8 @@ class ApiSavedRepository implements SavedRepository {
   @override
   Future<void> savePlaces({required List<String> placeIds, required List<String> collectionIds}) async => throw _notImplemented;
   @override
+  Future<void> unsavePlace(String placeId) async => throw _notImplemented;
+  @override
   Future<void> setPlaceCollections({required String placeId, required List<String> collectionIds}) async => throw _notImplemented;
   @override
   Future<List<String>> fetchPlaceCollectionIds(String placeId) async => throw _notImplemented;

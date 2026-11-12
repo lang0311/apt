@@ -107,6 +107,14 @@ class MockSavedRepository implements SavedRepository {
       });
 
   @override
+  Future<void> unsavePlace(String placeId) => _store.behavior.mutate(() {
+        _store.savedIds.remove(placeId);
+        for (final entry in _store.members.entries) {
+          if (entry.value.remove(placeId)) _store.touchCollection(entry.key);
+        }
+      });
+
+  @override
   Future<void> setPlaceCollections({required String placeId, required List<String> collectionIds}) =>
       _store.behavior.mutate(() {
         _store.savedIds.add(placeId);
