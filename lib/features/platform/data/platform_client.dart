@@ -154,6 +154,8 @@ class PlatformClient {
           ? null
           : TimeOfDay(hour: int.parse(time[0]), minute: int.parse(time[1])),
       memberCount: json['party_id'] == null ? 1 : partySizes[json['party_id']] ?? 1,
+      // NEEDS BACKEND: 서버가 확정한 코스의 수정을 409로 막아 저장한 코스는 편집을 숨긴다.
+      // 확정 후 수정이 허용되면 연다 (07 §3, 06 §7)
       canEdit: json['status'] != 'confirmed',
       stops: stops(json),
       taste: appliedTaste(json['taste_profile'], itinerary: json['itinerary'] as List?),
