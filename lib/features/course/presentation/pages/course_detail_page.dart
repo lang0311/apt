@@ -150,14 +150,15 @@ class _CrewStrip extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final partyId = course.partyId;
     // NEEDS BACKEND: 코스 상세에 파티원 목록이 같이 오는지, 파티 API를 따로 부르는지
-    final members = partyId == null ? null : ref.watch(partyProvider(partyId)).value?.members;
+    final party = partyId == null ? null : ref.watch(partyProvider(partyId)).value;
+    final members = party?.members;
     final names = members == null ? '파티 ${course.memberCount}명' : members.crewNames;
     return Material(
       color: AppColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: const BorderSide(color: AppColors.border)),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
-        onTap: members == null ? null : () => _showMembers(context, members, partyId!),
+        onTap: members == null ? null : () => _showMembers(context, members, partyId!, canInvite: party!.isOwner),
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 48),
           child: Padding(
@@ -178,7 +179,8 @@ class _CrewStrip extends ConsumerWidget {
     );
   }
 
-  void _showMembers(BuildContext context, List<PartyMember> members, String partyId) {
+  /// 초대 링크는 파티장만 만들 수 있어서(서버 403) 파티원에게는 초대하기를 보이지 않는다 (07 D43)
+  void _showMembers(BuildContext context, List<PartyMember> members, String partyId, {required bool canInvite}) {
     showAppBottomSheet<void>(
       context,
       builder: (ctx) => Padding(
@@ -201,15 +203,16 @@ class _CrewStrip extends ConsumerWidget {
                 ),
               ),
             const SizedBox(height: AppSpacing.xs),
-            TextButton.icon(
-              onPressed: () {
-                Navigator.of(ctx).pop();
-                showInviteModal(context, partyId: partyId);
-              },
-              icon: const Icon(Icons.person_add_alt_1_rounded),
-              label: const Text('초대하기'),
-              style: TextButton.styleFrom(foregroundColor: AppColors.primary, alignment: Alignment.centerLeft, minimumSize: const Size(44, 48)),
-            ),
+            if (canInvite)
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  showInviteModal(context, partyId: partyId);
+                },
+                icon: const Icon(Icons.person_add_alt_1_rounded),
+                label: const Text('초대하기'),
+                style: TextButton.styleFrom(foregroundColor: AppColors.primary, alignment: Alignment.centerLeft, minimumSize: const Size(44, 48)),
+              ),
             if (members.any((m) => !m.isMe))
               TextButton.icon(
                 onPressed: () {

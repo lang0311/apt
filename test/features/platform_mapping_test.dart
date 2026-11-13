@@ -141,4 +141,40 @@ void main() {
     expect(partyNameFor('  '), '새 파티');
     expect(partyNameFor('가' * 60).length, 60);
   });
+  test('파티장은 GET /me의 owner로 판단한다 — 파티원이면 isOwner가 false', () async {
+    final c = _FakePlatform({
+      '/me': {
+        'user': {'id': 'me', 'name': '김랑'},
+        'places': [],
+        'parties': [
+          {'id': 'mine', 'name': '김랑님의 파티', 'owner': 'me', 'members': _members},
+          {'id': 'joined', 'name': '지민님의 파티', 'owner': 'u2', 'members': _members},
+        ],
+      },
+      '/parties/joined': {'members': _members},
+    });
+    final repo = PlatformPartyRepository(c);
+    // 파티 상세에는 owner가 없어서, 모르면 /me를 먼저 받아 온다
+    expect((await repo.fetchParty('joined')).isOwner, isFalse);
+    expect(c.calls, ['/me', '/parties/joined']);
+    final parties = await repo.fetchMyParties();
+    expect({for (final p in parties) p.id: p.isOwner}, {'mine': true, 'joined': false});
+  });
+}
+
+const _members = [
+  {'id': 'me', 'name': '김랑', 'login': 'rang'},
+  {'id': 'u2', 'name': '지민', 'login': 'jimin'},
+];
+
+class _FakePlatform extends PlatformClient {
+  _FakePlatform(this.responses) : super(ApiClient(Dio()));
+  final Map<String, dynamic> responses;
+  final calls = <String>[];
+
+  @override
+  Future<dynamic> get(String path, [Map<String, dynamic>? query]) async {
+    calls.add(path);
+    return responses[path];
+  }
 }

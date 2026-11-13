@@ -98,6 +98,7 @@ class PlatformAuthRepository implements AuthRepository {
     _platform.places.clear();
     _platform.courses.clear();
     _platform.partySizes.clear();
+    _platform.partyOwners.clear();
     _platform.lastCourseId = null;
     _platform.currentUserId = userJson['id'] as String;
   }
@@ -552,6 +553,7 @@ class PlatformPartyRepository implements PartyRepository {
     final me = await _platform.me();
     final owner = ((me['user'] as Map)['name'] ?? '').toString();
     final created = await _platform.post('/parties', {'name': partyNameFor(owner)});
+    _platform.partyOwners[created['id'] as String] = _platform.currentUserId!; // 만든 사람이 파티장
     return fetchParty(created['id'] as String);
   }
 
@@ -566,12 +568,15 @@ class PlatformPartyRepository implements PartyRepository {
 
   @override
   Future<Party> fetchParty(String id) async {
+    // 파티장은 GET /me에만 와서, 아직 모르면 한 번 받아 온다
+    if (!_platform.partyOwners.containsKey(id)) await _platform.me();
     final party = await _platform.get('/parties/$id');
     return _party(id, party['members'] as List);
   }
 
   Party _party(String id, List members) => Party(
     id: id,
+    isOwner: _platform.partyOwners[id] == _platform.currentUserId,
     members: [
       for (final member in members)
         PartyMember(

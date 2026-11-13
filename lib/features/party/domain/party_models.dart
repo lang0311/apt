@@ -9,9 +9,12 @@ class PartyMember {
 }
 
 class Party {
-  const Party({required this.id, required this.members, this.preferenceSummary = const []});
+  const Party({required this.id, required this.members, this.preferenceSummary = const [], this.isOwner = true});
   final String id;
   final List<PartyMember> members;
+
+  /// 내가 파티장인지 (서버 값). 파티장만 초대 링크를 만들 수 있다 (07 D43)
+  final bool isOwner;
 
   /// 파티원 취향 종합 키워드 (서버 집계)
   final List<String> preferenceSummary;

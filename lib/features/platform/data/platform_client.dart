@@ -17,6 +17,9 @@ class PlatformClient {
   final Map<String, Json> places = {};
   final Map<String, Json> courses = {};
   final Map<String, int> partySizes = {};
+
+  /// 파티 id → 파티장 id. GET /me의 parties에만 온다(GET /parties/{id}에는 없음).
+  final Map<String, String> partyOwners = {};
   String? lastCourseId;
   String? currentUserId;
 
@@ -34,6 +37,7 @@ class PlatformClient {
     currentUserId = (data['user'] as Map)['id'] as String;
     for (final party in data['parties'] as List) {
       partySizes[party['id'] as String] = (party['members'] as List).length;
+      if (party['owner'] case final String owner) partyOwners[party['id'] as String] = owner;
     }
     for (final saved in data['places'] as List) {
       place(Map<String, dynamic>.from(saved as Map), saved: true);

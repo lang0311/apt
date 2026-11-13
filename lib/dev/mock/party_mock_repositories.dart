@@ -21,6 +21,7 @@ class MockMembersPartyRepository implements PartyRepository {
         id: party.id,
         members: [...party.members, ...mockPartyMembers],
         preferenceSummary: party.preferenceSummary,
+        isOwner: party.isOwner,
       );
 
   @override
