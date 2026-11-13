@@ -18,6 +18,8 @@ class Place {
     this.location,
     this.sourceUrl,
     this.sourceHandle,
+    this.phone,
+    this.mapUrl,
     this.isSaved = false,
   });
 
@@ -41,6 +43,12 @@ class Place {
   /// 원본 SNS 게시물
   final String? sourceUrl;
   final String? sourceHandle;
+
+  /// 전화번호 (팀 서버: 카카오 지도의 `phone`). 없으면 null
+  final String? phone;
+
+  /// 지도 서비스의 장소 페이지 주소 (팀 서버: 카카오맵 `place_url`). 없으면 null
+  final String? mapUrl;
   final bool isSaved;
 
   String get displayArea => areaLabel ?? address;
@@ -58,6 +66,8 @@ class Place {
         location: location,
         sourceUrl: sourceUrl,
         sourceHandle: sourceHandle,
+        phone: phone,
+        mapUrl: mapUrl,
         isSaved: isSaved ?? this.isSaved,
       );
 }

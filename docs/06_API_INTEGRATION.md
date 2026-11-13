@@ -25,7 +25,7 @@
 | 릴스 링크 추출 | 엑셀 참고 · `NEEDS BACKEND` | `POST /api/v1/places/share-link` | — Mock(서버 없음) |
 | 보관함 | 엑셀 참고 · `NEEDS BACKEND` | `/api/v1/user-lists` (만들기·내 목록·상세) | — Mock(서버 없음, 서버 모드는 준비 중 안내) |
 | 근처 저장 장소 (저장 지도) | 엑셀 참고 · `NEEDS BACKEND` | `GET /api/v1/places/nearby` | ◐ 서버 모드는 `/me` 장소를 앱에서 거리로 거름 |
-| 장소 상세·AI 키워드 | 엑셀 참고 · `NEEDS BACKEND` | `GET /api/v1/places/{placeId}` | ◐ 서버 모드는 `/me` 장소 정보로 표시 |
+| 장소 상세·AI 키워드 | 엑셀 참고 · `NEEDS BACKEND` | `GET /api/v1/places/{placeId}` | ◐ 서버 모드는 `/me` 장소 정보로 표시(주소 · 전화 · 태그 키워드 · 카카오맵 링크, 07 D42). 평점 · 영업 상태 · 사진은 서버에 없음 |
 | 프로필 수정 | 엑셀 참고 · `NEEDS BACKEND` | `PUT /api/v1/users/profile` | — Mock(서버 없음) |
 | 사용자 검색·팔로우 | 앱 범위 밖 | 엑셀에만 있음, 앱 화면 없음 | — |
 | 약관·트렌딩·취향 수동 설정 | 둘 다 없음 · `NEEDS BACKEND` | — | — Mock(서버 없음) |

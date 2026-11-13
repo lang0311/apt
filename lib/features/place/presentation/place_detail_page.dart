@@ -184,8 +184,20 @@ class _Body extends ConsumerWidget {
                     indent: SectionCard.innerPadding,
                     children: [
                       _InfoRow(label: '주소', child: Text(place.address, style: AppTypography.body)),
+                      if (place.phone != null)
+                        _InfoRow(
+                          label: '전화',
+                          onTap: () => openDialer(context, place.phone!),
+                          child: Text(place.phone!, style: AppTypography.bodyStrong),
+                        ),
                       if (place.keywords.isNotEmpty)
                         _InfoRow(label: '키워드', child: TagWrap(place.keywords, tone: AppTagTone.primary)),
+                      if (place.mapUrl != null)
+                        _InfoRow(
+                          label: '지도',
+                          onTap: () => openExternalLink(context, place.mapUrl!),
+                          child: Text('카카오맵에서 보기', style: AppTypography.bodyStrong),
+                        ),
                       if (place.sourceUrl != null)
                         _InfoRow(
                           label: '원본',

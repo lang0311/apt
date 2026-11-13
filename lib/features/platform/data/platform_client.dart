@@ -55,8 +55,34 @@ class PlatformClient {
       location: p['lat'] is num && p['lon'] is num
           ? GeoPoint((p['lat'] as num).toDouble(), (p['lon'] as num).toDouble())
           : null,
+      keywords: _tags(p['attribute_profile']),
+      phone: _text(p['phone']),
+      mapUrl: _webUrl(p['place_url']),
       isSaved: saved || places[id]?['is_saved'] == true,
     );
+  }
+
+  /// 서버가 근거와 함께 뽑은 장소 태그(`attribute_profile.tags[].tag`)를 키워드로 쓴다.
+  /// 추천에 쓰인 적 없는 장소는 태그가 없다(서버가 추천 과정에서만 만든다).
+  static List<String> _tags(Object? profile) {
+    final tags = profile is Map ? profile['tags'] : null;
+    if (tags is! List) return const [];
+    return {
+      for (final tag in tags)
+        if (tag is Map && _text(tag['tag']) != null) _text(tag['tag'])!,
+    }.toList();
+  }
+
+  static String? _text(Object? value) {
+    final text = value is String ? value.trim() : '';
+    return text.isEmpty ? null : text;
+  }
+
+  /// http(s) 주소만 링크로 쓴다
+  static String? _webUrl(Object? value) {
+    final text = _text(value);
+    final uri = text == null ? null : Uri.tryParse(text);
+    return uri != null && (uri.isScheme('http') || uri.isScheme('https')) && uri.host.isNotEmpty ? text : null;
   }
 
   /// 카카오 지도 검색. [near]를 주면 그 주변(서버 기준 반경 1.5km)에서 가까운 순.

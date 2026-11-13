@@ -48,6 +48,31 @@ void main() {
     expect(course.canEdit, isFalse);
     expect(course.stops.last.nextLeg, isNull);
   });
+  test('장소의 태그 · 전화 · 카카오맵 주소를 넘긴다 (없거나 빈 값은 비운다)', () {
+    final c = PlatformClient(ApiClient(Dio()));
+    final full = c.place({
+      'key': 'k1',
+      'name': 'KT&G상상마당 홍대',
+      'address': '서울 마포구 서교동 367-5',
+      'phone': '02-330-6200',
+      'place_url': 'http://place.map.kakao.com/1',
+      'attribute_profile': {
+        'tags': [
+          {'tag': '예술', 'dimension': 'interest_theme'},
+          {'tag': '공연 감상', 'dimension': 'activity'},
+          {'tag': '예술', 'dimension': 'interest_theme'},
+        ],
+      },
+    });
+    expect(full.keywords, ['예술', '공연 감상']);
+    expect(full.phone, '02-330-6200');
+    expect(full.mapUrl, 'http://place.map.kakao.com/1');
+
+    final bare = c.place({'key': 'k2', 'name': '마포새빛문화숲', 'address': '서울', 'phone': '', 'place_url': 'javascript:alert(1)'});
+    expect(bare.keywords, isEmpty);
+    expect(bare.phone, isNull);
+    expect(bare.mapUrl, isNull);
+  });
   test('빈 추천 이유는 null로 넘긴다 (시트에 추천 이유 보기가 안 뜨게)', () {
     final c = PlatformClient(ApiClient(Dio()));
     final course = c.course({
