@@ -190,6 +190,7 @@ class MockCourseRepository implements CourseRepository {
           moodKeys: old.moodKeys,
           partyId: old.partyId,
           canEdit: old.canEdit,
+          taste: old.taste,
         );
         _store.courses[courseId] = updated;
         return updated;

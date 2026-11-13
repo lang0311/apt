@@ -22,6 +22,7 @@ import '../course_draft_controller.dart';
 import '../course_providers.dart';
 import '../recommendation_controller.dart';
 import '../widgets/course_edit_actions.dart';
+import '../widgets/applied_taste_section.dart';
 import '../widgets/course_route_map.dart';
 import '../widgets/course_timeline.dart';
 import '../widgets/recommending_banner.dart';
@@ -152,13 +153,13 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                           )
                         : _WithBanner(
                             show: state.loading,
-                            child: CourseTimeline(
+                            child: _withTaste(state.recommendation?.taste, state.stops, draft.partyId, CourseTimeline(
                               stops: state.stops,
                               highlightIds: state.changedIds,
                               loadingIds: state.loadingIds,
                               onTapStop: busy ? null : (s) => showResultSheet(context, ref, s),
                               onMore: busy ? null : (s) => showResultSheet(context, ref, s),
-                            ),
+                            )),
                           ),
                   ),
                 if (_editing)
@@ -377,3 +378,11 @@ class _Stages extends StatelessWidget {
     );
   }
 }
+
+/// 일정 위에 반영한 취향 한 줄 (07 D46)
+Widget _withTaste(AppliedTaste? taste, List<CourseStop> stops, String? partyId, Widget timeline) => taste == null
+    ? timeline
+    : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        AppliedTasteSection(taste: taste, stops: stops, partyId: partyId),
+        timeline,
+      ]);

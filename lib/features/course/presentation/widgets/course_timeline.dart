@@ -5,6 +5,8 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/states.dart';
+import '../../../party/domain/party_models.dart';
+import '../../../party/presentation/widgets/party_avatar_stack.dart';
 import '../../../place/domain/place.dart';
 import '../../domain/course_models.dart';
 import 'course_place_row.dart';
@@ -56,6 +58,185 @@ class CourseHero extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 일정 카드 맨 위 한 줄: "자연 · 미식 취향을 반영했어요", 파티 코스는 "파티원 3명의 미식 …",
+/// 파티원이 공유한 단어가 없으면 "파티원 3명의 취향을 반영했어요" (07 D46).
+/// 파티 코스에 장소별로 맞는 파티원 정보가 있고 파티원 이름을 알면, 누를 수 있는 막대가 되어
+/// "장소마다 누구 취향인지 보기"를 누르면 일정 순서대로 장소와 그 장소가 맞는 파티원 이름을 펼쳐 보여 준다.
+/// ✦ · 주황은 AI 추천 장소 표시 전용이라 쓰지 않는다(D17). 넘치면 말줄임.
+class AppliedTasteLine extends StatefulWidget {
+  const AppliedTasteLine({super.key, required this.taste, this.stops = const [], this.members});
+  final AppliedTaste taste;
+
+  /// 지금 일정 (펼친 목록의 순서와 범위)
+  final List<CourseStop> stops;
+
+  /// 파티원 (서버 순서, 얼굴 색 순서와 같음). 없으면 펼치기 없이 한 줄만
+  final List<PartyMember>? members;
+
+  @override
+  State<AppliedTasteLine> createState() => _AppliedTasteLineState();
+}
+
+class _AppliedTasteLineState extends State<AppliedTasteLine> {
+  bool _open = false;
+
+  List<TextSpan> get _spans {
+    const strong = TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700);
+    final taste = widget.taste;
+    final words = taste.words.join(' · ');
+    return taste.words.isEmpty
+        ? [TextSpan(text: '파티원 ${taste.memberCount}명', style: strong), const TextSpan(text: '의 취향을 반영했어요')]
+        : [
+            if (taste.memberCount > 1) TextSpan(text: '파티원 ${taste.memberCount}명의 '),
+            TextSpan(text: words, style: strong),
+            const TextSpan(text: ' 취향을 반영했어요'),
+          ];
+  }
+
+  Widget _text(List<TextSpan> spans) =>
+      Text.rich(TextSpan(children: spans), style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis);
+
+  @override
+  Widget build(BuildContext context) {
+    final spans = _spans;
+    final members = widget.members;
+    final rows = members == null || !widget.taste.hasDetail ? const <Widget>[] : _detailRows(members);
+    if (rows.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.xs),
+        child: Semantics(label: spans.map((s) => s.text).join(), excludeSemantics: true, child: _text(spans)),
+      );
+    }
+    final radius = BorderRadius.circular(12);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.sm, 0, AppSpacing.sm, AppSpacing.xs),
+      child: Material(
+        color: AppColors.surfaceRaised,
+        shape: RoundedRectangleBorder(borderRadius: radius, side: const BorderSide(color: AppColors.border)),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Semantics(
+              button: true,
+              expanded: _open,
+              label: '${spans.map((s) => s.text).join()}. 장소마다 누구 취향인지 보기',
+              excludeSemantics: true,
+              child: InkWell(
+                onTap: () => setState(() => _open = !_open),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.sm, 6, AppSpacing.xs, 6),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _text(spans),
+                              const SizedBox(height: 1),
+                              Text('장소마다 누구 취향인지 보기',
+                                  style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
+                            ],
+                          ),
+                        ),
+                        AnimatedRotation(
+                          turns: _open ? 0.5 : 0,
+                          duration: const Duration(milliseconds: 200),
+                          child: const Icon(Icons.expand_more_rounded, size: 22, color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.topCenter,
+              child: _open
+                  ? Padding(
+                      padding: const EdgeInsets.fromLTRB(AppSpacing.sm, 0, AppSpacing.sm, AppSpacing.xxs),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: rows),
+                    )
+                  : const SizedBox(width: double.infinity),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 일정 순서대로 "장소 이름 · 맞는 파티원", 맨 아래 반영되지 못한 파티원
+  List<Widget> _detailRows(List<PartyMember> members) {
+    final taste = widget.taste;
+    final index = {for (final (i, m) in members.indexed) m.id: i};
+    String name(PartyMember m) => m.isMe ? '나' : m.nickname;
+    final rows = <Widget>[];
+    for (final stop in widget.stops) {
+      final ids = {...?taste.matches[stop.place.id]}.where(index.containsKey).toSet();
+      if (ids.isEmpty) continue;
+      final everyone = ids.length == members.length;
+      final who = [for (final m in members) if (ids.contains(m.id)) m];
+      rows.add(_DetailRow(
+        semantics: '${stop.place.name}, ${everyone ? '모두' : who.map(name).join(', ')}',
+        child: Row(
+          children: [
+            Expanded(child: Text(stop.place.name, style: AppTypography.label.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis)),
+            const SizedBox(width: AppSpacing.xs),
+            Flexible(
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 8,
+                children: everyone
+                    ? [Text('모두', style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700))]
+                    : [
+                        for (final m in who)
+                          Text(name(m), style: AppTypography.meta.copyWith(color: PartyAvatarStack.nameColor(index[m.id]!), fontWeight: FontWeight.w700)),
+                      ],
+              ),
+            ),
+          ],
+        ),
+      ));
+    }
+    for (final gap in taste.gaps) {
+      final member = members.where((m) => m.id == gap.memberId).firstOrNull;
+      if (member == null) continue;
+      final text = switch ((member.isMe, gap.noHistory)) {
+        (true, true) => '저장한 장소가 없어 내 취향은 반영하지 못했어요',
+        (true, false) => '내 취향에 잘 맞는 장소는 찾지 못했어요',
+        (false, true) => '${withTopicParticle(member.nickname)} 저장한 장소가 없어 반영하지 못했어요',
+        (false, false) => '${member.nickname} 취향에 잘 맞는 장소는 찾지 못했어요',
+      };
+      rows.add(_DetailRow(semantics: text, child: Text(text, style: AppTypography.caption)));
+    }
+    return rows;
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({required this.semantics, required this.child});
+  final String semantics;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        label: semantics,
+        excludeSemantics: true,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 36),
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.border))),
+          child: child,
+        ),
+      );
 }
 
 /// "10월 22일 (목) · 오전 11:00 출발 · 5곳 · 약 6시간"

@@ -58,6 +58,7 @@ class Recommendation {
     required this.stops,
     this.headline,
     this.description,
+    this.taste,
   });
 
   /// 서버가 추천 세션을 보존하는 경우의 ID (NEEDS BACKEND: 무상태 여부 확인)
@@ -65,6 +66,40 @@ class Recommendation {
   final List<CourseStop> stops;
   final String? headline;
   final String? description;
+
+  /// 이 추천에 반영한 취향 (없으면 일정 카드에 한 줄을 띄우지 않는다)
+  final AppliedTaste? taste;
+}
+
+/// 추천할 때 반영한 취향 (서버 `taste_profile`, 07 D46). 일정 카드에 "○○ · ○○ 취향을 반영했어요" 한 줄로 보여 준다.
+class AppliedTaste {
+  const AppliedTaste({required this.words, this.memberCount = 1, this.matches = const {}, this.gaps = const []});
+
+  /// 파티 코스: 장소 id → 그 장소가 강하게 맞는 파티원 id (서버 `group_blend.per_user[].strong_match_places`).
+  /// 추천했을 때 값이라 편집으로 빠진 장소가 남을 수 있어 화면은 지금 일정에 있는 장소만 보여 준다 (07 D46)
+  final Map<String, List<String>> matches;
+
+  /// 파티 코스: 반영되지 못한 파티원 (서버 `represented: false` / `insufficient_history`)
+  final List<TasteGap> gaps;
+
+  /// 펼쳐서 볼 내용이 있는지
+  bool get hasDetail => memberCount > 1 && (matches.isNotEmpty || gaps.isNotEmpty);
+
+  /// 보여 줄 취향 단어 (서버 순서, 넓은 지도 분류 이름은 뺀 것).
+  /// 파티 코스는 2명 이상이 공유한 단어만이고, 비어 있으면 "파티원 n명의 취향을 반영했어요"
+  final List<String> words;
+
+  /// 취향을 모은 사람 수. 2 이상이면 파티 코스 ("파티원 n명의 …")
+  final int memberCount;
+}
+
+/// 반영되지 못한 파티원과 그 이유
+class TasteGap {
+  const TasteGap({required this.memberId, required this.noHistory});
+  final String memberId;
+
+  /// true: 저장한 장소가 없어 반영 못 함 / false: 잘 맞는 장소를 찾지 못함
+  final bool noHistory;
 }
 
 /// AI 추천 진행 단계 (화면에 보여 주는 묶음). 서버의 세부 단계는 데이터 계층에서 이 값으로 묶는다.
@@ -135,6 +170,7 @@ class Course {
     this.moodKeys = const {},
     this.partyId,
     this.canEdit = true,
+    this.taste,
   });
 
   final String id;
@@ -151,4 +187,7 @@ class Course {
 
   /// 편집 가능 여부 (서버 값). 파티 코스는 초대된 참여자도 편집할 수 있다 (07 D23)
   final bool canEdit;
+
+  /// 이 코스를 추천할 때 반영한 취향 (07 D46)
+  final AppliedTaste? taste;
 }

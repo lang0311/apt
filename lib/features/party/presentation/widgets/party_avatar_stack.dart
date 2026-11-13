@@ -24,6 +24,15 @@ class PartyAvatarStack extends StatelessWidget {
     (AppColors.extractSoft, AppColors.extract),
   ];
 
+  /// 흰 바탕에 이름만 글자로 쓸 때의 색. 얼굴 색과 같은 짝이되 작은 글씨도 읽히게(대비 4.5 이상) 진하게 한다.
+  /// [index]는 얼굴을 그릴 때와 같은 순서(서버 파티원 순서)
+  static Color nameColor(int index) => const [
+        AppColors.primary,
+        Color(0xFFB5432B),
+        Color(0xFF0C7259),
+        Color(0xFF6B45C9),
+      ][index % _palette.length];
+
   Widget _face(int index, PartyMember member) {
     final (background, foreground) = _palette[(index + colorOffset) % _palette.length];
     return Container(

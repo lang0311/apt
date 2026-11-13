@@ -83,6 +83,7 @@ class MockMembersCourseRepository implements CourseRepository {
           moodKeys: c.moodKeys,
           partyId: c.partyId,
           canEdit: c.canEdit,
+          taste: c.taste,
         );
 
   Future<List<CourseSummary>> _summaries(Future<List<CourseSummary>> list) async => [for (final c in await list) _summary(c)];

@@ -156,8 +156,73 @@ class PlatformClient {
       memberCount: json['party_id'] == null ? 1 : partySizes[json['party_id']] ?? 1,
       canEdit: json['status'] != 'confirmed',
       stops: stops(json),
+      taste: appliedTaste(json['taste_profile'], itinerary: json['itinerary'] as List?),
     );
   }
+
+  /// 반영한 취향 한 줄에 쓸 단어 (07 D46). 서버 `taste_profile.keywords`를 서버 순서대로 쓰되,
+  /// 관심 주제(`interest_theme` · `specific_interest`)와 업종(`category`)만 두고 분위기 단어는 뺀다.
+  /// 업종 중 지도 분류의 넓은 이름(여행 · 관광명소 등)과 경로(`>`)도 뺀다. 서버 `summary` 문장은 분석 말투라 쓰지 않는다.
+  /// 파티 코스는 2명 이상이 공유한 단어(`shared_by` ≥ 2)만 쓰고, 그런 단어가 없으면 단어 없이 인원만 보여 준다.
+  /// 취향 단어가 아예 없으면(저장 기록이 없는 파티 등) 줄을 띄우지 않는다.
+  static AppliedTaste? appliedTaste(Object? profile, {List? itinerary}) {
+    if (profile is! Map) return null;
+    final size = profile['group_size'];
+    final members = size is int && size > 1 ? size : 1;
+    final words = <String>[];
+    var hasTaste = false;
+    for (final keyword in profile['keywords'] as List? ?? const []) {
+      if (keyword is! Map) continue;
+      final word = (keyword['category'] ?? '').toString().trim();
+      final dimension = (keyword['dimension'] ?? 'category').toString();
+      if (!_tasteDimensions.contains(dimension)) continue;
+      if (word.isEmpty || word.contains('>') || _broadCategories.contains(word) || words.contains(word)) continue;
+      hasTaste = true;
+      final shared = keyword['shared_by'];
+      if (members > 1 && !(shared is int && shared >= 2)) continue;
+      words.add(word);
+    }
+    if (!hasTaste) return null;
+    final (matches, gaps) = members > 1 ? _blend(profile['group_blend'], itinerary ?? const []) : (const <String, List<String>>{}, const <TasteGap>[]);
+    return AppliedTaste(words: words, memberCount: members, matches: matches, gaps: gaps);
+  }
+
+  /// 파티 코스에서 장소마다 강하게 맞는 파티원 (07 D46). 서버 `group_blend.per_user[id].strong_match_places`는
+  /// 내가 고른 장소와 AI 장소를 모두 담고, 장소를 이름으로만 알려 줘서 일정 이름과 맞춘다.
+  /// 일정에 같은 이름이 둘 이상이면 어느 쪽인지 모르므로 뺀다.
+  static (Map<String, List<String>>, List<TasteGap>) _blend(Object? blend, List itinerary) {
+    final perUser = blend is Map ? blend['per_user'] : null;
+    if (perUser is! Map) return (const {}, const []);
+    final idsByName = <String, List<String>>{};
+    for (final stop in itinerary) {
+      if (stop is! Map) continue;
+      final name = (stop['name'] ?? '').toString().trim();
+      final id = (stop['key'] ?? stop['id'] ?? stop['place_url'])?.toString();
+      if (name.isEmpty || id == null) continue;
+      (idsByName[name] ??= []).add(id);
+    }
+    final matches = <String, List<String>>{};
+    final gaps = <TasteGap>[];
+    for (final MapEntry(key: member, value: info) in perUser.entries) {
+      if (info is! Map) continue;
+      if (info['status'] == 'insufficient_history') {
+        gaps.add(TasteGap(memberId: member.toString(), noHistory: true));
+        continue;
+      }
+      if (info['represented'] == false) gaps.add(TasteGap(memberId: member.toString(), noHistory: false));
+      for (final name in info['strong_match_places'] as List? ?? const []) {
+        final ids = idsByName[name.toString().trim()];
+        if (ids == null || ids.length != 1) continue;
+        (matches[ids.single] ??= []).add(member.toString());
+      }
+    }
+    return (matches, gaps);
+  }
+
+  static const _tasteDimensions = {'interest_theme', 'specific_interest', 'category'};
+
+  /// 카카오 지도 대분류처럼 너무 넓어서 취향으로 읽히지 않는 이름
+  static const _broadCategories = {'여행', '관광명소', '관광,명소', '음식점', '문화시설', '문화,예술', '쇼핑', '서비스,산업', '가정,생활'};
 
   List<CourseStop> stops(Json course) => [
     for (final stop in course['itinerary'] as List)

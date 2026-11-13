@@ -462,6 +462,7 @@ class PlatformCourseRepository implements CourseRepository {
   Recommendation _recommendation(Json course) => Recommendation(
     recommendationId: course['id'] as String,
     stops: _platform.stops(course),
+    taste: PlatformClient.appliedTaste(course['taste_profile'], itinerary: course['itinerary'] as List?),
     headline: '코스를 확인해주세요',
     description: [
       course['recommendation_reason'],

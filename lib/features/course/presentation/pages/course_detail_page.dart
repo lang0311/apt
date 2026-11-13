@@ -17,6 +17,7 @@ import '../../../party/presentation/widgets/invite_modal.dart';
 import '../../../party/presentation/widgets/party_avatar_stack.dart';
 import '../../domain/course_models.dart';
 import '../course_providers.dart';
+import '../widgets/applied_taste_section.dart';
 import '../widgets/course_route_map.dart';
 import '../widgets/course_share_sheet.dart';
 import '../widgets/course_timeline.dart';
@@ -96,9 +97,15 @@ class _Body extends StatelessWidget {
               SectionCard(
                 title: '일정',
                 trailing: course.canEdit ? CourseEditButton(onPressed: () => context.push(AppRoutes.courseEdit(course.id))) : null,
-                child: CourseTimeline(
-                  stops: course.stops,
-                  onTapStop: (s) => context.push(AppRoutes.place(s.place.id)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (course.taste != null) AppliedTasteSection(taste: course.taste!, stops: course.stops, partyId: course.partyId),
+                    CourseTimeline(
+                      stops: course.stops,
+                      onTapStop: (s) => context.push(AppRoutes.place(s.place.id)),
+                    ),
+                  ],
                 ),
               ),
             ],

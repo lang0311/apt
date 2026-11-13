@@ -161,6 +161,124 @@ void main() {
     final parties = await repo.fetchMyParties();
     expect({for (final p in parties) p.id: p.isOwner}, {'mine': true, 'joined': false});
   });
+  test('반영한 취향 단어: 관심 주제 + 업종, 넓은 지도 분류 · 경로 · 분위기 단어는 빼고 서버 순서대로 (07 D46)', () {
+    final taste = PlatformClient.appliedTaste({
+      'summary': '선택·저장한 장소에서는 미식, 자연, 카페, 한식, 여행 관련 관심이 나타납니다.',
+      'group_size': 1,
+      'keywords': [
+        {'category': '미식', 'dimension': 'interest_theme'},
+        {'category': '자연', 'dimension': 'interest_theme'},
+        {'category': '아늑한', 'dimension': 'atmosphere'},
+        {'category': '카페', 'dimension': 'category'},
+        {'category': '한식', 'dimension': 'category'},
+        {'category': '여행', 'dimension': 'category'},
+        {'category': '음식점 > 한식', 'dimension': 'category'},
+      ],
+    })!;
+    expect(taste.words, ['미식', '자연', '카페', '한식']);
+    expect(taste.memberCount, 1);
+    expect(PlatformClient.appliedTaste({'keywords': [{'category': '여행'}]}), isNull);
+    expect(PlatformClient.appliedTaste(null), isNull);
+  });
+  test('파티 코스: 2명 이상이 공유한 단어만, 없으면 단어 없이 인원만, 취향이 아예 없으면 줄 없음 (07 D46)', () {
+    // 2026-11-13 3명 파티 실제 응답의 keywords
+    final taste = PlatformClient.appliedTaste({
+      'group_size': 3,
+      'keywords': [
+        {'category': '미식', 'dimension': 'interest_theme', 'shared_by': 2},
+        {'category': '자연', 'dimension': 'interest_theme', 'shared_by': 0},
+        {'category': '역사', 'dimension': 'interest_theme', 'shared_by': 0},
+        {'category': '식물', 'dimension': 'specific_interest', 'shared_by': 0},
+        {'category': '카페', 'dimension': 'category', 'shared_by': 3},
+      ],
+    })!;
+    expect(taste.words, ['미식', '카페']);
+    expect(taste.memberCount, 3);
+    final plain = PlatformClient.appliedTaste({
+      'group_size': 2,
+      'keywords': [
+        {'category': '자연', 'dimension': 'interest_theme', 'shared_by': 1},
+        {'category': '공원', 'dimension': 'category'},
+      ],
+    })!;
+    expect(plain.words, isEmpty);
+    expect(plain.memberCount, 2);
+    // 저장 기록이 없는 파티 (서버 테스트 test_recordless_party_…: keywords [])
+    expect(PlatformClient.appliedTaste({'group_size': 2, 'keywords': []}), isNull);
+  });
+  test('파티 코스: 장소마다 맞는 파티원을 이름으로 일정과 맞추고, 반영되지 못한 파티원을 모은다 (07 D46)', () {
+    // 2026-11-13 3명 파티 실제 응답 모양 (id는 줄임)
+    final itinerary = [
+      {'key': 'k-forest', 'name': '경의선숲길', 'saved': true},
+      {'key': 'k-cafe', 'name': '카페공명 연남점', 'saved': false},
+      {'key': 'k-hansik', 'name': '진청유점', 'saved': false},
+      {'key': 'k-bar', 'name': '잊힐리야 연남', 'saved': false},
+    ];
+    final taste = PlatformClient.appliedTaste({
+      'group_size': 3,
+      'keywords': [
+        {'category': '미식', 'dimension': 'interest_theme', 'shared_by': 2},
+      ],
+      'group_blend': {
+        'per_user': {
+          'jimin': {'status': 'evaluated', 'represented': true, 'strong_match_places': ['카페공명 연남점', '잊힐리야 연남']},
+          'test': {'status': 'evaluated', 'represented': true, 'strong_match_places': ['진청유점']},
+          'youngseo': {'status': 'evaluated', 'represented': true, 'strong_match_places': ['카페공명 연남점']},
+        },
+      },
+    }, itinerary: itinerary)!;
+    expect(taste.matches, {
+      'k-cafe': ['jimin', 'youngseo'],
+      'k-bar': ['jimin'],
+      'k-hansik': ['test'],
+    });
+    expect(taste.gaps, isEmpty);
+    expect(taste.hasDetail, isTrue);
+
+    final gapped = PlatformClient.appliedTaste({
+      'group_size': 3,
+      'keywords': [
+        {'category': '미식', 'dimension': 'interest_theme', 'shared_by': 2},
+      ],
+      'group_blend': {
+        'per_user': {
+          'a': {'status': 'evaluated', 'represented': false, 'strong_match_places': []},
+          'b': {'status': 'insufficient_history', 'represented': null},
+          // 같은 이름이 일정에 두 번 있으면 어느 쪽인지 몰라 뺀다 · 일정에 없는 이름도 뺀다
+          'c': {'status': 'evaluated', 'represented': true, 'strong_match_places': ['스타벅스', '없는 곳']},
+        },
+      },
+    }, itinerary: [
+      {'key': 's1', 'name': '스타벅스'},
+      {'key': 's2', 'name': '스타벅스'},
+    ])!;
+    expect(gapped.matches, isEmpty);
+    expect([for (final g in gapped.gaps) (g.memberId, g.noHistory)], [('a', false), ('b', true)]);
+
+    // 혼자 코스는 group_blend를 보지 않는다
+    final solo = PlatformClient.appliedTaste({
+      'group_size': 1,
+      'keywords': [{'category': '자연', 'dimension': 'interest_theme'}],
+      'group_blend': null,
+    }, itinerary: itinerary)!;
+    expect(solo.hasDetail, isFalse);
+  });
+  test('추천 결과와 저장한 코스 모두 반영한 취향을 읽는다', () {
+    final c = PlatformClient(ApiClient(Dio()));
+    final course = c.course({
+      'id': 'k',
+      'status': 'confirmed',
+      'party_id': null,
+      'itinerary': [],
+      'taste_profile': {
+        'group_size': 1,
+        'keywords': [
+          {'category': '자연', 'dimension': 'interest_theme'},
+        ],
+      },
+    });
+    expect(course.taste!.words, ['자연']);
+  });
   test('코스로 들어온 저장 장소: AI 추천은 따로, 직접 고른 곳 · 직접 저장은 카테고리와 개수에 (07 D44)', () async {
     final c = _FakePlatform({
       '/me': {
