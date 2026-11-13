@@ -4,6 +4,7 @@ import 'package:apt/features/course/presentation/widgets/map_place_picker.dart';
 import 'package:apt/features/place/domain/place.dart';
 import 'package:apt/features/saved/domain/saved_models.dart';
 import 'package:apt/features/saved/domain/saved_repository.dart';
+import 'package:apt/features/saved/presentation/pages/saved_map_page.dart';
 import 'package:apt/features/saved/presentation/pages/saved_page.dart';
 import 'package:apt/features/saved/presentation/saved_providers.dart';
 import 'package:flutter/material.dart';
@@ -89,9 +90,105 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('도시근린공원'));
     await tester.pumpAndSettle();
+    await tester.tap(find.text('1곳 보기'));
+    await tester.pumpAndSettle();
     expect(find.text('도시근린공원 1곳'), findsOneWidget);
     expect(find.text('우장근린공원'), findsOneWidget);
     expect(find.text('고드니 마곡본점'), findsNothing);
+  });
+
+  testWidgets('카테고리 필터는 여러 개 고르고, 칩은 "첫째 외 n", 초기화 · 그냥 닫기 (07 D48)', (tester) async {
+    await pump(tester, const SavedPage());
+    // 카테고리 탭: 한식 2 · 고궁,궁 1
+    await tester.tap(find.text('필터'));
+    await tester.pumpAndSettle();
+    expect(find.text('3곳 보기'), findsOneWidget); // 아무것도 안 고르면 전체
+    await tester.tap(find.text('한식'));
+    await tester.tap(find.text('고궁,궁'));
+    await tester.pumpAndSettle();
+    expect(find.text('3곳 보기'), findsOneWidget);
+    await tester.tap(find.text('초기화'));
+    await tester.pump();
+    await tester.tap(find.text('한식'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('2곳 보기'));
+    await tester.pumpAndSettle();
+    expect(find.text('한식 2곳'), findsOneWidget);
+    expect(find.text('경복궁'), findsNothing);
+
+    // 다시 열어 하나 더 고르면 "한식 외 1"
+    await tester.tap(find.text('필터'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('고궁,궁'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('3곳 보기'));
+    await tester.pumpAndSettle();
+    expect(find.text('한식 외 1 3곳'), findsOneWidget);
+    expect(find.text('한식 외 1'), findsOneWidget); // 걸린 필터 칩
+
+    // 칩의 ×로 모두 풀기
+    await tester.tap(find.bySemanticsLabel('한식 외 1 필터 해제'));
+    await tester.pumpAndSettle();
+    expect(find.text('전체 3곳'), findsOneWidget);
+  });
+
+  group('저장 지도 (07 D48)', () {
+    Widget map({bool aiOnly = false}) => SavedMapPage(mode: SavedMapMode.category, aiOnly: aiOnly);
+
+    testWidgets('직접 저장 + 추천받은 곳이 함께, 칩으로 켜고 끈다', (tester) async {
+      await pump(tester, map());
+      expect(find.text('5곳'), findsOneWidget); // 이 지역 5곳
+      await tester.tap(find.text('직접 저장'));
+      await tester.pumpAndSettle();
+      expect(find.text('2곳'), findsOneWidget);
+      expect(find.text('test3 코스에서 추천'), findsWidgets); // 추천받은 곳 카드
+      await tester.tap(find.text('직접 저장'));
+      await tester.tap(find.text('추천받은 곳'));
+      await tester.pumpAndSettle();
+      expect(find.text('3곳'), findsOneWidget);
+      await tester.tap(find.text('직접 저장'));
+      await tester.pumpAndSettle();
+      expect(find.text('보여 줄 장소가 없어요'), findsOneWidget);
+    });
+
+    testWidgets('AI 추천 탭에서 들어오면 추천받은 곳만', (tester) async {
+      await pump(tester, map(aiOnly: true));
+      expect(find.text('2곳'), findsOneWidget);
+      expect(find.bySemanticsLabel('직접 저장 숨김'), findsOneWidget);
+    });
+
+    testWidgets('필터 칩: 여러 개 고르면 "첫째 외 n", ×로 풀기', (tester) async {
+      await pump(tester, map());
+      await tester.tap(find.bySemanticsLabel('카테고리 필터'));
+      await tester.pumpAndSettle();
+      Finder inSheet(String text) => find.descendant(of: find.byType(BottomSheet), matching: find.text(text));
+      await tester.tap(inSheet('한식'));
+      await tester.tap(inSheet('디저트카페'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('3곳 보기'));
+      await tester.pumpAndSettle();
+      expect(find.text('3곳'), findsOneWidget);
+      expect(find.bySemanticsLabel('카테고리 필터, 한식 외 1 적용됨'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('카테고리 필터 해제'));
+      await tester.pumpAndSettle();
+      expect(find.text('5곳'), findsOneWidget);
+    });
+
+    testWidgets('목록으로 보기: 가로 카드 대신 묶음 목록, 지도로 돌아가기', (tester) async {
+      await pump(tester, map());
+      await tester.tap(find.text('목록으로 보기'));
+      await tester.pumpAndSettle();
+      expect(find.text('지도'), findsOneWidget);
+      expect(find.textContaining('직접 저장 ', findRichText: true), findsOneWidget); // 묶음 제목 '직접 저장 3'
+      await tester.tap(find.text('지도'));
+      await tester.pumpAndSettle();
+      expect(find.text('목록으로 보기'), findsOneWidget);
+    });
+
+    testWidgets('360 폭에서 넘치지 않는다', (tester) async {
+      await pump(tester, map(), width: 360);
+      expect(tester.takeException(), isNull);
+    });
   });
 
   group('코스 장소 고르기', () {
@@ -130,6 +227,19 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('추천받은 곳 2'), findsNothing);
       expect(find.text('고드니 마곡본점'), findsOneWidget);
+    });
+
+    testWidgets('카테고리를 여러 개 고르면 두 쪽 모두에서 거른다', (tester) async {
+      await pump(tester, picker());
+      await tester.tap(find.byTooltip('필터'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('한식'));
+      await tester.tap(find.text('도시근린공원'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('3곳 보기'));
+      await tester.pumpAndSettle();
+      expect(find.text('목록 3'), findsOneWidget);
+      expect(find.text('한식 외 1'), findsOneWidget);
     });
 
     testWidgets('360 폭에서 칩 막대가 넘치지 않는다', (tester) async {

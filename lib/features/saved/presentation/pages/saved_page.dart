@@ -45,19 +45,21 @@ class _SavedPageState extends ConsumerState<SavedPage> {
 
   Future<void> _refresh() {
     invalidateSavedData(ref);
-    final category = ref.read(savedCategoryFilterProvider);
     return awaitRefresh(context, [
       ref.read(savedSummaryProvider.future),
-      if (_tab == 0) ref.read(savedPlacesProvider(SavedPlaceQuery(categoryKey: category)).future),
+      if (_tab == 0) ref.read(savedPlacesProvider(const SavedPlaceQuery()).future),
       if (_tab == 1) ref.read(collectionsProvider.future),
       if (_tab == 2) ref.read(aiSavedPlacesProvider.future),
     ]);
   }
 
-  /// AI 추천 탭의 '지도'는 카테고리 지도(직접 저장한 곳)를 연다
+  /// '지도': 카테고리 탭은 고른 카테고리 그대로, AI 추천 탭은 추천받은 곳만 켜진 저장 지도 (07 D48)
   void _openMap() {
-    final category = ref.read(savedCategoryFilterProvider);
-    context.push(_tab == 1 ? AppRoutes.collectionMap() : AppRoutes.categoryMap(categoryKey: _tab == 0 ? category : null));
+    context.push(switch (_tab) {
+      1 => AppRoutes.collectionMap(),
+      2 => AppRoutes.categoryMap(categoryKeys: ref.read(aiCategoryFilterProvider), aiOnly: true),
+      _ => AppRoutes.categoryMap(categoryKeys: ref.read(savedCategoryFilterProvider)),
+    });
   }
 
   void _selectTab(int i) {
@@ -129,7 +131,7 @@ class _SavedPageState extends ConsumerState<SavedPage> {
                           1 => _CollectionsTab(
                             onCreate: _createCollection,
                             onShowAll: () {
-                              ref.read(savedCategoryFilterProvider.notifier).select(null);
+                              ref.read(savedCategoryFilterProvider.notifier).clear();
                               _selectTab(0);
                             },
                           ),
@@ -195,11 +197,15 @@ class _CategoryTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final summaryValue = ref.watch(savedSummaryProvider);
-    final selectedKey = ref.watch(savedCategoryFilterProvider);
-    final places = ref.watch(savedPlacesProvider(SavedPlaceQuery(categoryKey: selectedKey)));
     final summary = summaryValue.value;
-    final selected = summary?.categories.where((c) => c.key == selectedKey).firstOrNull;
-    void clear() => ref.read(savedCategoryFilterProvider.notifier).select(null);
+    // 지운 뒤 사라진 카테고리는 빼고 본다 (모두 사라지면 전체)
+    final keys = _liveKeys(summary, ref.watch(savedCategoryFilterProvider));
+    final places = ref
+        .watch(savedPlacesProvider(const SavedPlaceQuery()))
+        .whenData((list) => [for (final item in list) if (matchesCategories(item.place, keys)) item]);
+    final label = categoryFilterLabel(summary, keys);
+    final selected = keys.isNotEmpty;
+    void clear() => ref.read(savedCategoryFilterProvider.notifier).clear();
 
     // 저장 0곳: 필터 없이 저장 안내만
     if (summary != null && summary.totalCount == 0) {
@@ -218,18 +224,17 @@ class _CategoryTab extends ConsumerWidget {
 
     // 거를 것이 없으면(저장한 곳이 한 카테고리뿐) 필터를 숨긴다
     final filterable = summary != null && summary.categories.where((c) => c.count > 0).length > 1;
+    final selection = ref.watch(savedSelectionProvider);
+    final visible = places.value ?? const <SavedPlaceItem>[];
     final String title;
     if (summary == null) {
       title = '저장한 곳';
-    } else if (selected == null) {
+    } else if (!selected) {
       title = '전체 ${summary.totalCount}곳';
     } else {
-      title = '${selected.label} ${selected.count}곳';
+      title = '$label ${visible.length}곳';
     }
-
-    final selection = ref.watch(savedSelectionProvider);
-    final visible = places.value ?? const <SavedPlaceItem>[];
-    final showFilter = summary != null && (filterable || selected != null);
+    final showFilter = summary != null && (filterable || selected);
 
     return SectionCard(
       title: selection.active ? '전체 선택' : title,
@@ -245,13 +250,13 @@ class _CategoryTab extends ConsumerWidget {
                   HeaderTextButton(
                     label: '필터',
                     icon: Icons.tune_rounded,
-                    active: selected != null,
-                    semanticLabel: selected == null ? '카테고리 필터' : '카테고리 필터, ${selected.label} 적용됨',
+                    active: selected,
+                    semanticLabel: selected ? '카테고리 필터, $label 적용됨' : '카테고리 필터',
                     onPressed: () => showCategoryFilterSheet(
                       context,
                       summary: summary,
-                      selectedKey: selectedKey,
-                      onSelected: (key) => ref.read(savedCategoryFilterProvider.notifier).select(key),
+                      selected: keys,
+                      onApply: (picked) => ref.read(savedCategoryFilterProvider.notifier).select(picked),
                     ),
                   ),
                 if (visible.isNotEmpty) const _SelectButton(),
@@ -260,10 +265,10 @@ class _CategoryTab extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (selected != null && !selection.active)
+          if (selected && !selection.active)
             Padding(
               padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.xxs),
-              child: Align(alignment: Alignment.centerLeft, child: AppliedFilterChip(label: selected.label, onClear: clear)),
+              child: Align(alignment: Alignment.centerLeft, child: AppliedFilterChip(label: label, onClear: clear)),
             ),
           AsyncValueView(
             value: places,
@@ -272,7 +277,7 @@ class _CategoryTab extends ConsumerWidget {
             loading: const _RowSkeletons(),
             isEmpty: (list) => list.isEmpty,
             empty: _EmptyBody(
-              title: selected == null ? null : '${selected.label}에 저장한 곳이 없어요',
+              title: selected ? '$label에 저장한 곳이 없어요' : null,
               message: '다른 카테고리를 보거나 전체로 돌아가 보세요.',
               actionLabel: '전체 보기',
               onAction: clear,
@@ -288,6 +293,10 @@ class _CategoryTab extends ConsumerWidget {
   }
 }
 
+/// 고른 카테고리 중 아직 요약에 있는 것만 (지운 뒤 사라진 카테고리는 뺀다). 요약을 아직 모르면 그대로
+Set<String> _liveKeys(SavedSummary? summary, Set<String> keys) =>
+    summary == null ? keys : {for (final k in keys) if (summary.categories.any((c) => c.key == k)) k};
+
 /// AI 추천 탭: 코스를 저장할 때 AI 추천으로 저장 목록에 들어온 장소 (07 D44).
 /// 카테고리 탭과 같은 '전체 n곳 · 필터 · 선택' 줄을 두고, 필터는 이 탭의 장소 기준으로 센다 (07 D47).
 class _AiTab extends ConsumerWidget {
@@ -297,26 +306,26 @@ class _AiTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final places = ref.watch(aiSavedPlacesProvider);
     final summary = ref.watch(aiSavedSummaryProvider).value;
-    final selectedKey = ref.watch(aiCategoryFilterProvider);
     final selection = ref.watch(savedSelectionProvider);
     final all = places.value;
-    final selected = summary?.categories.where((c) => c.key == selectedKey).firstOrNull;
-    // 지운 뒤 그 카테고리가 사라졌으면 전체로 본다
-    final activeKey = selected?.key;
-    void clear() => ref.read(aiCategoryFilterProvider.notifier).select(null);
+    // 지운 뒤 사라진 카테고리는 빼고 본다 (모두 사라지면 전체)
+    final keys = _liveKeys(summary, ref.watch(aiCategoryFilterProvider));
+    final label = categoryFilterLabel(summary, keys);
+    final selected = keys.isNotEmpty;
+    void clear() => ref.read(aiCategoryFilterProvider.notifier).clear();
     final visible = [
       for (final item in all ?? const <SavedPlaceItem>[])
-        if (activeKey == null || categoryKeyOfPlace(item.place) == activeKey) item,
+        if (matchesCategories(item.place, keys)) item,
     ];
     final filterable = summary != null && summary.categories.where((c) => c.count > 0).length > 1;
-    final showFilter = summary != null && (filterable || selected != null);
+    final showFilter = summary != null && (filterable || selected);
     final String title;
     if (all == null) {
       title = 'AI 추천';
-    } else if (selected == null) {
+    } else if (!selected) {
       title = '전체 ${all.length}곳';
     } else {
-      title = '${selected.label} ${visible.length}곳';
+      title = '$label ${visible.length}곳';
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -335,13 +344,13 @@ class _AiTab extends ConsumerWidget {
                       HeaderTextButton(
                         label: '필터',
                         icon: Icons.tune_rounded,
-                        active: selected != null,
-                        semanticLabel: selected == null ? '카테고리 필터' : '카테고리 필터, ${selected.label} 적용됨',
+                        active: selected,
+                        semanticLabel: selected ? '카테고리 필터, $label 적용됨' : '카테고리 필터',
                         onPressed: () => showCategoryFilterSheet(
                           context,
                           summary: summary,
-                          selectedKey: activeKey,
-                          onSelected: (key) => ref.read(aiCategoryFilterProvider.notifier).select(key),
+                          selected: keys,
+                          onApply: (picked) => ref.read(aiCategoryFilterProvider.notifier).select(picked),
                         ),
                       ),
                     if (visible.isNotEmpty) const _SelectButton(),
@@ -350,10 +359,10 @@ class _AiTab extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (selected != null && !selection.active)
+              if (selected && !selection.active)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.xxs),
-                  child: Align(alignment: Alignment.centerLeft, child: AppliedFilterChip(label: selected.label, onClear: clear)),
+                  child: Align(alignment: Alignment.centerLeft, child: AppliedFilterChip(label: label, onClear: clear)),
                 ),
               AsyncValueView(
                 value: places,

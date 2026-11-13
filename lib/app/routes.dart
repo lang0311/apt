@@ -23,8 +23,12 @@ abstract final class AppRoutes {
 
   static const saved = '/saved';
   static String collection(String id) => '/saved/collections/$id';
-  static String categoryMap({String? categoryKey}) =>
-      Uri(path: '/saved/map', queryParameters: {'mode': 'category', 'key': ?categoryKey}).toString();
+  /// 저장 지도. [categoryKeys]는 고른 카테고리(여러 개), [aiOnly]면 추천받은 곳만 켜진 채로 연다 (07 D48)
+  static String categoryMap({Set<String> categoryKeys = const {}, bool aiOnly = false}) => Uri(path: '/saved/map', queryParameters: {
+        'mode': 'category',
+        if (categoryKeys.isNotEmpty) 'key': categoryKeys.toList(),
+        if (aiOnly) 'source': 'ai',
+      }).toString();
   static String collectionMap({String? collectionId}) =>
       Uri(path: '/saved/map', queryParameters: {'mode': 'collection', 'id': ?collectionId}).toString();
 

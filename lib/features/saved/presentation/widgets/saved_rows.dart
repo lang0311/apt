@@ -5,6 +5,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_network_image.dart';
+import '../../../../core/widgets/buttons.dart';
 import '../../../../core/widgets/overlays.dart';
 import '../../../place/domain/place.dart';
 import '../../domain/saved_models.dart';
@@ -410,49 +411,105 @@ class AppliedFilterChip extends StatelessWidget {
   }
 }
 
-/// 카테고리 시트: 전체 + 서버 대분류(아이콘·개수). 하나를 누르면 바로 닫히며 [onSelected]를 부른다. 0곳은 누를 수 없다.
-/// '전체'는 null로 선택, 그냥 닫으면 아무 일도 없다.
+/// 카테고리 시트: 서버 카테고리(아이콘 · 개수)를 **여러 개** 고른다(네모 체크, 07 D48).
+/// 아래 `초기화`는 고른 것을 모두 풀고, `n곳 보기`가 [onApply]로 고른 키들을 넘기며 닫는다(비면 전체).
+/// 그냥 닫으면 아무 일도 없다. 0곳은 고를 수 없다. 저장됨 · 코스 장소 고르기 · 저장 지도가 같이 쓴다.
 Future<void> showCategoryFilterSheet(
   BuildContext context, {
   required SavedSummary summary,
-  required String? selectedKey,
-  required ValueChanged<String?> onSelected,
+  required Set<String> selected,
+  required ValueChanged<Set<String>> onApply,
 }) {
-  void select(BuildContext ctx, String? key) {
-    Navigator.of(ctx).pop();
-    onSelected(key);
-  }
-
   return showAppBottomSheet<void>(
     context,
-    builder: (ctx) => SingleChildScrollView(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+    builder: (ctx) => _CategoryFilterSheet(summary: summary, initial: selected, onApply: onApply),
+  );
+}
+
+class _CategoryFilterSheet extends StatefulWidget {
+  const _CategoryFilterSheet({required this.summary, required this.initial, required this.onApply});
+  final SavedSummary summary;
+  final Set<String> initial;
+  final ValueChanged<Set<String>> onApply;
+
+  @override
+  State<_CategoryFilterSheet> createState() => _CategoryFilterSheetState();
+}
+
+class _CategoryFilterSheetState extends State<_CategoryFilterSheet> {
+  // 요약에 없는 키(지운 뒤 사라진 카테고리)는 시트에서 고를 수 없으니 뺀다
+  late final Set<String> _picked = {
+    for (final k in widget.initial)
+      if (widget.summary.categories.any((c) => c.key == k)) k,
+  };
+
+  int get _count => _picked.isEmpty
+      ? widget.summary.totalCount
+      : widget.summary.categories.where((c) => _picked.contains(c.key)).fold(0, (n, c) => n + c.count);
+
+  @override
+  Widget build(BuildContext context) {
+    final maxList = MediaQuery.sizeOf(context).height * 0.6;
+    return SafeArea(
+      top: false,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xxs, AppSpacing.lg, AppSpacing.xs),
             child: Text('카테고리', style: AppTypography.section),
           ),
-          _CategoryOption(
-            label: '전체',
-            count: summary.totalCount,
-            style: const CategoryStyle(Icons.format_list_bulleted_rounded, AppColors.primary),
-            selected: selectedKey == null,
-            onTap: () => select(ctx, null),
-          ),
-          for (final category in summary.categories)
-            _CategoryOption(
-              label: category.label,
-              count: category.count,
-              style: CategoryStyle.of(category.key),
-              selected: selectedKey == category.key,
-              onTap: category.count == 0 ? null : () => select(ctx, category.key),
+          ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxList),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  for (final category in widget.summary.categories)
+                    _CategoryOption(
+                      label: category.label,
+                      count: category.count,
+                      style: CategoryStyle.of(category.key),
+                      selected: _picked.contains(category.key),
+                      onTap: category.count == 0
+                          ? null
+                          : () => setState(() => _picked.contains(category.key) ? _picked.remove(category.key) : _picked.add(category.key)),
+                    ),
+                ],
+              ),
             ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.sm, AppSpacing.screenH, AppSpacing.md),
+            child: Row(
+              children: [
+                Expanded(
+                  child: AppButton(
+                    label: '초기화',
+                    variant: AppButtonVariant.outline,
+                    height: 48,
+                    onPressed: _picked.isEmpty ? null : () => setState(_picked.clear),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Expanded(
+                  flex: 2,
+                  child: AppButton(
+                    label: '$_count곳 보기',
+                    height: 48,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      widget.onApply(Set.unmodifiable(_picked));
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _CategoryOption extends StatelessWidget {
@@ -468,7 +525,7 @@ class _CategoryOption extends StatelessWidget {
     final enabled = onTap != null;
     return Semantics(
       button: true,
-      selected: selected,
+      checked: selected,
       enabled: enabled,
       label: '$label $count곳',
       excludeSemantics: true,
@@ -499,7 +556,7 @@ class _CategoryOption extends StatelessWidget {
                   const SizedBox(width: 6),
                   Text('$count', style: AppTypography.meta),
                   const Spacer(),
-                  if (selected) const Icon(Icons.check_rounded, color: AppColors.primary),
+                  IgnorePointer(child: SelectCheckbox(value: selected, onChanged: (_) {})),
                 ],
               ),
             ),

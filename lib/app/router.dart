@@ -166,7 +166,8 @@ final routerProvider = Provider<GoRouter>((ref) {
                     final q = s.uri.queryParameters;
                     return SavedMapPage(
                       mode: q['mode'] == 'collection' ? SavedMapMode.collection : SavedMapMode.category,
-                      initialCategoryKey: q['key'],
+                      initialCategoryKeys: {...?s.uri.queryParametersAll['key']},
+                      aiOnly: q['source'] == 'ai',
                       initialCollectionId: q['id'],
                     );
                   },

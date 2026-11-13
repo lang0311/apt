@@ -31,7 +31,7 @@ final aiSavedSummaryProvider = FutureProvider.autoDispose<SavedSummary>(
 );
 
 /// AI 추천 탭의 카테고리 필터 (카테고리 탭의 필터와 따로 기억한다)
-final aiCategoryFilterProvider = NotifierProvider<SavedCategoryFilter, String?>(SavedCategoryFilter.new);
+final aiCategoryFilterProvider = NotifierProvider<SavedCategoryFilter, Set<String>>(SavedCategoryFilter.new);
 
 /// 필터에 쓰는 장소의 카테고리 키. 서버 요약과 같게 업종이 없으면 '기타'
 String categoryKeyOfPlace(Place place) => place.categoryKey.isEmpty ? '기타' : place.categoryKey;
@@ -111,14 +111,33 @@ List<SavedPlaceItem> withDistanceFrom(GeoPoint? me, List<SavedPlaceItem> items, 
   return measured;
 }
 
-/// 저장됨 카테고리 필터(대분류 키, null=전체). 탭을 바꾸거나 상세에 다녀와도 유지하고, 앱을 다시 켜면 풀린다.
-final savedCategoryFilterProvider = NotifierProvider<SavedCategoryFilter, String?>(SavedCategoryFilter.new);
+/// 저장됨 카테고리 필터(고른 카테고리 키들, 비면 전체 — 여러 개 고를 수 있다, 07 D48).
+/// 탭을 바꾸거나 상세에 다녀와도 유지하고, 앱을 다시 켜면 풀린다.
+final savedCategoryFilterProvider = NotifierProvider<SavedCategoryFilter, Set<String>>(SavedCategoryFilter.new);
 
-class SavedCategoryFilter extends Notifier<String?> {
+class SavedCategoryFilter extends Notifier<Set<String>> {
   @override
-  String? build() => null;
+  Set<String> build() => const {};
 
-  void select(String? categoryKey) => state = categoryKey;
+  void select(Set<String> keys) => state = Set.unmodifiable(keys);
+
+  void clear() => state = const {};
+}
+
+/// 고른 카테고리에 드는지 (비어 있으면 모두)
+bool matchesCategories(Place place, Set<String> keys) => keys.isEmpty || keys.contains(categoryKeyOfPlace(place));
+
+/// 고른 카테고리를 칩 한 줄로: 하나면 그 이름, 둘 이상이면 '첫째 외 n'. 요약 순서로 첫째를 정한다.
+/// 요약에서 사라진 키도 이름은 키의 마지막 단계로 보여 준다(걸린 필터를 풀 수 있게).
+String categoryFilterLabel(SavedSummary? summary, Set<String> keys) {
+  if (keys.isEmpty) return '';
+  final ordered = [
+    for (final c in summary?.categories ?? const <PlaceCategory>[])
+      if (keys.contains(c.key)) c.label,
+    for (final k in keys)
+      if (!(summary?.categories.any((c) => c.key == k) ?? false)) k.split('>').last.trim(),
+  ];
+  return ordered.length == 1 ? ordered.first : '${ordered.first} 외 ${ordered.length - 1}';
 }
 
 final collectionsProvider = FutureProvider.autoDispose<List<PlaceCollection>>(
