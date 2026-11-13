@@ -17,7 +17,7 @@
 | 홈 요약 | **서버** | `GET /mobile/summary` | ✅ |
 | 장소 검색 | **서버** | `GET /places/search` (카카오 키 필요) | ✅ 지도에서 검색하기(07 D32) |
 | 내 장소 저장·삭제 | **서버** | `POST /me/places`, `DELETE /me/places/{key}` | ✅ 저장 · 해제(해제는 장소 상세의 `저장됨` 버튼, 07 D41). 저장됨에서 여러 곳 삭제는 한 곳씩 `DELETE`를 보낸다(한꺼번에 지우는 API 없음, 07 D45) |
-| 저장됨 AI 추천 탭 | **서버** | `GET /me`의 `places[].action_type`, `GET /courses`(+ 파티별 `?party_id=`)의 확정 코스 `itinerary[].saved` | ✅ 코스 확정 때 서버가 넣은 `course_confirmed` 장소 중 일정에서 AI 추천(`saved`가 아님)인 곳을 AI 추천 탭으로 나눈다. 저장됨의 개수 · 카테고리는 `/mobile/summary`가 이 장소까지 세서 서버 모드는 앱이 직접 저장한 곳만 센다(`NEEDS BACKEND`: 요약을 `action_type`별로, 07 D44) |
+| 저장됨 AI 추천 탭 | **서버** | `GET /me`의 `places[].action_type`, `GET /courses`(+ 파티별 `?party_id=`)의 확정 코스 `itinerary[].saved` | ✅ 코스 확정 때 서버가 넣은 `course_confirmed` 장소 중 일정에서 AI 추천(`saved`가 아님)인 곳을 AI 추천 탭으로 나눈다. 저장됨의 개수 · 카테고리는 `/mobile/summary`가 이 장소까지 세서 서버 모드는 앱이 직접 저장한 곳만 센다(`NEEDS BACKEND`: 요약을 `action_type`별로, 07 D44). AI 추천 탭의 필터 개수도 앱이 센다. 이 장소들은 코스 장소 고르기에도 함께 나오고 고정 장소로 보낼 수 있다(선택 토큰 있음, 07 D47) |
 | 코스 목록·상세 | **서버** | `GET /courses`, `/courses/{course}`, `POST /mobile/courses/{course}` | ✅ |
 | 반영한 취향 한 줄 · 파티원별 펼치기 | **서버** | 코스 응답의 `taste_profile`(`keywords[].category` · `dimension` · `shared_by`, `group_size`, 파티면 `group_blend.per_user[id]`의 `strong_match_places` · `represented` · `status`) + 파티원 이름은 `GET /parties/{party}` | ✅ 관심 주제 · 업종 단어만(파티 코스는 `shared_by` ≥ 2만), 넓은 지도 분류 이름은 빼고 앱이 해요체로 조합(`summary`는 안 씀, 07 D46) |
 | AI 추천 (job) | **서버** | `POST /jobs`, `GET /jobs/{job}`(status · stage → 화면 단계, 07 D33), `POST /jobs/{job}/cancel`, `GET /jobs`(진행 중 job, 취소 중이면 끝나길 기다림), `POST /recommend` | ✅ job 폴링 · 단계 · 취소(`/recommend`는 안 씀) |

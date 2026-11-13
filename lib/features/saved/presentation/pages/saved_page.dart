@@ -288,43 +288,92 @@ class _CategoryTab extends ConsumerWidget {
   }
 }
 
-/// AI 추천 탭: 코스를 저장할 때 AI 추천으로 저장 목록에 들어온 장소 (07 D44)
+/// AI 추천 탭: 코스를 저장할 때 AI 추천으로 저장 목록에 들어온 장소 (07 D44).
+/// 카테고리 탭과 같은 '전체 n곳 · 필터 · 선택' 줄을 두고, 필터는 이 탭의 장소 기준으로 센다 (07 D47).
 class _AiTab extends ConsumerWidget {
   const _AiTab();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final places = ref.watch(aiSavedPlacesProvider);
+    final summary = ref.watch(aiSavedSummaryProvider).value;
+    final selectedKey = ref.watch(aiCategoryFilterProvider);
     final selection = ref.watch(savedSelectionProvider);
-    final list = places.value;
+    final all = places.value;
+    final selected = summary?.categories.where((c) => c.key == selectedKey).firstOrNull;
+    // 지운 뒤 그 카테고리가 사라졌으면 전체로 본다
+    final activeKey = selected?.key;
+    void clear() => ref.read(aiCategoryFilterProvider.notifier).select(null);
+    final visible = [
+      for (final item in all ?? const <SavedPlaceItem>[])
+        if (activeKey == null || categoryKeyOfPlace(item.place) == activeKey) item,
+    ];
+    final filterable = summary != null && summary.categories.where((c) => c.count > 0).length > 1;
+    final showFilter = summary != null && (filterable || selected != null);
+    final String title;
+    if (all == null) {
+      title = 'AI 추천';
+    } else if (selected == null) {
+      title = '전체 ${all.length}곳';
+    } else {
+      title = '${selected.label} ${visible.length}곳';
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SectionCard(
-          title: selection.active ? '전체 선택' : (list == null ? 'AI 추천' : 'AI 추천 ${list.length}곳'),
-          titleWidget: selection.active ? _SelectAllTitle(items: list ?? const []) : null,
+          title: selection.active ? '전체 선택' : title,
+          titleWidget: selection.active ? _SelectAllTitle(items: visible) : null,
           trailing: selection.active
               ? const _DoneButton()
-              : (list == null || list.isEmpty)
+              : (!showFilter && visible.isEmpty)
               ? null
-              : const _SelectButton(),
-          child: AsyncValueView(
-            value: places,
-            compactError: true,
-            onRetry: () => ref.invalidate(aiSavedPlacesProvider),
-            loading: const _RowSkeletons(),
-            isEmpty: (list) => list.isEmpty,
-            empty: const _EmptyBody(
-              title: '아직 추천받아 저장한 곳이 없어요',
-              message: '코스를 저장하면 AI가 추천한 장소가 여기에 모여요.',
-            ),
-            data: (list) => DividedRows(
-              indent: selection.active ? 116 : 88,
-              children: [for (final item in list) _SavedRow(item: item, fromCourse: true)],
-            ),
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (showFilter)
+                      HeaderTextButton(
+                        label: '필터',
+                        icon: Icons.tune_rounded,
+                        active: selected != null,
+                        semanticLabel: selected == null ? '카테고리 필터' : '카테고리 필터, ${selected.label} 적용됨',
+                        onPressed: () => showCategoryFilterSheet(
+                          context,
+                          summary: summary,
+                          selectedKey: activeKey,
+                          onSelected: (key) => ref.read(aiCategoryFilterProvider.notifier).select(key),
+                        ),
+                      ),
+                    if (visible.isNotEmpty) const _SelectButton(),
+                  ],
+                ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (selected != null && !selection.active)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.xxs),
+                  child: Align(alignment: Alignment.centerLeft, child: AppliedFilterChip(label: selected.label, onClear: clear)),
+                ),
+              AsyncValueView(
+                value: places,
+                compactError: true,
+                onRetry: () => ref.invalidate(aiSavedPlacesProvider),
+                loading: const _RowSkeletons(),
+                isEmpty: (list) => list.isEmpty,
+                empty: const _EmptyBody(
+                  title: '아직 추천받아 저장한 곳이 없어요',
+                  message: '코스를 저장하면 AI가 추천한 장소가 여기에 모여요.',
+                ),
+                data: (_) => DividedRows(
+                  indent: selection.active ? 116 : 88,
+                  children: [for (final item in visible) _SavedRow(item: item, fromCourse: true)],
+                ),
+              ),
+            ],
           ),
         ),
-        if (list != null && list.isNotEmpty)
+        if (all != null && all.isNotEmpty)
           Padding(
             padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, 0),
             child: Text('직접 저장하면 카테고리로 옮겨져요.', style: AppTypography.caption),

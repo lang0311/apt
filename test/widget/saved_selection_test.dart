@@ -142,7 +142,7 @@ void main() {
 
     await tester.tap(find.text('AI 추천'));
     await tester.pumpAndSettle();
-    expect(find.text('AI 추천 1곳'), findsOneWidget);
+    expect(find.text('전체 1곳'), findsOneWidget); // 카테고리 탭과 같은 제목 줄 (07 D47)
     expect(find.text('연남 산책 코스에서 추천'), findsOneWidget);
 
     await tester.tap(find.text('선택'));

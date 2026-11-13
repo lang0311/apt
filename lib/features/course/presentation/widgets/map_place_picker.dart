@@ -40,6 +40,14 @@ class MapPlacePicker extends ConsumerStatefulWidget {
   ConsumerState<MapPlacePicker> createState() => _MapPlacePickerState();
 }
 
+/// 장소 고르기에 보이는 장소: 직접 저장한 곳 + 코스를 저장할 때 추천받아 저장된 곳 (07 D47)
+class _Pickable {
+  const _Pickable({required this.mine, required this.ai});
+  final List<SavedPlaceItem> mine;
+  final List<SavedPlaceItem> ai;
+  List<SavedPlaceItem> get all => [...mine, ...ai];
+}
+
 class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
   final _map = AptMapController();
   final _pages = PageController(viewportFraction: 0.64);
@@ -48,8 +56,45 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
   bool _listMode = false;
   String? _focusedId;
 
+  /// 칩: 직접 저장 · 추천받은 곳. 기본은 둘 다 켜짐, 둘 다 끌 수 있다. 화면을 나가면 기본으로 (07 D47)
+  bool _showMine = true;
+  bool _showAi = true;
+
   static const _searchHeight = 44.0;
-  static const _cardHeight = 64.0;
+  static const _cardHeight = 70.0;
+  static const _empty = SavedSummary(totalCount: 0, categories: []);
+
+  bool _matches(Place p) =>
+      (_categoryKey == null || categoryKeyOfPlace(p) == _categoryKey) && (_keyword.isEmpty || p.name.contains(_keyword));
+
+  /// 직접 저장한 곳은 저장소가 거른 결과, 추천받은 곳은 받아 둔 목록을 같은 조건으로 거른다
+  AsyncValue<_Pickable> _pickable() {
+    final mine = _showMine ? ref.watch(savedPlacesProvider(_query)) : const AsyncData(<SavedPlaceItem>[]);
+    final ai = _showAi ? ref.watch(aiSavedPlacesProvider) : const AsyncData(<SavedPlaceItem>[]);
+    for (final value in [mine, ai]) {
+      if (value.hasError) return AsyncError(value.error!, value.stackTrace ?? StackTrace.empty);
+    }
+    if (!mine.hasValue || !ai.hasValue) return const AsyncLoading();
+    return AsyncData(_Pickable(mine: mine.value!, ai: [for (final i in ai.value!) if (_matches(i.place)) i]));
+  }
+
+  /// 필터 시트의 카테고리 · 개수: 켜 둔 쪽만 더한다
+  SavedSummary? _summary() {
+    final mine = _showMine ? ref.watch(savedSummaryProvider).value : _empty;
+    final ai = _showAi ? ref.watch(aiSavedSummaryProvider).value : _empty;
+    return mine == null || ai == null ? null : mergeSummaries(mine, ai);
+  }
+
+  void _retry() {
+    ref.invalidate(savedPlacesProvider(_query));
+    ref.invalidate(aiSavedPlacesProvider);
+  }
+
+  void _toggle({bool? mine, bool? ai}) => setState(() {
+        _showMine = mine ?? _showMine;
+        _showAi = ai ?? _showAi;
+        _focusedId = null;
+      });
 
   SavedPlaceQuery get _query => SavedPlaceQuery(categoryKey: _categoryKey, keyword: _keyword.isEmpty ? null : _keyword);
 
@@ -83,8 +128,7 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
     );
   }
 
-  Future<void> _openFilter() async {
-    final summary = ref.read(savedSummaryProvider).value;
+  Future<void> _openFilter(SavedSummary? summary) async {
     if (summary == null) return;
     await showCategoryFilterSheet(
       context,
@@ -96,13 +140,18 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
 
   @override
   Widget build(BuildContext context) {
-    final items = ref.watch(savedPlacesProvider(_query));
-    final summary = ref.watch(savedSummaryProvider).value;
-    final places = [for (final i in items.value ?? const <SavedPlaceItem>[]) i.place];
+    final items = _pickable();
+    final summary = _summary();
+    final pickable = items.value;
+    final all = pickable?.all ?? const <SavedPlaceItem>[];
+    final places = [for (final i in all) i.place];
+    final fromAi = {for (final i in pickable?.ai ?? const <SavedPlaceItem>[]) i.place.id: i};
+    final noneShown = !_showMine && !_showAi;
     final selected = widget.selectedIds;
+    // 칩으로 한쪽을 꺼서 그 카테고리가 요약에서 빠져도 걸린 필터는 칩으로 남겨 풀 수 있게 한다
     final categoryLabel = _categoryKey == null
         ? null
-        : summary?.categories.where((c) => c.key == _categoryKey).firstOrNull?.label;
+        : summary?.categories.where((c) => c.key == _categoryKey).firstOrNull?.label ?? _categoryKey!.split('>').last.trim();
     final filterTop = _searchHeight + AppSpacing.xs * 2;
     // 필터 칩이 있으면 그 아래부터 지도·목록을 쓴다
     final contentTop = filterTop + (categoryLabel == null ? 0 : 36);
@@ -136,7 +185,10 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
               excludedIds: widget.excludedIds,
               excludedLabel: widget.excludedLabel,
               onToggle: widget.onToggle,
-              onRetry: () => ref.invalidate(savedPlacesProvider(_query)),
+              onRetry: _retry,
+              chips: _SourceChips(showMine: _showMine, showAi: _showAi, onChanged: _toggle),
+              showMine: _showMine,
+              showAi: _showAi,
             ),
           ),
 
@@ -152,7 +204,7 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
               _focusedId = null;
             }),
             filterCount: _categoryKey == null ? 0 : 1,
-            onFilter: summary == null ? null : _openFilter,
+            onFilter: summary == null ? null : () => _openFilter(summary),
           ),
         ),
         // 건 필터만 칩으로 (안 걸면 줄이 없다)
@@ -166,11 +218,15 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
         if (!_listMode) ...[
           Positioned(
             left: AppSpacing.sm,
+            right: AppSpacing.sm,
             bottom: _cardHeight + AppSpacing.lg,
-            child: _MapPill(
-              icon: Icons.format_list_bulleted_rounded,
-              label: '목록 ${places.length}',
-              onTap: () => setState(() => _listMode = true),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: _SourceBar(
+                count: places.length,
+                onList: () => setState(() => _listMode = true),
+                chips: _SourceChips(showMine: _showMine, showAi: _showAi, onChanged: _toggle),
+              ),
             ),
           ),
           Positioned(
@@ -180,7 +236,13 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
             height: _cardHeight,
             child: switch (items) {
               AsyncData() when places.isEmpty => Center(
-                  child: _Bubble(text: _keyword.isEmpty && _categoryKey == null ? '저장한 장소가 없어요' : '찾는 장소가 없어요'),
+                  child: _Bubble(
+                    text: noneShown
+                        ? '직접 저장이나 추천받은 곳을 켜 보세요'
+                        : _keyword.isEmpty && _categoryKey == null
+                        ? '저장한 장소가 없어요'
+                        : '찾는 장소가 없어요',
+                  ),
                 ),
               // 넘긴 카드가 늘 왼쪽 여백(12)에서 시작하도록 PageView를 여백 안에 두고, 지나간 카드는 밖으로 그린다
               AsyncData() => Padding(
@@ -201,6 +263,7 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
                           place: place,
                           focused: place.id == _focusedId,
                           number: order < 0 ? null : order + 1,
+                          recommended: fromAi[place.id],
                           inCourse: widget.excludedIds.contains(place.id),
                           excludedLabel: widget.excludedLabel,
                           onTap: () => _focus(places, i, scrollCards: true),
@@ -211,7 +274,7 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
                   ),
                 ),
               AsyncError() => Center(
-                  child: _Bubble(text: '장소를 불러오지 못했어요', onTap: () => ref.invalidate(savedPlacesProvider(_query))),
+                  child: _Bubble(text: '장소를 불러오지 못했어요', onTap: _retry),
                 ),
               _ => const Center(child: SizedBox.square(dimension: 24, child: CircularProgressIndicator(strokeWidth: 2.4))),
             },
@@ -435,11 +498,15 @@ class _PlaceCard extends StatelessWidget {
     required this.excludedLabel,
     required this.onTap,
     required this.onToggle,
+    this.recommended,
   });
 
   final Place place;
   final bool focused;
   final int? number;
+
+  /// 추천받아 저장된 곳이면 그 기록 (셋째 줄 "✦ ○○ 코스에서 추천")
+  final SavedPlaceItem? recommended;
   final bool inCourse;
   final String excludedLabel;
   final VoidCallback onTap;
@@ -474,6 +541,7 @@ class _PlaceCard extends StatelessWidget {
                     children: [
                       Text(place.name, style: AppTypography.bodyStrong.copyWith(fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
                       Text(_areaAndCategory(place), style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      if (recommended != null) _RecommendedLine(recommended!),
                     ],
                   ),
                 ),
@@ -490,7 +558,7 @@ class _PlaceCard extends StatelessWidget {
   }
 }
 
-/// 목록 상태: "저장한 장소 n · m곳 선택" + 행 목록
+/// 목록 상태: "저장한 장소 n" + 오른쪽 칩, 둘 다 켜면 "직접 저장 n" → "추천받은 곳 n" 묶음 (07 D47)
 class _ListPanel extends StatelessWidget {
   const _ListPanel({
     required this.items,
@@ -499,82 +567,266 @@ class _ListPanel extends StatelessWidget {
     required this.excludedLabel,
     required this.onToggle,
     required this.onRetry,
+    required this.chips,
+    required this.showMine,
+    required this.showAi,
   });
 
-  final AsyncValue<List<SavedPlaceItem>> items;
+  final AsyncValue<_Pickable> items;
   final List<String> selectedIds;
   final Set<String> excludedIds;
   final String excludedLabel;
   final ValueChanged<Place> onToggle;
   final VoidCallback onRetry;
+  final Widget chips;
+  final bool showMine;
+  final bool showAi;
 
   @override
   Widget build(BuildContext context) {
+    final count = items.value?.all.length;
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
-      child: AsyncValueView<List<SavedPlaceItem>>(
-        value: items,
-        onRetry: onRetry,
-        data: (list) => Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.sm, 0),
+            child: Row(
+              children: [
+                Text('저장한 장소', style: AppTypography.cardTitle),
+                const SizedBox(width: 6),
+                Expanded(child: Text(count == null ? '' : '$count', style: AppTypography.label.copyWith(color: AppColors.textTertiary))),
+                chips,
+              ],
+            ),
+          ),
+          Expanded(
+            child: AsyncValueView<_Pickable>(
+              value: items,
+              onRetry: onRetry,
+              data: (picked) => _rows(picked),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _rows(_Pickable picked) {
+    if (!showMine && !showAi) {
+      return const _ListMessage(title: '보여 줄 장소가 없어요', message: '위에서 직접 저장이나 추천받은 곳을 켜 보세요.');
+    }
+    if (picked.all.isEmpty) return const _ListMessage(title: '찾는 장소가 없어요');
+    // 둘 다 보일 때만 묶음 제목을 단다
+    final sections = picked.mine.isNotEmpty && picked.ai.isNotEmpty;
+    final entries = <Object>[
+      if (sections) '직접 저장 ${picked.mine.length}',
+      ...picked.mine,
+      if (sections) '추천받은 곳 ${picked.ai.length}',
+      ...picked.ai,
+    ];
+    final aiIds = {for (final i in picked.ai) i.place.id};
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 72),
+      itemCount: entries.length,
+      itemBuilder: (_, i) {
+        final entry = entries[i];
+        if (entry is String) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.xxs),
+            child: Text(entry, style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700)),
+          );
+        }
+        final item = entry as SavedPlaceItem;
+        return _row(item, recommended: aiIds.contains(item.place.id));
+      },
+    );
+  }
+
+  Widget _row(SavedPlaceItem item, {required bool recommended}) {
+    final p = item.place;
+    final inCourse = excludedIds.contains(p.id);
+    final order = selectedIds.indexOf(p.id);
+    return Opacity(
+      key: ValueKey(p.id),
+      opacity: inCourse ? 0.55 : 1,
+      child: InkWell(
+        onTap: inCourse ? null : () => onToggle(p),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.md, 6, AppSpacing.xs, 6),
+          child: Row(
+            children: [
+              AppNetworkImage(url: p.imageUrl, width: 48, height: 48, radius: 12),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(p.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(_areaAndCategory(p), style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    if (recommended) _RecommendedLine(item),
+                  ],
+                ),
+              ),
+              if (inCourse)
+                Padding(padding: const EdgeInsets.all(10), child: _InCourseTag(excludedLabel))
+              else
+                _SelectButton(number: order < 0 ? null : order + 1, name: p.name, onTap: () => onToggle(p)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ListMessage extends StatelessWidget {
+  const _ListMessage({required this.title, this.message});
+  final String title;
+  final String? message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.xxs),
-              child: Row(
-                children: [
-                  Text('저장한 장소', style: AppTypography.cardTitle),
-                  const SizedBox(width: 6),
-                  Expanded(child: Text('${list.length}', style: AppTypography.label.copyWith(color: AppColors.textTertiary))),
-                  Text('${selectedIds.length}곳 선택', style: AppTypography.meta),
-                ],
+            Text(title, style: AppTypography.bodyStrong, textAlign: TextAlign.center),
+            if (message != null) ...[
+              const SizedBox(height: 4),
+              Text(message!, style: AppTypography.meta, textAlign: TextAlign.center),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// "✦ ○○ 코스에서 추천" — 저장됨 AI 추천 탭과 같은 표시 (07 D44)
+class _RecommendedLine extends StatelessWidget {
+  const _RecommendedLine(this.item);
+  final SavedPlaceItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Icon(Icons.auto_awesome, size: 11, color: AppColors.ai),
+        const SizedBox(width: 3),
+        Flexible(
+          child: Text(
+            SavedPlaceRow.recommendedLabel(item.recommendedIn),
+            style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w700),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// 지도 아래 흰 막대: "목록 n" | 직접 저장 · 추천받은 곳 칩 (07 D47)
+class _SourceBar extends StatelessWidget {
+  const _SourceBar({required this.count, required this.onList, required this.chips});
+  final int count;
+  final VoidCallback onList;
+  final Widget chips;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white.withValues(alpha: 0.95),
+      shape: const StadiumBorder(),
+      elevation: 2,
+      shadowColor: const Color(0x2914223A),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            customBorder: const StadiumBorder(),
+            onTap: onList,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 44),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 14, right: 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.format_list_bulleted_rounded, size: 17, color: AppColors.textPrimary),
+                    const SizedBox(width: 5),
+                    Text('목록 $count', style: AppTypography.label),
+                  ],
+                ),
               ),
             ),
-            Expanded(
-              child: list.isEmpty
-                  ? const Center(child: Text('찾는 장소가 없어요'))
-                  : ListView.builder(
-                      padding: const EdgeInsets.only(bottom: 72),
-                      itemCount: list.length,
-                      itemBuilder: (_, i) {
-                        final p = list[i].place;
-                        final inCourse = excludedIds.contains(p.id);
-                        final order = selectedIds.indexOf(p.id);
-                        return Opacity(
-                          key: ValueKey(p.id),
-                          opacity: inCourse ? 0.55 : 1,
-                          child: InkWell(
-                            onTap: inCourse ? null : () => onToggle(p),
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(AppSpacing.md, 6, AppSpacing.xs, 6),
-                              child: Row(
-                                children: [
-                                  AppNetworkImage(url: p.imageUrl, width: 48, height: 48, radius: 12),
-                                  const SizedBox(width: AppSpacing.sm),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(p.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
-                                        Text(_areaAndCategory(p), style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
-                                      ],
-                                    ),
-                                  ),
-                                  if (inCourse)
-                                    Padding(padding: const EdgeInsets.all(10), child: _InCourseTag(excludedLabel))
-                                  else
-                                    _SelectButton(number: order < 0 ? null : order + 1, name: p.name, onTap: () => onToggle(p)),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+          ),
+          Container(width: 1, height: 16, color: AppColors.divider),
+          Padding(padding: const EdgeInsets.only(left: 2, right: 4), child: chips),
+        ],
+      ),
+    );
+  }
+}
+
+/// 직접 저장 · 추천받은 곳 칩 두 개. 바탕 없이 켜짐은 파랑 테두리 · 글자, 꺼짐은 회색. 둘 다 끌 수 있다 (07 D47)
+class _SourceChips extends StatelessWidget {
+  const _SourceChips({required this.showMine, required this.showAi, required this.onChanged});
+  final bool showMine;
+  final bool showAi;
+  final void Function({bool? mine, bool? ai}) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _SourceChip(label: '직접 저장', on: showMine, onTap: () => onChanged(mine: !showMine)),
+        _SourceChip(label: '추천받은 곳', on: showAi, onTap: () => onChanged(ai: !showAi)),
+      ],
+    );
+  }
+}
+
+class _SourceChip extends StatelessWidget {
+  const _SourceChip({required this.label, required this.on, required this.onTap});
+  final String label;
+  final bool on;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = on ? AppColors.primary : AppColors.textTertiary;
+    return Semantics(
+      button: true,
+      toggled: on,
+      label: '$label ${on ? '보는 중' : '숨김'}',
+      excludeSemantics: true,
+      child: InkResponse(
+        onTap: onTap,
+        radius: 28,
+        // 보이는 칩은 높이 26, 누르는 영역은 44
+        child: SizedBox(
+          height: 44,
+          child: Center(
+            child: Container(
+              height: 26,
+              margin: const EdgeInsets.symmetric(horizontal: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              alignment: Alignment.center,
+              decoration: ShapeDecoration(
+                shape: StadiumBorder(side: BorderSide(color: on ? AppColors.primary : AppColors.progressInactive, width: on ? 1.2 : 1)),
+              ),
+              child: Text(label, style: AppTypography.caption.copyWith(color: color, fontWeight: on ? FontWeight.w700 : FontWeight.w600)),
             ),
-          ],
+          ),
         ),
       ),
     );

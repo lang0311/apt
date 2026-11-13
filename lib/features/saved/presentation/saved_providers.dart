@@ -23,6 +23,45 @@ final aiSavedPlacesProvider = FutureProvider.autoDispose<List<SavedPlaceItem>>(
   (ref) => ref.watch(savedRepositoryProvider).fetchAiSavedPlaces(),
 );
 
+/// AI 추천 장소의 카테고리별 개수 (AI 추천 탭 · 코스 장소 고르기의 필터, 07 D47).
+/// 서버 요약(`/mobile/summary`)은 이 장소들을 따로 나누지 않아서, 이미 받은 목록으로 앱이 센다(D44와 같은 예외).
+/// NEEDS BACKEND: 요약이 `action_type`별로 나뉘면 서버 값을 쓴다.
+final aiSavedSummaryProvider = FutureProvider.autoDispose<SavedSummary>(
+  (ref) async => summarizeByCategory([for (final item in await ref.watch(aiSavedPlacesProvider.future)) item.place]),
+);
+
+/// AI 추천 탭의 카테고리 필터 (카테고리 탭의 필터와 따로 기억한다)
+final aiCategoryFilterProvider = NotifierProvider<SavedCategoryFilter, String?>(SavedCategoryFilter.new);
+
+/// 필터에 쓰는 장소의 카테고리 키. 서버 요약과 같게 업종이 없으면 '기타'
+String categoryKeyOfPlace(Place place) => place.categoryKey.isEmpty ? '기타' : place.categoryKey;
+
+/// 장소 목록을 카테고리별로 센다 (처음 나온 순서)
+SavedSummary summarizeByCategory(Iterable<Place> places) {
+  final counts = <String, int>{};
+  for (final place in places) {
+    final key = categoryKeyOfPlace(place);
+    counts[key] = (counts[key] ?? 0) + 1;
+  }
+  return SavedSummary(
+    totalCount: counts.values.fold(0, (sum, n) => sum + n),
+    categories: [
+      for (final MapEntry(:key, :value) in counts.entries)
+        PlaceCategory(key: key, label: key.split('>').last.trim(), count: value),
+    ],
+  );
+}
+
+/// 두 요약을 더한다 (코스 장소 고르기에서 직접 저장 + 추천받은 곳). 같은 카테고리는 개수를 합친다
+SavedSummary mergeSummaries(SavedSummary a, SavedSummary b) {
+  final merged = <String, PlaceCategory>{};
+  for (final c in [...a.categories, ...b.categories]) {
+    final old = merged[c.key];
+    merged[c.key] = old == null ? c : PlaceCategory(key: c.key, label: old.label, count: old.count + c.count);
+  }
+  return SavedSummary(totalCount: a.totalCount + b.totalCount, categories: merged.values.toList());
+}
+
 class MapQuery {
   const MapQuery(this.bounds, this.query);
   final GeoBounds bounds;
