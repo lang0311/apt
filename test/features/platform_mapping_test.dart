@@ -4,6 +4,7 @@ import 'package:apt/core/network/api_client.dart';
 import 'package:apt/features/course/domain/course_models.dart';
 import 'package:apt/features/platform/data/platform_client.dart';
 import 'package:apt/features/platform/data/platform_repositories.dart';
+import 'package:apt/features/saved/domain/saved_models.dart';
 
 void main() {
   test(
@@ -159,6 +160,50 @@ void main() {
     expect(c.calls, ['/me', '/parties/joined']);
     final parties = await repo.fetchMyParties();
     expect({for (final p in parties) p.id: p.isOwner}, {'mine': true, 'joined': false});
+  });
+  test('코스로 들어온 저장 장소: AI 추천은 따로, 직접 고른 곳 · 직접 저장은 카테고리와 개수에 (07 D44)', () async {
+    final c = _FakePlatform({
+      '/me': {
+        'user': {'id': 'me', 'name': '김랑'},
+        'parties': [],
+        'places': [
+          {'key': 'a', 'name': '직접', 'category': '음식점 > 한식', 'action_type': 'direct_save'},
+          {'key': 'b', 'name': 'AI', 'category': '여행 > 공원', 'action_type': 'course_confirmed'},
+          {'key': 'c', 'name': '고른 곳', 'category': '음식점 > 카페', 'action_type': 'course_confirmed'},
+          {'key': 'd', 'name': '코스 모름', 'category': '음식점 > 카페', 'action_type': 'course_confirmed'},
+        ],
+      },
+      '/courses': [
+        {
+          'id': 'x',
+          'title': '연남 산책',
+          'status': 'confirmed',
+          'itinerary': [
+            {'key': 'c', 'saved': true},
+            {'key': 'b', 'saved': false},
+          ],
+        },
+        // 저장하지 않은 추천 결과(초안)는 보지 않는다
+        {
+          'id': 'y',
+          'title': '초안',
+          'status': 'draft',
+          'itinerary': [
+            {'key': 'd', 'saved': false},
+          ],
+        },
+      ],
+    });
+    final repo = PlatformSavedRepository(c);
+    final mine = await repo.fetchSavedPlaces(const SavedPlaceQuery());
+    expect([for (final i in mine) i.place.name], ['직접', '고른 곳']);
+    final ai = await repo.fetchAiSavedPlaces();
+    expect({for (final i in ai) i.place.name: i.recommendedIn}, {'AI': '연남 산책', '코스 모름': null});
+    final summary = await repo.fetchSummary();
+    expect(summary.totalCount, 2);
+    expect({for (final cat in summary.categories) cat.label: cat.count}, {'한식': 1, '카페': 1});
+    // 코스 목록은 같은 장소 목록이면 한 번만 받는다
+    expect(c.calls.where((path) => path == '/courses'), hasLength(1));
   });
 }
 

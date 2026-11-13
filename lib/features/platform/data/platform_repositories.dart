@@ -141,35 +141,105 @@ class PlatformAuthRepository implements AuthRepository {
 class PlatformSavedRepository extends ApiSavedRepository {
   PlatformSavedRepository(this._platform) : super(_platform.client);
   final PlatformClient _platform;
+  /// 저장 개수 · 카테고리. 서버 `/mobile/summary`는 코스로 들어온 AI 추천 장소까지 세서,
+  /// 카테고리 탭에 보이는 직접 저장한 곳만 앱이 센다 (07 D44).
+  /// NEEDS BACKEND: 서버 요약이 `action_type`별로 나뉘면 서버 값을 쓴다.
   @override
   Future<SavedSummary> fetchSummary() async {
-    final summary = await _platform.get('/mobile/summary');
+    final counts = <String, int>{};
+    for (final place in (await _split()).mine) {
+      final key = categoryKeyOf(place);
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
     return SavedSummary(
-      totalCount: summary['saved_count'] as int,
+      totalCount: counts.values.fold(0, (sum, n) => sum + n),
       categories: [
-        for (final category in summary['categories'] as List)
-          PlaceCategory(
-            key: category['key'] as String,
-            label: category['label'] as String,
-            count: category['count'] as int,
-          ),
+        for (final entry in counts.entries)
+          PlaceCategory(key: entry.key, label: entry.key.split('>').last.trim(), count: entry.value),
       ],
     );
+  }
+
+  /// 서버 요약과 같은 카테고리 키: 카카오 업종 전체 경로, 없으면 대분류 이름, 그것도 없으면 '기타'
+  static String categoryKeyOf(Json place) {
+    for (final field in ['category', 'category_group_name']) {
+      final value = place[field];
+      if (value is String && value.isNotEmpty) return value;
+    }
+    return '기타';
   }
 
   @override
   Future<List<SavedPlaceItem>> fetchSavedPlaces(SavedPlaceQuery query) async {
     if (query.collectionId != null) throw const NotImplementedFailure('보관함');
-    final me = await _platform.me();
-    bool matches(dynamic place) =>
-        (query.categoryKey == null || place['category'] == query.categoryKey) &&
+    bool matches(Json place) =>
+        (query.categoryKey == null || categoryKeyOf(place) == query.categoryKey) &&
         (query.keyword == null || place['name'].toString().contains(query.keyword!));
     return [
-      for (final place in me['places'] as List)
-        if (matches(place))
-          SavedPlaceItem(place: _platform.place(Map<String, dynamic>.from(place as Map), saved: true)),
+      for (final place in (await _split()).mine)
+        if (matches(place)) SavedPlaceItem(place: _platform.place(place, saved: true)),
     ];
   }
+
+  @override
+  Future<List<SavedPlaceItem>> fetchAiSavedPlaces() async => [
+    for (final (place, course) in (await _split()).ai)
+      SavedPlaceItem(place: _platform.place(place, saved: true), recommendedIn: course),
+  ];
+
+  /// 코스를 저장하면 서버가 일정의 모든 장소를 저장 목록에 `action_type: course_confirmed`로 넣는다
+  /// (취향 가중치 0.8, 팀이 일부러 정한 동작). 그중 확정 코스 일정에서 AI가 추천한 곳(`saved`가 아님)은
+  /// AI 추천 탭으로, 직접 고른 장소로 코스에 넣은 곳은 카테고리로 나눈다. 어느 코스인지 못 찾으면
+  /// (코스 목록은 최근 30개만 옴) AI 추천으로 본다 (07 D44).
+  Future<({List<Json> mine, List<(Json, String?)> ai})> _split() async {
+    final me = await _platform.me();
+    final places = [for (final p in me['places'] as List) Map<String, dynamic>.from(p as Map)];
+    final fromCourses = [for (final p in places) if (p['action_type'] == 'course_confirmed') p['key'].toString()];
+    if (fromCourses.isEmpty) return (mine: places, ai: <(Json, String?)>[]);
+    final stops = await _courseStops(me, fromCourses);
+    final mine = <Json>[];
+    final ai = <(Json, String?)>[];
+    for (final place in places) {
+      final key = place['key'].toString();
+      final pickedOnly = stops.picked.contains(key) && !stops.aiCourse.containsKey(key);
+      if (place['action_type'] != 'course_confirmed' || pickedOnly) {
+        mine.add(place);
+      } else {
+        ai.add((place, stops.aiCourse[key]));
+      }
+    }
+    return (mine: mine, ai: ai);
+  }
+
+  /// 확정한 코스(개인 + 내가 속한 파티) 일정에서 장소 key별로 AI가 추천한 코스 이름과 직접 고른 장소를 모은다.
+  /// 같은 장소 목록이면 다시 받지 않는다. 최근에 고친 코스가 앞에 온다.
+  Future<({Map<String, String> aiCourse, Set<String> picked})> _courseStops(Json me, List<String> keys) async {
+    final signature = (keys.toList()..sort()).join(',');
+    if (_stopsFor == signature && _stops != null) return _stops!;
+    final rows = [
+      ...await _platform.get('/courses') as List,
+      for (final party in me['parties'] as List) ...await _platform.get('/courses', {'party_id': party['id']}) as List,
+    ];
+    final aiCourse = <String, String>{};
+    final picked = <String>{};
+    for (final row in rows) {
+      final course = Map<String, dynamic>.from(row as Map);
+      if (course['status'] != 'confirmed') continue;
+      for (final stop in course['itinerary'] as List) {
+        final key = (stop['key'] ?? stop['id']).toString();
+        if (stop['saved'] == true) {
+          picked.add(key);
+        } else {
+          aiCourse.putIfAbsent(key, () => (course['title'] ?? '추천 코스').toString());
+        }
+      }
+    }
+    _stopsFor = signature;
+    return _stops = (aiCourse: aiCourse, picked: picked);
+  }
+
+  String? _stopsFor;
+  ({Map<String, String> aiCourse, Set<String> picked})? _stops;
 
   @override
   Future<List<SavedPlaceItem>> fetchSavedPlacesNearby(

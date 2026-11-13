@@ -7,9 +7,12 @@ import '../../app/theme/app_typography.dart';
 /// 섹션 묶음 (surface + border 1px, radius 20). 제목은 컨테이너 안에 둔다.
 /// [child]는 좌우 여백 없이 받는다 — 가로 스크롤 목록이 컨테이너 끝까지 닿게 하고, 여백은 child가 정한다.
 class SectionCard extends StatelessWidget {
-  const SectionCard({super.key, required this.title, required this.child, this.actionLabel, this.onAction, this.trailing});
+  const SectionCard({super.key, required this.title, required this.child, this.actionLabel, this.onAction, this.trailing, this.titleWidget});
 
   final String title;
+
+  /// 제목 글자 대신 넣는 위젯 (예: 저장됨 선택 모드의 '전체 선택'). [title]은 그대로 의미로 남긴다.
+  final Widget? titleWidget;
   final String? actionLabel;
   final VoidCallback? onAction;
 
@@ -42,7 +45,7 @@ class SectionCard extends StatelessWidget {
                     constraints: const BoxConstraints(minHeight: 44),
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: Semantics(header: true, child: Text(title, style: AppTypography.cardTitle)),
+                      child: titleWidget ?? Semantics(header: true, child: Text(title, style: AppTypography.cardTitle)),
                     ),
                   ),
                 ),

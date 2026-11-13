@@ -6,6 +6,7 @@ import '../../../../app/routes.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../core/widgets/bottom_cta.dart';
 import '../../../../core/widgets/buttons.dart';
 import '../../../../core/widgets/headers.dart';
 import '../../../../core/widgets/overlays.dart';
@@ -14,11 +15,14 @@ import '../../../../core/widgets/states.dart';
 import '../../../../core/widgets/surfaces.dart';
 import '../../domain/saved_models.dart';
 import '../saved_providers.dart';
+import '../saved_selection.dart';
 import '../widgets/create_collection_modal.dart';
 import '../widgets/saved_rows.dart';
 
-/// #13 / #14 저장됨 — [카테고리 | 내 보관함] (2026-10-20 개편, docs/05 #13·#14, 07 D21)
-/// 카테고리 탭은 평소엔 '전체 n곳 · 필터'만 두고, 필터를 걸었을 때만 칩 하나로 조건을 보여 준다.
+/// #13 / #14 저장됨 — [카테고리 | 내 보관함 | AI 추천] (2026-10-20 개편, docs/05 #13·#14, 07 D21 · D44 · D45)
+/// 카테고리 탭은 평소엔 '전체 n곳 · 필터 · 선택'만 두고, 필터를 걸었을 때만 칩 하나로 조건을 보여 준다.
+/// AI 추천 탭은 코스를 저장할 때 AI 추천으로 들어온 장소다(카테고리 · 개수에는 직접 저장한 곳만).
+/// 두 탭 모두 '선택'(또는 행 길게 누르기)으로 여러 곳을 골라 삭제한다.
 /// 목록은 홈과 같은 SectionCard 하나 안의 구분선 행이다. 지도는 상단바 버튼 하나로만 연다.
 class SavedPage extends ConsumerStatefulWidget {
   const SavedPage({super.key});
@@ -29,6 +33,7 @@ class SavedPage extends ConsumerStatefulWidget {
 
 class _SavedPageState extends ConsumerState<SavedPage> {
   int _tab = 0;
+  bool _deleting = false;
 
   /// 섹션 묶음 바깥 여백 (홈과 같은 값)
   static const _outer = AppSpacing.sm;
@@ -45,49 +50,105 @@ class _SavedPageState extends ConsumerState<SavedPage> {
       ref.read(savedSummaryProvider.future),
       if (_tab == 0) ref.read(savedPlacesProvider(SavedPlaceQuery(categoryKey: category)).future),
       if (_tab == 1) ref.read(collectionsProvider.future),
+      if (_tab == 2) ref.read(aiSavedPlacesProvider.future),
     ]);
   }
 
+  /// AI 추천 탭의 '지도'는 카테고리 지도(직접 저장한 곳)를 연다
   void _openMap() {
     final category = ref.read(savedCategoryFilterProvider);
-    context.push(_tab == 0 ? AppRoutes.categoryMap(categoryKey: category) : AppRoutes.collectionMap());
+    context.push(_tab == 1 ? AppRoutes.collectionMap() : AppRoutes.categoryMap(categoryKey: _tab == 0 ? category : null));
+  }
+
+  void _selectTab(int i) {
+    ref.read(savedSelectionProvider.notifier).exit();
+    setState(() => _tab = i);
+  }
+
+  /// 고른 곳 삭제. 카테고리는 바로 지우고 되돌리기, AI 추천은 되돌릴 수 없어 한 번 묻는다 (07 D45).
+  Future<void> _deleteSelected() async {
+    final ids = ref.read(savedSelectionProvider).ids.toList();
+    if (ids.isEmpty || _deleting) return;
+    final ai = _tab == 2;
+    if (ai) {
+      final ok = await showConfirmDialog(
+        context,
+        title: '${ids.length}곳을 삭제할까요?',
+        message: 'AI가 추천해 저장된 장소는 삭제하면 되돌릴 수 없어요. 저장한 코스에는 그대로 남아요.',
+        confirmLabel: '삭제',
+        destructive: true,
+      );
+      if (!ok || !mounted) return;
+    }
+    setState(() => _deleting = true);
+    try {
+      await deleteSavedPlaces(context, ref, ids: ids, undoable: !ai);
+    } finally {
+      if (mounted) setState(() => _deleting = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: RefreshIndicator(
-          onRefresh: _refresh,
-          child: ListView(
-            padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
+    final selection = ref.watch(savedSelectionProvider);
+    final count = selection.ids.length;
+    return PopScope(
+      // 고르는 중에 뒤로 가기를 누르면 선택만 푼다
+      canPop: !selection.active,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) ref.read(savedSelectionProvider.notifier).exit();
+      },
+      child: Scaffold(
+        body: SafeArea(
+          bottom: false,
+          child: Column(
             children: [
-              PageTitleHeader(
-                title: '저장됨',
-                trailing: _MapButton(onPressed: _openMap),
-              ),
-              Padding(
-                padding: AppSpacing.screenPadding,
-                child: SegmentedTabs(
-                  labels: const ['카테고리', '내 보관함'],
-                  selectedIndex: _tab,
-                  onChanged: (i) => setState(() => _tab = i),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: _outer),
-                child: _tab == 0
-                    ? const _CategoryTab()
-                    : _CollectionsTab(
-                        onCreate: _createCollection,
-                        onShowAll: () {
-                          ref.read(savedCategoryFilterProvider.notifier).select(null);
-                          setState(() => _tab = 0);
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: _refresh,
+                  child: ListView(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
+                    children: [
+                      PageTitleHeader(
+                        title: '저장됨',
+                        trailing: _MapButton(onPressed: _openMap),
+                      ),
+                      Padding(
+                        padding: AppSpacing.screenPadding,
+                        child: SegmentedTabs(
+                          labels: const ['카테고리', '내 보관함', 'AI 추천'],
+                          selectedIndex: _tab,
+                          onChanged: _selectTab,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: _outer),
+                        child: switch (_tab) {
+                          0 => const _CategoryTab(),
+                          1 => _CollectionsTab(
+                            onCreate: _createCollection,
+                            onShowAll: () {
+                              ref.read(savedCategoryFilterProvider.notifier).select(null);
+                              _selectTab(0);
+                            },
+                          ),
+                          _ => const _AiTab(),
                         },
                       ),
+                    ],
+                  ),
+                ),
               ),
+              // 고르는 중에는 하단 탭(앱 셸이 숨김) 자리에 삭제 버튼
+              if (selection.active)
+                BottomCta(
+                  child: AppButton.dark(
+                    label: count == 0 ? '삭제' : '$count곳 삭제',
+                    loading: _deleting,
+                    onPressed: count == 0 ? null : _deleteSelected,
+                  ),
+                ),
             ],
           ),
         ),
@@ -166,26 +227,40 @@ class _CategoryTab extends ConsumerWidget {
       title = '${selected.label} ${selected.count}곳';
     }
 
+    final selection = ref.watch(savedSelectionProvider);
+    final visible = places.value ?? const <SavedPlaceItem>[];
+    final showFilter = summary != null && (filterable || selected != null);
+
     return SectionCard(
-      title: title,
-      trailing: summary == null || (!filterable && selected == null)
+      title: selection.active ? '전체 선택' : title,
+      titleWidget: selection.active ? _SelectAllTitle(items: visible) : null,
+      trailing: selection.active
+          ? const _DoneButton()
+          : (!showFilter && visible.isEmpty)
           ? null
-          : HeaderTextButton(
-              label: '필터',
-              icon: Icons.tune_rounded,
-              active: selected != null,
-              semanticLabel: selected == null ? '카테고리 필터' : '카테고리 필터, ${selected.label} 적용됨',
-              onPressed: () => showCategoryFilterSheet(
-                context,
-                summary: summary,
-                selectedKey: selectedKey,
-                onSelected: (key) => ref.read(savedCategoryFilterProvider.notifier).select(key),
-              ),
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (showFilter)
+                  HeaderTextButton(
+                    label: '필터',
+                    icon: Icons.tune_rounded,
+                    active: selected != null,
+                    semanticLabel: selected == null ? '카테고리 필터' : '카테고리 필터, ${selected.label} 적용됨',
+                    onPressed: () => showCategoryFilterSheet(
+                      context,
+                      summary: summary,
+                      selectedKey: selectedKey,
+                      onSelected: (key) => ref.read(savedCategoryFilterProvider.notifier).select(key),
+                    ),
+                  ),
+                if (visible.isNotEmpty) const _SelectButton(),
+              ],
             ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (selected != null)
+          if (selected != null && !selection.active)
             Padding(
               padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.xxs),
               child: Align(alignment: Alignment.centerLeft, child: AppliedFilterChip(label: selected.label, onClear: clear)),
@@ -203,13 +278,136 @@ class _CategoryTab extends ConsumerWidget {
               onAction: clear,
             ),
             data: (list) => DividedRows(
-              children: [
-                for (final item in list)
-                  SavedPlaceRow(place: item.place, onTap: () => context.push(AppRoutes.place(item.place.id))),
-              ],
+              indent: selection.active ? 116 : 88,
+              children: [for (final item in list) _SavedRow(item: item)],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// AI 추천 탭: 코스를 저장할 때 AI 추천으로 저장 목록에 들어온 장소 (07 D44)
+class _AiTab extends ConsumerWidget {
+  const _AiTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final places = ref.watch(aiSavedPlacesProvider);
+    final selection = ref.watch(savedSelectionProvider);
+    final list = places.value;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionCard(
+          title: selection.active ? '전체 선택' : (list == null ? 'AI 추천' : 'AI 추천 ${list.length}곳'),
+          titleWidget: selection.active ? _SelectAllTitle(items: list ?? const []) : null,
+          trailing: selection.active
+              ? const _DoneButton()
+              : (list == null || list.isEmpty)
+              ? null
+              : const _SelectButton(),
+          child: AsyncValueView(
+            value: places,
+            compactError: true,
+            onRetry: () => ref.invalidate(aiSavedPlacesProvider),
+            loading: const _RowSkeletons(),
+            isEmpty: (list) => list.isEmpty,
+            empty: const _EmptyBody(
+              title: '아직 추천받아 저장한 곳이 없어요',
+              message: '코스를 저장하면 AI가 추천한 장소가 여기에 모여요.',
+            ),
+            data: (list) => DividedRows(
+              indent: selection.active ? 116 : 88,
+              children: [for (final item in list) _SavedRow(item: item, fromCourse: true)],
+            ),
+          ),
+        ),
+        if (list != null && list.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, 0),
+            child: Text('직접 저장하면 카테고리로 옮겨져요.', style: AppTypography.caption),
+          ),
+      ],
+    );
+  }
+}
+
+/// 저장 장소 한 행. 고르는 중이면 누르면 체크, 아니면 장소 상세. 길게 누르면 그 행을 고른 채로 선택 시작 (07 D45).
+class _SavedRow extends ConsumerWidget {
+  const _SavedRow({required this.item, this.fromCourse = false});
+  final SavedPlaceItem item;
+  final bool fromCourse;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selection = ref.watch(savedSelectionProvider);
+    final select = ref.read(savedSelectionProvider.notifier);
+    final id = item.place.id;
+    return SavedPlaceRow(
+      place: item.place,
+      fromCourse: fromCourse,
+      recommendedIn: item.recommendedIn,
+      selected: selection.active ? selection.ids.contains(id) : null,
+      failed: selection.active && selection.failed.contains(id),
+      onTap: selection.active ? () => select.toggle(id) : () => context.push(AppRoutes.place(id)),
+      onLongPress: selection.active ? null : () => select.start(id),
+    );
+  }
+}
+
+/// 카드 제목 줄의 '선택' — 선택 모드로 (07 D45)
+class _SelectButton extends ConsumerWidget {
+  const _SelectButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) =>
+      HeaderTextButton(label: '선택', semanticLabel: '여러 곳 선택해서 삭제', onPressed: () => ref.read(savedSelectionProvider.notifier).start());
+}
+
+/// 선택 모드의 '완료' — 선택을 푼다
+class _DoneButton extends ConsumerWidget {
+  const _DoneButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) =>
+      HeaderTextButton(label: '완료', semanticLabel: '선택 끝내기', onPressed: () => ref.read(savedSelectionProvider.notifier).exit());
+}
+
+/// 선택 모드의 카드 제목: 네모 체크 '전체 선택 n/총'. 누르면 보이는 목록 전체를 고르거나 푼다.
+class _SelectAllTitle extends ConsumerWidget {
+  const _SelectAllTitle({required this.items});
+  final List<SavedPlaceItem> items;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final chosen = ref.watch(savedSelectionProvider).ids;
+    final ids = [for (final item in items) item.place.id];
+    final count = ids.where(chosen.contains).length;
+    final all = ids.isNotEmpty && count == ids.length;
+    void toggleAll() => ref.read(savedSelectionProvider.notifier).setAll(ids, selected: !all);
+    return Semantics(
+      button: true,
+      checked: all,
+      label: '전체 선택, ${ids.length}곳 중 $count곳 선택됨',
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: ids.isEmpty ? null : toggleAll,
+        borderRadius: BorderRadius.circular(10),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 44),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SelectCheckbox(value: all, onChanged: (_) => toggleAll()),
+              const SizedBox(width: AppSpacing.xs),
+              Text('전체 선택', style: AppTypography.cardTitle),
+              const SizedBox(width: 6),
+              Text('$count/${ids.length}', style: AppTypography.meta),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -267,22 +465,22 @@ class _CollectionsTab extends ConsumerWidget {
   }
 }
 
-/// 컨테이너 안 빈 상태: (제목) + 한두 문장 + 버튼 하나
+/// 컨테이너 안 빈 상태: (제목) + 한두 문장 + (버튼 하나)
 class _EmptyBody extends StatelessWidget {
   const _EmptyBody({
     this.title,
     required this.message,
-    required this.actionLabel,
-    required this.onAction,
+    this.actionLabel,
+    this.onAction,
     this.actionIcon,
     this.secondaryLabel,
     this.onSecondary,
   });
   final String? title;
   final String message;
-  final String actionLabel;
+  final String? actionLabel;
   final IconData? actionIcon;
-  final VoidCallback onAction;
+  final VoidCallback? onAction;
 
   /// 주 버튼 아래 글자 버튼
   final String? secondaryLabel;
@@ -300,8 +498,11 @@ class _EmptyBody extends StatelessWidget {
             const SizedBox(height: 4),
           ],
           Text(message, style: AppTypography.meta.copyWith(height: 1.55)),
-          const SizedBox(height: AppSpacing.sm),
-          AppButton(label: actionLabel, icon: actionIcon, variant: AppButtonVariant.white, height: 44, onPressed: onAction),
+          if (actionLabel != null && onAction != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            AppButton(label: actionLabel!, icon: actionIcon, variant: AppButtonVariant.white, height: 44, onPressed: onAction),
+          ] else
+            const SizedBox(height: AppSpacing.xs),
           if (secondaryLabel != null) Center(child: AppTextLink(label: secondaryLabel!, onPressed: onSecondary)),
         ],
       ),

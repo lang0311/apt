@@ -6,6 +6,10 @@ abstract interface class SavedRepository {
 
   Future<List<SavedPlaceItem>> fetchSavedPlaces(SavedPlaceQuery query);
 
+  /// 코스를 저장할 때 AI 추천으로 저장 목록에 들어온 장소 (저장됨의 AI 추천 탭, 07 D44).
+  /// [fetchSavedPlaces] · [fetchSummary]에는 이 장소가 들어가지 않는다.
+  Future<List<SavedPlaceItem>> fetchAiSavedPlaces();
+
   /// `GET /api/v1/places/nearby` (lat, lng, radius m) — 로그인 사용자의 저장 장소 중 [center]에서
   /// [radiusMeters] 안에 있는 것.
   /// 가정 (docs/API 초안 기준, 2026-10-19): 서버는 거리·카테고리/보관함 필터·페이징을 주지 않는다.

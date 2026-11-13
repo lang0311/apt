@@ -12,10 +12,42 @@ import 'category_style.dart';
 import 'place_image.dart';
 
 /// 저장 장소 한 행: 사진 56 · 이름 · '카테고리 · 동네' · ★평점/@출처(둘 다 없으면 셋째 줄 생략)
+/// AI 추천 탭에서는 셋째 줄에 ✦ + 추천한 코스 이름(07 D44), 선택 모드에서는 왼쪽에 네모 체크(07 D45).
 class SavedPlaceRow extends StatelessWidget {
-  const SavedPlaceRow({super.key, required this.place, required this.onTap});
+  const SavedPlaceRow({
+    super.key,
+    required this.place,
+    required this.onTap,
+    this.onLongPress,
+    this.selected,
+    this.failed = false,
+    this.recommendedIn,
+    this.fromCourse = false,
+  });
   final Place place;
   final VoidCallback onTap;
+
+  /// 길게 누르면 선택 모드로 (이 행을 고른 채로)
+  final VoidCallback? onLongPress;
+
+  /// 선택 모드일 때만 값이 있다 (체크 표시)
+  final bool? selected;
+
+  /// 지난번 삭제에 실패한 행 ('삭제하지 못했어요')
+  final bool failed;
+
+  /// AI 추천 탭: 추천한 코스 이름 ([fromCourse]인데 이름을 모르면 null)
+  final String? recommendedIn;
+
+  /// AI 추천 탭의 행 (셋째 줄에 ✦ 추천 표시)
+  final bool fromCourse;
+
+  /// '연남 산책' → '연남 산책 코스에서 추천'. 이름이 이미 '코스'로 끝나면 덧붙이지 않는다.
+  static String recommendedLabel(String? course) {
+    if (course == null || course.trim().isEmpty) return '코스에서 추천';
+    final name = course.trim();
+    return name.endsWith('코스') ? '$name에서 추천' : '$name 코스에서 추천';
+  }
 
   /// '서울 성동구 성수동' → '성수동'
   static String shortArea(Place p) => p.displayArea.trim().split(RegExp(r'\s+')).last;
@@ -31,55 +63,115 @@ class SavedPlaceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final area = shortArea(place);
     final handle = _handleOf(place);
-    final hasThird = place.rating != null || handle != null;
+    final hasThird = !fromCourse && (place.rating != null || handle != null);
+    final checked = selected;
 
     return Semantics(
-      button: true,
-      label: [place.name, place.categoryLabel, area, if (place.rating != null) '평점 ${place.rating}'].join(', '),
+      button: checked == null,
+      checked: checked,
+      label: [
+        place.name,
+        place.categoryLabel,
+        area,
+        if (place.rating != null) '평점 ${place.rating}',
+        if (fromCourse) recommendedLabel(recommendedIn),
+        if (failed) '삭제하지 못했어요',
+      ].join(', '),
       excludeSemantics: true,
-      child: InkWell(
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 76),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 10),
-            child: Row(
-              children: [
-                PlaceImage(place: place, width: 56, height: 56),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(place.name, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
-                      const SizedBox(height: 2),
-                      Text(
-                        [place.categoryLabel, if (area.isNotEmpty) area].join(' · '),
-                        style: AppTypography.meta,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (hasThird) ...[
-                        const SizedBox(height: 3),
-                        Row(
-                          children: [
-                            if (place.rating != null) ...[
-                              const Icon(Icons.star_rounded, size: 13, color: Color(0xFFF5A524)),
-                              const SizedBox(width: 2),
-                              Text(place.rating!.toStringAsFixed(1), style: AppTypography.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-                              const SizedBox(width: AppSpacing.xs),
-                            ],
-                            if (handle != null)
-                              Flexible(child: Text(handle, style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis)),
-                          ],
+      child: Material(
+        color: checked == true ? AppColors.primarySoft : Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 76),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(checked == null ? AppSpacing.md : AppSpacing.sm, 10, AppSpacing.md, 10),
+              child: Row(
+                children: [
+                  if (checked != null) ...[
+                    SelectCheckbox(value: checked, onChanged: (_) => onTap()),
+                    const SizedBox(width: AppSpacing.xs),
+                  ],
+                  PlaceImage(place: place, width: 56, height: 56),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(place.name, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        const SizedBox(height: 2),
+                        Text(
+                          failed ? '삭제하지 못했어요' : [place.categoryLabel, if (area.isNotEmpty) area].join(' · '),
+                          style: failed ? AppTypography.meta.copyWith(color: AppColors.dangerText) : AppTypography.meta,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
+                        if (fromCourse) ...[
+                          const SizedBox(height: 3),
+                          Row(
+                            children: [
+                              const Icon(Icons.auto_awesome, size: 12, color: AppColors.ai),
+                              const SizedBox(width: 3),
+                              Flexible(
+                                child: Text(
+                                  recommendedLabel(recommendedIn),
+                                  style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w700),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (hasThird) ...[
+                          const SizedBox(height: 3),
+                          Row(
+                            children: [
+                              if (place.rating != null) ...[
+                                const Icon(Icons.star_rounded, size: 13, color: Color(0xFFF5A524)),
+                                const SizedBox(width: 2),
+                                Text(place.rating!.toStringAsFixed(1), style: AppTypography.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+                                const SizedBox(width: AppSpacing.xs),
+                              ],
+                              if (handle != null)
+                                Flexible(child: Text(handle, style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                            ],
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 선택 모드의 네모 체크 (행 · 전체 선택 공통, 07 D45). 누르는 영역은 행 전체라 체크 자체는 작게 둔다.
+class SelectCheckbox extends StatelessWidget {
+  const SelectCheckbox({super.key, required this.value, required this.onChanged});
+  final bool value;
+  final ValueChanged<bool?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: SizedBox.square(
+        dimension: 24,
+        child: Checkbox(
+          value: value,
+          onChanged: onChanged,
+          activeColor: AppColors.primary,
+          checkColor: Colors.white,
+          side: const BorderSide(color: AppColors.controlBorder, width: 1.6),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
         ),
       ),
     );
@@ -230,15 +322,17 @@ class HeaderTextButton extends StatelessWidget {
   const HeaderTextButton({
     super.key,
     required this.label,
-    required this.icon,
     required this.onPressed,
+    this.icon,
     this.active = false,
     this.primary = false,
     this.semanticLabel,
   });
 
   final String label;
-  final IconData icon;
+
+  /// 없으면 글자만 ('선택', '완료')
+  final IconData? icon;
   final VoidCallback onPressed;
   final bool active;
 
@@ -266,8 +360,10 @@ class HeaderTextButton extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, size: 17, color: fg),
-                  const SizedBox(width: 4),
+                  if (icon != null) ...[
+                    Icon(icon, size: 17, color: fg),
+                    const SizedBox(width: 4),
+                  ],
                   Text(label, style: AppTypography.label.copyWith(color: fg)),
                 ],
               ),

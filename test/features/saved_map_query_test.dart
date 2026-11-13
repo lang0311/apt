@@ -19,6 +19,9 @@ class _FakeSavedRepository implements SavedRepository {
   int? lastRadius;
 
   @override
+  Future<List<SavedPlaceItem>> fetchAiSavedPlaces() async => const [];
+
+  @override
   Future<List<SavedPlaceItem>> fetchSavedPlacesNearby(GeoPoint center, int radiusMeters, SavedPlaceQuery query) async {
     lastCenter = center;
     lastRadius = radiusMeters;

@@ -55,6 +55,10 @@ class MockSavedRepository implements SavedRepository {
   Future<List<SavedPlaceItem>> fetchSavedPlaces(SavedPlaceQuery query) =>
       _store.behavior.query(() => _filter(query), empty: () => const []);
 
+  /// Mock에는 코스를 저장할 때 장소가 저장 목록에 들어가는 동작이 없어서 늘 비어 있다.
+  @override
+  Future<List<SavedPlaceItem>> fetchAiSavedPlaces() => _store.behavior.query(() => const [], empty: () => const []);
+
   @override
   Future<List<SavedPlaceItem>> fetchSavedPlacesNearby(GeoPoint center, int radiusMeters, SavedPlaceQuery query) =>
       _store.behavior.query(

@@ -17,6 +17,8 @@ class ApiSavedRepository implements SavedRepository {
   Future<SavedSummary> fetchSummary() async => throw _notImplemented;
   @override
   Future<List<SavedPlaceItem>> fetchSavedPlaces(SavedPlaceQuery query) async => throw _notImplemented;
+  @override
+  Future<List<SavedPlaceItem>> fetchAiSavedPlaces() async => throw _notImplemented;
   // GET /api/v1/places/nearby?lat&lng&radius → 받은 목록에 query(카테고리·보관함·검색어)를 적용한다.
   @override
   Future<List<SavedPlaceItem>> fetchSavedPlacesNearby(GeoPoint center, int radiusMeters, SavedPlaceQuery query) async =>

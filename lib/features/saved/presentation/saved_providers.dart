@@ -18,6 +18,11 @@ final savedPlacesProvider = FutureProvider.autoDispose.family<List<SavedPlaceIte
   (ref, query) => ref.watch(savedRepositoryProvider).fetchSavedPlaces(query),
 );
 
+/// 저장됨의 AI 추천 탭: 코스를 저장할 때 AI 추천으로 들어온 장소 (07 D44)
+final aiSavedPlacesProvider = FutureProvider.autoDispose<List<SavedPlaceItem>>(
+  (ref) => ref.watch(savedRepositoryProvider).fetchAiSavedPlaces(),
+);
+
 class MapQuery {
   const MapQuery(this.bounds, this.query);
   final GeoBounds bounds;
@@ -101,6 +106,7 @@ void invalidateSavedDataIn(ProviderContainer container) => _savedData.forEach(co
 final _savedData = <ProviderOrFamily>[
   savedSummaryProvider,
   savedPlacesProvider,
+  aiSavedPlacesProvider,
   savedPlacesInBoundsProvider,
   collectionsProvider,
   collectionProvider,

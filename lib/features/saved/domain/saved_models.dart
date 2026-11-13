@@ -67,10 +67,13 @@ class SavedPlaceQuery {
 
 /// 지도/목록에 쓰는 저장 장소 + 내 위치 기준 거리 정보 (서버 제공 시)
 class SavedPlaceItem {
-  const SavedPlaceItem({required this.place, this.distanceMeters, this.walkMinutes});
+  const SavedPlaceItem({required this.place, this.distanceMeters, this.walkMinutes, this.recommendedIn});
   final Place place;
   final int? distanceMeters;
   final int? walkMinutes;
+
+  /// AI 추천 탭: 이 장소를 추천한 코스 이름. 어느 코스인지 모르면 null (07 D44)
+  final String? recommendedIn;
 }
 
 /// 저장 지도 기준

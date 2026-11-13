@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/saved/presentation/saved_selection.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 
@@ -27,18 +29,27 @@ const _tabs = [
 ];
 
 /// 하단 탭 5개. 활성 탭은 현재 라우트가 속한 branch 기준.
-class AppShell extends StatelessWidget {
+/// 저장됨에서 여러 곳을 고르는 중에는 하단 탭을 숨기고, 저장됨 화면이 그 자리에 삭제 버튼을 둔다 (07 D45).
+class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.shell});
   final StatefulNavigationShell shell;
 
+  static const _savedBranch = 2;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selecting = shell.currentIndex == _savedBranch && ref.watch(savedSelectionProvider).active;
     return Scaffold(
       body: shell,
-      bottomNavigationBar: AppBottomNav(
-        currentIndex: shell.currentIndex,
-        onTap: (i) => shell.goBranch(i, initialLocation: i == shell.currentIndex),
-      ),
+      bottomNavigationBar: selecting
+          ? null
+          : AppBottomNav(
+              currentIndex: shell.currentIndex,
+              onTap: (i) {
+                ref.read(savedSelectionProvider.notifier).exit();
+                shell.goBranch(i, initialLocation: i == shell.currentIndex);
+              },
+            ),
     );
   }
 }
