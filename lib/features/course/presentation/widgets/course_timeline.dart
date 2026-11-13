@@ -7,7 +7,6 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/states.dart';
 import '../../../party/domain/party_models.dart';
 import '../../../party/presentation/widgets/party_avatar_stack.dart';
-import '../../../place/domain/place.dart';
 import '../../domain/course_models.dart';
 import 'course_place_row.dart';
 import 'course_route_map.dart';
@@ -295,7 +294,7 @@ class _StopText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final place = stop.place;
-    final area = _shortArea(place);
+    final area = place.shortArea;
     final sub = [place.categoryLabel, if (area.isNotEmpty) area].join(' · ');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -318,16 +317,6 @@ class _StopText extends StatelessWidget {
   }
 }
 
-/// 주소에서 동네 이름만 뽑는다: '서울 성동구 성수동' → '성수동', '서울 마포구 서교동 367-5' → '서교동',
-/// 도로명 주소 '서울 마포구 토정로 56' → '마포구'. 서버 주소는 번지 · 건물 번호로 끝나므로 마지막 낱말을 그대로 쓰지 않는다.
-String _shortArea(Place p) {
-  final parts = p.displayArea.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
-  for (final pattern in [RegExp(r'^[가-힣]+\d*[동읍면리가]$'), RegExp(r'^[가-힣]+[구군시]$')]) {
-    final found = parts.lastWhere(pattern.hasMatch, orElse: () => '');
-    if (found.isNotEmpty) return found;
-  }
-  return '';
-}
 
 /// 일정 타임라인 (보는 상태). 장소 행은 옅은 흰 바탕으로 나누고, 행 사이 점선에 이동 정보를 둔다.
 /// 코스 상세와 4단계 결과가 같은 위젯을 쓴다.

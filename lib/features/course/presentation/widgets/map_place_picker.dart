@@ -480,10 +480,9 @@ class _InCourseTag extends StatelessWidget {
   }
 }
 
-/// '성수동 · 카페' (주소 마지막 단어 · 카테고리)
+/// '성수동 · 카페' (동네 · 카테고리, 번지는 쓰지 않는다)
 String _areaAndCategory(Place place) {
-  final parts = place.displayArea.trim().split(RegExp(r'\s+'));
-  final area = parts.isEmpty ? '' : parts.last;
+  final area = place.shortArea;
   return [if (area.isNotEmpty) area, place.categoryLabel].join(' · ');
 }
 

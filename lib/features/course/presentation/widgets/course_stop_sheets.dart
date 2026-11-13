@@ -67,7 +67,7 @@ Future<void> showStopSheet(BuildContext context, {required CourseStop stop, requ
                     children: [
                       Text(place.name, style: AppTypography.cardTitle, maxLines: 1, overflow: TextOverflow.ellipsis),
                       Text(
-                        [place.categoryLabel, if (place.displayArea.isNotEmpty) place.displayArea, if (!stop.isAi) '내가 고른 장소'].join(' · '),
+                        [place.categoryLabel, if (place.shortArea.isNotEmpty) place.shortArea, if (!stop.isAi) '내가 고른 장소'].join(' · '),
                         style: AppTypography.caption,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

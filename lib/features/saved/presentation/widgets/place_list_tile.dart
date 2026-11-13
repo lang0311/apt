@@ -49,7 +49,7 @@ class PlaceListTile extends StatelessWidget {
               Text(place.name, style: AppTypography.cardTitle, maxLines: 1, overflow: TextOverflow.ellipsis),
               const SizedBox(height: 4),
               Text(
-                subtitle ?? '${place.displayArea} · ${place.categoryLabel}',
+                subtitle ?? [if (place.shortArea.isNotEmpty) place.shortArea, place.categoryLabel].join(' · '),
                 style: AppTypography.meta,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

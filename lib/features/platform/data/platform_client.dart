@@ -54,6 +54,8 @@ class PlatformClient {
       id: id,
       name: p['name'] as String,
       address: (p['road_address'] ?? p['address'] ?? '').toString(),
+      // 동 이름은 지번 주소(`address`)에만 있어서 짧은 동네 표기는 지번 주소로 뽑는다 ('상수동'). 장소 상세의 주소 줄은 도로명
+      areaLabel: _text(p['address']),
       categoryKey: category,
       categoryLabel: category.split('>').last.trim(),
       location: p['lat'] is num && p['lon'] is num

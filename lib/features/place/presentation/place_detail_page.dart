@@ -269,7 +269,7 @@ class _TitleCard extends StatelessWidget {
               children: [
                 Text(place.name, style: AppTypography.display),
                 const SizedBox(height: 4),
-                Text([place.categoryLabel, if (place.displayArea.isNotEmpty) place.displayArea].join(' · '), style: AppTypography.body),
+                Text([place.categoryLabel, if (place.shortArea.isNotEmpty) place.shortArea].join(' · '), style: AppTypography.body),
                 if (status.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.xs),
                   Text(status, style: AppTypography.label.copyWith(color: AppColors.primary)),

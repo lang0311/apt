@@ -49,8 +49,8 @@ class SavedPlaceRow extends StatelessWidget {
     return name.endsWith('코스') ? '$name에서 추천' : '$name 코스에서 추천';
   }
 
-  /// '서울 성동구 성수동' → '성수동'
-  static String shortArea(Place p) => p.displayArea.trim().split(RegExp(r'\s+')).last;
+  /// '서울 성동구 성수동' → '성수동', '서울 강서구 화곡로 416' → '강서구' (번지는 쓰지 않는다, [Place.shortArea])
+  static String shortArea(Place p) => p.shortArea;
 
   /// 출처 계정을 '@계정' 꼴로. 없으면 null.
   static String? _handleOf(Place place) {

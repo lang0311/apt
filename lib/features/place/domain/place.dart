@@ -53,6 +53,9 @@ class Place {
 
   String get displayArea => areaLabel ?? address;
 
+  /// 목록 · 카드 · 시트에 쓰는 짧은 동네 이름 ('성수동', '마포구', '김포시'). 주소는 장소 상세의 `주소` 줄에서만 길게 보여 준다.
+  String get shortArea => shortAreaOf(displayArea);
+
   Place copyWith({bool? isSaved}) => Place(
         id: id,
         name: name,
@@ -93,4 +96,17 @@ class PlaceDetail {
 
   /// 내가 이 장소를 넣어 둔 보관함
   final List<String> collectionIds;
+}
+
+/// 주소에서 동네 이름만 뽑는다. 마지막 낱말이 번지 · 건물 번호('416', '134-6')일 수 있어서 그대로 쓰지 않는다.
+/// 동 · 읍 · 면 · 리 · 가('성수동', '을지로3가')가 있으면 그것, 없으면(도로명 주소) 구 · 군 · 시('마포구', '김포시'),
+/// 그것도 없으면 빈 문자열.
+/// '서울 마포구 서교동 367-5' → '서교동' · '서울 강서구 화곡로 416' → '강서구' · '경기 김포시 김포한강2로24번길 134-6' → '김포시'
+String shortAreaOf(String address) {
+  final parts = address.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+  for (final pattern in [RegExp(r'^[가-힣]+\d*[동읍면리가]$'), RegExp(r'^[가-힣]+[구군시]$')]) {
+    final found = parts.lastWhere(pattern.hasMatch, orElse: () => '');
+    if (found.isNotEmpty) return found;
+  }
+  return '';
 }
