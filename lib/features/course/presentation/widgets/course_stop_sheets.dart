@@ -3,18 +3,18 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
-import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/overlays.dart';
+import '../../../saved/presentation/widgets/place_image.dart';
 import '../../domain/course_models.dart';
 
 /// 장소 시트 한 줄의 색 구분
 enum StopSheetTone {
   normal,
 
-  /// AI 추천 동작(바꾸기) — 주황 아이콘
+  /// AI 추천 동작(바꾸기). 아이콘 색은 보통 줄과 같다 — 주황은 '추천 이유 보기'에만(07 D17 · D60)
   ai,
 
-  /// 다른 화면으로 가는 동작 — 파랑 아이콘
+  /// 다른 화면으로 가는 동작 (오른쪽 ›)
   link,
 
   /// 차단처럼 되돌리기 어려운 동작 — 빨간 아이콘·글자, 따로 떼어 둔다
@@ -44,9 +44,28 @@ class StopSheetAction {
   final bool chevron;
 }
 
-/// 장소 머리(사진 · 이름 · 부제) + (AI 장소) 추천 이유 보기 + 묶음별 동작. 묶음 사이는 바탕색 띠로 나눈다.
-Future<void> showStopSheet(BuildContext context, {required CourseStop stop, required List<List<StopSheetAction>> groups}) {
+/// 장소 머리(사진 또는 카테고리 색 칸 · 이름 · 부제) + 묶음별 동작. 묶음 사이는 바탕색 띠로 나눈다.
+/// 줄 아이콘은 색 칸 없이 선 아이콘만 둔다(07 D60). AI 장소의 '추천 이유 보기'는 첫 묶음의
+/// [reasonAfter]번째 줄 뒤에 둔다(0이면 맨 위 — 4단계 결과는 '다른 곳으로 바꾸기' 다음).
+Future<void> showStopSheet(
+  BuildContext context, {
+  required CourseStop stop,
+  required List<List<StopSheetAction>> groups,
+  int reasonAfter = 0,
+}) {
   final place = stop.place;
+  final reason = stop.isAi && stop.aiReason != null ? _ReasonRow(reason: stop.aiReason!) : null;
+  const line = Divider(height: 1, indent: AppSpacing.screenH, endIndent: AppSpacing.screenH, color: AppColors.divider);
+  List<Widget> rows(BuildContext ctx, int g) {
+    final items = <Widget>[
+      for (final a in groups[g]) _ActionRow(action: a, sheetContext: ctx),
+    ];
+    if (g == 0 && reason != null) items.insert(reasonAfter.clamp(0, items.length), reason);
+    return [
+      for (final (i, w) in items.indexed) ...[if (i > 0) line, w],
+    ];
+  }
+
   return showAppBottomSheet<void>(
     context,
     builder: (ctx) => SingleChildScrollView(
@@ -59,7 +78,8 @@ Future<void> showStopSheet(BuildContext context, {required CourseStop stop, requ
             padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.xxs, AppSpacing.screenH, AppSpacing.sm),
             child: Row(
               children: [
-                AppNetworkImage(url: place.imageUrl, width: 44, height: 44, radius: 12),
+                // 저장됨 · 장소 고르기와 같은 썸네일 (사진이 없으면 카테고리 색 칸)
+                PlaceImage(place: place, width: 44, height: 44, radius: AppRadius.small, iconSize: 20),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Column(
@@ -78,10 +98,9 @@ Future<void> showStopSheet(BuildContext context, {required CourseStop stop, requ
               ],
             ),
           ),
-          if (stop.isAi && stop.aiReason != null) _ReasonRow(reason: stop.aiReason!),
           for (var g = 0; g < groups.length; g++) ...[
             if (g > 0) Container(height: 6, color: AppColors.bg, margin: const EdgeInsets.symmetric(vertical: 4)),
-            for (final a in groups[g]) _ActionRow(action: a, sheetContext: ctx),
+            ...rows(ctx, g),
           ],
         ],
       ),
@@ -119,14 +138,9 @@ class _ReasonRowState extends State<_ReasonRow> {
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH, vertical: 8),
                 child: Row(
                   children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(color: AppColors.aiSoft, borderRadius: BorderRadius.circular(AppRadius.small)),
-                      child: const Icon(Icons.auto_awesome, size: 20, color: AppColors.aiText),
-                    ),
+                    const SizedBox(width: 28, child: Icon(Icons.auto_awesome, size: 20, color: AppColors.ai)),
                     const SizedBox(width: AppSpacing.sm),
-                    Expanded(child: Text('추천 이유 보기', style: AppTypography.bodyStrong)),
+                    Expanded(child: Text('추천 이유 보기', style: AppTypography.bodyStrong.copyWith(color: AppColors.aiText))),
                     Icon(_open ? Icons.expand_less_rounded : Icons.expand_more_rounded, color: AppColors.textSecondary),
                   ],
                 ),
@@ -136,8 +150,8 @@ class _ReasonRowState extends State<_ReasonRow> {
         ),
         if (_open)
           Padding(
-            // 아이콘(36) + 간격만큼 들여 써서 줄 제목 아래에 맞춘다
-            padding: const EdgeInsets.fromLTRB(AppSpacing.screenH + 36 + AppSpacing.sm, 0, AppSpacing.screenH, AppSpacing.sm),
+            // 아이콘(28) + 간격만큼 들여 써서 줄 제목 아래에 맞춘다
+            padding: const EdgeInsets.fromLTRB(AppSpacing.screenH + 28 + AppSpacing.sm, 0, AppSpacing.screenH, AppSpacing.sm),
             child: Text(widget.reason, style: AppTypography.body.copyWith(color: AppColors.textPrimary, height: 1.55)),
           ),
       ],
@@ -150,17 +164,10 @@ class _ActionRow extends StatelessWidget {
   final StopSheetAction action;
   final BuildContext sheetContext;
 
-  /// 아이콘 원의 (바탕, 아이콘) 색
-  (Color, Color) get _iconColors => switch (action.tone) {
-        StopSheetTone.danger => (AppColors.dangerSoft, AppColors.dangerText),
-        StopSheetTone.ai => (AppColors.aiSoft, AppColors.aiText),
-        StopSheetTone.link => (AppColors.primarySoft, AppColors.primary),
-        StopSheetTone.normal => (AppColors.surfaceMuted, AppColors.textPrimary),
-      };
-
   @override
   Widget build(BuildContext context) {
-    final (bg, fg) = _iconColors;
+    // 색 칸 없이 선 아이콘만. 지우기 · 차단만 빨강
+    final fg = action.tone == StopSheetTone.danger ? AppColors.dangerText : AppColors.textPrimary;
     return InkWell(
       onTap: () {
         Navigator.of(sheetContext).pop();
@@ -172,12 +179,7 @@ class _ActionRow extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH, vertical: 8),
           child: Row(
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(AppRadius.small)),
-                child: Icon(action.icon, size: 20, color: fg),
-              ),
+              SizedBox(width: 28, child: Icon(action.icon, size: 22, color: fg)),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
@@ -216,7 +218,8 @@ class _ActionRow extends StatelessWidget {
 }
 
 /// 4단계 결과에서 장소를 누를 때.
-/// AI 장소: 바꾸기 · 이 코스에서 빼기(이번만) / 앞으로 추천하지 않기(차단) / 장소 정보.
+/// AI 장소: 바꾸기 · 추천 이유 · 이 코스에서 빼기(이번만) · 장소 정보 / 앞으로 추천하지 않기(차단).
+/// 가장 많이 쓸 바꾸기를 맨 위에 둔다(07 D60).
 /// 내가 고른 장소: 장소 정보 · 이 코스에서 빼기 (차단 없음, 저장됨에는 그대로).
 Future<void> showResultStopSheet(
   BuildContext context, {
@@ -232,7 +235,7 @@ Future<void> showResultStopSheet(
       [info, _removeOwn(onRemove)],
     ]);
   }
-  return showStopSheet(context, stop: stop, groups: [
+  return showStopSheet(context, stop: stop, reasonAfter: onSwap != null ? 1 : 0, groups: [
     [
       if (onSwap != null)
         StopSheetAction(
@@ -244,9 +247,9 @@ Future<void> showResultStopSheet(
           onTap: onSwap,
         ),
       _removeAi(onRemove),
+      info,
     ],
     if (onBlock != null) [_block(onBlock)],
-    [info],
   ]);
 }
 

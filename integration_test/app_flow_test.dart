@@ -218,10 +218,10 @@ void main() {
 
     // 다시 추천 중 취소 → 이전 일정 그대로
     await tapText(tester, '다시 추천', scroll: false);
-    await waitFor(tester, find.text('AI 장소를 다시 고르고 있어요'));
+    await waitFor(tester, find.textContaining('다시 고르고 있어요'));
     await tapText(tester, '취소', scroll: false);
     await expectSnack(tester, '추천을 취소했어요');
-    expect(find.text('AI 장소를 다시 고르고 있어요'), findsNothing);
+    expect(find.textContaining('다시 고르고 있어요'), findsNothing);
     await waitGone(tester, find.byType(SnackBar), timeout: const Duration(seconds: 8));
 
     await tapText(tester, '다시 추천', scroll: false);

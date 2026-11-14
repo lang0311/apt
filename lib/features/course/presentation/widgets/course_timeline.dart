@@ -369,9 +369,12 @@ Widget _marker(CourseStop stop, int? number) => StopMarker(source: stop.source, 
 /// 장소 이름 아래 줄: 카테고리 · 지역. AI 추천 여부는 번호 원(주황 ✦)으로 구분하고,
 /// 추천 이유는 장소를 눌렀을 때 시트의 '추천 이유 보기'에서 보여 준다 (07 D40).
 class _StopText extends StatelessWidget {
-  const _StopText({required this.stop, this.prefix});
+  const _StopText({required this.stop, this.prefix, this.changed = false});
   final CourseStop stop;
   final String? prefix;
+
+  /// 다시 추천으로 바뀐 장소 — 이름 옆에 작은 '바뀜' (주황은 AI 추천 장소 표시라 써도 된다, 07 D17 · D60)
+  final bool changed;
 
   @override
   Widget build(BuildContext context) {
@@ -382,7 +385,15 @@ class _StopText extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(place.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
+        Row(
+          children: [
+            Flexible(child: Text(place.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis)),
+            if (changed) ...[
+              const SizedBox(width: 6),
+              Text('바뀜', style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w800)),
+            ],
+          ],
+        ),
         const SizedBox(height: 1),
         Text.rich(
           TextSpan(children: [
@@ -478,8 +489,10 @@ class _ViewTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: highlighted ? AppColors.aiSoft : Colors.transparent,
+    return _ChangedFlash(
+      on: highlighted,
+      child: Material(
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(AppRadius.medium),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppRadius.medium),
@@ -515,7 +528,7 @@ class _ViewTile extends StatelessWidget {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Align(alignment: Alignment.centerLeft, child: _StopText(stop: stop)),
+                    child: Align(alignment: Alignment.centerLeft, child: _StopText(stop: stop, changed: highlighted)),
                   ),
                 ),
                 if (onMore != null)
@@ -529,6 +542,60 @@ class _ViewTile extends StatelessWidget {
             ),
           ),
         ),
+      ),
+      ),
+    );
+  }
+}
+
+/// 다시 추천으로 바뀐 줄: 주황 바탕을 약 4초 보여 주고 옅어진다. 그 뒤에는 이름 옆 '바뀜'만 남는다(07 D60).
+class _ChangedFlash extends StatefulWidget {
+  const _ChangedFlash({required this.on, required this.child});
+  final bool on;
+  final Widget child;
+
+  @override
+  State<_ChangedFlash> createState() => _ChangedFlashState();
+}
+
+class _ChangedFlashState extends State<_ChangedFlash> with SingleTickerProviderStateMixin {
+  // 4초 동안 그대로, 마지막 0.6초에 옅어진다
+  late final AnimationController _c;
+  late final CurvedAnimation _fade;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 4600));
+    _fade = CurvedAnimation(parent: _c, curve: const Interval(4000 / 4600, 1, curve: Curves.easeOut));
+    if (widget.on) _c.forward();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ChangedFlash old) {
+    super.didUpdateWidget(old);
+    if (widget.on && !old.on) _c.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _fade.dispose();
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.on) return widget.child;
+    return AnimatedBuilder(
+      animation: _fade,
+      child: widget.child,
+      builder: (_, child) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: Color.lerp(AppColors.aiSoft, AppColors.aiSoft.withValues(alpha: 0), _fade.value),
+          borderRadius: BorderRadius.circular(AppRadius.medium),
+        ),
+        child: child,
       ),
     );
   }
@@ -720,12 +787,10 @@ class _EditTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(AppRadius.medium);
-    return Material(
-      color: highlighted
-          ? AppColors.aiSoft
-          : added
-              ? AppColors.primarySoft
-              : Colors.transparent,
+    return _ChangedFlash(
+      on: highlighted,
+      child: Material(
+      color: added && !highlighted ? AppColors.primarySoft : Colors.transparent,
       borderRadius: radius,
       child: InkWell(
         borderRadius: radius,
@@ -745,7 +810,7 @@ class _EditTile extends StatelessWidget {
               ),
               _marker(stop, number),
               const SizedBox(width: 10),
-              Expanded(child: _StopText(stop: stop, prefix: added ? '새로 추가' : null)),
+              Expanded(child: _StopText(stop: stop, prefix: added ? '새로 추가' : null, changed: highlighted)),
               IconButton(
                 tooltip: '${stop.place.name} 빼기',
                 onPressed: enabled ? onRemove : null,
@@ -759,6 +824,7 @@ class _EditTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -125,6 +127,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                     title: '일정 편집',
                     child: _WithBanner(
                       show: state.loading,
+                      count: state.loadingIds.length,
                       child: CourseEditList(
                         stops: state.stops,
                         enabled: !busy,
@@ -147,15 +150,24 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                             padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
                             child: Text('일정에 장소가 없어요. "편집"에서 장소를 추가해 주세요.', style: AppTypography.meta),
                           )
-                        : _WithBanner(
-                            show: state.loading,
-                            child: _withTaste(state.recommendation?.taste, state.stops, draft.partyId, legend: CourseStopLegend(stops: state.stops), CourseTimeline(
+                        : _withTaste(
+                            state.recommendation?.taste,
+                            state.stops,
+                            draft.partyId,
+                            legend: CourseStopLegend(stops: state.stops),
+                            banner: state.loading
+                                ? RecommendingBanner(
+                                    count: state.loadingIds.length,
+                                    onCancel: () => cancelRecommendationWithNotice(context, ref),
+                                  )
+                                : null,
+                            CourseTimeline(
                               stops: state.stops,
                               highlightIds: state.changedIds,
                               loadingIds: state.loadingIds,
                               onTapStop: busy ? null : (s) => showResultSheet(context, ref, s),
                               onMore: busy ? null : (s) => showResultSheet(context, ref, s),
-                            )),
+                            ),
                           ),
                   ),
                 if (_editing)
@@ -199,9 +211,8 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                       Expanded(
                         flex: 2,
                         child: AppButton(
-                          label: '다시 추천',
+                          label: state.loading ? '다시 추천 중…' : '다시 추천',
                           variant: AppButtonVariant.white,
-                          loading: state.loading,
                           onPressed: busy ? null : () => recommendAgainWithUndo(context, ref),
                         ),
                       ),
@@ -233,9 +244,10 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
 
 /// 다시 추천하는 동안 일정 위에 진행 줄(+ 취소)을 붙인다
 class _WithBanner extends ConsumerWidget {
-  const _WithBanner({required this.show, required this.child});
+  const _WithBanner({required this.show, required this.child, this.count = 0});
   final bool show;
   final Widget child;
+  final int count;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -243,7 +255,7 @@ class _WithBanner extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        RecommendingBanner(onCancel: () => cancelRecommendationWithNotice(context, ref)),
+        RecommendingBanner(count: count, onCancel: () => cancelRecommendationWithNotice(context, ref)),
         child,
       ],
     );
@@ -251,7 +263,7 @@ class _WithBanner extends ConsumerWidget {
 }
 
 /// 기다리는 동안: 결과와 같은 자리에 뼈대(제목 → 지도 자리의 단계 표시 → 일정)
-class _Waiting extends StatelessWidget {
+class _Waiting extends StatefulWidget {
   const _Waiting({required this.title, required this.date, required this.stage, required this.isParty});
   final String title;
   final DateTime? date;
@@ -259,11 +271,44 @@ class _Waiting extends StatelessWidget {
   final bool isParty;
 
   @override
+  State<_Waiting> createState() => _WaitingState();
+}
+
+class _WaitingState extends State<_Waiting> {
+  // 한 단계에 몇 분씩 머물 수 있어 멈춘 것처럼 보이지 않게 지난 시간을 센다(07 D60)
+  final _watch = Stopwatch()..start();
+  Timer? _tick;
+
+  @override
+  void initState() {
+    super.initState();
+    _tick = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _tick?.cancel();
+    super.dispose();
+  }
+
+  static String _elapsed(Duration d) {
+    final m = d.inMinutes;
+    final s = d.inSeconds % 60;
+    return m == 0 ? '$s초 지났어요' : '$m분 $s초 지났어요';
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final title = widget.title;
+    final date = widget.date;
+    final stage = widget.stage;
+    final isParty = widget.isParty;
     return ListView(
       padding: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.lg),
       children: [
-        CourseHero(title: '코스를 만들고 있어요', meta: [title, if (date != null) formatMonthDayWeekday(date!)].join(' · ')),
+        CourseHero(title: '코스를 만들고 있어요', meta: [title, if (date != null) formatMonthDayWeekday(date)].join(' · ')),
         const SizedBox(height: AppSpacing.sm),
         Padding(
           padding: AppSpacing.screenPadding,
@@ -272,7 +317,18 @@ class _Waiting extends StatelessWidget {
             children: [
               AppCard(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-                child: _Stages(stage: stage ?? RecommendationStage.findCandidates, isParty: isParty),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _Stages(stage: stage ?? RecommendationStage.findCandidates, isParty: isParty),
+                    const Divider(height: AppSpacing.md, color: AppColors.divider),
+                    // 초마다 바뀌는 글자라 스크린리더에는 읽어 주지 않는다
+                    ExcludeSemantics(
+                      child: Text(_elapsed(_watch.elapsed), style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+                    ),
+                    const SizedBox(height: 2),
+                  ],
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
               SectionCard(
@@ -320,6 +376,14 @@ class _Stages extends StatelessWidget {
     RecommendationStage.organize: '동선 정리',
   };
 
+  /// 지금 단계 아래에 무엇을 하는 중인지 한 줄
+  static const _doing = {
+    RecommendationStage.findCandidates: '갈 만한 장소를 찾고 있어요',
+    RecommendationStage.checkPlaces: '찾은 장소가 실제로 있는지 지도에서 확인하고 있어요',
+    RecommendationStage.matchTaste: '파티원 취향에 맞는 곳을 고르고 있어요',
+    RecommendationStage.organize: '가기 좋은 순서로 정리하고 있어요',
+  };
+
   /// 끝난 단계 = 체크, 지금 단계 = 진행 원, 남은 단계 = 빈 원
   Widget _icon(RecommendationStage s) {
     if (s.index < stage.index) {
@@ -351,7 +415,7 @@ class _Stages extends StatelessWidget {
     ];
     return Semantics(
       liveRegion: true,
-      label: '${_labels[stage]} 중',
+      label: '${_labels[stage]} 중. ${_doing[stage]}',
       excludeSemantics: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -360,14 +424,23 @@ class _Stages extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox.square(dimension: 20, child: _icon(s)),
                   const SizedBox(width: 10),
-                  Text(
-                    _labels[s]!,
-                    style: AppTypography.bodyStrong.copyWith(
-                      color: _textColor(s),
-                      fontWeight: s == stage ? FontWeight.w700 : FontWeight.w500,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _labels[s]!,
+                          style: AppTypography.bodyStrong.copyWith(
+                            color: _textColor(s),
+                            fontWeight: s == stage ? FontWeight.w700 : FontWeight.w500,
+                          ),
+                        ),
+                        if (s == stage) Text(_doing[s]!, style: AppTypography.caption),
+                      ],
                     ),
                   ),
                 ],
@@ -381,9 +454,11 @@ class _Stages extends StatelessWidget {
 
 /// 일정 위에 반영한 취향 한 줄 (07 D46)
 /// 일정 카드 안: 범례 → 반영한 취향 → 타임라인 (코스 상세와 같은 순서)
-Widget _withTaste(AppliedTaste? taste, List<CourseStop> stops, String? partyId, Widget timeline, {Widget? legend}) =>
+Widget _withTaste(AppliedTaste? taste, List<CourseStop> stops, String? partyId, Widget timeline, {Widget? legend, Widget? banner}) =>
     Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       ?legend,
       if (taste != null) AppliedTasteSection(taste: taste, stops: stops, partyId: partyId),
+      // 다시 추천하는 동안의 한 줄 (07 D60)
+      ?banner,
       timeline,
     ]);
