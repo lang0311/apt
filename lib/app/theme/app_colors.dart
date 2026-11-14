@@ -38,6 +38,9 @@ abstract final class AppColors {
   static const divider = Color(0xFFE9EEF5);
   static const progressInactive = Color(0xFFDCE4F0);
 
+  /// 비활성 버튼 바탕은 `progressInactive`, 글자는 이 색 (바탕 위 약 4.7:1). 투명도로 흐리게 하지 않는다.
+  static const disabledText = Color(0xFF56637B);
+
   /// AI 추천 전용. AI가 추천한 것에만 쓴다.
   static const ai = Color(0xFFF39A45);
   static const aiSoft = Color(0xFFFFF1E4);

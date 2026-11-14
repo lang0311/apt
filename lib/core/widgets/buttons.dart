@@ -50,13 +50,16 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = onPressed != null && !loading;
-    final (bg, fg, border) = switch (variant) {
-      AppButtonVariant.primary => (AppColors.primary, Colors.white, null),
-      AppButtonVariant.dark => (AppColors.ink, Colors.white, null),
-      AppButtonVariant.outline => (AppColors.surface, AppColors.primary, AppColors.primary),
-      AppButtonVariant.soft => (AppColors.primarySoft, AppColors.primary, null),
-      AppButtonVariant.white => (AppColors.surface, AppColors.textPrimary, AppColors.border),
-    };
+    // 비활성은 투명도로 흐리지 않고 회색 바탕 + 진한 회색 글자로 (로딩 중에는 원래 색을 유지)
+    final (bg, fg, border) = !enabled && !loading
+        ? (AppColors.progressInactive, AppColors.disabledText, null)
+        : switch (variant) {
+            AppButtonVariant.primary => (AppColors.primary, Colors.white, null),
+            AppButtonVariant.dark => (AppColors.ink, Colors.white, null),
+            AppButtonVariant.outline => (AppColors.surface, AppColors.primary, AppColors.primary),
+            AppButtonVariant.soft => (AppColors.primarySoft, AppColors.primary, null),
+            AppButtonVariant.white => (AppColors.surface, AppColors.textPrimary, AppColors.border),
+          };
 
     final child = loading
         ? SizedBox.square(
@@ -77,24 +80,21 @@ class AppButton extends StatelessWidget {
             ],
           );
 
-    return Opacity(
-      opacity: enabled || loading ? 1 : 0.4,
-      child: SizedBox(
-        height: height,
-        width: expand ? double.infinity : null,
-        child: Material(
-          color: bg,
-          shape: RoundedRectangleBorder(
-            borderRadius: AppRadius.buttonAll,
-            side: border == null ? BorderSide.none : BorderSide(color: border, width: 1.4),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: enabled ? onPressed : null,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: Center(child: child),
-            ),
+    return SizedBox(
+      height: height,
+      width: expand ? double.infinity : null,
+      child: Material(
+        color: bg,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppRadius.buttonAll,
+          side: border == null ? BorderSide.none : BorderSide(color: border, width: 1.4),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: enabled ? onPressed : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            child: Center(child: child),
           ),
         ),
       ),
