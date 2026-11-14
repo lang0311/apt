@@ -24,7 +24,7 @@ const _tabs = [
   _Tab(0, '홈', Icons.home_outlined, Icons.home_rounded),
   _Tab(2, '저장됨', Icons.bookmark_border_rounded, Icons.bookmark_rounded),
   _Tab(1, '코스', Icons.route_outlined, Icons.route_rounded, raised: true),
-  _Tab(3, '추출', Icons.add_box_outlined, Icons.add_box_rounded),
+  _Tab(3, '장소 추가', Icons.add_box_outlined, Icons.add_box_rounded),
   _Tab(4, '마이', Icons.person_outline_rounded, Icons.person_rounded),
 ];
 

@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/routes.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/instagram_url.dart';
 import '../../../../core/widgets/headers.dart';
 import '../../../../core/widgets/inputs.dart';
 import '../../../../core/widgets/surfaces.dart';
+import '../../../saved/presentation/widgets/place_image.dart';
+import '../extraction_providers.dart';
 import '../widgets/extracted_place_card.dart';
 
-/// #10 링크 입력 (폴백). 주 경로는 릴스 "공유 → 우리 앱"이며, 공유로 들어오면 이 화면을 건너뛴다.
-/// 맨 위 링크 줄은 찾는 중 · 찾은 장소 화면의 링크 줄과 같은 모양이다 (07 D26).
-class LinkInputPage extends StatefulWidget {
+/// #10 장소 추가 탭 (11-14 '추출'에서 이름 변경). 주 경로인 릴스 공유 3단계를 맨 위에 두고,
+/// 링크 붙여 넣기 · 지도에서 검색하기는 '다른 방법'으로 묶고, 아래에 최근 추가한 곳을 보여 준다.
+/// 공유로 들어오면 이 화면을 건너뛴다. 링크 줄은 찾는 중 · 찾은 장소 화면의 링크 줄과 같은 모양이다 (07 D26).
+class LinkInputPage extends ConsumerStatefulWidget {
   const LinkInputPage({super.key});
 
   @override
-  State<LinkInputPage> createState() => _LinkInputPageState();
+  ConsumerState<LinkInputPage> createState() => _LinkInputPageState();
 }
 
-class _LinkInputPageState extends State<LinkInputPage> {
+class _LinkInputPageState extends ConsumerState<LinkInputPage> {
   final _url = TextEditingController();
   final _focus = FocusNode();
   String? _error;
@@ -57,12 +62,31 @@ class _LinkInputPageState extends State<LinkInputPage> {
         child: ListView(
           padding: const EdgeInsets.only(bottom: AppSpacing.xl),
           children: [
-            const PageTitleHeader(title: '추출'),
+            const PageTitleHeader(title: '장소 추가'),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // 주 경로: 릴스에서 공유 (순서가 있어 번호를 붙인다)
+                  SectionCard(
+                    title: '릴스에서 바로 저장하기',
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                      child: Column(
+                        children: const [
+                          _GuideRow(step: 1, icon: Icons.share_outlined, text: '릴스에서 공유를 눌러요'),
+                          _GuideRow(step: 2, icon: Icons.more_horiz_rounded, text: '앱 목록에서 APT를 골라요'),
+                          _GuideRow(step: 3, icon: Icons.check_rounded, text: '찾은 장소를 확인하고 저장해요'),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.xs, 0, AppSpacing.xs, AppSpacing.xs),
+                    child: Text('다른 방법', style: AppTypography.section),
+                  ),
                   ExtractSourceRow(
                     focused: _focus.hasFocus,
                     leading: const LinkTile(),
@@ -127,23 +151,62 @@ class _LinkInputPageState extends State<LinkInputPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  SectionCard(
-                    title: '릴스에서 바로 저장하기',
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                      child: Column(
-                        children: const [
-                          _GuideRow(icon: Icons.share_outlined, text: '릴스에서 공유를 눌러요'),
-                          _GuideRow(icon: Icons.more_horiz_rounded, text: '앱 목록에서 APT를 골라요'),
-                          _GuideRow(icon: Icons.check_rounded, text: '찾은 장소를 확인하고 저장해요'),
-                        ],
-                      ),
-                    ),
-                  ),
+                  const _RecentAdded(),
                 ],
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 최근 추가한 곳 (다섯 곳까지). 없으면 섹션째 숨긴다
+class _RecentAdded extends ConsumerWidget {
+  const _RecentAdded();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final recent = ref.watch(recentExtractionsProvider).value ?? const [];
+    if (recent.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.lg),
+      child: SectionCard(
+        title: '최근 추가한 곳',
+        actionLabel: '모두 보기',
+        onAction: () => context.go(AppRoutes.saved),
+        child: DividedRows(
+          indent: SectionCard.innerPadding + 44 + AppSpacing.sm,
+          children: [
+            for (final r in recent.take(5))
+              InkWell(
+                onTap: () => context.push(AppRoutes.place(r.place.id)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: 8),
+                  child: Row(
+                    children: [
+                      PlaceImage(place: r.place, width: 44, height: 44, radius: 12, iconSize: 20),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(r.place.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
+                            Text(
+                              [r.place.categoryLabel, if (r.place.shortArea.isNotEmpty) r.place.shortArea].join(' · '),
+                              style: AppTypography.caption,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(formatRecentDate(r.extractedAt), style: AppTypography.caption),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -164,7 +227,8 @@ class _SearchRowLabel extends StatelessWidget {
 }
 
 class _GuideRow extends StatelessWidget {
-  const _GuideRow({required this.icon, required this.text});
+  const _GuideRow({required this.step, required this.icon, required this.text});
+  final int step;
   final IconData icon;
   final String text;
 
@@ -185,7 +249,15 @@ class _GuideRow extends StatelessWidget {
             child: Icon(icon, size: 17, color: AppColors.textPrimary),
           ),
           const SizedBox(width: AppSpacing.sm),
-          Expanded(child: Text(text, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w500))),
+          Expanded(
+            child: Text.rich(
+              TextSpan(children: [
+                TextSpan(text: '$step  ', style: AppTypography.bodyStrong.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
+                TextSpan(text: text),
+              ]),
+              style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w500),
+            ),
+          ),
         ],
       ),
     );
