@@ -11,6 +11,7 @@ import '../../auth/domain/auth_models.dart';
 import '../../auth/domain/auth_repository.dart';
 import '../../saved/data/api_saved_repository.dart';
 import '../../saved/domain/saved_models.dart';
+import '../../saved/domain/saved_repository.dart';
 import '../../place/domain/place.dart';
 import '../../place/domain/place_repository.dart';
 import '../../place/domain/place_search_repository.dart';
@@ -569,16 +570,30 @@ class PlatformHomeRepository implements HomeRepository {
 }
 
 class PlatformMyRepository implements MyRepository {
-  PlatformMyRepository(this._platform);
+  PlatformMyRepository(this._platform, this._saved, this._courses);
   final PlatformClient _platform;
+  final SavedRepository _saved;
+  final CourseRepository _courses;
+
+  /// 이름만 서버 요약을 쓴다. 숫자는 눌러서 가는 목록과 같은 기준으로 앱이 센다 (07 D44와 같은 방식).
+  /// 서버 `/mobile/summary`의 숫자는 목록과 달라서 마이와 목록이 어긋난다:
+  /// - `saved_count`: 코스 저장으로 들어온 AI 추천 장소까지 센다 (저장됨 탭은 직접 저장한 곳만)
+  /// - `created_course_count`: 저장하지 않은 추천 결과(draft)와 내가 만든 파티 코스까지 센다 (코스 탭 '내 코스'는 확정한 개인 코스만)
+  /// - `joined_course_count`: 남이 만든 파티 코스만 센다 (코스 탭 '함께하는 코스'는 내가 만든 파티 코스도 포함)
+  /// NEEDS BACKEND: 요약이 목록과 같은 기준(확정 코스만, 개인/파티 구분)으로 나뉘면 서버 값을 쓴다.
   @override
   Future<MyProfile> fetchProfile() async {
     final summary = await _platform.get('/mobile/summary');
+    final (saved, mine, party) = await (
+      _saved.fetchSummary(),
+      _courses.fetchMyCourses(),
+      _courses.fetchPartyCourses(),
+    ).wait;
     return MyProfile(
       nickname: summary['name'] as String,
-      savedPlaceCount: summary['saved_count'] as int,
-      createdCourseCount: summary['created_course_count'] as int,
-      joinedCourseCount: summary['joined_course_count'] as int,
+      savedPlaceCount: saved.totalCount,
+      createdCourseCount: mine.length,
+      joinedCourseCount: party.length,
     );
   }
 }

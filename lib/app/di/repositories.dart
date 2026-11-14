@@ -116,5 +116,9 @@ final preferenceRepositoryProvider = Provider<PreferenceRepository>((ref) => swi
 final myRepositoryProvider = Provider<MyRepository>((ref) => switch (ref.watch(dataSourceProvider)) {
       DataSource.mock => MockMyRepository(ref.watch(mockStoreProvider)),
       DataSource.api => ApiMyRepository(ref.watch(apiClientProvider)),
-      DataSource.server => PlatformMyRepository(ref.watch(platformClientProvider)),
+      DataSource.server => PlatformMyRepository(
+          ref.watch(platformClientProvider),
+          ref.watch(savedRepositoryProvider),
+          ref.watch(courseRepositoryProvider),
+        ),
     });
