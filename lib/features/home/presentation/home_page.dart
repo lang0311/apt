@@ -9,6 +9,7 @@ import '../../../core/widgets/headers.dart';
 import '../../../core/widgets/overlays.dart';
 import '../../../core/widgets/states.dart';
 import '../../../core/widgets/surfaces.dart';
+import '../../course/domain/course_models.dart';
 import '../../course/presentation/course_draft_controller.dart';
 import '../../course/presentation/course_providers.dart';
 import '../../extraction/presentation/extraction_providers.dart';
@@ -103,9 +104,12 @@ class HomePage extends ConsumerWidget {
     };
 
     final isFirstUse = top is HomeTopStart;
+    // 날짜 없는 코스는 날짜 있는 코스가 없을 때만 따로 한 줄 (있으면 큰 카드의 "n개 더"에 들어간다, 07 D58)
+    final undated = top is HomeTopCourse ? const <CourseSummary>[] : undatedCourses(courses.value ?? const []);
     final sections = <Widget>[
       ?topWidget,
-      if (top is HomeTopCourse)
+      // 바로가기는 처음 쓰는 사람(시작 안내)만 빼고 늘 둔다 — 맨 위 카드가 없어도 첫 줄이 비지 않게
+      if (top != null && !isFirstUse)
         HomeQuickActions(
           onSavePlace: () => context.go(AppRoutes.extract),
           onNewCourse: () => startCourseWizard(context, ref),
@@ -122,6 +126,7 @@ class HomePage extends ConsumerWidget {
             onOpenRegion: (_) => context.go(AppRoutes.saved),
           ),
         ),
+      if (undated.isNotEmpty) HomeUndatedCourses(courses: undated, onTap: () => context.go(AppRoutes.courses)),
       if (!isFirstUse)
         ?_section(
           value: recent,

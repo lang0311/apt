@@ -13,6 +13,8 @@ import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/segmented_tabs.dart';
 import '../../../../core/widgets/states.dart';
 import '../../../../core/widgets/surfaces.dart';
+import '../../../course/domain/course_models.dart';
+import '../../../course/presentation/widgets/course_thumb.dart';
 import '../../domain/saved_models.dart';
 import '../saved_providers.dart';
 import '../saved_selection.dart';
@@ -147,7 +149,8 @@ class _SavedPageState extends ConsumerState<SavedPage> {
               // 고르는 중에는 하단 탭(앱 셸이 숨김) 자리에 삭제 버튼
               if (selection.active)
                 BottomCta(
-                  child: AppButton.dark(
+                  child: AppButton(
+                    variant: AppButtonVariant.danger,
                     label: count == 0 ? '삭제' : '$count곳 삭제',
                     loading: _deleting,
                     onPressed: count == 0 ? null : _deleteSelected,
@@ -202,6 +205,16 @@ class _CategoryTab extends ConsumerWidget {
     final d = i.place.district;
     return d.isEmpty ? _noArea : d;
   }
+
+  /// 동네(동 · 읍 · 면). 지역 이름과 같으면(동이 없는 주소) 동네 정보 없음
+  static String _dongOf(SavedPlaceItem i) {
+    final a = i.place.shortArea;
+    return a.isEmpty || a == i.place.district ? _noArea : a;
+  }
+
+  /// 지역 필터 값은 '마포구' 또는 동네까지 '마포구 연남동' (동네 줄을 눌렀을 때, 07 D59)
+  static bool _inRegions(SavedPlaceItem i, Set<String> regions) =>
+      regions.isEmpty || regions.contains(_regionOf(i)) || regions.contains('${_regionOf(i)} ${_dongOf(i)}');
 
   /// 지역 필터 시트용 요약: 지역마다 곳 수 (많은 순, 동네 정보 없음은 맨 아래)
   static SavedSummary _regionSummary(List<SavedPlaceItem> all) {
@@ -286,7 +299,7 @@ class _CategoryTab extends ConsumerWidget {
     final places = allValue.whenData(
       (list) => [
         for (final item in list)
-          if (matchesCategories(item.place, keys) && (regions.isEmpty || regions.contains(_regionOf(item)))) item,
+          if (matchesCategories(item.place, keys) && _inRegions(item, regions)) item,
       ],
     );
     final regionSummary = _regionSummary(all);
@@ -375,7 +388,13 @@ class _CategoryTab extends ConsumerWidget {
               actionLabel: '전체 보기',
               onAction: clear,
             ),
-            data: (list) => _GroupedRows(items: list, view: view, indent: selection.active ? 116 : 88),
+            data: (list) => _GroupedRows(
+              items: list,
+              view: view,
+              indent: selection.active ? 116 : 88,
+              // 동네 줄을 누르면 그 동네로 거른다 (칩 '마포구 연남동', ×로 풂)
+              onOpenDong: selection.active ? null : (key) => ref.read(savedRegionFilterProvider.notifier).select({key}),
+            ),
           ),
         ],
       ),
@@ -385,11 +404,15 @@ class _CategoryTab extends ConsumerWidget {
 
 /// 보기 방식대로 묶거나 정렬한 행. 지역별 · 업종별은 묶음 제목(이름 · n곳)을 달고 곳 수가 많은 묶음부터,
 /// 묶음이 여섯 곳을 넘으면 세 곳만 보이고 '모두 보기'로 펼친다.
+/// 지역별에서 한 지역이 스무 곳을 넘으면 장소 대신 동네 줄(모자이크 · 연남동 9곳 · 장소 이름)로 나눈다(07 D59).
 class _GroupedRows extends StatefulWidget {
-  const _GroupedRows({required this.items, required this.view, required this.indent});
+  const _GroupedRows({required this.items, required this.view, required this.indent, this.onOpenDong});
   final List<SavedPlaceItem> items;
   final SavedView view;
   final double indent;
+
+  /// 동네 줄을 눌렀을 때 ('마포구 연남동'). 없으면(선택 중) 동네로 나누지 않는다
+  final ValueChanged<String>? onOpenDong;
 
   @override
   State<_GroupedRows> createState() => _GroupedRowsState();
@@ -399,6 +422,17 @@ class _GroupedRowsState extends State<_GroupedRows> {
   final _open = <String>{};
   static const _preview = 3;
   static const _foldOver = 6;
+  static const _splitOver = 20;
+
+  /// 한 지역의 장소를 동네로 묶는다 (곳 수가 많은 동네부터, 동네 정보 없음은 맨 끝)
+  List<MapEntry<String, List<SavedPlaceItem>>> _dongs(List<SavedPlaceItem> items) {
+    final map = <String, List<SavedPlaceItem>>{};
+    for (final i in items) {
+      map.putIfAbsent(_CategoryTab._dongOf(i), () => []).add(i);
+    }
+    return map.entries.toList()
+      ..sort((a, b) => a.key == _CategoryTab._noArea ? 1 : b.key == _CategoryTab._noArea ? -1 : b.value.length.compareTo(a.value.length));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -436,6 +470,19 @@ class _GroupedRowsState extends State<_GroupedRows> {
                   ],
                 ),
               ),
+              if (byRegion && widget.onOpenDong != null && g.key != _CategoryTab._noArea && g.value.length > _splitOver)
+                DividedRows(
+                  indent: SectionCard.innerPadding + 44 + AppSpacing.sm,
+                  children: [
+                    for (final d in _dongs(g.value))
+                      _DongRow(
+                        name: d.key,
+                        items: d.value,
+                        onTap: () => widget.onOpenDong!(d.key == _CategoryTab._noArea ? g.key : '${g.key} ${d.key}'),
+                      ),
+                  ],
+                )
+              else ...[
               DividedRows(
                 indent: widget.indent,
                 children: [
@@ -455,10 +502,48 @@ class _GroupedRowsState extends State<_GroupedRows> {
                     ),
                   ),
                 ),
+              ],
             ],
           ],
         );
     }
+  }
+}
+
+/// 동네 줄: 업종 모자이크 · '연남동 9곳' · 장소 이름 셋 · ›
+class _DongRow extends StatelessWidget {
+  const _DongRow({required this.name, required this.items, required this.onTap});
+  final String name;
+  final List<SavedPlaceItem> items;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(SectionCard.innerPadding, 10, AppSpacing.sm, 10),
+        child: Row(
+          children: [
+            CourseThumb(
+              course: CourseSummary(id: name, title: name, placeCount: items.length, stopCategoryKeys: [for (final i in items) i.place.categoryKey]),
+              size: 44,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('$name ${items.length}곳', style: AppTypography.bodyStrong),
+                  Text(items.take(3).map((i) => i.place.name).join(', '), style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -500,7 +585,7 @@ class _ToolChip extends StatelessWidget {
                       height: 18,
                       alignment: Alignment.center,
                       padding: const EdgeInsets.symmetric(horizontal: 5),
-                      decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(9)),
+                      decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(AppRadius.small)),
                       child: Text('$count', style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w800, height: 1)),
                     ),
                   ],
@@ -674,7 +759,7 @@ class _SelectAllTitle extends ConsumerWidget {
       excludeSemantics: true,
       child: InkWell(
         onTap: ids.isEmpty ? null : toggleAll,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppRadius.small),
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 44),
           child: Row(

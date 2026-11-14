@@ -69,8 +69,8 @@ class _GuideStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      // 카드 안에 흰 칸을 또 띄우지 않는다(07 D57)
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs, horizontal: AppSpacing.xxs),
-      decoration: BoxDecoration(color: AppColors.surfaceRaised, borderRadius: BorderRadius.circular(AppRadius.sm)),
       child: Column(
         children: [
           Container(
@@ -79,7 +79,7 @@ class _GuideStep extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: appMark ? AppColors.ink : AppColors.surface,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(AppRadius.small),
             ),
             child: appMark
                 ? Text('APT', style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w800))
@@ -123,7 +123,7 @@ class NewSavesNudge extends StatelessWidget {
                         left: 20.0 * i,
                         child: Container(
                           padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12)),
+                          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(AppRadius.small)),
                           child: PlaceImage(place: thumbs[i].place, width: 32, height: 32, radius: 10, iconSize: 16),
                         ),
                       ),
@@ -307,7 +307,7 @@ class _StopStrip extends StatelessWidget {
         return _StripCell(
           tile: Container(
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.small)),
             child: Text('+${n - 4}', style: AppTypography.label.copyWith(color: AppColors.textSecondary)),
           ),
           label: '',
@@ -321,8 +321,8 @@ class _StopStrip extends StatelessWidget {
           children: [
             Positioned.fill(
               child: Container(
-                decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
-                child: Icon(style.icon, size: 18, color: style.color),
+                decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.small)),
+                child: Icon(style.icon, size: 18, color: style.ink),
               ),
             ),
             if (ai)
@@ -374,6 +374,42 @@ class _StripCell extends StatelessWidget {
         const SizedBox(height: 4),
         Text(label, style: AppTypography.caption.copyWith(color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
       ],
+    );
+  }
+}
+
+/// 날짜를 정하지 않은 코스 한 줄 (날짜 있는 다가오는 코스가 없을 때만, 누르면 코스 탭). 07 D58
+class HomeUndatedCourses extends StatelessWidget {
+  const HomeUndatedCourses({super.key, required this.courses, required this.onTap});
+  final List<CourseSummary> courses;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      padding: const EdgeInsets.fromLTRB(SectionCard.innerPadding, AppSpacing.sm, AppSpacing.sm, AppSpacing.sm),
+      onTap: onTap,
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.small)),
+            child: const Icon(Icons.event_outlined, size: 20, color: AppColors.textSecondary),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('날짜 미정 코스 ${courses.length}개', style: AppTypography.bodyStrong),
+                Text(courses.map((c) => c.title).join(', '), style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+        ],
+      ),
     );
   }
 }
@@ -479,7 +515,7 @@ class HomeQuickActions extends StatelessWidget {
             icon: Icons.route_rounded,
             label: '코스 만들기',
             iconColor: Colors.white,
-            iconBackground: AppColors.ink,
+            iconBackground: AppColors.primary,
             onTap: onNewCourse,
           ),
         ),
@@ -520,7 +556,7 @@ class _QuickAction extends StatelessWidget {
                 Container(
                   width: 30,
                   height: 30,
-                  decoration: BoxDecoration(color: iconBackground, borderRadius: BorderRadius.circular(10)),
+                  decoration: BoxDecoration(color: iconBackground, borderRadius: BorderRadius.circular(AppRadius.small)),
                   child: Icon(icon, size: 17, color: iconColor),
                 ),
                 const SizedBox(width: AppSpacing.xs),
@@ -587,7 +623,7 @@ class SuggestedCourseStrip extends StatelessWidget {
             width: 200,
             child: Material(
               color: AppColors.surfaceRaised,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: AppColors.border)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.medium), side: const BorderSide(color: AppColors.border)),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
                 onTap: () => onTap(course),
@@ -709,7 +745,7 @@ class _PhotoTile extends StatelessWidget {
                     child: Container(
                       width: 26,
                       height: 26,
-                      decoration: BoxDecoration(color: AppColors.photoBadge, borderRadius: BorderRadius.circular(9)),
+                      decoration: BoxDecoration(color: AppColors.photoBadge, borderRadius: BorderRadius.circular(AppRadius.small)),
                       child: Icon(saved! ? Icons.bookmark_rounded : Icons.bookmark_border_rounded, size: 15, color: Colors.white),
                     ),
                   ),

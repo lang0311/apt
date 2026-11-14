@@ -66,4 +66,9 @@ void main() {
     expect(top.course.id, 'dated');
     expect(top.moreCount, 1);
   });
+
+  test('날짜 없는 코스만 있으면 맨 위 큰 카드로 쓰지 않는다 (07 D58)', () {
+    final top = _resolve(courses: [_course('undated', null)], saved: 2);
+    expect(top, isA<HomeTopNudge>());
+  });
 }
