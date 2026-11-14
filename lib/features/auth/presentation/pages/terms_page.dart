@@ -146,37 +146,41 @@ class _TermsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        // › 버튼(48) 유무와 관계없이 모든 행 높이를 같게 맞춘다
-        constraints: const BoxConstraints(minHeight: 56),
-        padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.xxs, AppSpacing.xs),
-        child: Row(
-          children: [
-            CheckMark(checked: checked),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  title,
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 2),
-                    Text(subtitle!, style: AppTypography.meta),
+    // 체크 표시는 아이콘 색뿐이라, 스크린리더에는 선택 여부를 따로 알린다
+    return Semantics(
+      checked: checked,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          // › 버튼(48) 유무와 관계없이 모든 행 높이를 같게 맞춘다
+          constraints: const BoxConstraints(minHeight: 56),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.xxs, AppSpacing.xs),
+          child: Row(
+            children: [
+              CheckMark(checked: checked),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    title,
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 2),
+                      Text(subtitle!, style: AppTypography.meta),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-            if (onOpen != null)
-              IconButton(
-                tooltip: '약관 보기',
-                icon: const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
-                onPressed: onOpen,
-              )
-            else
-              const SizedBox(width: 48),
-          ],
+              if (onOpen != null)
+                IconButton(
+                  tooltip: '약관 보기',
+                  icon: const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+                  onPressed: onOpen,
+                )
+              else
+                const SizedBox(width: 48),
+            ],
+          ),
         ),
       ),
     );
