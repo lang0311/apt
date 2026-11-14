@@ -4,8 +4,11 @@ import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_typography.dart';
 
 enum MapPinKind {
-  /// 번호 원 (코스 순서, 선택 순서)
+  /// 번호 원 (코스 순서)
   numbered,
+
+  /// 고른 장소 (파란 원 + 체크). 고른 순서는 추천에 쓰이지 않아 번호를 붙이지 않는다
+  picked,
 
   /// AI 추천 (주황 ✦)
   ai,
@@ -42,6 +45,7 @@ class MapPin extends StatelessWidget {
           color ?? AppColors.primary,
           Text('${number ?? ''}', style: AppTypography.bodyStrong.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
         ),
+      MapPinKind.picked => _circle(color ?? AppColors.primary, const Icon(Icons.check_rounded, color: Colors.white, size: 20)),
       MapPinKind.ai => _circle(AppColors.ai, const Icon(Icons.auto_awesome, color: Colors.white, size: 18)),
       MapPinKind.place => _teardrop(),
       MapPinKind.result => _result(),

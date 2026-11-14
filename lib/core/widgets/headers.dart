@@ -176,21 +176,38 @@ class StepProgressBar extends StatelessWidget {
 
   static const _total = 4;
 
+  /// 막대 아래 단계 이름 (지금 단계만 파랑)
+  static const labels = ['정보', '동행', '장소', '추천'];
+
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: '$_total단계 중 $step단계',
+      label: '$_total단계 중 $step단계, ${labels[step - 1]}',
+      excludeSemantics: true,
       child: Row(
         children: [
           for (var i = 0; i < _total; i++) ...[
             if (i > 0) const SizedBox(width: 10),
             Expanded(
-              child: Container(
-                height: 4,
-                decoration: BoxDecoration(
-                  color: i < step ? AppColors.primary : AppColors.progressInactive,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: i < step ? AppColors.primary : AppColors.progressInactive,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    labels[i],
+                    style: AppTypography.caption.copyWith(
+                      color: i + 1 == step ? AppColors.primary : AppColors.textTertiary,
+                      fontWeight: i + 1 == step ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
