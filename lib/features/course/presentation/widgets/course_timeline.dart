@@ -191,7 +191,7 @@ class _AppliedTasteLineState extends State<AppliedTasteLine> {
         semantics: '${stop.place.name}, ${everyone ? '모두' : who.map(name).join(', ')}',
         child: Row(
           children: [
-            Expanded(child: Text(stop.place.name, style: AppTypography.label.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis)),
+            Expanded(child: Text(stop.place.name, style: AppTypography.label.copyWith(fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis)),
             const SizedBox(width: AppSpacing.xs),
             Flexible(
               child: Wrap(
@@ -327,7 +327,7 @@ class CourseStopLegend extends StatelessWidget {
     final mine = stops.length - ai;
     Widget item(Widget dot, String text) => Row(
           mainAxisSize: MainAxisSize.min,
-          children: [dot, const SizedBox(width: 6), Text(text, style: AppTypography.caption.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600))],
+          children: [dot, const SizedBox(width: 6), Text(text, style: AppTypography.caption.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w700))],
         );
     return Padding(
       padding: const EdgeInsets.fromLTRB(SectionCard.innerPadding, 0, SectionCard.innerPadding, AppSpacing.xs),
@@ -523,7 +523,7 @@ class _ViewTile extends StatelessWidget {
                     child: Text(
                       stop.arrivalTime == null ? '' : formatClock(stop.arrivalTime!),
                       textAlign: TextAlign.right,
-                      style: AppTypography.caption.copyWith(fontWeight: FontWeight.w600),
+                      style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
@@ -682,7 +682,7 @@ class CourseEditList extends StatelessWidget {
             proxyDecorator: (child, _, _) => Material(
               color: Colors.transparent,
               elevation: 6,
-              shadowColor: const Color(0x2914223A),
+              shadowColor: AppColors.shadowFloat,
               borderRadius: BorderRadius.circular(14),
               child: child,
             ),

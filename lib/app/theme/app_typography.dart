@@ -31,7 +31,7 @@ abstract final class AppTypography {
   /// 카드 제목
   static final cardTitle = _s(16, FontWeight.w700);
 
-  static final bodyStrong = _s(14, FontWeight.w600);
+  static final bodyStrong = _s(14, FontWeight.w700);
   static final body = _s(13, FontWeight.w500, color: AppColors.textSecondary);
   static final button = _s(15, FontWeight.w700, height: 1.2);
   static final label = _s(13, FontWeight.w700);

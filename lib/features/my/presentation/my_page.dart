@@ -117,7 +117,7 @@ class _Profile extends StatelessWidget {
                   tapTargetSize: MaterialTapTargetSize.padded,
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                 ),
-                child: Text('프로필 편집', style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                child: Text('프로필 편집', style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
               ),
             ],
           ),

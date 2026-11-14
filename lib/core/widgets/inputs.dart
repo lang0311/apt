@@ -148,7 +148,7 @@ class AppFieldError extends StatelessWidget {
       children: [
         const Icon(Icons.error_outline_rounded, size: 16, color: AppColors.danger),
         const SizedBox(width: 6),
-        Expanded(child: Text(message, style: AppTypography.meta.copyWith(color: AppColors.danger, fontWeight: FontWeight.w600))),
+        Expanded(child: Text(message, style: AppTypography.meta.copyWith(color: AppColors.danger, fontWeight: FontWeight.w700))),
       ],
     );
   }

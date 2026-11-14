@@ -209,7 +209,7 @@ class _CollectionButton extends StatelessWidget {
                   '보관함',
                   style: AppTypography.meta.copyWith(
                     color: active ? AppColors.primary : AppColors.textPrimary,
-                    fontWeight: active ? FontWeight.w700 : FontWeight.w600,
+                    fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                   ),
                 ),
               ),

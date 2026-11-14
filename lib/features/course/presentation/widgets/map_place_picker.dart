@@ -441,7 +441,7 @@ class _ListSheetState extends State<_ListSheet> {
               decoration: const BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.card)),
-                boxShadow: [BoxShadow(color: Color(0x1F14223A), blurRadius: 16, offset: Offset(0, -4))],
+                boxShadow: [BoxShadow(color: AppColors.shadowFloat, blurRadius: 16, offset: Offset(0, -4))],
               ),
               child: widget.builder(scroll),
             ),
@@ -540,7 +540,7 @@ class _MapPill extends StatelessWidget {
       color: dark ? AppColors.ink : Colors.white.withValues(alpha: 0.92),
       shape: const StadiumBorder(),
       elevation: 2,
-      shadowColor: const Color(0x2914223A),
+      shadowColor: AppColors.shadowFloat,
       child: InkWell(
         customBorder: const StadiumBorder(),
         onTap: onTap,
@@ -574,7 +574,7 @@ class _Bubble extends StatelessWidget {
       color: Colors.white,
       borderRadius: BorderRadius.circular(14),
       elevation: 2,
-      shadowColor: const Color(0x2914223A),
+      shadowColor: AppColors.shadowFloat,
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
         onTap: onTap,
@@ -678,7 +678,7 @@ class _PlaceCard extends StatelessWidget {
       child: Material(
         color: AppColors.surfaceRaised,
         elevation: 3,
-        shadowColor: const Color(0x2914223A),
+        shadowColor: AppColors.shadowFloat,
         shape: RoundedRectangleBorder(
           borderRadius: radius,
           side: BorderSide(color: focused ? AppColors.primary : Colors.transparent, width: 1.5),

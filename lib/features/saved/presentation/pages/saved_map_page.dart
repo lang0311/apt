@@ -851,7 +851,7 @@ class _FilterChip extends StatelessWidget {
     return Material(
       color: Colors.white.withValues(alpha: 0.95),
       elevation: 1,
-      shadowColor: const Color(0x2914223A),
+      shadowColor: AppColors.shadowFloat,
       shape: StadiumBorder(side: BorderSide(color: active ? AppColors.primary : AppColors.border)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -911,7 +911,7 @@ class _ListPill extends StatelessWidget {
       color: Colors.white.withValues(alpha: 0.94),
       shape: const StadiumBorder(),
       elevation: 2,
-      shadowColor: const Color(0x2914223A),
+      shadowColor: AppColors.shadowFloat,
       child: InkWell(
         customBorder: const StadiumBorder(),
         onTap: count == 0 ? null : onPressed,
@@ -945,7 +945,7 @@ class _MapFab extends StatelessWidget {
       color: AppColors.ink,
       shape: const StadiumBorder(),
       elevation: 3,
-      shadowColor: const Color(0x4014223A),
+      shadowColor: AppColors.shadowStrong,
       child: InkWell(
         customBorder: const StadiumBorder(),
         onTap: onPressed,
@@ -986,7 +986,7 @@ class _MapPlaceCard extends StatelessWidget {
       child: Material(
         color: AppColors.surfaceRaised,
         elevation: 2,
-        shadowColor: const Color(0x2914223A),
+        shadowColor: AppColors.shadowFloat,
         shape: RoundedRectangleBorder(
           borderRadius: radius,
           side: BorderSide(color: selected ? AppColors.primary : Colors.transparent, width: 1.5),
@@ -1048,7 +1048,7 @@ class _PlaceGroup extends StatelessWidget {
                 : Text.rich(
                     TextSpan(children: [
                       TextSpan(text: '$title '),
-                      TextSpan(text: '${items.length}', style: const TextStyle(color: AppColors.textTertiary, fontWeight: FontWeight.w600)),
+                      TextSpan(text: '${items.length}', style: const TextStyle(color: AppColors.textTertiary, fontWeight: FontWeight.w700)),
                     ]),
                     style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700),
                   ),
@@ -1107,7 +1107,7 @@ class _PlaceRow extends StatelessWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
-                    child: Text(distance, style: AppTypography.caption.copyWith(color: AppColors.textTertiary, fontWeight: FontWeight.w600)),
+                    child: Text(distance, style: AppTypography.caption.copyWith(color: AppColors.textTertiary, fontWeight: FontWeight.w700)),
                   ),
                 ],
               ],
@@ -1133,7 +1133,7 @@ class _RecommendedLine extends StatelessWidget {
         Flexible(
           child: Text(
             SavedPlaceRow.recommendedLabel(item.recommendedIn),
-            style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w600),
+            style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w700),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

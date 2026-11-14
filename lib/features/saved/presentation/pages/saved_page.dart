@@ -246,7 +246,7 @@ class _CategoryTab extends ConsumerWidget {
                               v.label,
                               style: AppTypography.bodyStrong.copyWith(
                                 color: v == current ? AppColors.primary : AppColors.textPrimary,
-                                fontWeight: v == current ? FontWeight.w800 : FontWeight.w600,
+                                fontWeight: v == current ? FontWeight.w800 : FontWeight.w500,
                               ),
                             ),
                           ),

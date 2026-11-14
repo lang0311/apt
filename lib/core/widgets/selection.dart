@@ -11,7 +11,7 @@ class CheckMark extends StatelessWidget {
   static const _size = 22.0;
 
   // 안 고른 상태의 회색 체크
-  static const _off = Color(0xFFC3CBD7);
+  static const _off = AppColors.checkOff;
 
   Color get _color => checked ? AppColors.primary : _off;
 

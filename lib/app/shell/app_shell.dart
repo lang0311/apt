@@ -160,7 +160,7 @@ class _NavItem extends StatelessWidget {
               color: active ? AppColors.primary : AppColors.ink,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: AppColors.surface, width: 3),
-              boxShadow: const [BoxShadow(color: Color(0x2E14223A), blurRadius: 6, offset: Offset(0, 2))],
+              boxShadow: const [BoxShadow(color: AppColors.shadowFloat, blurRadius: 6, offset: Offset(0, 2))],
             ),
             child: const Icon(Icons.route_rounded, color: Colors.white, size: 22),
           ),

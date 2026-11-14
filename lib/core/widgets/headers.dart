@@ -158,7 +158,7 @@ class StepHeader extends StatelessWidget {
           onLeading: onBack,
           trailing: Text(
             '$step / 4',
-            style: AppTypography.label.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+            style: AppTypography.label.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w700),
           ),
         ),
         Padding(

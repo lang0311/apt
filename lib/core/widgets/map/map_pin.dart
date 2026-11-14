@@ -62,7 +62,7 @@ class MapPin extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
-              boxShadow: const [BoxShadow(color: Color(0x2214223A), blurRadius: 6)],
+              boxShadow: const [BoxShadow(color: AppColors.shadowFloat, blurRadius: 6)],
             ),
             child: Text(label!, style: AppTypography.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
           ),
@@ -96,7 +96,7 @@ class MapPin extends StatelessWidget {
         color: Colors.white,
         shape: BoxShape.circle,
         border: Border.all(color: c, width: 2.5),
-        boxShadow: const [BoxShadow(color: Color(0x2E14223A), blurRadius: 5, offset: Offset(0, 1))],
+        boxShadow: const [BoxShadow(color: AppColors.shadowFloat, blurRadius: 5, offset: Offset(0, 1))],
       ),
       child: Icon(icon ?? Icons.place, size: 17, color: c),
     );
@@ -110,7 +110,7 @@ class MapPin extends StatelessWidget {
       child: Stack(
         alignment: Alignment.topCenter,
         children: [
-          Icon(Icons.location_on, size: 42, color: c, shadows: const [Shadow(color: Color(0x4414223A), blurRadius: 4)]),
+          Icon(Icons.location_on, size: 42, color: c, shadows: const [Shadow(color: AppColors.shadowStrong, blurRadius: 4)]),
           Positioned(
             top: 8,
             child: Icon(icon ?? Icons.place, size: 15, color: Colors.white),

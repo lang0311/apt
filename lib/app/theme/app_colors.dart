@@ -33,6 +33,26 @@ abstract final class AppColors {
   /// 떠 있는 카드·버튼의 그림자 (`ink` 20%)
   static const shadow = Color(0x3314223A);
 
+  /// 지도 위 알약 · 카드 · 핀 · 하단 탭처럼 떠 있는 작은 것의 그림자 (`ink` 16%).
+  /// 예전에 화면마다 12~18%로 적던 값을 하나로 합쳤다
+  static const shadowFloat = Color(0x2914223A);
+
+  /// 진한 바탕 위에 떠 있는 버튼 · 지도 핀 아이콘의 그림자 (`ink` 25%)
+  static const shadowStrong = Color(0x4014223A);
+
+  /// 사진 위 글자를 읽히게 하는 아래쪽 어둠 (`ink` 70% → 투명)
+  static const photoScrim = Color(0xB314223A);
+  static const photoScrimClear = Color(0x0014223A);
+
+  /// 사진 위 작은 아이콘 칸 바탕 (`ink` 45%)
+  static const photoBadge = Color(0x7314223A);
+
+  /// 별점 별
+  static const rating = Color(0xFFF5A524);
+
+  /// 안 고른 체크 표시(연한 회색, 07 · 사용자 결정으로 이 모양 유지)
+  static const checkOff = Color(0xFFC3CBD7);
+
   /// 체크박스·라디오 미선택 테두리. `border`는 1.21:1이라 선택 컨트롤에는 이 색을 쓴다(약 3:1).
   static const controlBorder = Color(0xFF8B97AB);
   static const divider = Color(0xFFE9EEF5);

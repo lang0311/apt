@@ -48,12 +48,12 @@ class SegmentedTabs extends StatelessWidget {
                       if (counts?[i] != null)
                         TextSpan(
                           text: ' ${counts![i]}',
-                          style: const TextStyle(color: AppColors.textTertiary, fontWeight: FontWeight.w600),
+                          style: const TextStyle(color: AppColors.textTertiary, fontWeight: FontWeight.w700),
                         ),
                     ]),
                     style: AppTypography.bodyStrong.copyWith(
                       color: i == selectedIndex ? AppColors.ink : AppColors.textSecondary,
-                      fontWeight: i == selectedIndex ? FontWeight.w800 : FontWeight.w600,
+                      fontWeight: i == selectedIndex ? FontWeight.w800 : FontWeight.w500,
                     ),
                   ),
                 ),

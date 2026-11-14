@@ -51,7 +51,7 @@ class _SourceChip extends StatelessWidget {
               decoration: ShapeDecoration(
                 shape: StadiumBorder(side: BorderSide(color: on ? AppColors.primary : AppColors.progressInactive, width: on ? 1.2 : 1)),
               ),
-              child: Text(label, style: AppTypography.caption.copyWith(color: color, fontWeight: on ? FontWeight.w700 : FontWeight.w600)),
+              child: Text(label, style: AppTypography.caption.copyWith(color: color, fontWeight: on ? FontWeight.w700 : FontWeight.w500)),
             ),
           ),
         ),

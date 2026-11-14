@@ -255,7 +255,7 @@ class HomeCourseCard extends StatelessWidget {
                             children: [
                               Icon(icon, size: 14, color: AppColors.textSecondary),
                               const SizedBox(width: 4),
-                              Text(text, style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                              Text(text, style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
                             ],
                           ),
                       ],
@@ -698,7 +698,7 @@ class _PhotoTile extends StatelessWidget {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         stops: [0.45, 1],
-                        colors: [Color(0x0014223A), Color(0xB314223A)],
+                        colors: [AppColors.photoScrimClear, AppColors.photoScrim],
                       ),
                     ),
                   ),
@@ -709,7 +709,7 @@ class _PhotoTile extends StatelessWidget {
                     child: Container(
                       width: 26,
                       height: 26,
-                      decoration: BoxDecoration(color: const Color(0x7314223A), borderRadius: BorderRadius.circular(9)),
+                      decoration: BoxDecoration(color: AppColors.photoBadge, borderRadius: BorderRadius.circular(9)),
                       child: Icon(saved! ? Icons.bookmark_rounded : Icons.bookmark_border_rounded, size: 15, color: Colors.white),
                     ),
                   ),

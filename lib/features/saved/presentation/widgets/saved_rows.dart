@@ -131,7 +131,7 @@ class SavedPlaceRow extends StatelessWidget {
                           Row(
                             children: [
                               if (place.rating != null) ...[
-                                const Icon(Icons.star_rounded, size: 13, color: Color(0xFFF5A524)),
+                                const Icon(Icons.star_rounded, size: 13, color: AppColors.rating),
                                 const SizedBox(width: 2),
                                 Text(place.rating!.toStringAsFixed(1), style: AppTypography.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
                                 const SizedBox(width: AppSpacing.xs),
@@ -633,7 +633,7 @@ class _CategoryOption extends StatelessWidget {
                     label,
                     style: AppTypography.bodyStrong.copyWith(
                       color: selected ? AppColors.primary : AppColors.textPrimary,
-                      fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                      fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
                     ),
                   ),
                   const SizedBox(width: 6),

@@ -140,7 +140,7 @@ class AppTag extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label, style: AppTypography.caption.copyWith(color: fg, fontWeight: FontWeight.w600)),
+          Text(label, style: AppTypography.caption.copyWith(color: fg, fontWeight: FontWeight.w700)),
         ],
       ),
     );

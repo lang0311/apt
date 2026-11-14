@@ -235,7 +235,7 @@ class _StopCard extends StatelessWidget {
     return Material(
       color: AppColors.surfaceRaised,
       elevation: 2,
-      shadowColor: const Color(0x2914223A),
+      shadowColor: AppColors.shadowFloat,
       shape: RoundedRectangleBorder(
         borderRadius: radius,
         side: BorderSide(color: focused ? AppColors.primary : Colors.transparent, width: 1.5),
