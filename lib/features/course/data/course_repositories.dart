@@ -27,6 +27,7 @@ class MockCourseRepository implements CourseRepository {
       memberCount: course.memberCount,
       memberNames: meta?.memberNames ?? const [],
       tags: meta?.tags ?? const [],
+      stopCategoryKeys: [for (final s in course.stops) s.place.categoryKey],
     );
   }
 

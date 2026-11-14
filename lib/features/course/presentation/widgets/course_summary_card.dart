@@ -4,11 +4,11 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
-import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/surfaces.dart';
 import '../../../party/domain/party_models.dart';
 import '../../../party/presentation/widgets/party_avatar_stack.dart';
 import '../../domain/course_models.dart';
+import 'course_thumb.dart';
 
 /// 코스 목록 행 (SectionCard 안 구분선 행): 사진 · 이름 · (파티원 한 줄) · 지역 · n곳 · 오른쪽 날짜
 class CourseSummaryRow extends StatelessWidget {
@@ -25,7 +25,7 @@ class CourseSummaryRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: 10),
         child: Row(
           children: [
-            AppNetworkImage(url: course.thumbnailUrl, width: 48, height: 48, radius: 12),
+            CourseThumb(course: course),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Column(

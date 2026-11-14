@@ -129,6 +129,7 @@ class CourseSummary {
     this.memberCount = 1,
     this.memberNames = const [],
     this.tags = const [],
+    this.stopCategoryKeys = const [],
   });
 
   final String id;
@@ -143,6 +144,9 @@ class CourseSummary {
   /// 파티원 이름 (나 포함, 서버 순서). NEEDS BACKEND: 목록 summary에 이름이 오는지
   final List<String> memberNames;
   final List<String> tags;
+
+  /// 일정 장소의 카테고리 키(순서대로). 사진이 없을 때 앞 칸에 카테고리 아이콘을 모아 보여 준다.
+  final List<String> stopCategoryKeys;
 }
 
 /// "이런 코스는 어때요?" (서버 추천 코스)

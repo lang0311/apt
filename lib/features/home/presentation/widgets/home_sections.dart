@@ -10,6 +10,7 @@ import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/buttons.dart';
 import '../../../../core/widgets/surfaces.dart';
 import '../../../course/domain/course_models.dart';
+import '../../../course/presentation/widgets/course_thumb.dart';
 import '../../../extraction/domain/extraction_models.dart';
 import '../../../place/domain/place.dart';
 import '../../../saved/presentation/widgets/place_image.dart';
@@ -225,7 +226,7 @@ class HomeCourseCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  AppNetworkImage(url: course.thumbnailUrl, width: 60, height: 60, radius: AppRadius.thumb, placeholderIcon: Icons.route_rounded),
+                  CourseThumb(course: course, size: 72),
                 ],
               ),
             ),

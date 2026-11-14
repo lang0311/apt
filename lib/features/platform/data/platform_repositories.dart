@@ -301,7 +301,20 @@ class PlatformCourseRepository implements CourseRepository {
     isParty: course['party_id'] != null,
     date: DateTime.tryParse((course['date'] ?? '').toString()),
     memberCount: course['party_id'] == null ? 1 : _platform.partySizes[course['party_id']] ?? 1,
+    regionLabel: _region(course['itinerary'] as List),
+    stopCategoryKeys: [
+      for (final stop in course['itinerary'] as List) PlatformSavedRepository.categoryKeyOf(Map<String, dynamic>.from(stop as Map)),
+    ],
   );
+
+  /// 지역 줄: 첫 장소 주소의 구 · 시 ('서울 강서구 화곡로 416' → '강서구'). 주소가 없으면 비운다.
+  static String? _region(List itinerary) {
+    for (final stop in itinerary) {
+      final parts = ((stop as Map)['address'] ?? '').toString().trim().split(RegExp(r'\s+'));
+      if (parts.length >= 2 && parts[1].isNotEmpty) return parts[1];
+    }
+    return null;
+  }
 
   Future<List<Json>> _courseRows([String? partyId]) async {
     final rows = await _platform.get('/courses', partyId == null ? null : {'party_id': partyId}) as List;

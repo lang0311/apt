@@ -66,6 +66,7 @@ class MockMembersCourseRepository implements CourseRepository {
           memberCount: c.memberCount + mockPartyMembers.length,
           memberNames: c.memberNames,
           tags: c.tags,
+          stopCategoryKeys: c.stopCategoryKeys,
         );
 
   Course _course(Course c) => !c.isParty
