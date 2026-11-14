@@ -54,12 +54,16 @@ void main() {
   testWidgets('C. 저장됨: 카테고리 필터 → 장소 상세 → 보관함 변경', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '저장됨');
-    await waitFor(tester, find.text('저장한 곳'));
+    await waitFor(tester, find.textContaining('전체 '));
 
-    // 필터 시트에서 맛집 → 남색 칩으로 표시
+    // 기본 보기는 지역별 → 업종별로 바꾸면 필터가 업종으로
+    await tapText(tester, '지역별', scroll: false);
+    await tapText(tester, '업종별', scroll: false);
+    // 필터 시트에서 맛집 → 고른 값만 칩으로
     await tapText(tester, '필터', scroll: false);
-    await tapText(tester, '맛집', scroll: false);
-    await waitFor(tester, find.textContaining('맛집 '));
+    await tapFinder(tester, find.text('맛집').last, scroll: false); // 뒤 목록의 묶음 제목이 아니라 시트의 항목
+    await tapFinder(tester, find.textContaining('곳 보기'), scroll: false);
+    await waitFor(tester, find.bySemanticsLabel('맛집 필터 해제'));
     await tapText(tester, '연남식당');
 
     await waitFor(tester, find.text('장소 정보'));
@@ -75,7 +79,7 @@ void main() {
   testWidgets('D. 보관함: 새 보관함 → 빈 보관함 → 저장한 장소에서 추가', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '저장됨');
-    await tapText(tester, '내 보관함');
+    await tapText(tester, '보관함', scroll: false); // 저장됨 탭 [전체 | 보관함 | AI 추천]
     await tapText(tester, '새 보관함');
     await waitFor(tester, find.text('보관함 이름'));
     await typeInto(tester, find.byType(TextField).last, '서울 가을 산책');
@@ -180,8 +184,9 @@ void main() {
     await waitFor(tester, find.text('코스 저장'), timeout: const Duration(seconds: 20));
     expect(find.textContaining(RegExp(r'^일정 \d+곳$')), findsOneWidget);
     await tapText(tester, '다시 추천', scroll: false);
-    await waitFor(tester, find.textContaining('추천 장소'), timeout: const Duration(seconds: 20));
-    await waitGone(tester, find.byType(SnackBar), timeout: const Duration(seconds: 8));
+    // 결과 스낵바 '추천 장소 n곳을 바꿨어요' (일정 아래 안내 문구에도 '추천 장소'가 있어 끝까지 맞춘다)
+    await waitFor(tester, find.textContaining(RegExp(r'추천 장소 \d+곳을 바꿨어요')), timeout: const Duration(seconds: 20));
+    await waitGone(tester, find.byType(SnackBar), timeout: const Duration(seconds: 12));
     await tapText(tester, '코스 저장', scroll: false);
 
     // 완료 화면 없이 바로 상세, 파티 코스라 파티원에게 알릴지 묻는다
@@ -220,8 +225,8 @@ void main() {
     await waitGone(tester, find.byType(SnackBar), timeout: const Duration(seconds: 8));
 
     await tapText(tester, '다시 추천', scroll: false);
-    await waitFor(tester, find.textContaining('추천 장소'), timeout: const Duration(seconds: 20));
-    await waitGone(tester, find.byType(SnackBar), timeout: const Duration(seconds: 8));
+    await waitFor(tester, find.textContaining(RegExp(r'추천 장소 \d+곳을 바꿨어요')), timeout: const Duration(seconds: 20));
+    await waitGone(tester, find.byType(SnackBar), timeout: const Duration(seconds: 12));
     await tapText(tester, '저장', scroll: false);
     await expectSnack(tester, '코스를 저장했어요');
     await waitFor(tester, find.textContaining(RegExp(r'^일정 \d+곳$')));
