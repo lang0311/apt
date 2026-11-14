@@ -14,7 +14,7 @@ void main() {
       home: Scaffold(bottomNavigationBar: AppBottomNav(currentIndex: 1, onTap: tapped.add)),
     ));
 
-    final labels = ['홈', '저장됨', '코스', '추출', '마이'];
+    final labels = ['홈', '저장됨', '코스', '장소 추가', '마이'];
     final xs = [for (final l in labels) tester.getCenter(find.text(l)).dx];
     expect(xs, [...xs]..sort(), reason: '왼쪽부터 순서대로');
 

@@ -95,7 +95,7 @@ void main() {
 
   testWidgets('E. 추출: 링크 입력 → 찾은 장소 → 보관함 고르기 → 저장(결과에 남음) → 보기 → 장소 상세', (tester) async {
     await signInExisting(tester);
-    await tapTab(tester, '추출');
+    await tapTab(tester, '장소 추가');
     await waitFor(tester, find.text('릴스에서 바로 저장하기'));
     await typeInto(tester, find.byType(TextField).first, 'https://www.instagram.com/reel/DA7mNpQrStU/');
     await tester.pump(const Duration(milliseconds: 300));
@@ -118,7 +118,7 @@ void main() {
 
   testWidgets('F. 추출 실패: 비공개 게시물 → 다른 링크 넣기', (tester) async {
     await signInExisting(tester);
-    await tapTab(tester, '추출');
+    await tapTab(tester, '장소 추가');
     await typeInto(tester, find.byType(TextField).first, 'https://www.instagram.com/p/private123/');
     await tester.pump(const Duration(milliseconds: 300));
     await tapText(tester, '찾기');
@@ -138,8 +138,8 @@ void main() {
     await waitFor(tester, find.text('어떤 코스를 만들까요?'));
     await typeInto(tester, find.byType(TextField).first, '가을 서울 카페 산책');
     await tester.pump(const Duration(milliseconds: 300));
-    await tapText(tester, '날짜와 시작 시간을 골라 주세요');
-    await tapFinder(tester, find.textContaining('출발'), scroll: false); // 기본값(내일 오전 11:00)으로 확인
+    await tapText(tester, '내일'); // 날짜 칩. 출발 시간은 오전 11:00으로 채워진다
+    expect(find.text('오전 11:00'), findsOneWidget);
     await tapText(tester, '산책');
     await tapText(tester, '다음');
 
@@ -165,20 +165,20 @@ void main() {
     await tapFinder(tester, find.textContaining('목록 '), scroll: false);
     await tapText(tester, '카페 온더뷰');
     await tapText(tester, '연남식당');
-    await waitFor(tester, find.text('2곳'));
-    await tapText(tester, '코스 추천받기', scroll: false);
+    await waitFor(tester, find.text('고른 곳 2'));
+    await tapText(tester, '2곳으로 코스 추천받기', scroll: false);
 
     // 4/4 기다리는 중 — 단계 표시(파티 코스는 파티원 취향 단계) → 추천 취소 → 3/4로, 고른 장소 유지
     await waitFor(tester, find.text('후보 장소 찾기'));
     expect(find.text('파티원 취향 맞추기'), findsOneWidget);
     await tapText(tester, '추천 취소', scroll: false);
     await expectSnack(tester, '추천을 취소했어요');
-    await waitFor(tester, find.text('2곳'));
-    await tapText(tester, '코스 추천받기', scroll: false);
+    await waitFor(tester, find.text('고른 곳 2'));
+    await tapText(tester, '2곳으로 코스 추천받기', scroll: false);
 
     // 4/4
     await waitFor(tester, find.text('코스 저장'), timeout: const Duration(seconds: 20));
-    expect(find.text('일정'), findsOneWidget);
+    expect(find.textContaining(RegExp(r'^일정 \d+곳$')), findsOneWidget);
     await tapText(tester, '다시 추천', scroll: false);
     await waitFor(tester, find.textContaining('추천 장소'), timeout: const Duration(seconds: 20));
     await waitGone(tester, find.byType(SnackBar), timeout: const Duration(seconds: 8));
@@ -202,7 +202,7 @@ void main() {
     await signInExisting(tester);
     await tapTab(tester, '코스');
     await tapText(tester, '서울 카페 투어');
-    await waitFor(tester, find.text('일정'));
+    await waitFor(tester, find.textContaining(RegExp(r'^일정 \d+곳$')));
     await tapText(tester, '편집');
     await waitFor(tester, find.text('일정 편집'));
 
@@ -224,14 +224,14 @@ void main() {
     await waitGone(tester, find.byType(SnackBar), timeout: const Duration(seconds: 8));
     await tapText(tester, '저장', scroll: false);
     await expectSnack(tester, '코스를 저장했어요');
-    await waitFor(tester, find.text('일정'));
+    await waitFor(tester, find.textContaining(RegExp(r'^일정 \d+곳$')));
     expectNoErrors(tester);
   });
 
   testWidgets('I. 마이: 취향 설정 변경 → 저장 → 로그아웃', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '마이');
-    await waitFor(tester, find.text('내 기록'));
+    await waitFor(tester, find.text('저장한 곳'));
     await tapText(tester, '수정');
     await waitFor(tester, find.text('어떤 곳을 좋아하세요?'));
     await tapText(tester, '쇼핑');
