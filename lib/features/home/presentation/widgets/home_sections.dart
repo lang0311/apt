@@ -13,6 +13,7 @@ import '../../../course/domain/course_models.dart';
 import '../../../course/presentation/widgets/course_thumb.dart';
 import '../../../extraction/domain/extraction_models.dart';
 import '../../../place/domain/place.dart';
+import '../../../saved/presentation/widgets/category_style.dart';
 import '../../../saved/presentation/widgets/place_image.dart';
 
 /// ① 처음 써요 — 공유로 저장하는 3단계 + 링크 붙여넣기
@@ -158,7 +159,8 @@ class NewSavesNudge extends StatelessWidget {
   }
 }
 
-/// ③ 다가오는 코스 / ④ 오늘 코스. D-day(또는 '오늘')만 크게, 이름과 '날짜 · 장소 수', 대표 사진 1장.
+/// ③ 다가오는 코스 / ④ 오늘 코스. D-day(또는 '오늘')를 크게, 이름, 장소 순서 줄, 출발 · 거리 · 인원(있는 값만).
+/// 서버가 장소 이름을 주지 않으면(목 데이터 등) 장소 줄 대신 '날짜 · n곳' 한 줄.
 class HomeCourseCard extends StatelessWidget {
   const HomeCourseCard({
     super.key,
@@ -178,27 +180,24 @@ class HomeCourseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final date = course.date;
-    final meta = '${date == null ? '날짜 미정' : formatMonthDayWeekday(date)} · ${course.placeCount}곳';
     final big = AppTypography.title.copyWith(fontSize: 22, fontWeight: FontWeight.w800, height: 1.1);
+    final hasStops = course.stopNames.length == course.stopCategoryKeys.length && course.stopNames.isNotEmpty;
 
     final Widget headline;
     if (isToday) {
-      headline = Row(
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: const BoxDecoration(color: AppColors.success, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 6),
-          Text('오늘', style: big.copyWith(color: AppColors.primary)),
-        ],
-      );
+      headline = Text('오늘', style: big.copyWith(color: AppColors.primary));
     } else if (date == null) {
       headline = Text('날짜 미정', style: big.copyWith(fontSize: 18, color: AppColors.textSecondary));
     } else {
       headline = Text(ddayLabel(date), style: big.copyWith(color: AppColors.primary));
     }
+
+    final facts = <(IconData, String)>[
+      if (date != null && !isToday) (Icons.calendar_today_outlined, formatMonthDayWeekday(date)),
+      if (course.startTime != null) (Icons.schedule_rounded, '${formatTimeOfDay(course.startTime!)} 출발'),
+      if (course.distanceKm != null) (Icons.straighten_rounded, formatDistance((course.distanceKm! * 1000).round())),
+      if (course.isParty) (Icons.group_outlined, '${course.memberCount}명'),
+    ];
 
     return Material(
       color: AppColors.surface,
@@ -210,34 +209,68 @@ class HomeCourseCard extends StatelessWidget {
           InkWell(
             onTap: onOpen,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.md, 14, 14, 14),
-              child: Row(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.md, 14, AppSpacing.md, AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            headline,
+                            const SizedBox(height: 6),
+                            Text(course.title, style: AppTypography.cardTitle, maxLines: 1, overflow: TextOverflow.ellipsis),
+                            if (!hasStops) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                [date == null ? '날짜 미정' : formatMonthDayWeekday(date), '${course.placeCount}곳'].join(', '),
+                                style: AppTypography.meta,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      if (!hasStops) ...[
+                        const SizedBox(width: AppSpacing.sm),
+                        CourseThumb(course: course, size: 72),
+                      ],
+                    ],
+                  ),
+                  if (hasStops) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    _StopStrip(keys: course.stopCategoryKeys, names: course.stopNames, isAi: course.stopIsAi),
+                  ],
+                  if (facts.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Wrap(
+                      spacing: AppSpacing.md,
+                      runSpacing: 4,
                       children: [
-                        headline,
-                        const SizedBox(height: 6),
-                        Text(course.title, style: AppTypography.cardTitle, maxLines: 1, overflow: TextOverflow.ellipsis),
-                        const SizedBox(height: 2),
-                        Text(meta, style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        for (final (icon, text) in facts)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(icon, size: 14, color: AppColors.textSecondary),
+                              const SizedBox(width: 4),
+                              Text(text, style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                            ],
+                          ),
                       ],
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  CourseThumb(course: course, size: 72),
+                  ],
+                  if (isToday) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    AppButton(label: '코스 보기', height: 44, onPressed: onOpen),
+                  ],
                 ],
               ),
             ),
           ),
-          if (isToday)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, 14, 14),
-              child: AppButton(label: '코스 보기', height: 44, onPressed: onOpen),
-            )
-          else if (moreCount > 0) ...[
-            const Divider(height: 1, color: AppColors.border),
+          if (!isToday && moreCount > 0) ...[
+            const Divider(height: 1, indent: AppSpacing.md, endIndent: AppSpacing.md, color: AppColors.divider),
             InkWell(
               onTap: onMore,
               child: Padding(
@@ -254,6 +287,169 @@ class HomeCourseCard extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// 장소 순서 줄: 업종 칸 + 이름. 5곳까지는 모두, 6곳부터는 앞 셋 · 남은 수 · 마지막 곳. AI 추천 칸에는 작은 ✦
+class _StopStrip extends StatelessWidget {
+  const _StopStrip({required this.keys, required this.names, required this.isAi});
+  final List<String> keys;
+  final List<String> names;
+  final List<bool> isAi;
+
+  @override
+  Widget build(BuildContext context) {
+    final n = keys.length;
+    final shown = n <= 5 ? [for (var i = 0; i < n; i++) i] : [0, 1, 2, -1, n - 1];
+    Widget cell(int i) {
+      if (i < 0) {
+        return _StripCell(
+          tile: Container(
+            alignment: Alignment.center,
+            decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(10)),
+            child: Text('+${n - 4}', style: AppTypography.label.copyWith(color: AppColors.textSecondary)),
+          ),
+          label: '',
+        );
+      }
+      final style = CategoryStyle.of(keys[i]);
+      final ai = i < isAi.length && isAi[i];
+      return _StripCell(
+        tile: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
+                child: Icon(style.icon, size: 18, color: style.color),
+              ),
+            ),
+            if (ai)
+              Positioned(
+                right: -3,
+                top: -3,
+                child: Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(color: AppColors.ai, shape: BoxShape.circle, border: Border.all(color: AppColors.surface, width: 1.5)),
+                  child: const Icon(Icons.auto_awesome, size: 8, color: Colors.white),
+                ),
+              ),
+          ],
+        ),
+        label: names[i],
+      );
+    }
+
+    return Semantics(
+      label: '장소 순서: ${names.join(', ')}',
+      excludeSemantics: true,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final (j, i) in shown.indexed) ...[
+            if (j > 0) const SizedBox(width: 6),
+            Expanded(child: cell(i)),
+          ],
+          // 곳 수가 적어도 칸 폭이 너무 커지지 않게 빈 자리를 채운다
+          for (var k = shown.length; k < 5; k++) ...[const SizedBox(width: 6), const Expanded(child: SizedBox.shrink())],
+        ],
+      ),
+    );
+  }
+}
+
+class _StripCell extends StatelessWidget {
+  const _StripCell({required this.tile, required this.label});
+  final Widget tile;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(height: 36, child: tile),
+        const SizedBox(height: 4),
+        Text(label, style: AppTypography.caption.copyWith(color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+      ],
+    );
+  }
+}
+
+/// 저장한 곳을 지역(구 · 시)으로 묶어 코스 만들기로 잇는다. 곳 수가 많은 지역부터 세 곳까지.
+/// '코스 만들기'는 장소를 미리 고르지 않고 3단계를 그 지역으로 걸러 연다.
+class HomeRegionGroups extends StatelessWidget {
+  const HomeRegionGroups({super.key, required this.places, required this.onStart, required this.onOpenRegion});
+  final List<Place> places;
+  final ValueChanged<String> onStart;
+  final ValueChanged<String> onOpenRegion;
+
+  static List<(String, List<Place>)> groups(List<Place> places) {
+    final map = <String, List<Place>>{};
+    for (final p in places) {
+      final d = p.district;
+      if (d.isNotEmpty) map.putIfAbsent(d, () => []).add(p);
+    }
+    return [for (final e in map.entries) (e.key, e.value)]..sort((a, b) => b.$2.length.compareTo(a.$2.length));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final list = groups(places).take(3).toList();
+    return DividedRows(
+      indent: SectionCard.innerPadding + 44 + AppSpacing.sm,
+      children: [
+        for (final (name, items) in list)
+          InkWell(
+            onTap: () => onOpenRegion(name),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(SectionCard.innerPadding, 10, AppSpacing.sm, 10),
+              child: Row(
+                children: [
+                  CourseThumb(
+                    course: CourseSummary(id: name, title: name, placeCount: items.length, stopCategoryKeys: [for (final p in items) p.categoryKey]),
+                    size: 44,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('$name ${items.length}곳', style: AppTypography.bodyStrong),
+                        Text(items.take(3).map((p) => p.name).join(', '), style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  // 작은 알약 버튼 (보이는 높이 32, 누르는 영역 44)
+                  Semantics(
+                    button: true,
+                    label: '$name에서 코스 만들기',
+                    excludeSemantics: true,
+                    child: InkResponse(
+                      onTap: () => onStart(name),
+                      radius: 30,
+                      child: SizedBox(
+                        height: 44,
+                        child: Center(
+                          child: Container(
+                            height: 32,
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: AppRadius.pillAll),
+                            child: Text('코스 만들기', style: AppTypography.label.copyWith(fontSize: 13, color: AppColors.primary)),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

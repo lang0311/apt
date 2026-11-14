@@ -13,6 +13,7 @@ import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/segmented_tabs.dart';
 import '../../../../core/widgets/states.dart';
 import '../../../../core/widgets/surfaces.dart';
+import '../../../home/presentation/widgets/home_sections.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../domain/course_models.dart';
 import '../course_draft_controller.dart';
@@ -120,25 +121,57 @@ class _Split extends ConsumerWidget {
           ],
         );
 
+    // 지난 코스는 달마다 묶는다 (최근 달부터)
+    final months = <String, List<CourseSummary>>{};
+    for (final c in past) {
+      months.putIfAbsent(c.date!.year == DateTime.now().year ? '${c.date!.month}월' : '${c.date!.year}년 ${c.date!.month}월', () => []).add(c);
+    }
+
     return Padding(
       padding: AppSpacing.screenPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SectionCard(
-            title: '다가오는 코스',
-            child: upcoming.isEmpty
-                ? _EmptyLine(
-                    text: '예정된 코스가 없어요',
-                    actionLabel: '코스 만들기',
-                    onAction: () => startCourseWizard(context, ref),
-                  )
-                : rows(upcoming),
-          ),
+          // 가장 가까운 코스 하나는 홈과 같은 큰 카드, 나머지는 아래 목록
+          if (upcoming.isEmpty)
+            SectionCard(
+              title: '다가오는 코스',
+              child: _EmptyLine(
+                text: '예정된 코스가 없어요',
+                actionLabel: '코스 만들기',
+                onAction: () => startCourseWizard(context, ref),
+              ),
+            )
+          else ...[
+            HomeCourseCard(
+              course: upcoming.first,
+              isToday: upcoming.first.date != null && daysUntil(upcoming.first.date!) == 0,
+              moreCount: 0,
+              onOpen: () => context.push(AppRoutes.course(upcoming.first.id)),
+              onMore: () {},
+            ),
+            if (upcoming.length > 1) ...[
+              const SizedBox(height: AppSpacing.sm),
+              SectionCard(title: '다가오는 코스 ${upcoming.length - 1}개 더', child: rows(upcoming.skip(1).toList())),
+            ],
+          ],
           const SizedBox(height: AppSpacing.sm),
           SectionCard(
             title: '지난 코스',
-            child: past.isEmpty ? const _EmptyLine(text: '아직 지난 여행이 없어요') : rows(past),
+            child: past.isEmpty
+                ? const _EmptyLine(text: '아직 지난 여행이 없어요')
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (final (i, e) in months.entries.indexed) ...[
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(SectionCard.innerPadding, i == 0 ? 0 : AppSpacing.sm, SectionCard.innerPadding, 0),
+                          child: Text(e.key, style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700)),
+                        ),
+                        rows(e.value),
+                      ],
+                    ],
+                  ),
           ),
         ],
       ),

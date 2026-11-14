@@ -83,28 +83,24 @@ class _People extends StatelessWidget {
   }
 }
 
-/// 오른쪽 날짜: 다가오는 코스 = D-day(파랑) + "11.02 월", 지난 코스 = 회색 "10.12" + "일요일"
+/// 오른쪽 날짜: 다가오는 코스 = D-day(파랑) + "11월 15일 (일)", 지난 코스 = 회색 "10월 26일 (월)" 한 줄.
+/// 날짜 표기는 앱 전체에서 "11월 13일 (금)" 한 가지로 맞춘다 (UI 리뷰 10)
 class _When extends StatelessWidget {
   const _When({required this.date});
   final DateTime date;
 
   @override
   Widget build(BuildContext context) {
-    final mmdd = '${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}';
     final upcoming = daysUntil(date) >= 0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
-      children: upcoming
-          ? [
-              Text(ddayLabel(date), style: AppTypography.label.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 2),
-              Text('$mmdd ${weekdayLabel(date)}', style: AppTypography.caption),
-            ]
-          : [
-              Text(mmdd, style: AppTypography.label.copyWith(color: AppColors.textSecondary)),
-              const SizedBox(height: 2),
-              Text('${weekdayLabel(date)}요일', style: AppTypography.caption),
-            ],
+      children: [
+        if (upcoming) ...[
+          Text(ddayLabel(date), style: AppTypography.label.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 2),
+        ],
+        Text(formatMonthDayWeekday(date), style: AppTypography.caption.copyWith(color: upcoming ? null : AppColors.textSecondary)),
+      ],
     );
   }
 }

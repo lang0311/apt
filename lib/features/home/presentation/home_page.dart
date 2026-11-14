@@ -12,6 +12,8 @@ import '../../../core/widgets/surfaces.dart';
 import '../../course/presentation/course_draft_controller.dart';
 import '../../course/presentation/course_providers.dart';
 import '../../extraction/presentation/extraction_providers.dart';
+import '../../saved/domain/saved_models.dart';
+import '../../saved/presentation/saved_providers.dart';
 import '../domain/home_top.dart';
 import 'home_providers.dart';
 import 'widgets/home_sections.dart';
@@ -32,6 +34,7 @@ class HomePage extends ConsumerWidget {
     ref.invalidate(trendingPlacesProvider);
     ref.invalidate(suggestedCoursesProvider);
     ref.invalidate(activeCoursesProvider);
+    ref.invalidate(savedPlacesProvider);
     return awaitRefresh(context, [
       ref.read(activeCoursesProvider.future),
       ref.read(homeStatsProvider.future),
@@ -60,6 +63,7 @@ class HomePage extends ConsumerWidget {
     final seenAt = ref.watch(homeNudgeSeenAtProvider);
     final suggested = ref.watch(suggestedCoursesProvider);
     final trending = ref.watch(trendingPlacesProvider);
+    final saved = ref.watch(savedPlacesProvider(const SavedPlaceQuery()));
 
     // 맨 위 자리는 코스·저장 수·최근 저장·제안 기록이 모두 있어야 고를 수 있다.
     // 통계·최근 저장이 실패해도 코스가 있으면 코스 카드는 보여 준다.
@@ -105,6 +109,18 @@ class HomePage extends ConsumerWidget {
         HomeQuickActions(
           onSavePlace: () => context.go(AppRoutes.extract),
           onNewCourse: () => startCourseWizard(context, ref),
+        ),
+      // 저장한 곳을 지역으로 묶어 코스 만들기로 (주소에 구 · 시가 있는 곳만, 없으면 섹션째 숨긴다)
+      if (!isFirstUse && HomeRegionGroups.groups([for (final i in saved.value ?? const <SavedPlaceItem>[]) i.place]).isNotEmpty)
+        SectionCard(
+          title: '지역별로 시작하기',
+          actionLabel: '모두 보기',
+          onAction: () => context.go(AppRoutes.saved),
+          child: HomeRegionGroups(
+            places: [for (final i in saved.value!) i.place],
+            onStart: (region) => startCourseWizard(context, ref, region: region),
+            onOpenRegion: (_) => context.go(AppRoutes.saved),
+          ),
         ),
       if (!isFirstUse)
         ?_section(
