@@ -8,80 +8,83 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/buttons.dart';
 import '../../../../core/widgets/overlays.dart';
 
-typedef CourseWhen = ({DateTime date, TimeOfDay time});
-
-/// 코스 출발 날짜·시간 시트: 날짜는 2주 칩(+ 달력 팝업), 시간은 휠.
-Future<CourseWhen?> showCourseWhenSheet(BuildContext context, {DateTime? date, TimeOfDay? time}) {
-  return showAppBottomSheet<CourseWhen>(
-    context,
-    builder: (_) => _CourseWhenSheet(initialDate: date, initialTime: time),
-  );
-}
-
 const _chipDays = 14;
 const _minuteStep = 10;
 
-class _CourseWhenSheet extends StatefulWidget {
-  const _CourseWhenSheet({this.initialDate, this.initialTime});
-  final DateTime? initialDate;
-  final TimeOfDay? initialTime;
+/// 코스 만들기 1단계의 날짜 칩 한 줄: 오늘부터 2주 + 달력 칩(먼 날짜는 달력 팝업).
+/// 달력에서 2주 뒤 날짜를 고르면 그 날짜를 맨 앞 칩으로 보여 준다.
+class CourseDayChips extends StatelessWidget {
+  const CourseDayChips({super.key, required this.selected, required this.onPick, this.padding = EdgeInsets.zero});
+  final DateTime? selected;
+  final ValueChanged<DateTime> onPick;
+  final EdgeInsets padding;
 
-  @override
-  State<_CourseWhenSheet> createState() => _CourseWhenSheetState();
-}
-
-class _CourseWhenSheetState extends State<_CourseWhenSheet> {
-  late final DateTime _today = DateUtils.dateOnly(DateTime.now());
-  late DateTime _date;
-  late bool _pm;
-  late int _hour12; // 1–12
-  late int _minute; // 0, 10, … 50
-
-  @override
-  void initState() {
-    super.initState();
-    // 기본값: 내일. 지난 날짜가 들어 있으면 오늘로 당긴다.
-    final initial = widget.initialDate;
-    if (initial == null) {
-      _date = _today.add(const Duration(days: 1));
-    } else {
-      final day = DateUtils.dateOnly(initial);
-      _date = day.isBefore(_today) ? _today : day;
-    }
-    final time = widget.initialTime ?? const TimeOfDay(hour: 11, minute: 0);
-    _pm = time.hour >= 12;
-    _hour12 = time.hour % 12 == 0 ? 12 : time.hour % 12;
-    _minute = (time.minute ~/ _minuteStep) * _minuteStep;
-  }
-
-  TimeOfDay get _time => TimeOfDay(hour: (_hour12 % 12) + (_pm ? 12 : 0), minute: _minute);
-
-  Future<void> _openCalendar() async {
+  Future<void> _openCalendar(BuildContext context, DateTime today) async {
     final picked = await showDialog<DateTime>(
       context: context,
       useRootNavigator: true,
       barrierColor: AppColors.scrim,
-      builder: (_) => _CalendarDialog(today: _today, selected: _date),
+      builder: (_) => _CalendarDialog(today: today, selected: selected ?? today.add(const Duration(days: 1))),
     );
-    if (picked != null) setState(() => _date = picked);
-  }
-
-  /// 오늘부터 [offset]일 뒤 칩 ('오늘' · '내일' · 요일)
-  Widget _dayChip(int offset) {
-    final day = _today.add(Duration(days: offset));
-    return _DayChip(
-      top: switch (offset) { 0 => '오늘', 1 => '내일', _ => weekdayLabel(day) },
-      date: day,
-      selected: _date == day,
-      onTap: () => setState(() => _date = day),
-    );
+    if (picked != null) onPick(picked);
   }
 
   @override
   Widget build(BuildContext context) {
-    final lastChip = _today.add(const Duration(days: _chipDays - 1));
-    final farSelected = _date.isAfter(lastChip);
+    final today = DateUtils.dateOnly(DateTime.now());
+    final picked = selected == null ? null : DateUtils.dateOnly(selected!);
+    final lastChip = today.add(const Duration(days: _chipDays - 1));
+    final far = picked != null && picked.isAfter(lastChip);
 
+    return SizedBox(
+      height: MediaQuery.textScalerOf(context).scale(62),
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: padding,
+        children: [
+          if (far) ...[
+            _DayChip(top: '${picked.month}월 ${weekdayLabel(picked)}', date: picked, selected: true, wide: true, onTap: () {}),
+            const SizedBox(width: AppSpacing.xs),
+          ],
+          for (var i = 0; i < _chipDays; i++) ...[
+            _DayChip(
+              top: switch (i) { 0 => '오늘', 1 => '내일', _ => weekdayLabel(today.add(Duration(days: i))) },
+              date: today.add(Duration(days: i)),
+              selected: picked == today.add(Duration(days: i)),
+              onTap: () => onPick(today.add(Duration(days: i))),
+            ),
+            const SizedBox(width: AppSpacing.xs),
+          ],
+          _CalendarChip(onTap: () => _openCalendar(context, today)),
+        ],
+      ),
+    );
+  }
+}
+
+/// 출발 시간 시트: 오전/오후 · 시 · 분 휠 (기본 오전 11:00)
+Future<TimeOfDay?> showCourseTimeSheet(BuildContext context, {TimeOfDay? time}) {
+  return showAppBottomSheet<TimeOfDay>(context, builder: (_) => _TimeSheet(initial: time));
+}
+
+class _TimeSheet extends StatefulWidget {
+  const _TimeSheet({this.initial});
+  final TimeOfDay? initial;
+
+  @override
+  State<_TimeSheet> createState() => _TimeSheetState();
+}
+
+class _TimeSheetState extends State<_TimeSheet> {
+  late final TimeOfDay _start = widget.initial ?? const TimeOfDay(hour: 11, minute: 0);
+  late bool _pm = _start.hour >= 12;
+  late int _hour12 = _start.hour % 12 == 0 ? 12 : _start.hour % 12;
+  late int _minute = (_start.minute ~/ _minuteStep) * _minuteStep;
+
+  TimeOfDay get _time => TimeOfDay(hour: (_hour12 % 12) + (_pm ? 12 : 0), minute: _minute);
+
+  @override
+  Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, 0, AppSpacing.screenH, AppSpacing.md),
       child: Column(
@@ -90,7 +93,7 @@ class _CourseWhenSheetState extends State<_CourseWhenSheet> {
         children: [
           Row(
             children: [
-              Expanded(child: Text('언제 떠나요?', style: AppTypography.section)),
+              Expanded(child: Text('출발 시간', style: AppTypography.section)),
               IconButton(
                 tooltip: '닫기',
                 onPressed: () => Navigator.pop(context),
@@ -98,36 +101,7 @@ class _CourseWhenSheetState extends State<_CourseWhenSheet> {
               ),
             ],
           ),
-          Row(
-            children: [
-              Expanded(child: Text('날짜', style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700))),
-              _MonthButton(date: _date, onTap: _openCalendar),
-            ],
-          ),
           const SizedBox(height: AppSpacing.xs),
-          SizedBox(
-            height: MediaQuery.textScalerOf(context).scale(62),
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              // 시트 좌우 여백 밖까지 밀리도록
-              clipBehavior: Clip.none,
-              children: [
-                // 달력에서 2주 뒤 날짜를 고르면 맨 앞 칩으로 보여 준다
-                if (farSelected) ...[
-                  _DayChip(top: '${_date.month}월 ${weekdayLabel(_date)}', date: _date, selected: true, wide: true, onTap: () {}),
-                  const SizedBox(width: AppSpacing.xs),
-                ],
-                for (var i = 0; i < _chipDays; i++) ...[
-                  _dayChip(i),
-                  const SizedBox(width: AppSpacing.xs),
-                ],
-                _CalendarChip(onTap: _openCalendar),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text('시작 시간', style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700)),
-          const SizedBox(height: AppSpacing.xxs),
           _TimeWheel(
             pm: _pm,
             hour12: _hour12,
@@ -136,47 +110,9 @@ class _CourseWhenSheetState extends State<_CourseWhenSheet> {
             onHour: (v) => setState(() => _hour12 = v),
             onMinute: (v) => setState(() => _minute = v),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          AppButton(
-            label: '${formatMonthDayWeekday(_date)} ${formatTimeOfDay(_time)} 출발',
-            onPressed: () => Navigator.pop<CourseWhen>(context, (date: _date, time: _time)),
-          ),
+          const SizedBox(height: AppSpacing.md),
+          AppButton(label: '${formatTimeOfDay(_time)} 출발', onPressed: () => Navigator.pop<TimeOfDay>(context, _time)),
         ],
-      ),
-    );
-  }
-}
-
-/// '📅 2026년 10월 ▾' — 누르면 달력 팝업
-class _MonthButton extends StatelessWidget {
-  const _MonthButton({required this.date, required this.onTap});
-  final DateTime date;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: '달력 열기, ${date.year}년 ${date.month}월',
-      excludeSemantics: true,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 40),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.calendar_today_outlined, size: 16, color: AppColors.primary),
-                const SizedBox(width: 6),
-                Text('${date.year}년 ${date.month}월', style: AppTypography.label),
-                const Icon(Icons.expand_more_rounded, size: 18, color: AppColors.textSecondary),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

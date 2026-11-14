@@ -19,7 +19,7 @@ import '../course_draft_controller.dart';
 import '../course_providers.dart';
 import '../widgets/course_when_sheet.dart';
 
-/// #23 코스 기본 정보 (1/4): 이름 · 언제(날짜+시작 시간) · 분위기
+/// #23 코스 기본 정보 (1/4): 이름 · 날짜(화면의 칩) · 출발 시간(휠 시트) · 분위기. 장소는 3단계에서만 보여 준다
 class CourseInfoPage extends ConsumerStatefulWidget {
   const CourseInfoPage({super.key});
 
@@ -38,12 +38,17 @@ class _CourseInfoPageState extends ConsumerState<CourseInfoPage> {
 
   CourseDraftController get _draft => ref.read(courseDraftProvider.notifier);
 
-  Future<void> _pickWhen() async {
+  /// 날짜를 처음 고르면 출발 시간은 오전 11시로 채워 둔다 (시간 칸에서 바꾼다)
+  void _pickDate(DateTime date) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    _draft.update((d) => d.copyWith(date: date, startTime: d.startTime ?? const TimeOfDay(hour: 11, minute: 0)));
+  }
+
+  Future<void> _pickTime() async {
     // 시트를 닫으면 이전 포커스(코스 이름)가 돌아와 키보드가 다시 올라오지 않게 먼저 푼다
     FocusManager.instance.primaryFocus?.unfocus();
-    final draft = ref.read(courseDraftProvider);
-    final picked = await showCourseWhenSheet(context, date: draft.date, time: draft.startTime);
-    if (picked != null) _draft.update((d) => d.copyWith(date: picked.date, startTime: picked.time));
+    final picked = await showCourseTimeSheet(context, time: ref.read(courseDraftProvider).startTime);
+    if (picked != null) _draft.update((d) => d.copyWith(startTime: picked));
   }
 
   @override
@@ -77,15 +82,28 @@ class _CourseInfoPageState extends ConsumerState<CourseInfoPage> {
                           onChanged: (v) => _draft.update((d) => d.copyWith(name: v)),
                         ),
                         const SizedBox(height: AppSpacing.md),
+                        Text('언제 떠나요', style: AppTypography.label),
+                        const SizedBox(height: AppSpacing.xs),
+                      ],
+                    ),
+                  ),
+                  // 날짜 칩은 화면 끝까지 넘긴다 (기간 여행은 정책 확정 후)
+                  CourseDayChips(
+                    selected: draft.date,
+                    onPick: _pickDate,
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.md, AppSpacing.screenH, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                         _PickerField(
-                          label: '언제 떠나요',
-                          icon: Icons.calendar_today_outlined,
-                          // 기간(여러 날) 여행은 정책/디자인 확정 후 지원
-                          value: draft.date == null || draft.startTime == null
-                              ? null
-                              : '${formatMonthDayWeekday(draft.date!)} · ${formatTimeOfDay(draft.startTime!)}',
-                          hint: '날짜와 시작 시간을 골라 주세요',
-                          onTap: _pickWhen,
+                          label: '출발 시간',
+                          icon: Icons.schedule_rounded,
+                          value: draft.startTime == null ? null : formatTimeOfDay(draft.startTime!),
+                          hint: '출발 시간을 골라 주세요',
+                          onTap: _pickTime,
                         ),
                         if (showMoods) ...[
                           const SizedBox(height: AppSpacing.lg),

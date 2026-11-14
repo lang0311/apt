@@ -23,7 +23,7 @@ import '../../../preference/presentation/preference_providers.dart';
 import '../../domain/course_models.dart';
 import '../course_draft_controller.dart';
 
-/// #25 / #26 동행 설정 (2/4, 정보 다음 · 장소 선택 전) — 혼자 가요 / 함께 가요 라디오
+/// #25 / #26 동행 설정 (2/4, 정보 다음 · 장소 선택 전) — 혼자 가요 / 함께 가요 두 칸, 함께면 파티 체크 목록
 class CompanionPage extends ConsumerStatefulWidget {
   const CompanionPage({super.key});
 
@@ -101,27 +101,34 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
                 children: [
                   Text('누구와 함께 가나요?', style: AppTypography.title),
                   const SizedBox(height: AppSpacing.md),
-                  AppCard(
-                    padding: EdgeInsets.zero,
-                    child: Column(
+                  // 혼자 / 함께는 나란한 두 칸 (고르는 단계가 한눈에 보이게)
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _RadioRow(
-                          title: '혼자 가요',
-                          description: '내 취향으로 추천해요',
-                          selected: !isParty,
-                          onTap: () => _setCompanion(Companion.solo),
+                        Expanded(
+                          child: _CompanionTile(
+                            icon: Icons.person_outline_rounded,
+                            title: '혼자 가요',
+                            description: '내 취향으로 추천해요',
+                            selected: !isParty,
+                            onTap: () => _setCompanion(Companion.solo),
+                          ),
                         ),
-                        const Divider(height: 1, indent: AppSpacing.md, endIndent: AppSpacing.md, color: AppColors.divider),
-                        _RadioRow(
-                          title: '함께 가요',
-                          description: '파티원 취향을 함께 반영해요',
-                          selected: isParty,
-                          onTap: () => _setCompanion(Companion.party),
+                        const SizedBox(width: AppSpacing.xs),
+                        Expanded(
+                          child: _CompanionTile(
+                            icon: Icons.group_outlined,
+                            title: '함께 가요',
+                            description: '파티원 취향도 반영해요',
+                            selected: isParty,
+                            onTap: () => _setCompanion(Companion.party),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: AppSpacing.lg),
                   if (isParty)
                     _PartyPicker(
                       selectedId: draft.partyId,
@@ -149,8 +156,10 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
   }
 }
 
-class _RadioRow extends StatelessWidget {
-  const _RadioRow({required this.title, required this.description, required this.selected, required this.onTap});
+/// 혼자 / 함께 칸: 아이콘 · 제목 · 설명. 고르면 파란 테두리와 연한 파랑 바탕
+class _CompanionTile extends StatelessWidget {
+  const _CompanionTile({required this.icon, required this.title, required this.description, required this.selected, required this.onTap});
+  final IconData icon;
   final String title;
   final String description;
   final bool selected;
@@ -158,28 +167,34 @@ class _RadioRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(AppRadius.thumb);
     return Semantics(
       selected: selected,
       inMutuallyExclusiveGroup: true,
       button: true,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 14),
-          child: Row(
-            children: [
-              CheckMark(checked: selected),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: AppTypography.bodyStrong),
-                    Text(description, style: AppTypography.caption),
-                  ],
-                ),
-              ),
-            ],
+      label: '$title, $description',
+      excludeSemantics: true,
+      child: Material(
+        color: selected ? AppColors.primarySoft : AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: BorderSide(color: selected ? AppColors.primary : AppColors.border, width: selected ? 1.5 : 1),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: radius,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.sm, AppSpacing.sm, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(icon, size: 22, color: selected ? AppColors.primary : AppColors.textSecondary),
+                const SizedBox(height: AppSpacing.xs),
+                Text(title, style: AppTypography.bodyStrong.copyWith(color: selected ? AppColors.primary : AppColors.textPrimary)),
+                const SizedBox(height: 2),
+                Text(description, style: AppTypography.caption),
+              ],
+            ),
           ),
         ),
       ),
@@ -212,7 +227,9 @@ class _PartyPicker extends ConsumerWidget {
       onRetry: () => ref.invalidate(myPartiesProvider),
       loading: const SkeletonBox(height: 160),
       data: (list) {
-        if (list.isEmpty) return newCard;
+        // 나 혼자인 파티는 '혼자 가요'와 같아서 목록에서 뺀다 (지금 고른 파티는 남긴다)
+        final shown = [for (final p in list) if (p.members.length > 1 || p.id == selectedId) p];
+        if (shown.isEmpty) return newCard;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -224,19 +241,19 @@ class _PartyPicker extends ConsumerWidget {
                   DividedRows(
                     indent: SectionCard.innerPadding,
                     children: [
-                      for (final p in list)
+                      for (final p in shown)
                         _PartyRow(
                           selected: !newParty && p.id == selectedId,
                           label: p.members.crewNames,
                           count: '${p.members.length}명',
                           onTap: () => onPick(p.id),
                         ),
-                      _PartyRow(selected: newParty, label: '새 파티 만들기', onTap: onPickNew, accent: true),
+                      _PartyRow(selected: newParty, label: '새 파티 만들기', onTap: onPickNew, accent: true, leadingIcon: Icons.add_rounded),
                     ],
                   ),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(SectionCard.innerPadding, AppSpacing.xxs, SectionCard.innerPadding, 0),
-                    child: Text('고른 파티원이 저장한 장소와 취향을 추천에 반영해요.', style: AppTypography.caption),
+                    padding: const EdgeInsets.fromLTRB(SectionCard.innerPadding, AppSpacing.xs, SectionCard.innerPadding, AppSpacing.xxs),
+                    child: Text('고른 파티원이 저장한 장소와 취향을 추천에 반영해요. 초대 수락을 기다리지 않고 다음으로 갈 수 있어요.', style: AppTypography.caption),
                   ),
                 ],
               ),
@@ -251,8 +268,11 @@ class _PartyPicker extends ConsumerWidget {
 
 /// 파티 한 줄(높이 48): 라디오 · 파티원 이름(넘치면 말줄임) · 인원
 class _PartyRow extends StatelessWidget {
-  const _PartyRow({required this.selected, required this.label, required this.onTap, this.count, this.accent = false});
+  const _PartyRow({required this.selected, required this.label, required this.onTap, this.count, this.accent = false, this.leadingIcon});
   final bool selected;
+
+  /// 고르는 줄이 아니라 행동 줄(새 파티 만들기)이면 체크 대신 이 아이콘
+  final IconData? leadingIcon;
   final String label;
   final String? count;
   final VoidCallback onTap;
@@ -269,12 +289,15 @@ class _PartyRow extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 48),
+          constraints: const BoxConstraints(minHeight: 52),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
             child: Row(
               children: [
-                CheckMark(checked: selected),
+                if (leadingIcon != null && !selected)
+                    SizedBox.square(dimension: 24, child: Icon(leadingIcon, size: 22, color: AppColors.primary))
+                else
+                  CheckMark(checked: selected),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
@@ -361,16 +384,19 @@ class _SoloCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final labels = ref.watch(myPreferenceLabelsProvider);
+    // 직접 고르는 취향이 없으면(팀 서버) 저장한 장소로 추천한다는 설명만, 링크는 '취향 보기'
+    final manual = !(ref.watch(preferenceGroupsProvider).value?.isEmpty ?? false);
     return SectionCard(
       title: '반영할 취향',
       trailing: TextButton(
         onPressed: () => context.push(AppRoutes.preferences),
         style: TextButton.styleFrom(foregroundColor: AppColors.primary, minimumSize: const Size(44, 44)),
-        child: Text('취향 수정', style: AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
+        child: Text(manual ? '취향 수정' : '취향 보기', style: AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
         child: switch (labels) {
+          _ when !manual => Text('저장한 장소를 보고 내 취향에 맞춰 추천해요', style: AppTypography.meta),
           AsyncData(:final value) when value.isNotEmpty => Text(value.take(5).join(' · '), style: AppTypography.bodyStrong),
           AsyncData() => Text('아직 고른 취향이 없어요', style: AppTypography.meta),
           AsyncError() => Text('취향을 불러오지 못했어요', style: AppTypography.meta),
