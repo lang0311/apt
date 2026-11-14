@@ -5,6 +5,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/states.dart';
+import '../../../../core/widgets/surfaces.dart';
 import '../../../party/domain/party_models.dart';
 import '../../../party/presentation/widgets/party_avatar_stack.dart';
 import '../../domain/course_models.dart';
@@ -13,10 +14,12 @@ import 'course_route_map.dart';
 
 /// 코스 머리: 이름 + 한 줄 정보 (상세 · 4단계 결과 · 편집이 같은 모양)
 class CourseHero extends StatelessWidget {
-  const CourseHero({super.key, required this.title, required this.meta, this.dday, this.savedNotice = false});
+  const CourseHero({super.key, required this.title, this.meta, this.dday, this.savedNotice = false});
 
   final String title;
-  final String meta;
+
+  /// 제목 아래 한 줄 (요약 칸 [CourseStats]을 쓰는 화면은 비운다)
+  final String? meta;
 
   /// 다가오는 코스의 D-day (날짜에서 계산한 값)
   final String? dday;
@@ -51,8 +54,10 @@ class CourseHero extends StatelessWidget {
             const SizedBox(height: 2),
           ],
           Text(title, style: AppTypography.title.copyWith(fontSize: 22, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 4),
-          Text(meta, style: AppTypography.meta),
+          if (meta != null && meta!.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(meta!, style: AppTypography.meta),
+          ],
         ],
       ),
     );
@@ -246,6 +251,108 @@ String courseMetaLine({DateTime? date, TimeOfDay? start, int? placeCount, Durati
       if (duration != null) '약 ${formatDuration(duration)}',
     ].join(' · ');
 
+/// 장소 사이 직선 거리 합(m). 팀 서버 `distance_km`와 같은 방식(`route_type: straight_line`)이라 편집 뒤에도 앱에서 다시 센다.
+/// 좌표가 있는 장소가 둘보다 적으면 null
+int? straightDistanceMeters(List<CourseStop> stops) {
+  final points = [for (final s in stops) if (s.place.location != null) s.place.location!];
+  if (points.length < 2) return null;
+  var sum = 0.0;
+  for (var i = 1; i < points.length; i++) {
+    sum += points[i - 1].distanceTo(points[i]);
+  }
+  return sum.round();
+}
+
+/// 코스 요약 칸: 날짜 · 출발 · 거리. 값이 있는 칸만 보여 주고(2칸, 1칸), 하나도 없으면 그리지 않는다
+class CourseStats extends StatelessWidget {
+  const CourseStats({super.key, this.date, this.start, this.stops = const []});
+  final DateTime? date;
+  final TimeOfDay? start;
+  final List<CourseStop> stops;
+
+  @override
+  Widget build(BuildContext context) {
+    final meters = straightDistanceMeters(stops);
+    final cells = <(String, String)>[
+      if (date != null) ('날짜', '${date!.month}.${date!.day} (${weekdayLabel(date!)})'),
+      if (start != null) ('출발', formatTimeOfDay(start!)),
+      if (meters != null) ('직선 거리', formatDistance(meters)),
+    ];
+    if (cells.isEmpty) return const SizedBox.shrink();
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.thumb),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final (i, (label, value)) in cells.indexed) ...[
+              if (i > 0) const VerticalDivider(width: 1, thickness: 1, indent: 12, endIndent: 12, color: AppColors.divider),
+              Expanded(
+                child: Semantics(
+                  label: '$label $value',
+                  excludeSemantics: true,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.sm, 10, AppSpacing.xs, 11),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(label, style: AppTypography.caption),
+                        const SizedBox(height: 2),
+                        Text(value, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 일정 제목 아래 한 줄: 진한 원 "내가 고른 곳 n", 주황 ✦ "AI 추천 n" (없는 쪽은 뺀다)
+class CourseStopLegend extends StatelessWidget {
+  const CourseStopLegend({super.key, required this.stops});
+  final List<CourseStop> stops;
+
+  @override
+  Widget build(BuildContext context) {
+    final ai = stops.where((s) => s.isAi).length;
+    final mine = stops.length - ai;
+    Widget item(Widget dot, String text) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [dot, const SizedBox(width: 6), Text(text, style: AppTypography.caption.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600))],
+        );
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(SectionCard.innerPadding, 0, SectionCard.innerPadding, AppSpacing.xs),
+      child: Wrap(
+        spacing: AppSpacing.md,
+        runSpacing: 4,
+        children: [
+          if (mine > 0)
+            item(Container(width: 12, height: 12, decoration: const BoxDecoration(color: AppColors.ink, shape: BoxShape.circle)), '내가 고른 곳 $mine'),
+          if (ai > 0)
+            item(
+              Container(
+                width: 12,
+                height: 12,
+                decoration: const BoxDecoration(color: AppColors.ai, shape: BoxShape.circle),
+                child: const Icon(Icons.auto_awesome, size: 8, color: Colors.white),
+              ),
+              'AI 추천 $ai',
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 /// 일정 카드 제목 줄의 "편집" 버튼 (테두리 있는 작은 버튼, 누르는 영역 44)
 class CourseEditButton extends StatelessWidget {
   const CourseEditButton({super.key, required this.onPressed});
@@ -318,7 +425,7 @@ class _StopText extends StatelessWidget {
 }
 
 
-/// 일정 타임라인 (보는 상태). 장소 행은 옅은 흰 바탕으로 나누고, 행 사이 점선에 이동 정보를 둔다.
+/// 일정 타임라인 (보는 상태). 번호 원을 한 줄기 선으로 잇고, 행 사이에 이동 정보를 둔다.
 /// 코스 상세와 4단계 결과가 같은 위젯을 쓴다.
 class CourseTimeline extends StatelessWidget {
   const CourseTimeline({
@@ -360,6 +467,8 @@ class CourseTimeline extends StatelessWidget {
                 stop: stops[i],
                 number: numbers[i],
                 showTime: showTime,
+                lineAbove: i > 0,
+                lineBelow: i < stops.length - 1,
                 highlighted: highlightIds.contains(stops[i].place.id),
                 onTap: onTapStop == null ? null : () => onTapStop!(stops[i]),
                 onMore: onMore == null || !stops[i].isAi ? null : () => onMore!(stops[i]),
@@ -373,8 +482,19 @@ class CourseTimeline extends StatelessWidget {
 }
 
 class _ViewTile extends StatelessWidget {
-  const _ViewTile({required this.stop, required this.number, this.showTime = true, this.highlighted = false, this.onTap, this.onMore});
+  const _ViewTile({
+    required this.stop,
+    required this.number,
+    this.showTime = true,
+    this.highlighted = false,
+    this.lineAbove = false,
+    this.lineBelow = false,
+    this.onTap,
+    this.onMore,
+  });
   final CourseStop stop;
+  final bool lineAbove;
+  final bool lineBelow;
   final int? number;
   final bool showTime;
   final bool highlighted;
@@ -384,7 +504,7 @@ class _ViewTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: highlighted ? AppColors.aiSoft : AppColors.surfaceRaised,
+      color: highlighted ? AppColors.aiSoft : Colors.transparent,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -392,12 +512,14 @@ class _ViewTile extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 56),
           child: Padding(
-            padding: EdgeInsets.fromLTRB(AppSpacing.xs, 8, onMore == null ? AppSpacing.sm : 0, 8),
-            child: Row(
+            padding: EdgeInsets.fromLTRB(AppSpacing.xs, 0, onMore == null ? AppSpacing.sm : 0, 0),
+            child: IntrinsicHeight(
+              child: Row(
               children: [
                 if (showTime) ...[
-                  SizedBox(
+                  Container(
                     width: 40,
+                    alignment: Alignment.centerRight,
                     child: Text(
                       stop.arrivalTime == null ? '' : formatClock(stop.arrivalTime!),
                       textAlign: TextAlign.right,
@@ -406,9 +528,21 @@ class _ViewTile extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.xs),
                 ],
-                _marker(stop, number),
-                const SizedBox(width: 10),
-                Expanded(child: _StopText(stop: stop)),
+                // 번호 원 위아래로 선을 이어 일정 전체가 한 줄기로 보이게
+                Column(
+                  children: [
+                    Expanded(child: _Line(visible: lineAbove)),
+                    _marker(stop, number),
+                    Expanded(child: _Line(visible: lineBelow)),
+                  ],
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Align(alignment: Alignment.centerLeft, child: _StopText(stop: stop)),
+                  ),
+                ),
                 if (onMore != null)
                   IconButton(
                     tooltip: '${stop.place.name} 메뉴',
@@ -416,6 +550,7 @@ class _ViewTile extends StatelessWidget {
                     icon: const Icon(Icons.more_horiz_rounded, size: 20, color: AppColors.textSecondary),
                   ),
               ],
+              ),
             ),
           ),
         ),
@@ -424,7 +559,7 @@ class _ViewTile extends StatelessWidget {
   }
 }
 
-/// 장소 사이 이동 줄: 번호 원 아래 점선 + "도보 6분"
+/// 장소 사이 이동 줄: 번호 원을 잇는 선 + "도보 6분" (이동 정보가 없으면 짧게)
 class _LegRow extends StatelessWidget {
   const _LegRow({this.leg, this.showTime = true});
   final RouteLeg? leg;
@@ -433,13 +568,14 @@ class _LegRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 30,
+      height: leg == null ? 6 : 26,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // (시각(40) + 간격(8)) + 번호 원 가운데(13)
-          SizedBox(width: AppSpacing.xs + (showTime ? 40 + AppSpacing.xs : 0) + 12),
-          CustomPaint(size: const Size(2, 30), painter: _DashPainter()),
-          const SizedBox(width: 14),
+          // 시각(40) + 간격(8), 선은 번호 원(26) 가운데 — 글자는 장소 이름과 같은 자리에서 시작
+          SizedBox(width: AppSpacing.xs + (showTime ? 40 + AppSpacing.xs : 0)),
+          const _Line(visible: true),
+          const SizedBox(width: 12),
           if (leg != null) ...[
             Icon(leg!.mode.icon, size: 13, color: AppColors.textSecondary),
             const SizedBox(width: 4),
@@ -451,19 +587,17 @@ class _LegRow extends StatelessWidget {
   }
 }
 
-class _DashPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.controlBorder
-      ..strokeWidth = 1.5;
-    for (double y = 2; y < size.height - 2; y += 5) {
-      canvas.drawLine(Offset(size.width / 2, y), Offset(size.width / 2, y + 2.5), paint);
-    }
-  }
+/// 일정 줄기 (폭 2, 번호 원 가운데를 지난다)
+class _Line extends StatelessWidget {
+  const _Line({required this.visible});
+  final bool visible;
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  Widget build(BuildContext context) => Container(
+        width: 2,
+        margin: const EdgeInsets.symmetric(horizontal: 12),
+        color: visible ? AppColors.borderStrong : Colors.transparent,
+      );
 }
 
 class _SkeletonTile extends StatelessWidget {

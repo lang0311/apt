@@ -106,20 +106,16 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
       body = ListView(
         padding: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.lg),
         children: [
-          CourseHero(
-            title: draft.name,
-            meta: courseMetaLine(
-              date: draft.date,
-              start: draft.startTime,
-              placeCount: _editing ? null : state.stops.length,
-            ),
-          ),
+          CourseHero(title: draft.name),
           const SizedBox(height: AppSpacing.sm),
           Padding(
             padding: AppSpacing.screenPadding,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // 코스 상세와 같은 요약 칸 (거리는 편집하면 다시 센다)
+                CourseStats(date: draft.date, start: draft.startTime, stops: state.stops),
+                const SizedBox(height: AppSpacing.xs),
                 if (!_editing) ...[
                   CourseRouteMap(title: draft.name, stops: state.stops, height: 160),
                   const SizedBox(height: AppSpacing.sm),
@@ -144,7 +140,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                   )
                 else
                   SectionCard(
-                    title: '일정',
+                    title: '일정 ${state.stops.length}곳',
                     trailing: CourseEditButton(onPressed: busy ? null : () => setState(() => _editing = true)),
                     child: state.stops.isEmpty
                         ? Padding(
@@ -153,7 +149,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                           )
                         : _WithBanner(
                             show: state.loading,
-                            child: _withTaste(state.recommendation?.taste, state.stops, draft.partyId, CourseTimeline(
+                            child: _withTaste(state.recommendation?.taste, state.stops, draft.partyId, legend: CourseStopLegend(stops: state.stops), CourseTimeline(
                               stops: state.stops,
                               highlightIds: state.changedIds,
                               loadingIds: state.loadingIds,
@@ -167,7 +163,12 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                     padding: const EdgeInsets.fromLTRB(6, AppSpacing.xs, 0, 0),
                     child: Text('시간과 이동 정보는 다시 추천하거나 완료하면 다시 계산돼요.', style: AppTypography.caption),
                   )
-                else if (!state.stops.any((s) => s.isAi))
+                else if (state.stops.any((s) => s.isAi))
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(6, AppSpacing.xs, 0, 0),
+                    child: Text('다시 추천하면 AI 추천 장소만 바뀌고 내가 고른 곳은 그대로예요.', style: AppTypography.caption),
+                  )
+                else
                   Padding(
                     padding: const EdgeInsets.fromLTRB(6, AppSpacing.xs, 0, 0),
                     // 추천 0건 — 디자인 없음 (docs/07 §3)
@@ -380,9 +381,10 @@ class _Stages extends StatelessWidget {
 }
 
 /// 일정 위에 반영한 취향 한 줄 (07 D46)
-Widget _withTaste(AppliedTaste? taste, List<CourseStop> stops, String? partyId, Widget timeline) => taste == null
-    ? timeline
-    : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        AppliedTasteSection(taste: taste, stops: stops, partyId: partyId),
-        timeline,
-      ]);
+/// 일정 카드 안: 범례 → 반영한 취향 → 타임라인 (코스 상세와 같은 순서)
+Widget _withTaste(AppliedTaste? taste, List<CourseStop> stops, String? partyId, Widget timeline, {Widget? legend}) =>
+    Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      ?legend,
+      if (taste != null) AppliedTasteSection(taste: taste, stops: stops, partyId: partyId),
+      timeline,
+    ]);

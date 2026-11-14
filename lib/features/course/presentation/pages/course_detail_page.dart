@@ -7,6 +7,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../core/widgets/buttons.dart';
 import '../../../../core/widgets/headers.dart';
 import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/states.dart';
@@ -78,7 +79,7 @@ class _Body extends StatelessWidget {
       children: [
         CourseHero(
           title: course.title,
-          meta: courseMetaLine(date: course.date, start: course.startTime, placeCount: course.stops.length, duration: course.totalDuration),
+          // 날짜 · 출발 · 거리는 아래 요약 칸으로 (소요 시간은 서버가 주면 칸을 늘린다)
           dday: date != null && daysUntil(date) >= 0 ? ddayLabel(date) : null,
           savedNotice: justSaved,
         ),
@@ -88,6 +89,8 @@ class _Body extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              CourseStats(date: course.date, start: course.startTime, stops: course.stops),
+              const SizedBox(height: AppSpacing.xs),
               if (course.isParty) ...[
                 _CrewStrip(course: course),
                 const SizedBox(height: AppSpacing.xs),
@@ -95,11 +98,12 @@ class _Body extends StatelessWidget {
               CourseRouteMap(title: course.title, stops: course.stops, height: course.isParty ? 120 : 160),
               const SizedBox(height: AppSpacing.sm),
               SectionCard(
-                title: '일정',
+                title: '일정 ${course.stops.length}곳',
                 trailing: course.canEdit ? CourseEditButton(onPressed: () => context.push(AppRoutes.courseEdit(course.id))) : null,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    CourseStopLegend(stops: course.stops),
                     if (course.taste != null) AppliedTasteSection(taste: course.taste!, stops: course.stops, partyId: course.partyId),
                     CourseTimeline(
                       stops: course.stops,
@@ -186,8 +190,11 @@ class _CrewStrip extends ConsumerWidget {
     );
   }
 
+  /// 나를 맨 위에, 초대하기 · 코스 알리기는 사람 목록과 나눠 아래 버튼 두 개로.
   /// 초대 링크는 파티장만 만들 수 있어서(서버 403) 파티원에게는 초대하기를 보이지 않는다 (07 D43)
   void _showMembers(BuildContext context, List<PartyMember> members, String partyId, {required bool canInvite}) {
+    final ordered = [...members.where((m) => m.isMe), ...members.where((m) => !m.isMe)];
+    final canShare = members.any((m) => !m.isMe);
     showAppBottomSheet<void>(
       context,
       builder: (ctx) => Padding(
@@ -198,38 +205,57 @@ class _CrewStrip extends ConsumerWidget {
           children: [
             Text('함께하는 사람 ${members.length}명', style: AppTypography.cardTitle),
             const SizedBox(height: AppSpacing.xs),
-            for (final (i, m) in members.indexed)
+            for (final m in ordered)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Row(
                   children: [
-                    PartyAvatarStack(members: [m], size: 36, max: 1, colorOffset: i),
+                    // 얼굴 색은 서버 순서 그대로 (상세의 얼굴 묶음과 같은 색)
+                    PartyAvatarStack(members: [m], size: 36, max: 1, colorOffset: members.indexOf(m)),
                     const SizedBox(width: AppSpacing.sm),
-                    Text(m.isMe ? '${m.nickname} (나)' : m.nickname, style: AppTypography.bodyStrong),
+                    Flexible(child: Text(m.nickname, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                    if (m.isMe) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6)),
+                        child: Text(canInvite ? '나, 파티장' : '나', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700)),
+                      ),
+                    ],
                   ],
                 ),
               ),
-            const SizedBox(height: AppSpacing.xs),
-            if (canInvite)
-              TextButton.icon(
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                  showInviteModal(context, partyId: partyId);
-                },
-                icon: const Icon(Icons.person_add_alt_1_rounded),
-                label: const Text('초대하기'),
-                style: TextButton.styleFrom(foregroundColor: AppColors.primary, alignment: Alignment.centerLeft, minimumSize: const Size(44, 48)),
+            if (canInvite || canShare) ...[
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                children: [
+                  if (canInvite)
+                    Expanded(
+                      child: AppButton(
+                        label: '초대하기',
+                        variant: canShare ? AppButtonVariant.outline : AppButtonVariant.primary,
+                        height: 48,
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                          showInviteModal(context, partyId: partyId);
+                        },
+                      ),
+                    ),
+                  if (canInvite && canShare) const SizedBox(width: AppSpacing.xs),
+                  if (canShare)
+                    Expanded(
+                      child: AppButton(
+                        label: '코스 알리기',
+                        height: 48,
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                          showCourseShareSheet(context, course: course, members: members);
+                        },
+                      ),
+                    ),
+                ],
               ),
-            if (members.any((m) => !m.isMe))
-              TextButton.icon(
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                  showCourseShareSheet(context, course: course, members: members);
-                },
-                icon: const Icon(Icons.ios_share_rounded),
-                label: const Text('코스 알리기'),
-                style: TextButton.styleFrom(foregroundColor: AppColors.primary, alignment: Alignment.centerLeft, minimumSize: const Size(44, 48)),
-              ),
+            ],
           ],
         ),
       ),

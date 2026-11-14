@@ -130,6 +130,10 @@ class CourseSummary {
     this.memberNames = const [],
     this.tags = const [],
     this.stopCategoryKeys = const [],
+    this.stopNames = const [],
+    this.stopIsAi = const [],
+    this.startTime,
+    this.distanceKm,
   });
 
   final String id;
@@ -147,6 +151,18 @@ class CourseSummary {
 
   /// 일정 장소의 카테고리 키(순서대로). 사진이 없을 때 앞 칸에 카테고리 아이콘을 모아 보여 준다.
   final List<String> stopCategoryKeys;
+
+  /// 일정 장소 이름(순서대로, [stopCategoryKeys]와 같은 길이). 홈 코스 카드의 장소 줄. 없으면 빈 목록
+  final List<String> stopNames;
+
+  /// 일정 장소가 AI 추천인지(순서대로). 홈 장소 줄에서 ✦로 구분한다
+  final List<bool> stopIsAi;
+
+  /// 출발 시간 (팀 서버 `start_time`). 없으면 null
+  final TimeOfDay? startTime;
+
+  /// 장소 사이 직선 거리 합 (팀 서버 `distance_km`). 없으면 null
+  final double? distanceKm;
 }
 
 /// "이런 코스는 어때요?" (서버 추천 코스)
