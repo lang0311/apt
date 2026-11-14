@@ -157,13 +157,17 @@ class _EmptyLine extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(SectionCard.innerPadding, 0, SectionCard.innerPadding, AppSpacing.xxs),
-      child: Row(
+      // 문구와 링크를 '·'로 잇지 않고 두 줄로 나눈다
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(text, style: AppTypography.meta),
-          if (actionLabel != null) ...[
-            Text(' · ', style: AppTypography.meta),
-            AppTextLink(label: actionLabel!, onPressed: onAction, style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700)),
-          ],
+          if (actionLabel != null)
+            // AppTextLink의 좌우 여백(4)만큼 당겨 위 문구와 글자 왼쪽을 맞춘다
+            Transform.translate(
+              offset: const Offset(-4, 0),
+              child: AppTextLink(label: actionLabel!, onPressed: onAction, style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700)),
+            ),
         ],
       ),
     );
