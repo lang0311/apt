@@ -153,28 +153,35 @@ class _Body extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.only(bottom: AppSpacing.lg),
             children: [
-              Stack(
-                children: [
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: PlaceDetailPage._photoHeight,
-                    child: PlaceImage(
-                      place: place,
-                      width: double.infinity,
+              if (place.imageUrl != null && place.imageUrl!.isNotEmpty)
+                Stack(
+                  children: [
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
                       height: PlaceDetailPage._photoHeight,
-                      radius: 0,
-                      iconSize: 40,
+                      child: PlaceImage(
+                        place: place,
+                        width: double.infinity,
+                        height: PlaceDetailPage._photoHeight,
+                        radius: 0,
+                        iconSize: 40,
+                      ),
                     ),
-                  ),
-                  Padding(
-                    // 사진 아래쪽에 28만큼 겹친다
-                    padding: const EdgeInsets.fromLTRB(AppSpacing.sm, PlaceDetailPage._photoHeight - 28, AppSpacing.sm, 0),
-                    child: _TitleCard(detail: detail, onSave: () => _onSaveButton(context, ref)),
-                  ),
-                ],
-              ),
+                    Padding(
+                      // 사진 아래쪽에 28만큼 겹친다
+                      padding: const EdgeInsets.fromLTRB(AppSpacing.sm, PlaceDetailPage._photoHeight - 28, AppSpacing.sm, 0),
+                      child: _TitleCard(detail: detail, onSave: () => _onSaveButton(context, ref)),
+                    ),
+                  ],
+                )
+              else
+                // 사진이 없으면 큰 칸 없이 이름 카드부터 (뒤로 · 공유 버튼 아래 높이만큼 비운다)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.xs + 48 + AppSpacing.xs, AppSpacing.sm, 0),
+                  child: _TitleCard(detail: detail, onSave: () => _onSaveButton(context, ref)),
+                ),
               const SizedBox(height: AppSpacing.sm),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
