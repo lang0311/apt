@@ -56,6 +56,12 @@ class Place {
   /// 목록 · 카드 · 시트에 쓰는 짧은 동네 이름 ('성수동', '마포구', '김포시'). 주소는 장소 상세의 `주소` 줄에서만 길게 보여 준다.
   String get shortArea => shortAreaOf(displayArea);
 
+  /// 지역 묶음 이름: 구 · 군 · 시('강서구', '김포시'). 없으면 동네 이름, 그것도 없으면 빈 문자열
+  String get district {
+    final d = districtOf(displayArea);
+    return d.isNotEmpty ? d : shortArea;
+  }
+
   Place copyWith({bool? isSaved}) => Place(
         id: id,
         name: name,
@@ -109,4 +115,10 @@ String shortAreaOf(String address) {
     if (found.isNotEmpty) return found;
   }
   return '';
+}
+
+/// 주소에서 구 · 군 · 시만 뽑는다(지역 묶음용). 여럿이면 마지막('경기 성남시 분당구 …' → '분당구'). 없으면 빈 문자열
+String districtOf(String address) {
+  final pattern = RegExp(r'^[가-힣]+[구군시]$');
+  return address.trim().split(RegExp(r'\s+')).lastWhere(pattern.hasMatch, orElse: () => '');
 }

@@ -11,6 +11,7 @@ import '../../../place/domain/place.dart';
 import '../../domain/saved_models.dart';
 import 'category_style.dart';
 import 'place_image.dart';
+import 'source_chips.dart';
 
 /// 저장 장소 한 행: 사진 56 · 이름 · '카테고리 · 동네' · ★평점/@출처(둘 다 없으면 셋째 줄 생략)
 /// AI 추천 탭에서는 셋째 줄에 ✦ + 추천한 코스 이름(07 D44), 선택 모드에서는 왼쪽에 네모 체크(07 D45).
@@ -414,23 +415,59 @@ class AppliedFilterChip extends StatelessWidget {
 /// 카테고리 시트: 서버 카테고리(아이콘 · 개수)를 **여러 개** 고른다(네모 체크, 07 D48).
 /// 아래 `초기화`는 고른 것을 모두 풀고, `n곳 보기`가 [onApply]로 고른 키들을 넘기며 닫는다(비면 전체).
 /// 그냥 닫으면 아무 일도 없다. 0곳은 고를 수 없다. 저장됨 · 코스 장소 고르기 · 저장 지도가 같이 쓴다.
+/// [title] · [styleOf]를 바꾸면 같은 시트로 지역을 고른다(저장됨 지역별 보기). [sources]를 주면 맨 위에
+/// 직접 저장 · 추천받은 곳 켜고 끄기가 붙고 `적용`을 누를 때 [onApplySources]로 넘긴다(07 D47, 칩을 시트 안으로).
 Future<void> showCategoryFilterSheet(
   BuildContext context, {
   required SavedSummary summary,
   required Set<String> selected,
   required ValueChanged<Set<String>> onApply,
+  String title = '카테고리',
+  CategoryStyle Function(String key)? styleOf,
+  ({bool mine, bool ai})? sources,
+  void Function(bool mine, bool ai)? onApplySources,
+  bool? autoSearch,
+  ValueChanged<bool>? onApplyAutoSearch,
 }) {
   return showAppBottomSheet<void>(
     context,
-    builder: (ctx) => _CategoryFilterSheet(summary: summary, initial: selected, onApply: onApply),
+    builder: (ctx) => _CategoryFilterSheet(
+      summary: summary,
+      initial: selected,
+      onApply: onApply,
+      title: title,
+      styleOf: styleOf ?? CategoryStyle.of,
+      sources: sources,
+      onApplySources: onApplySources,
+      autoSearch: autoSearch,
+      onApplyAutoSearch: onApplyAutoSearch,
+    ),
   );
 }
 
 class _CategoryFilterSheet extends StatefulWidget {
-  const _CategoryFilterSheet({required this.summary, required this.initial, required this.onApply});
+  const _CategoryFilterSheet({
+    required this.summary,
+    required this.initial,
+    required this.onApply,
+    required this.title,
+    required this.styleOf,
+    this.sources,
+    this.onApplySources,
+    this.autoSearch,
+    this.onApplyAutoSearch,
+  });
   final SavedSummary summary;
   final Set<String> initial;
   final ValueChanged<Set<String>> onApply;
+  final String title;
+  final CategoryStyle Function(String key) styleOf;
+  final ({bool mine, bool ai})? sources;
+  final void Function(bool mine, bool ai)? onApplySources;
+
+  /// 저장 지도의 '지도 이동 시 자동 검색' (주면 시트 맨 아래 스위치 한 줄)
+  final bool? autoSearch;
+  final ValueChanged<bool>? onApplyAutoSearch;
 
   @override
   State<_CategoryFilterSheet> createState() => _CategoryFilterSheetState();
@@ -442,6 +479,10 @@ class _CategoryFilterSheetState extends State<_CategoryFilterSheet> {
     for (final k in widget.initial)
       if (widget.summary.categories.any((c) => c.key == k)) k,
   };
+
+  late bool _mine = widget.sources?.mine ?? true;
+  late bool _ai = widget.sources?.ai ?? true;
+  late bool _auto = widget.autoSearch ?? true;
 
   int get _count => _picked.isEmpty
       ? widget.summary.totalCount
@@ -458,8 +499,31 @@ class _CategoryFilterSheetState extends State<_CategoryFilterSheet> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xxs, AppSpacing.lg, AppSpacing.xs),
-            child: Text('카테고리', style: AppTypography.section),
+            // 켜고 끄기가 붙으면 시트 제목은 '필터', 아래에 두 묶음 이름을 단다
+            child: Text(widget.sources == null ? widget.title : '필터', style: AppTypography.section),
           ),
+          if (widget.sources != null) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 0),
+              child: Row(
+                children: [
+                  Expanded(child: Text('보여 줄 장소', style: AppTypography.label)),
+                  SourceChips(
+                    showMine: _mine,
+                    showAi: _ai,
+                    onChanged: ({bool? mine, bool? ai}) => setState(() {
+                      _mine = mine ?? _mine;
+                      _ai = ai ?? _ai;
+                    }),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
+              child: Text(widget.title, style: AppTypography.label),
+            ),
+          ],
           ConstrainedBox(
             constraints: BoxConstraints(maxHeight: maxList),
             child: SingleChildScrollView(
@@ -469,7 +533,7 @@ class _CategoryFilterSheetState extends State<_CategoryFilterSheet> {
                     _CategoryOption(
                       label: category.label,
                       count: category.count,
-                      style: CategoryStyle.of(category.key),
+                      style: widget.styleOf(category.key),
                       selected: _picked.contains(category.key),
                       onTap: category.count == 0
                           ? null
@@ -479,6 +543,16 @@ class _CategoryFilterSheetState extends State<_CategoryFilterSheet> {
               ),
             ),
           ),
+          if (widget.autoSearch != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xs, AppSpacing.md, 0),
+              child: Row(
+                children: [
+                  Expanded(child: Text('지도 이동 시 자동 검색', style: AppTypography.label)),
+                  Switch(value: _auto, onChanged: (v) => setState(() => _auto = v)),
+                ],
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.sm, AppSpacing.screenH, AppSpacing.md),
             child: Row(
@@ -488,18 +562,27 @@ class _CategoryFilterSheetState extends State<_CategoryFilterSheet> {
                     label: '초기화',
                     variant: AppButtonVariant.outline,
                     height: 48,
-                    onPressed: _picked.isEmpty ? null : () => setState(_picked.clear),
+                    onPressed: _picked.isEmpty && _mine && _ai
+                        ? null
+                        : () => setState(() {
+                              _picked.clear();
+                              _mine = true;
+                              _ai = true;
+                            }),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   flex: 2,
                   child: AppButton(
-                    label: '$_count곳 보기',
+                    // 켜고 끄기가 붙으면 개수가 바뀌어 미리 셀 수 없다
+                    label: widget.sources == null && widget.autoSearch == null ? '$_count곳 보기' : '적용',
                     height: 48,
                     onPressed: () {
                       Navigator.of(context).pop();
                       widget.onApply(Set.unmodifiable(_picked));
+                      widget.onApplySources?.call(_mine, _ai);
+                      widget.onApplyAutoSearch?.call(_auto);
                     },
                   ),
                 ),

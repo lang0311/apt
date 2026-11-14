@@ -24,9 +24,21 @@ class CourseDraftController extends Notifier<CourseDraft> {
 
 final courseDraftProvider = NotifierProvider<CourseDraftController, CourseDraft>(CourseDraftController.new);
 
+/// 지역 묶음(홈 · 저장됨)에서 코스 만들기로 들어오면 3단계 장소 고르기를 그 지역(구)으로 걸러 연다.
+/// 장소를 미리 고르지는 않는다 — 한 지역에 장소가 많아도 사용자가 3단계에서 고른다.
+class PickerRegionController extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void set(String? region) => state = region;
+}
+
+final pickerRegionProvider = NotifierProvider<PickerRegionController, String?>(PickerRegionController.new);
+
 /// 코스 만들기 진입점 (코스 탭 +, 첫 코스 만들기, 장소 상세, 보관함 상세)
-void startCourseWizard(BuildContext context, WidgetRef ref, {List<Place> places = const []}) {
+void startCourseWizard(BuildContext context, WidgetRef ref, {List<Place> places = const [], String? region}) {
   ref.read(courseDraftProvider.notifier).start(places: places);
+  ref.read(pickerRegionProvider.notifier).set(region);
   ref.invalidate(recommendationProvider);
   context.push(AppRoutes.courseNewInfo);
 }

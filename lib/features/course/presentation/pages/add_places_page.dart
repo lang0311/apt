@@ -61,13 +61,14 @@ class _AddPlacesPageState extends State<AddPlacesPage> {
               ),
             ),
             BottomCta(
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   if (_selected.isNotEmpty) ...[
-                    PickedTray(places: _selected),
-                    const SizedBox(width: AppSpacing.sm),
+                    PickedChips(places: _selected, onRemove: _toggle),
+                    const SizedBox(height: AppSpacing.sm),
                   ],
-                  Expanded(child: AppButton(label: widget.args.ctaLabel, onPressed: _selected.isEmpty ? null : _done)),
+                  AppButton(label: widget.args.ctaLabel, onPressed: _selected.isEmpty ? null : _done),
                 ],
               ),
             ),
