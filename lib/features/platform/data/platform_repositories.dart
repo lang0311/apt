@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:flutter/material.dart' show DateUtils, TimeOfDay;
 
 import '../../../core/config/env.dart';
@@ -28,6 +28,21 @@ import '../../my/domain/my_models.dart';
 import '../../preference/domain/preference_models.dart';
 import '../../preference/domain/preference_repository.dart';
 import 'platform_client.dart';
+
+/// 추천 요청의 `area`: 고른 장소 주소의 앞 두 단어(시도 + 시군구) 중 가장 많은 것. 같으면 먼저 고른 쪽,
+/// 주소가 빈 곳(추천받은 곳 일부)은 세지 않는다. 서버는 이 지역 안에서 AI 추천 장소를 찾고, 다시 추천해도 처음 값을 쓴다.
+/// 고른 순서는 추천에 쓰이지 않으므로 지역도 순서가 아니라 고른 곳들이 모인 곳으로 정한다.
+@visibleForTesting
+String courseArea(List<Place> places, {String fallback = '서울 마포구'}) {
+  final counts = <String, int>{};
+  for (final p in places) {
+    final area = p.address.trim().split(RegExp(r'\s+')).take(2).join(' ');
+    if (area.isNotEmpty) counts[area] = (counts[area] ?? 0) + 1;
+  }
+  if (counts.isEmpty) return fallback;
+  // Map은 넣은 순서를 지키므로, 같은 수면 먼저 고른 지역이 남는다
+  return counts.entries.reduce((a, b) => b.value > a.value ? b : a).key;
+}
 
 /// 코스 안 장소의 키. 서버는 `key`(정규 키)를 주고, 없으면 `id`를 쓴다.
 String _placeKey(dynamic stop) => (stop['key'] ?? stop['id']).toString();
@@ -457,10 +472,9 @@ class PlatformCourseRepository implements CourseRepository {
       for (final p in draft.places) {
         tokens.add(await _platform.token(p.id));
       }
-      final address = draft.places.first.address.split(' ').take(2).join(' ');
       if (_platform.cancelRequested) throw const CancelledFailure();
       started = await _platform.post('/jobs', {
-        'area': address.isEmpty ? '서울 마포구' : address,
+        'area': courseArea(draft.places),
         'place_tokens': tokens,
         'excluded_place_tokens': exclusionTokens,
         'place_count': (draft.places.length + 3).clamp(1, 6),
