@@ -14,6 +14,8 @@ import '../../../core/widgets/chips.dart';
 import '../../../core/widgets/headers.dart';
 import '../../../core/widgets/overlays.dart';
 import '../../../core/widgets/states.dart';
+import '../../../core/widgets/surfaces.dart';
+import '../../saved/presentation/saved_providers.dart';
 import '../domain/preference_models.dart';
 import 'preference_providers.dart';
 
@@ -93,6 +95,8 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
     final groups = ref.watch(preferenceGroupsProvider);
     final mine = ref.watch(myPreferencesProvider);
     if (mine.hasValue) _init(mine.value!);
+    // 서버에 직접 고르는 취향 항목이 없으면(팀 서버, NEEDS BACKEND) 고르는 화면 대신 설명 화면
+    final manual = !(groups.hasValue && groups.value!.isEmpty);
 
     return PopScope(
       canPop: !_dirty,
@@ -104,15 +108,19 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
           child: Column(
             children: [
               PlainHeader(
-                title: '취향 설정',
+                title: manual ? '취향 설정' : '취향',
                 onLeading: () => _dirty ? _confirmLeave() : _leave(),
-                trailing: _selected == null
+                trailing: _selected == null || !manual
                     ? null
                     : Text('${_selected!.length}개 선택', style: AppTypography.label.copyWith(color: AppColors.textSecondary)),
               ),
-              Expanded(child: _body(groups, mine)),
+              Expanded(child: manual ? _body(groups, mine) : const _AutoTaste()),
               BottomCta(
-                child: AppButton(label: '취향 저장하기', loading: _saving, onPressed: _dirty ? _save : null),
+                child: manual
+                    ? AppButton(label: '취향 저장하기', loading: _saving, onPressed: _dirty ? _save : null)
+                    : widget.onboarding
+                    ? AppButton(label: '다음', onPressed: _leave)
+                    : AppButton(label: '장소 더 저장하기', onPressed: () => context.go(AppRoutes.extract)),
               ),
             ],
           ),
@@ -171,6 +179,80 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
             ],
           ),
         ],
+      ],
+    );
+  }
+}
+
+/// 직접 고르는 취향이 없을 때: 추천이 무엇을 보고 만들어지는지 설명하고, 저장한 곳의 업종별 수와
+/// 추천하지 않는 장소로 가는 길을 둔다. 서버에 취향 항목이 생기면 고르는 화면으로 돌아간다.
+class _AutoTaste extends ConsumerWidget {
+  const _AutoTaste();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final summary = ref.watch(savedSummaryProvider);
+    final top = [...?summary.value?.categories.where((c) => c.count > 0)]..sort((a, b) => b.count.compareTo(a.count));
+    return ListView(
+      padding: const EdgeInsets.only(top: AppSpacing.xs, bottom: AppSpacing.lg),
+      children: [
+        Padding(
+          padding: AppSpacing.screenPadding,
+          child: AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('저장한 장소로 취향을 읽어요', style: AppTypography.cardTitle),
+                const SizedBox(height: 6),
+                Text('지금은 취향을 직접 고르지 않아도 돼요. 저장한 장소가 늘수록 추천이 더 잘 맞아요.', style: AppTypography.body),
+              ],
+            ),
+          ),
+        ),
+        if (top.isNotEmpty) ...[
+          SectionHeader(
+            title: '직접 저장한 곳',
+            trailingText: '${summary.value!.totalCount}곳',
+            padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.lg, AppSpacing.screenH, AppSpacing.xs),
+          ),
+          Padding(
+            padding: AppSpacing.screenPadding,
+            child: AppCard(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
+              child: DividedRows(
+                indent: SectionCard.innerPadding,
+                children: [
+                  for (final c in top.take(5))
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: AppSpacing.sm),
+                      child: Row(
+                        children: [
+                          Expanded(child: Text(c.label, style: AppTypography.bodyStrong)),
+                          Text('${c.count}곳', style: AppTypography.meta),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        const SectionHeader(
+          title: '추천에서 빼고 싶다면',
+          padding: EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.lg, AppSpacing.screenH, AppSpacing.xs),
+        ),
+        Padding(
+          padding: AppSpacing.screenPadding,
+          child: AppCard(
+            onTap: () => context.push(AppRoutes.blockedPlaces),
+            child: Row(
+              children: [
+                Expanded(child: Text('추천하지 않는 장소', style: AppTypography.bodyStrong)),
+                const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
