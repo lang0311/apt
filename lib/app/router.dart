@@ -22,6 +22,7 @@ import '../features/course/presentation/pages/blocked_places_page.dart';
 import '../features/course/presentation/pages/course_detail_page.dart';
 import '../features/course/presentation/pages/course_edit_page.dart';
 import '../features/course/presentation/pages/course_info_page.dart';
+import '../features/course/presentation/pages/course_route_map_page.dart';
 import '../features/course/presentation/pages/courses_page.dart';
 import '../features/course/presentation/pages/place_selection_page.dart';
 import '../features/extraction/presentation/pages/extraction_result_page.dart';
@@ -127,6 +128,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.placeSearch, builder: (_, _) => const PlaceSearchPage()),
       GoRoute(path: '/course-edit/:id', builder: (_, s) => CourseEditPage(courseId: s.pathParameters['id']!)),
       GoRoute(path: '/invites/:token', builder: (_, s) => InviteAcceptPage(token: s.pathParameters['token']!)),
+      GoRoute(
+        path: AppRoutes.courseMap,
+        // 앱을 다시 띄우는 등 넘길 값이 없으면 코스 목록으로
+        redirect: (_, s) => s.extra is CourseMapArgs ? null : AppRoutes.courses,
+        builder: (_, s) => CourseRouteMapPage(args: s.extra! as CourseMapArgs),
+      ),
       GoRoute(
         path: AppRoutes.pickPlaces,
         builder: (_, s) => AddPlacesPage(args: s.extra as AddPlacesArgs? ?? const AddPlacesArgs()),

@@ -121,7 +121,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (!_editing) ...[
-                  CourseRouteMap(stops: state.stops, height: 160),
+                  CourseRouteMap(title: draft.name, stops: state.stops, height: 160),
                   const SizedBox(height: AppSpacing.sm),
                 ],
                 if (_editing)

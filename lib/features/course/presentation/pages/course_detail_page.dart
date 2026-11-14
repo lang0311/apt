@@ -92,7 +92,7 @@ class _Body extends StatelessWidget {
                 _CrewStrip(course: course),
                 const SizedBox(height: AppSpacing.xs),
               ],
-              CourseRouteMap(stops: course.stops, height: course.isParty ? 120 : 160),
+              CourseRouteMap(title: course.title, stops: course.stops, height: course.isParty ? 120 : 160),
               const SizedBox(height: AppSpacing.sm),
               SectionCard(
                 title: '일정',

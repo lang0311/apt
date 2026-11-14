@@ -45,6 +45,9 @@ abstract final class AppRoutes {
   static const courseNewAi = '/courses/new/ai';
   static const pickPlaces = '/courses/pick-places';
 
+  /// 코스 지도 크게 보기 (전체 화면, `extra`로 [CourseMapArgs]를 받는다)
+  static const courseMap = '/course-map';
+
   static String invite(String token) => '/invites/$token';
 
   static const my = '/my';
