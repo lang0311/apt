@@ -52,7 +52,7 @@ class LinkTile extends StatelessWidget {
     return Container(
       width: 30,
       height: 30,
-      decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(9)),
+      decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.small)),
       child: Icon(icon, size: 18, color: AppColors.textSecondary),
     );
   }
@@ -68,7 +68,7 @@ class InstagramTile extends StatelessWidget {
       width: 30,
       height: 30,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: BorderRadius.circular(AppRadius.small),
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

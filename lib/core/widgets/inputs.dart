@@ -188,7 +188,7 @@ class AppSearchField extends StatelessWidget {
       padding: const EdgeInsets.only(left: AppSpacing.md, right: 6),
       decoration: BoxDecoration(
         color: fillColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.medium),
         border: bordered ? Border.all(color: AppColors.border) : null,
       ),
       child: Row(

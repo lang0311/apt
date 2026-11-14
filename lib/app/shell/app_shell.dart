@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/saved/presentation/saved_selection.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
+import '../../app/theme/app_spacing.dart';
 
 class _Tab {
   const _Tab(this.branch, this.label, this.icon, this.activeIcon, {this.raised = false});
@@ -129,7 +130,7 @@ class _NavItem extends StatelessWidget {
           height: 30,
           decoration: BoxDecoration(
             color: active ? AppColors.primarySoft : Colors.transparent,
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(AppRadius.medium),
           ),
           child: Icon(active ? tab.activeIcon : tab.icon, color: color, size: 23),
         ),
@@ -158,7 +159,7 @@ class _NavItem extends StatelessWidget {
             height: _raisedSize,
             decoration: BoxDecoration(
               color: active ? AppColors.primary : AppColors.ink,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(AppRadius.medium),
               border: Border.all(color: AppColors.surface, width: 3),
               boxShadow: const [BoxShadow(color: AppColors.shadowFloat, blurRadius: 6, offset: Offset(0, 2))],
             ),

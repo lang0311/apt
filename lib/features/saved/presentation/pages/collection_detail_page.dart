@@ -142,7 +142,7 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
           const SizedBox(height: AppSpacing.lg),
           AppButton(label: '저장한 장소에서 추가하기', onPressed: () => _addFromSaved(const [])),
           const SizedBox(height: AppSpacing.xs),
-          AppButton.outline(label: '링크로 장소 찾기', onPressed: () => context.go(AppRoutes.extract)),
+          AppButton(variant: AppButtonVariant.white, label: '링크로 장소 찾기', onPressed: () => context.go(AppRoutes.extract)),
         ],
       ),
     );
@@ -204,7 +204,7 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
           ),
         ),
         BottomCta(
-          child: AppButton.dark(
+          child: AppButton(
             label: '이 보관함으로 코스 만들기',
             // 보관함 장소를 일괄로 불러와 코스 만들기 1/4로 (docs/04 §D)
             onPressed: places.hasValue

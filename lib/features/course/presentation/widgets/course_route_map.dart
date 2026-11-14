@@ -80,7 +80,7 @@ class _ExpandPill extends StatelessWidget {
       padding: const EdgeInsets.only(left: 10, right: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppRadius.large),
         boxShadow: const [BoxShadow(color: AppColors.shadow, blurRadius: 8, offset: Offset(0, 2))],
       ),
       child: Row(

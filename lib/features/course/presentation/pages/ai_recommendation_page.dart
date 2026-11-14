@@ -285,7 +285,6 @@ class _Waiting extends StatelessWidget {
                         Container(
                           height: 56,
                           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                          decoration: BoxDecoration(color: AppColors.surfaceRaised, borderRadius: BorderRadius.circular(14)),
                           child: Row(
                             children: [
                               const SkeletonBox(width: 26, height: 26, radius: 13),

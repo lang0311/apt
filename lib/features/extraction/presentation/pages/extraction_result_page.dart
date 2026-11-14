@@ -167,7 +167,7 @@ class _Failure extends StatelessWidget {
                       height: 32,
                       decoration: BoxDecoration(
                         color: AppColors.surfaceRaised,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(AppRadius.small),
                         border: Border.all(color: AppColors.border),
                       ),
                       child: Icon(
@@ -349,7 +349,7 @@ class _ReviewState extends ConsumerState<_Review> {
   Widget _bottomButton({required bool allSaved}) {
     // 이 화면에서 남은 장소까지 다 저장했으면 '완료'
     if (allSaved && _savedNow.isNotEmpty) {
-      return AppButton.outline(label: '완료', onPressed: () => context.go(AppRoutes.extract));
+      return AppButton(label: '완료', onPressed: () => context.go(AppRoutes.extract));
     }
     if (allSaved) {
       return AppButton(label: '저장됨에서 보기', variant: AppButtonVariant.soft, onPressed: () => context.go(AppRoutes.saved));

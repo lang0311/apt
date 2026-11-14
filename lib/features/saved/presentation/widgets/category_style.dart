@@ -5,15 +5,21 @@ import '../../../../app/theme/app_colors.dart';
 /// 카테고리 키 → 앱의 아이콘/색 매핑. 목록·개수는 서버 데이터이고,
 /// 모르는 카테고리는 기본 아이콘으로 표시한다 (docs/05 #13).
 class CategoryStyle {
-  const CategoryStyle(this.icon, this.color);
+  const CategoryStyle(this.icon, this.color, [this._ink]);
   final IconData icon;
+
+  /// 칸 바탕(12%) · 지도 핀 색
   final Color color;
+  final Color? _ink;
+
+  /// 카테고리 칸 위 아이콘 색. 바탕과 3:1이 안 되는 색만 따로 진하게 둔다
+  Color get ink => _ink ?? color;
 
   static const _map = <String, CategoryStyle>{
-    'restaurant': CategoryStyle(Icons.restaurant_rounded, AppColors.danger),
+    'restaurant': CategoryStyle(Icons.restaurant_rounded, AppColors.danger, AppColors.categoryFoodInk),
     'cafe': CategoryStyle(Icons.local_cafe_rounded, AppColors.primary),
     'tour': CategoryStyle(Icons.landscape_rounded, AppColors.extract),
-    'culture': CategoryStyle(Icons.museum_rounded, AppColors.success),
+    'culture': CategoryStyle(Icons.museum_rounded, AppColors.success, AppColors.categoryCultureInk),
     'stay': CategoryStyle(Icons.hotel_rounded, AppColors.stay),
   };
 

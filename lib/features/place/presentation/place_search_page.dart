@@ -325,7 +325,7 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
               Expanded(
                 child: onMap
                     ? DecoratedBox(
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), boxShadow: AppShadow.soft),
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(AppRadius.medium), boxShadow: AppShadow.soft),
                         child: field,
                       )
                     : field,

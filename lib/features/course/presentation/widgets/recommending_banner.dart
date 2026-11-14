@@ -16,7 +16,7 @@ class RecommendingBanner extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(SectionCard.innerPadding, 0, SectionCard.innerPadding, AppSpacing.xs),
       child: Container(
         padding: const EdgeInsets.only(left: AppSpacing.md, right: AppSpacing.xxs),
-        decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(14)),
+        decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(AppRadius.medium)),
         child: Row(
           children: [
             const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)),

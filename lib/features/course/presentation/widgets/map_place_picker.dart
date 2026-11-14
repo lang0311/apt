@@ -463,16 +463,16 @@ class _SearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), boxShadow: AppShadow.soft),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(AppRadius.small), boxShadow: AppShadow.soft),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.small),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
           child: Container(
             height: height,
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.8),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.small),
               border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
             ),
             child: Row(
@@ -572,11 +572,11 @@ class _Bubble extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(AppRadius.medium),
       elevation: 2,
       shadowColor: AppColors.shadowFloat,
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppRadius.medium),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
@@ -672,7 +672,7 @@ class _PlaceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(14);
+    final radius = BorderRadius.circular(AppRadius.medium);
     return Opacity(
       opacity: inCourse ? 0.55 : 1,
       child: Material(

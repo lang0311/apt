@@ -166,9 +166,9 @@ class _CrewStrip extends ConsumerWidget {
     final names = members == null ? '파티 ${course.memberCount}명' : members.crewNames;
     return Material(
       color: AppColors.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: const BorderSide(color: AppColors.border)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.medium), side: const BorderSide(color: AppColors.border)),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppRadius.medium),
         onTap: members == null ? null : () => _showMembers(context, members, partyId!, canInvite: party!.isOwner),
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 48),
@@ -233,7 +233,7 @@ class _CrewStrip extends ConsumerWidget {
                     Expanded(
                       child: AppButton(
                         label: '초대하기',
-                        variant: canShare ? AppButtonVariant.outline : AppButtonVariant.primary,
+                        variant: canShare ? AppButtonVariant.white : AppButtonVariant.primary,
                         height: 48,
                         onPressed: () {
                           Navigator.of(ctx).pop();

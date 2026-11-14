@@ -181,7 +181,7 @@ class _TitlePill extends StatelessWidget {
     // alignment를 주면 폭이 화면 끝까지 늘어나므로 세로 여백으로 높이 40을 맞춘다 (글자 폭만큼만)
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: _floatShadow),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppRadius.large), boxShadow: _floatShadow),
       child: Text.rich(
         TextSpan(children: [
           TextSpan(text: title),
@@ -205,7 +205,7 @@ class _LineNote extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.94),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.large),
         boxShadow: AppShadow.soft,
       ),
       child: Row(
@@ -231,7 +231,7 @@ class _StopCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final place = stop.place;
-    final radius = BorderRadius.circular(14);
+    final radius = BorderRadius.circular(AppRadius.medium);
     return Material(
       color: AppColors.surfaceRaised,
       elevation: 2,

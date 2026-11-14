@@ -48,7 +48,7 @@ class SocialAuthErrorPage extends StatelessWidget {
             BottomCta(
               child: Column(
                 children: [
-                  AppButton.dark(label: '다시 로그인하기', onPressed: () => context.go(AppRoutes.login)),
+                  AppButton(label: '다시 로그인하기', onPressed: () => context.go(AppRoutes.login)),
                   const SizedBox(height: AppSpacing.xs),
                   AppTextLink(
                     label: '고객센터 문의',

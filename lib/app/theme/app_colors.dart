@@ -74,6 +74,11 @@ abstract final class AppColors {
   /// 차단·삭제처럼 위험한 동작의 글자. `danger`는 흰 바탕 글자 대비가 약 3:1이라 문장에는 이 값을 쓴다(약 5:1).
   static const dangerText = Color(0xFFC8463C);
   static const success = Color(0xFF16A07D);
+
+  /// 카테고리 칸(색 12% 바탕) 위 아이콘. `danger` · `success`는 그 바탕과 3:1이 안 돼서
+  /// 아이콘만 조금 진하게 쓴다(음식점 3.69:1, 전시 · 문화 3.91:1, UI 리뷰 18)
+  static const categoryFoodInk = Color(0xFFD14B41);
+  static const categoryCultureInk = Color(0xFF128467);
   static const successSoft = Color(0xFFE6F6F1);
 
   /// 숙박 카테고리 아이콘 색. 주황(`ai`)은 AI 추천 전용이라 카테고리에는 쓰지 않는다 (07 D17).

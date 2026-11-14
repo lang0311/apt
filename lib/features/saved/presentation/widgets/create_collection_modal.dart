@@ -103,7 +103,7 @@ class _CreateCollectionFormState extends ConsumerState<_CreateCollectionForm> {
           children: [
             Expanded(
               flex: 2,
-              child: AppButton.outline(label: '취소', onPressed: () => Navigator.of(context).pop()),
+              child: AppButton(variant: AppButtonVariant.white, label: '취소', onPressed: () => Navigator.of(context).pop()),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(

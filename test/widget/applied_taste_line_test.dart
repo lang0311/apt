@@ -78,12 +78,12 @@ void main() {
       ));
     }
 
-    testWidgets('접혀 있다가 누르면 일정 순서대로 장소와 이름이 나온다', (tester) async {
+    testWidgets('링크를 누르면 시트에 일정 순서대로 장소와 이름이 나온다 (07 D57)', (tester) async {
       await pump(tester, taste);
-      expect(find.text('장소마다 누구 취향인지 보기'), findsOneWidget);
+      expect(find.text('누구 취향인지 보기'), findsOneWidget);
       expect(find.text('카페공명 연남점'), findsNothing);
 
-      await tester.tap(find.text('장소마다 누구 취향인지 보기'));
+      await tester.tap(find.text('누구 취향인지 보기'));
       await tester.pumpAndSettle();
       final names = ['카페공명 연남점', '진청유점', '잊힐리야 연남'];
       final ys = [for (final n in names) tester.getTopLeft(find.text(n)).dy];
@@ -93,7 +93,8 @@ void main() {
       expect(find.text('지민'), findsNWidgets(2));
       expect(find.text('영서'), findsOneWidget);
 
-      await tester.tap(find.text('장소마다 누구 취향인지 보기'));
+      expect(find.text('장소마다 누구 취향인지'), findsOneWidget); // 시트 제목
+      await tester.tapAt(const Offset(10, 10)); // 시트 바깥을 눌러 닫는다
       await tester.pumpAndSettle();
       expect(find.text('카페공명 연남점'), findsNothing);
     });
@@ -108,22 +109,22 @@ void main() {
           gaps: [TasteGap(memberId: 'youngseo', noHistory: true), TasteGap(memberId: 'jimin', noHistory: false)],
         ),
       );
-      await tester.tap(find.text('장소마다 누구 취향인지 보기'));
+      await tester.tap(find.text('누구 취향인지 보기'));
       await tester.pumpAndSettle();
       expect(find.text('모두'), findsOneWidget);
       expect(find.text('영서는 저장한 장소가 없어 반영하지 못했어요'), findsOneWidget);
       expect(find.text('지민 취향에 잘 맞는 장소는 찾지 못했어요'), findsOneWidget);
     });
 
-    testWidgets('파티원을 아직 모르면 펼치기 없이 한 줄만', (tester) async {
+    testWidgets('파티원을 아직 모르면 링크 없이 한 줄만', (tester) async {
       await pump(tester, taste, m: null);
-      expect(find.text('장소마다 누구 취향인지 보기'), findsNothing);
+      expect(find.text('누구 취향인지 보기'), findsNothing);
       expect(find.text('파티원 3명의 미식 취향을 반영했어요', findRichText: true), findsOneWidget);
     });
 
-    testWidgets('좁은 화면에서 펼쳐도 넘치지 않는다', (tester) async {
+    testWidgets('좁은 화면에서 시트를 열어도 넘치지 않는다', (tester) async {
       await pump(tester, taste, width: 320);
-      await tester.tap(find.text('장소마다 누구 취향인지 보기'));
+      await tester.tap(find.text('누구 취향인지 보기'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });

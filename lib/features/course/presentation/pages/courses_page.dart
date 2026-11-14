@@ -234,7 +234,7 @@ class _EmptyCourses extends ConsumerWidget {
                   if (i > 0) const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(AppRadius.medium),
                       // 추천 코스 상세 화면은 디자인 없음
                       onTap: () => showAppSnackBar(context, '추천 코스 상세는 준비 중이에요.'),
                       child: Column(

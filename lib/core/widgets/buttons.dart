@@ -4,7 +4,9 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 
-enum AppButtonVariant { primary, dark, outline, soft, white }
+/// 색 규칙(07 D57): primary = 화면마다 하나, 다음 단계로 가는 주 행동 · white = 그 옆 보조 행동 ·
+/// soft = 목록 줄 안 작은 행동 · dark = 이미 켜진 상태(저장됨 등) · danger = 지우기 · 차단(빨간 글자)
+enum AppButtonVariant { primary, dark, outline, soft, white, danger }
 
 /// 공통 버튼 (Primary / Dark / Outline / Soft / White). 높이 52, radius 16.
 class AppButton extends StatelessWidget {
@@ -59,6 +61,7 @@ class AppButton extends StatelessWidget {
             AppButtonVariant.outline => (AppColors.surface, AppColors.primary, AppColors.primary),
             AppButtonVariant.soft => (AppColors.primarySoft, AppColors.primary, null),
             AppButtonVariant.white => (AppColors.surface, AppColors.textPrimary, AppColors.border),
+            AppButtonVariant.danger => (AppColors.surface, AppColors.dangerText, AppColors.border),
           };
 
     final child = loading
@@ -123,7 +126,7 @@ class AppTextLink extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onPressed,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(AppRadius.small),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
         child: Row(

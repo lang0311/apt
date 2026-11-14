@@ -122,7 +122,7 @@ class _ReasonRowState extends State<_ReasonRow> {
                     Container(
                       width: 36,
                       height: 36,
-                      decoration: BoxDecoration(color: AppColors.aiSoft, borderRadius: BorderRadius.circular(12)),
+                      decoration: BoxDecoration(color: AppColors.aiSoft, borderRadius: BorderRadius.circular(AppRadius.small)),
                       child: const Icon(Icons.auto_awesome, size: 20, color: AppColors.aiText),
                     ),
                     const SizedBox(width: AppSpacing.sm),
@@ -175,7 +175,7 @@ class _ActionRow extends StatelessWidget {
               Container(
                 width: 36,
                 height: 36,
-                decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(AppRadius.small)),
                 child: Icon(action.icon, size: 20, color: fg),
               ),
               const SizedBox(width: AppSpacing.sm),

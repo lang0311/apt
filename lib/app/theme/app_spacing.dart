@@ -20,17 +20,23 @@ abstract final class AppSpacing {
   static const backButtonSize = 36.0;
 }
 
-/// 디자인 토큰 — 모서리
+/// 디자인 토큰 — 모서리. 크기에 따라 네 단계 + 알약 (UI 리뷰 디자인 언어 ①, 07 D56)
+/// 작게 10(썸네일 · 아이콘 칸 · 태그) · 중간 14(입력칸 · 버튼 · 사진 · 카드 안 타일) · 크게 20(카드) · 시트 28 · 알약 999.
+/// 모자이크 안 작은 칸 · 진행 막대처럼 아주 작은 것(2~7)만 숫자를 그대로 쓴다.
 abstract final class AppRadius {
-  /// 작은 글자 버튼 (추출 '보관함')
-  static const xs = 8.0;
-  static const sm = 12.0;
-  static const input = 15.0;
-  static const button = 16.0;
-  static const thumb = 14.0;
-  static const card = 20.0;
+  static const small = 10.0;
+  static const medium = 14.0;
+  static const large = 20.0;
   static const sheet = 28.0;
   static const pill = 999.0;
+
+  // 예전 이름 — 위 네 단계로 모았다
+  static const xs = small;
+  static const sm = small;
+  static const input = medium;
+  static const button = medium;
+  static const thumb = medium;
+  static const card = large;
 
   static final inputAll = BorderRadius.circular(input);
   static final buttonAll = BorderRadius.circular(button);

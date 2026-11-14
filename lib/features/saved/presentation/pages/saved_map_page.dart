@@ -347,7 +347,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
                   decoration: BoxDecoration(
                     // 목록은 연회색 바탕에 흰 묶음 카드, 지도 화면은 밝은 바탕
                     color: _expanded ? AppColors.bg : AppColors.surface,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
                     boxShadow: AppShadow.soft,
                   ),
                   child: _savedSheet(scroll, shown, mineInView, aiInView, aiIds, sheetMax),
@@ -610,7 +610,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
               const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: DecoratedBox(
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), boxShadow: AppShadow.soft),
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(AppRadius.medium), boxShadow: AppShadow.soft),
                   child: AppSearchField(hint: '저장된 장소 검색', onChanged: (v) => setState(() => _keyword = v.trim())),
                 ),
               ),
@@ -620,7 +620,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
         Container(
           margin: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.xs),
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16), boxShadow: AppShadow.soft),
+          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(AppRadius.medium), boxShadow: AppShadow.soft),
           child: Row(
             children: [
               Text('내 보관함', style: AppTypography.label.copyWith(color: AppColors.textSecondary)),
@@ -980,7 +980,7 @@ class _MapPlaceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final place = item.place;
     final distance = _distanceLabel(item);
-    final radius = BorderRadius.circular(14);
+    final radius = BorderRadius.circular(AppRadius.medium);
     return SizedBox(
       width: 240,
       child: Material(
@@ -1054,7 +1054,7 @@ class _PlaceGroup extends StatelessWidget {
                   ),
           ),
           DecoratedBox(
-            decoration: BoxDecoration(color: AppColors.surfaceRaised, borderRadius: BorderRadius.circular(16)),
+            decoration: BoxDecoration(color: AppColors.surfaceRaised, borderRadius: BorderRadius.circular(AppRadius.medium)),
             child: Column(
               children: [
                 for (final (i, item) in items.indexed) _PlaceRow(item: item, recommended: recommended, divider: i > 0),
@@ -1079,7 +1079,7 @@ class _PlaceRow extends StatelessWidget {
     final distance = _distanceLabel(item);
     final sub = [if (place.shortArea.isNotEmpty) place.shortArea, place.categoryLabel].join(' · ');
     return InkWell(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(AppRadius.medium),
       onTap: () => context.push(AppRoutes.place(place.id)),
       child: Stack(
         children: [

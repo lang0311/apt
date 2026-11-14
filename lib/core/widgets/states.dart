@@ -133,7 +133,7 @@ class AppEmptyState extends StatelessWidget {
           ],
           if (secondaryLabel != null) ...[
             const SizedBox(height: AppSpacing.sm),
-            AppButton.outline(label: secondaryLabel!, onPressed: onSecondary, icon: Icons.add_rounded),
+            AppButton(variant: AppButtonVariant.white, label: secondaryLabel!, onPressed: onSecondary, icon: Icons.add_rounded),
           ],
         ],
       ),

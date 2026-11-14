@@ -30,7 +30,7 @@ class CourseThumb extends StatelessWidget {
         height: h,
         alignment: Alignment.center,
         decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(7)),
-        child: Icon(style.icon, size: (w < h ? w : h) * 0.56, color: style.color),
+        child: Icon(style.icon, size: (w < h ? w : h) * 0.56, color: style.ink),
       );
     }
 

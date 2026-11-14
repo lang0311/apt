@@ -35,7 +35,7 @@ class PlaceImage extends StatelessWidget {
       height: height,
       alignment: iconAlignment,
       decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(radius)),
-      child: Icon(style.icon, size: iconSize, color: style.color),
+      child: Icon(style.icon, size: iconSize, color: style.ink),
     );
   }
 }

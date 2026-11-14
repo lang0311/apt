@@ -182,7 +182,7 @@ class _Row extends StatelessWidget {
       enabled: onTap != null,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.small),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
           child: Row(

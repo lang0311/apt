@@ -181,7 +181,7 @@ Future<bool> showConfirmDialog(
                 Expanded(
                   child: AppButton(
                     label: confirmLabel,
-                    variant: destructive ? AppButtonVariant.dark : AppButtonVariant.primary,
+                    variant: destructive ? AppButtonVariant.danger : AppButtonVariant.primary,
                     height: 46,
                     onPressed: () => Navigator.of(ctx).pop(true),
                   ),

@@ -5,6 +5,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/states.dart';
+import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/surfaces.dart';
 import '../../../party/domain/party_models.dart';
 import '../../../party/presentation/widgets/party_avatar_stack.dart';
@@ -64,31 +65,23 @@ class CourseHero extends StatelessWidget {
   }
 }
 
-/// 일정 카드 맨 위 한 줄: "자연 · 미식 취향을 반영했어요", 파티 코스는 "파티원 3명의 미식 …",
+/// 일정 머리(범례) 아래 한 줄: "자연 · 미식 취향을 반영했어요", 파티 코스는 "파티원 3명의 미식 …",
 /// 파티원이 공유한 단어가 없으면 "파티원 3명의 취향을 반영했어요" (07 D46).
-/// 파티 코스에 장소별로 맞는 파티원 정보가 있고 파티원 이름을 알면, 누를 수 있는 막대가 되어
-/// "장소마다 누구 취향인지 보기"를 누르면 일정 순서대로 장소와 그 장소가 맞는 파티원 이름을 펼쳐 보여 준다.
+/// 파티 코스에 장소별로 맞는 파티원 정보가 있고 파티원 이름을 알면 그 아래 파란 링크 "누구 취향인지 보기"를 두고,
+/// 누르면 바텀시트에 일정 순서대로 장소와 그 장소가 맞는 파티원 이름을 보여 준다(07 D57 — 카드 안의 막대 대신 한 겹).
 /// ✦ · 주황은 AI 추천 장소 표시 전용이라 쓰지 않는다(D17). 넘치면 말줄임.
-class AppliedTasteLine extends StatefulWidget {
+class AppliedTasteLine extends StatelessWidget {
   const AppliedTasteLine({super.key, required this.taste, this.stops = const [], this.members});
   final AppliedTaste taste;
 
-  /// 지금 일정 (펼친 목록의 순서와 범위)
+  /// 지금 일정 (시트 목록의 순서와 범위)
   final List<CourseStop> stops;
 
-  /// 파티원 (서버 순서, 얼굴 색 순서와 같음). 없으면 펼치기 없이 한 줄만
+  /// 파티원 (서버 순서, 얼굴 색 순서와 같음). 없으면 링크 없이 한 줄만
   final List<PartyMember>? members;
-
-  @override
-  State<AppliedTasteLine> createState() => _AppliedTasteLineState();
-}
-
-class _AppliedTasteLineState extends State<AppliedTasteLine> {
-  bool _open = false;
 
   List<TextSpan> get _spans {
     const strong = TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700);
-    final taste = widget.taste;
     final words = taste.words.join(' · ');
     return taste.words.isEmpty
         ? [TextSpan(text: '파티원 ${taste.memberCount}명', style: strong), const TextSpan(text: '의 취향을 반영했어요')]
@@ -99,77 +92,58 @@ class _AppliedTasteLineState extends State<AppliedTasteLine> {
           ];
   }
 
-  Widget _text(List<TextSpan> spans) =>
-      Text.rich(TextSpan(children: spans), style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis);
+  Widget _text(List<TextSpan> spans, {int maxLines = 1}) =>
+      Text.rich(TextSpan(children: spans), style: AppTypography.meta, maxLines: maxLines, overflow: TextOverflow.ellipsis);
 
   @override
   Widget build(BuildContext context) {
     final spans = _spans;
-    final members = widget.members;
-    final rows = members == null || !widget.taste.hasDetail ? const <Widget>[] : _detailRows(members);
-    if (rows.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.xs),
-        child: Semantics(label: spans.map((s) => s.text).join(), excludeSemantics: true, child: _text(spans)),
-      );
-    }
-    final radius = BorderRadius.circular(12);
+    final m = members;
+    final rows = m == null || !taste.hasDetail ? const <Widget>[] : _detailRows(m);
+    final line = Semantics(label: spans.map((s) => s.text).join(), excludeSemantics: true, child: _text(spans));
     return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.sm, 0, AppSpacing.sm, AppSpacing.xs),
-      child: Material(
-        color: AppColors.surfaceRaised,
-        shape: RoundedRectangleBorder(borderRadius: radius, side: const BorderSide(color: AppColors.border)),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+      padding: EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, rows.isEmpty ? AppSpacing.xs : 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          line,
+          if (rows.isNotEmpty)
             Semantics(
               button: true,
-              expanded: _open,
-              label: '${spans.map((s) => s.text).join()}. 장소마다 누구 취향인지 보기',
+              label: '장소마다 누구 취향인지 보기',
               excludeSemantics: true,
               child: InkWell(
-                onTap: () => setState(() => _open = !_open),
+                borderRadius: BorderRadius.circular(AppRadius.small),
+                onTap: () => _openSheet(context, spans, rows),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 48),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(AppSpacing.sm, 6, AppSpacing.xs, 6),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _text(spans),
-                              const SizedBox(height: 1),
-                              Text('장소마다 누구 취향인지 보기',
-                                  style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
-                            ],
-                          ),
-                        ),
-                        AnimatedRotation(
-                          turns: _open ? 0.5 : 0,
-                          duration: const Duration(milliseconds: 200),
-                          child: const Icon(Icons.expand_more_rounded, size: 22, color: AppColors.textSecondary),
-                        ),
-                      ],
-                    ),
+                  constraints: const BoxConstraints(minHeight: 36),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: 1,
+                    child: Text('누구 취향인지 보기', style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
                   ),
                 ),
               ),
             ),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutCubic,
-              alignment: Alignment.topCenter,
-              child: _open
-                  ? Padding(
-                      padding: const EdgeInsets.fromLTRB(AppSpacing.sm, 0, AppSpacing.sm, AppSpacing.xxs),
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: rows),
-                    )
-                  : const SizedBox(width: double.infinity),
-            ),
+        ],
+      ),
+    );
+  }
+
+  void _openSheet(BuildContext context, List<TextSpan> spans, List<Widget> rows) {
+    showAppBottomSheet<void>(
+      context,
+      builder: (ctx) => SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.xs, AppSpacing.screenH, AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('장소마다 누구 취향인지', style: AppTypography.cardTitle),
+            const SizedBox(height: 2),
+            _text(spans, maxLines: 2),
+            const SizedBox(height: AppSpacing.xs),
+            ...rows,
           ],
         ),
       ),
@@ -178,11 +152,10 @@ class _AppliedTasteLineState extends State<AppliedTasteLine> {
 
   /// 일정 순서대로 "장소 이름 · 맞는 파티원", 맨 아래 반영되지 못한 파티원
   List<Widget> _detailRows(List<PartyMember> members) {
-    final taste = widget.taste;
     final index = {for (final (i, m) in members.indexed) m.id: i};
     String name(PartyMember m) => m.isMe ? '나' : m.nickname;
     final rows = <Widget>[];
-    for (final stop in widget.stops) {
+    for (final stop in stops) {
       final ids = {...?taste.matches[stop.place.id]}.where(index.containsKey).toSet();
       if (ids.isEmpty) continue;
       final everyone = ids.length == members.length;
@@ -191,9 +164,11 @@ class _AppliedTasteLineState extends State<AppliedTasteLine> {
         semantics: '${stop.place.name}, ${everyone ? '모두' : who.map(name).join(', ')}',
         child: Row(
           children: [
-            Expanded(child: Text(stop.place.name, style: AppTypography.label.copyWith(fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis)),
+            Expanded(flex: 3, child: Text(stop.place.name, style: AppTypography.label.copyWith(fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis)),
             const SizedBox(width: AppSpacing.xs),
-            Flexible(
+            // 이름은 오른쪽 끝에 붙인다
+            Expanded(
+              flex: 2,
               child: Wrap(
                 alignment: WrapAlignment.end,
                 spacing: 8,
@@ -505,9 +480,9 @@ class _ViewTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: highlighted ? AppColors.aiSoft : Colors.transparent,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(AppRadius.medium),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppRadius.medium),
         onTap: onTap,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 56),
@@ -609,7 +584,6 @@ class _SkeletonTile extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints(minHeight: 56),
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 8),
-      decoration: BoxDecoration(color: AppColors.surfaceRaised, borderRadius: BorderRadius.circular(14)),
       child: Row(
         children: [
           if (withTime) ...[
@@ -636,6 +610,7 @@ class _SkeletonTile extends StatelessWidget {
 }
 
 /// 일정 편집 목록 (손잡이 · 번호 · 이름 · X, 마지막 "장소 추가").
+/// 카드 안에 흰 칸을 또 띄우지 않고 구분선으로 나눈 한 겹 목록이다(07 D57).
 /// 시간과 이동 줄은 저장하거나 다시 추천하면 다시 계산되므로 편집 중에는 숨긴다.
 class CourseEditList extends StatelessWidget {
   const CourseEditList({
@@ -680,19 +655,22 @@ class CourseEditList extends StatelessWidget {
             itemCount: stops.length,
             onReorder: enabled ? onReorder : (_, _) {},
             proxyDecorator: (child, _, _) => Material(
-              color: Colors.transparent,
+              color: AppColors.surfaceRaised,
               elevation: 6,
               shadowColor: AppColors.shadowFloat,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(AppRadius.medium),
               child: child,
             ),
             itemBuilder: (_, i) {
               final stop = stops[i];
               final id = stop.place.id;
-              return Padding(
+              return Column(
                 key: ValueKey(id),
-                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                child: loadingIds.contains(id)
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (i > 0) const Divider(height: 1, indent: 40, endIndent: AppSpacing.xs, color: AppColors.divider),
+                  loadingIds.contains(id)
                     ? const _SkeletonTile()
                     : _EditTile(
                         stop: stop,
@@ -704,10 +682,14 @@ class CourseEditList extends StatelessWidget {
                         onRemove: () => onRemove(stop),
                         onTap: () => onTapTile(stop, i),
                       ),
+                ],
               );
             },
           ),
-          if (onAdd != null) _AddTile(onTap: enabled ? onAdd : null),
+          if (onAdd != null) ...[
+            if (stops.isNotEmpty) const Divider(height: 1, indent: 40, endIndent: AppSpacing.xs, color: AppColors.divider),
+            _AddTile(onTap: enabled ? onAdd : null),
+          ],
         ],
       ),
     );
@@ -737,13 +719,14 @@ class _EditTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(14);
+    final radius = BorderRadius.circular(AppRadius.medium);
     return Material(
-      color: highlighted ? AppColors.aiSoft : AppColors.surfaceRaised,
-      shape: RoundedRectangleBorder(
-        borderRadius: radius,
-        side: added ? const BorderSide(color: AppColors.primary, width: 1.5) : BorderSide.none,
-      ),
+      color: highlighted
+          ? AppColors.aiSoft
+          : added
+              ? AppColors.primarySoft
+              : Colors.transparent,
+      borderRadius: radius,
       child: InkWell(
         borderRadius: radius,
         onTap: enabled ? onTap : null,
@@ -787,50 +770,28 @@ class _AddTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _DashedBorderPainter(),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: onTap,
-          child: SizedBox(
-            height: 52,
-            child: Row(
-              children: [
-                const SizedBox(width: 40),
-                Container(
-                  width: 26,
-                  height: 26,
-                  decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
-                  child: const Icon(Icons.add_rounded, size: 16, color: AppColors.primary),
-                ),
-                const SizedBox(width: 10),
-                Text('장소 추가', style: AppTypography.bodyStrong.copyWith(color: AppColors.primary)),
-              ],
-            ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.medium),
+        onTap: onTap,
+        child: SizedBox(
+          height: 52,
+          child: Row(
+            children: [
+              const SizedBox(width: 40),
+              Container(
+                width: 26,
+                height: 26,
+                decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
+                child: const Icon(Icons.add_rounded, size: 16, color: AppColors.primary),
+              ),
+              const SizedBox(width: 10),
+              Text('장소 추가', style: AppTypography.bodyStrong.copyWith(color: AppColors.primary)),
+            ],
           ),
         ),
       ),
     );
   }
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.controlBorder.withValues(alpha: 0.6)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4;
-    final path = Path()..addRRect(RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(14)));
-    for (final metric in path.computeMetrics()) {
-      for (double d = 0; d < metric.length; d += 9) {
-        canvas.drawPath(metric.extractPath(d, d + 5), paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

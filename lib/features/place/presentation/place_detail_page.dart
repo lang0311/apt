@@ -258,7 +258,7 @@ class _TitleCard extends StatelessWidget {
           const SizedBox(width: AppSpacing.xs),
           AppButton(
             label: place.isSaved ? '저장됨' : '저장하기',
-            variant: place.isSaved ? AppButtonVariant.soft : AppButtonVariant.outline,
+            variant: place.isSaved ? AppButtonVariant.dark : AppButtonVariant.white,
             icon: place.isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
             expand: false,
             height: 40,

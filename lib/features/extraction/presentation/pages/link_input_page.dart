@@ -243,7 +243,7 @@ class _GuideRow extends StatelessWidget {
             height: 32,
             decoration: BoxDecoration(
               color: AppColors.surfaceRaised,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(AppRadius.small),
               border: Border.all(color: AppColors.border),
             ),
             child: Icon(icon, size: 17, color: AppColors.textPrimary),

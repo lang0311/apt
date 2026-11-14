@@ -351,9 +351,9 @@ class HeaderTextButton extends StatelessWidget {
       excludeSemantics: true,
       child: Material(
         color: active ? AppColors.primarySoft : Colors.transparent,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppRadius.small),
         child: InkWell(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppRadius.small),
           onTap: onPressed,
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
@@ -560,7 +560,7 @@ class _CategoryFilterSheetState extends State<_CategoryFilterSheet> {
                 Expanded(
                   child: AppButton(
                     label: '초기화',
-                    variant: AppButtonVariant.outline,
+                    variant: AppButtonVariant.white,
                     height: 48,
                     onPressed: _picked.isEmpty && _mine && _ai
                         ? null
@@ -625,8 +625,8 @@ class _CategoryOption extends StatelessWidget {
                   Container(
                     width: 36,
                     height: 36,
-                    decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(11)),
-                    child: Icon(style.icon, size: 19, color: style.color),
+                    decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.small)),
+                    child: Icon(style.icon, size: 19, color: style.ink),
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Text(

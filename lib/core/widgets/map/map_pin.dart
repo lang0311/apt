@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_typography.dart';
+import '../../../app/theme/app_spacing.dart';
 
 enum MapPinKind {
   /// 번호 원 (코스 순서)
@@ -61,7 +62,7 @@ class MapPin extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.small),
               boxShadow: const [BoxShadow(color: AppColors.shadowFloat, blurRadius: 6)],
             ),
             child: Text(label!, style: AppTypography.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
