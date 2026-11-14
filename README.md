@@ -149,7 +149,7 @@ flutter run -d chrome --web-hostname=127.0.0.1 --web-port=5173 --dart-define=APT
 | 아이디 로그인 | 아이디 아무거나 + 비밀번호 `password1` (그 밖의 비밀번호는 오류 화면) |
 | 아이디 가입 중복 오류 | 아이디 `taken` |
 | 닉네임 중복 오류 | 닉네임 `관리자` |
-| 링크 추출 실패 상태 | 추출 탭에서 링크에 `private`(비공개) · `none`(장소 없음) · `fail`(실패)을 넣기 |
+| 링크 추출 실패 상태 | 장소 추가 탭에서 링크에 `private`(비공개) · `none`(장소 없음) · `fail`(실패)을 넣기 |
 | 초대 예외 화면 | 초대 링크 `/invites/expired` · `/invites/joined` · `/invites/full` |
 | 빈 상태 / 오류 상태 전체 | `flutter run --dart-define=MOCK_SCENARIO=empty` / `=error` |
 

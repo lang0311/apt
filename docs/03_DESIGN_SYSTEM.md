@@ -97,17 +97,17 @@
 
 ## 4. 공통 컴포넌트
 
-2026-10-30 코드(`lib/core/widgets/`, 각 기능의 `presentation/widgets/`) 기준 이름이다.
+2026-10-30 코드(`lib/core/widgets/`, 각 기능의 `presentation/widgets/`) 기준 이름이다. 2026-11-14 UI 리뷰 후속(07 D50~D55)에서 바뀐 것을 더했다.
 
 **기본 (`core/widgets`)**: `AppButton`(`primary`·`dark`·`soft`·`outline`·`white`) `AppTextLink` `AppIconBox` `AppTextField` `AppFieldError` `AppSearchField` `AppChip` `AppTextChip` `ChipScroller` `AppTag` `TagWrap` `CheckMark`(체크 아이콘만, 07 D26) `NumberBadge` `SegmentedTabs`(track / pills / underline) `KakaoSymbol` `AppLogo`
-**헤더**: `PageTitleHeader`(탭 화면 큰 제목) `PlainHeader`(배경 없는 뒤로 + 제목) `AuthHeader`(가입 화면) `StepHeader`(위저드 뒤로 + 제목 + n/4) `StepProgressBar` `SectionHeader`
-**표면 · 하단**: `SectionCard`(섹션 컨테이너, 제목 줄 오른쪽 `trailing`) `DividedRows`(컨테이너 안 구분선 행) `AppCard` `IconCircle` `BottomCta`(하단 고정 버튼 영역)
+**헤더**: `PageTitleHeader`(탭 화면 큰 제목) `PlainHeader`(배경 없는 뒤로 + 제목) `AuthHeader`(가입 화면) `StepHeader`(위저드 뒤로 + 제목 + n/4) `StepProgressBar`(막대 아래 단계 이름 `정보 · 동행 · 장소 · 추천`, 지금 단계만 파랑 · 굵게) `SectionHeader`
+**표면 · 하단**: `SectionCard`(섹션 컨테이너, 제목 줄 오른쪽 `trailing`) `DividedRows`(컨테이너 안 구분선 행, 구분선은 왼쪽 `indent` + 오른쪽 `endIndent` 기본 16 — 카드 오른쪽 끝까지 뻗지 않음) `AppCard` `IconCircle` `BottomCta`(하단 고정 버튼 영역)
 **오버레이**: `showAppSnackBar`(하단 고정 버튼이 있으면 그 위 8에 뜸, 07 D36) `showAppBottomSheet` `showAppModal` `showConfirmDialog` `showActionSheet`
 **상태**: `AsyncValueView`(로딩 · 빈 · 오류를 한 번에) `AppLoading` `SkeletonBox` `SkeletonList` `AppEmptyState` `AppErrorState`
-**사진 · 장소**: `PlaceImage`(사진 없으면 카테고리 색 칸 + 아이콘, 같은 크기 유지) `AppNetworkImage` `PlaceListTile` `SavedPlaceRow` `CollectionRow`(2×2 `MiniCollage`) `ExtractedPlaceRow` `RatingText` `AppliedFilterChip`(걸린 필터, 남색) `HeaderTextButton`
-**홈**: `HomeCourseCard` `HomeQuickActions` `HomeStartGuide` `NewSavesNudge` `RecentSavedStrip` `SuggestedCourseStrip` `TrendingPlaceGrid`
-**지도**: `AptMap`(네이버 · 웹 타일 · 미리보기 지도를 감쌈) `MapPin`(번호/선택/AI/내 위치) `MapPlacePicker`(지도 위 장소 고르기, 3단계 · 장소 추가 공용) `CourseRouteMap`
-**코스**: `CourseHero`(이름 + 한 줄 정보) `CourseTimeline`(보기) `CourseEditList`(편집) `CourseEditButton` `StopMarker`(번호/✦) `CourseSummaryRow` `PickedTray` `RecommendingBanner`(추천 진행 · 취소) 장소 시트(`StopSheetAction`, 차단은 빨간 글자로 떼어 둠)
+**사진 · 장소**: `PlaceImage`(사진 없으면 카테고리 색 칸 + 아이콘, 같은 크기 유지) `AppNetworkImage` `PlaceListTile` `SavedPlaceRow` `CollectionRow`(2×2 `MiniCollage`) `ExtractedPlaceRow` `RatingText` `AppliedFilterChip`(걸린 필터, 남색 — 건 값만 하나씩) `showCategoryFilterSheet`(여러 개 고르는 카테고리 시트. `sources`를 주면 제목 `필터` + `보여 줄 장소`(직접 저장 · 추천받은 곳), `autoSearch`를 주면 `지도 이동 시 자동 검색` 스위치, 이때 버튼은 `적용`) `HeaderTextButton`
+**홈**: `HomeCourseCard`(D-day · 이름 · 장소 순서 줄 — 5곳까지 모두, 6곳부터 앞 셋 · `+n` · 마지막, AI 칸에 작은 ✦ · 아이콘 줄) `HomeRegionGroups`(지역별로 시작하기 — 구 · 시 묶음 세 개, 모자이크 + `코스 만들기`) `HomeQuickActions` `HomeStartGuide` `NewSavesNudge` `RecentSavedStrip` `SuggestedCourseStrip` `TrendingPlaceGrid`
+**지도**: `AptMap`(네이버 · 웹 타일 · 미리보기 지도를 감쌈) `MapPin`(번호/선택/AI/내 위치/`picked` 파란 체크 — 3단계에서 고른 곳, 순서 번호 없음) `MapPlacePicker`(지도 위 장소 고르기, 3단계 · 장소 추가 공용. 카드 · 목록은 지금 지도 영역 안의 장소만, 목록은 아래에서 올라오는 시트) `CourseRouteMap`
+**코스**: `CourseHero`(이름 + 한 줄 정보, 요약 칸을 쓰는 화면은 정보 줄 없음) `CourseStats`(날짜 · 출발 · 직선 거리, 있는 칸만) `CourseStopLegend`(`내가 고른 곳 n · AI 추천 n`) `CourseThumb`(사진 없으면 업종 모자이크: 1곳 한 칸 · 2곳 반반 · 3곳 큰 칸 + 둘 · 4곳 2×2 · 5곳부터 셋 + `+n`) `CourseDayChips`(오늘부터 2주 날짜 칩 + 달력) `showCourseTimeSheet`(출발 시간 휠) `CourseTimeline`(보기, 마커 사이를 한 줄로 이음) `CourseEditList`(편집) `CourseEditButton` `StopMarker`(번호/✦) `CourseSummaryRow` `PickedChips`(고른 장소 칩 줄, ×로 빼기) `RecommendingBanner`(추천 진행 · 취소) 장소 시트(`StopSheetAction`, 차단은 빨간 글자로 떼어 둠)
 **파티 · 공유 · 인증**: `PartyAvatarStack` `ShareOption`(초대 · 코스 알리기 시트 공통) `SocialLoginButton` `SocialIconButton`
 규칙: 페이지 안에서 같은 UI를 반복 작성하지 않는다. 새 화면 전에 **기존 컴포넌트를 검색해 재사용/확장**한다.
 
