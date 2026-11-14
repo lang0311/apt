@@ -16,11 +16,13 @@ import '../../../../core/widgets/surfaces.dart';
 import '../../domain/saved_models.dart';
 import '../saved_providers.dart';
 import '../saved_selection.dart';
+import '../widgets/category_style.dart';
 import '../widgets/create_collection_modal.dart';
 import '../widgets/saved_rows.dart';
 
-/// #13 / #14 저장됨 — [카테고리 | 내 보관함 | AI 추천] (2026-10-20 개편, docs/05 #13·#14, 07 D21 · D44 · D45)
-/// 카테고리 탭은 평소엔 '전체 n곳 · 필터 · 선택'만 두고, 필터를 걸었을 때만 칩 하나로 조건을 보여 준다.
+/// #13 / #14 저장됨 — [전체 | 보관함 | AI 추천] (2026-10-20 개편, 11-14 지역 묶음, docs/05 #13·#14, 07 D21 · D44 · D45)
+/// 전체 탭은 보기 방식(지역별 · 업종별 · 최근 저장한 순 · 이름순)으로 묶고, 필터는 지역별이면 지역, 그 밖에는 업종을 고른다.
+/// 칩 줄에는 보기 방식 · 필터 · 고른 값만 올라온다.
 /// AI 추천 탭은 코스를 저장할 때 AI 추천으로 들어온 장소다(카테고리 · 개수에는 직접 저장한 곳만).
 /// 두 탭 모두 '선택'(또는 행 길게 누르기)으로 여러 곳을 골라 삭제한다.
 /// 목록은 홈과 같은 SectionCard 하나 안의 구분선 행이다. 지도는 상단바 버튼 하나로만 연다.
@@ -118,7 +120,7 @@ class _SavedPageState extends ConsumerState<SavedPage> {
                       Padding(
                         padding: AppSpacing.screenPadding,
                         child: SegmentedTabs(
-                          labels: const ['카테고리', '내 보관함', 'AI 추천'],
+                          labels: const ['전체', '보관함', 'AI 추천'],
                           selectedIndex: _tab,
                           onChanged: _selectTab,
                         ),
@@ -194,18 +196,103 @@ class _MapButton extends StatelessWidget {
 class _CategoryTab extends ConsumerWidget {
   const _CategoryTab();
 
+  static const _noArea = '동네 정보 없음';
+
+  static String _regionOf(SavedPlaceItem i) {
+    final d = i.place.district;
+    return d.isEmpty ? _noArea : d;
+  }
+
+  /// 지역 필터 시트용 요약: 지역마다 곳 수 (많은 순, 동네 정보 없음은 맨 아래)
+  static SavedSummary _regionSummary(List<SavedPlaceItem> all) {
+    final counts = <String, int>{};
+    for (final i in all) {
+      counts.update(_regionOf(i), (n) => n + 1, ifAbsent: () => 1);
+    }
+    final keys = counts.keys.toList()
+      ..sort((a, b) => a == _noArea ? 1 : b == _noArea ? -1 : counts[b]!.compareTo(counts[a]!));
+    return SavedSummary(totalCount: all.length, categories: [for (final k in keys) PlaceCategory(key: k, label: k, count: counts[k]!)]);
+  }
+
+  static const _regionStyle = CategoryStyle(Icons.place_outlined, AppColors.textSecondary);
+
+  Future<void> _pickView(BuildContext context, WidgetRef ref, SavedView current) async {
+    final picked = await showAppBottomSheet<SavedView>(
+      context,
+      builder: (ctx) => SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xxs, AppSpacing.lg, AppSpacing.xs),
+              child: Text('어떻게 볼까요?', style: AppTypography.section),
+            ),
+            for (final v in SavedView.values)
+              Semantics(
+                selected: v == current,
+                button: true,
+                child: InkWell(
+                  onTap: () => Navigator.of(ctx).pop(v),
+                  child: SizedBox(
+                    height: 52,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              v.label,
+                              style: AppTypography.bodyStrong.copyWith(
+                                color: v == current ? AppColors.primary : AppColors.textPrimary,
+                                fontWeight: v == current ? FontWeight.w800 : FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          if (v == current) const Icon(Icons.check_rounded, color: AppColors.primary, size: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.md),
+              child: Text('지역별이면 필터에서 지역을, 그 밖에는 업종을 골라요.', style: AppTypography.caption),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (picked == null || picked == current) return;
+    // 보기 방식이 바뀌면 필터 종류가 바뀌니 고른 값을 푼다
+    ref.read(savedCategoryFilterProvider.notifier).clear();
+    ref.read(savedRegionFilterProvider.notifier).clear();
+    ref.read(savedViewProvider.notifier).set(picked);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final summaryValue = ref.watch(savedSummaryProvider);
     final summary = summaryValue.value;
+    final view = ref.watch(savedViewProvider);
+    final byRegion = view == SavedView.region;
     // 지운 뒤 사라진 카테고리는 빼고 본다 (모두 사라지면 전체)
-    final keys = _liveKeys(summary, ref.watch(savedCategoryFilterProvider));
-    final places = ref
-        .watch(savedPlacesProvider(const SavedPlaceQuery()))
-        .whenData((list) => [for (final item in list) if (matchesCategories(item.place, keys)) item]);
-    final label = categoryFilterLabel(summary, keys);
-    final selected = keys.isNotEmpty;
-    void clear() => ref.read(savedCategoryFilterProvider.notifier).clear();
+    final keys = byRegion ? const <String>{} : _liveKeys(summary, ref.watch(savedCategoryFilterProvider));
+    final regions = byRegion ? ref.watch(savedRegionFilterProvider) : const <String>{};
+    final allValue = ref.watch(savedPlacesProvider(const SavedPlaceQuery()));
+    final all = allValue.value ?? const <SavedPlaceItem>[];
+    final places = allValue.whenData(
+      (list) => [
+        for (final item in list)
+          if (matchesCategories(item.place, keys) && (regions.isEmpty || regions.contains(_regionOf(item)))) item,
+      ],
+    );
+    final regionSummary = _regionSummary(all);
+    final applied = byRegion ? regions : keys;
+    final selected = applied.isNotEmpty;
+    void clear() => byRegion ? ref.read(savedRegionFilterProvider.notifier).clear() : ref.read(savedCategoryFilterProvider.notifier).clear();
 
     // 저장 0곳: 필터 없이 저장 안내만
     if (summary != null && summary.totalCount == 0) {
@@ -222,53 +309,59 @@ class _CategoryTab extends ConsumerWidget {
       );
     }
 
-    // 거를 것이 없으면(저장한 곳이 한 카테고리뿐) 필터를 숨긴다
-    final filterable = summary != null && summary.categories.where((c) => c.count > 0).length > 1;
     final selection = ref.watch(savedSelectionProvider);
     final visible = places.value ?? const <SavedPlaceItem>[];
-    final String title;
-    if (summary == null) {
-      title = '저장한 곳';
-    } else if (!selected) {
-      title = '전체 ${summary.totalCount}곳';
-    } else {
-      title = '$label ${visible.length}곳';
-    }
-    final showFilter = summary != null && (filterable || selected);
+    final title = summary == null ? '저장한 곳' : selected ? '${visible.length}곳' : '전체 ${summary.totalCount}곳';
+    final filterSummary = byRegion ? regionSummary : summary;
+    final showFilter = filterSummary != null && (filterSummary.categories.where((c) => c.count > 0).length > 1 || selected);
+
+    Future<void> openFilter() => showCategoryFilterSheet(
+          context,
+          summary: filterSummary!,
+          selected: applied,
+          title: byRegion ? '지역' : '카테고리',
+          styleOf: byRegion ? (_) => _regionStyle : null,
+          onApply: (picked) => byRegion
+              ? ref.read(savedRegionFilterProvider.notifier).select(picked)
+              : ref.read(savedCategoryFilterProvider.notifier).select(picked),
+        );
 
     return SectionCard(
       title: selection.active ? '전체 선택' : title,
       titleWidget: selection.active ? _SelectAllTitle(items: visible) : null,
-      trailing: selection.active
-          ? const _DoneButton()
-          : (!showFilter && visible.isEmpty)
-          ? null
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (showFilter)
-                  HeaderTextButton(
-                    label: '필터',
-                    icon: Icons.tune_rounded,
-                    active: selected,
-                    semanticLabel: selected ? '카테고리 필터, $label 적용됨' : '카테고리 필터',
-                    onPressed: () => showCategoryFilterSheet(
-                      context,
-                      summary: summary,
-                      selected: keys,
-                      onApply: (picked) => ref.read(savedCategoryFilterProvider.notifier).select(picked),
-                    ),
-                  ),
-                if (visible.isNotEmpty) const _SelectButton(),
-              ],
-            ),
+      trailing: selection.active ? const _DoneButton() : visible.isEmpty ? null : const _SelectButton(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (selected && !selection.active)
+          // 칩 줄: 보기 방식 · 필터 · 고른 값만 (고르기 전에는 지역 · 업종 이름을 늘어놓지 않는다)
+          if (!selection.active)
             Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.xxs),
-              child: Align(alignment: Alignment.centerLeft, child: AppliedFilterChip(label: label, onClear: clear)),
+              padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.xs),
+              child: Wrap(
+                spacing: AppSpacing.xs,
+                runSpacing: AppSpacing.xs,
+                children: [
+                  _ToolChip(label: view.label, trailingIcon: Icons.expand_more_rounded, onTap: () => _pickView(context, ref, view)),
+                  if (showFilter)
+                    _ToolChip(
+                      label: '필터',
+                      leadingIcon: Icons.tune_rounded,
+                      count: applied.length,
+                      semanticLabel: selected ? '${byRegion ? '지역' : '카테고리'} 필터, ${applied.length}개 적용됨' : '${byRegion ? '지역' : '카테고리'} 필터',
+                      onTap: openFilter,
+                    ),
+                  for (final k in applied)
+                    AppliedFilterChip(
+                      label: byRegion ? k : (summary?.categories.where((c) => c.key == k).firstOrNull?.label ?? k),
+                      onClear: () {
+                        final rest = {...applied}..remove(k);
+                        byRegion
+                            ? ref.read(savedRegionFilterProvider.notifier).select(rest)
+                            : ref.read(savedCategoryFilterProvider.notifier).select(rest);
+                      },
+                    ),
+                ],
+              ),
             ),
           AsyncValueView(
             value: places,
@@ -277,17 +370,146 @@ class _CategoryTab extends ConsumerWidget {
             loading: const _RowSkeletons(),
             isEmpty: (list) => list.isEmpty,
             empty: _EmptyBody(
-              title: selected ? '$label에 저장한 곳이 없어요' : null,
-              message: '다른 카테고리를 보거나 전체로 돌아가 보세요.',
+              title: selected ? '고른 조건에 저장한 곳이 없어요' : null,
+              message: '다른 조건을 고르거나 전체로 돌아가 보세요.',
               actionLabel: '전체 보기',
               onAction: clear,
             ),
-            data: (list) => DividedRows(
-              indent: selection.active ? 116 : 88,
-              children: [for (final item in list) _SavedRow(item: item)],
-            ),
+            data: (list) => _GroupedRows(items: list, view: view, indent: selection.active ? 116 : 88),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 보기 방식대로 묶거나 정렬한 행. 지역별 · 업종별은 묶음 제목(이름 · n곳)을 달고 곳 수가 많은 묶음부터,
+/// 묶음이 여섯 곳을 넘으면 세 곳만 보이고 '모두 보기'로 펼친다.
+class _GroupedRows extends StatefulWidget {
+  const _GroupedRows({required this.items, required this.view, required this.indent});
+  final List<SavedPlaceItem> items;
+  final SavedView view;
+  final double indent;
+
+  @override
+  State<_GroupedRows> createState() => _GroupedRowsState();
+}
+
+class _GroupedRowsState extends State<_GroupedRows> {
+  final _open = <String>{};
+  static const _preview = 3;
+  static const _foldOver = 6;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = widget.items;
+    switch (widget.view) {
+      case SavedView.recent:
+        return DividedRows(indent: widget.indent, children: [for (final i in items) _SavedRow(item: i)]);
+      case SavedView.name:
+        final sorted = [...items]..sort((a, b) => a.place.name.compareTo(b.place.name));
+        return DividedRows(indent: widget.indent, children: [for (final i in sorted) _SavedRow(item: i)]);
+      case SavedView.region:
+      case SavedView.category:
+        final byRegion = widget.view == SavedView.region;
+        final map = <String, List<SavedPlaceItem>>{};
+        for (final i in items) {
+          final key = byRegion ? _CategoryTab._regionOf(i) : i.place.categoryLabel;
+          map.putIfAbsent(key, () => []).add(i);
+        }
+        final groups = map.entries.toList()
+          ..sort((a, b) => a.key == _CategoryTab._noArea ? 1 : b.key == _CategoryTab._noArea ? -1 : b.value.length.compareTo(a.value.length));
+        // 묶음이 하나면 제목 없이 목록만
+        if (groups.length == 1) {
+          return DividedRows(indent: widget.indent, children: [for (final i in items) _SavedRow(item: i)]);
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final (gi, g) in groups.indexed) ...[
+              Padding(
+                padding: EdgeInsets.fromLTRB(AppSpacing.md, gi == 0 ? AppSpacing.xxs : AppSpacing.md, AppSpacing.md, 0),
+                child: Row(
+                  children: [
+                    Expanded(child: Text(g.key, style: AppTypography.label)),
+                    Text('${g.value.length}곳', style: AppTypography.meta),
+                  ],
+                ),
+              ),
+              DividedRows(
+                indent: widget.indent,
+                children: [
+                  for (final i in (g.value.length > _foldOver && !_open.contains(g.key)) ? g.value.take(_preview) : g.value) _SavedRow(item: i),
+                ],
+              ),
+              if (g.value.length > _foldOver && !_open.contains(g.key))
+                InkWell(
+                  onTap: () => setState(() => _open.add(g.key)),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.sm, AppSpacing.xs),
+                    child: Row(
+                      children: [
+                        Expanded(child: Text('${g.key} ${g.value.length}곳 모두 보기', style: AppTypography.label.copyWith(color: AppColors.primary))),
+                        const Icon(Icons.expand_more_rounded, color: AppColors.primary, size: 20),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ],
+        );
+    }
+  }
+}
+
+/// 칩 줄의 도구 칩 (보기 방식 ▾ · 필터). 흰 바탕 + 테두리, 필터를 걸면 숫자 배지
+class _ToolChip extends StatelessWidget {
+  const _ToolChip({required this.label, required this.onTap, this.leadingIcon, this.trailingIcon, this.count = 0, this.semanticLabel});
+  final String label;
+  final VoidCallback onTap;
+  final IconData? leadingIcon;
+  final IconData? trailingIcon;
+  final int count;
+  final String? semanticLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: semanticLabel ?? label,
+      excludeSemantics: true,
+      child: Material(
+        color: AppColors.surfaceRaised,
+        shape: StadiumBorder(side: BorderSide(color: count > 0 ? AppColors.primary : AppColors.border)),
+        child: InkWell(
+          customBorder: const StadiumBorder(),
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 34),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(AppSpacing.sm, 0, trailingIcon == null ? AppSpacing.sm : 6, 0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (leadingIcon != null) ...[Icon(leadingIcon, size: 15, color: AppColors.textPrimary), const SizedBox(width: 4)],
+                  Text(label, style: AppTypography.label.copyWith(fontSize: 13)),
+                  if (count > 0) ...[
+                    const SizedBox(width: 5),
+                    Container(
+                      constraints: const BoxConstraints(minWidth: 18),
+                      height: 18,
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(9)),
+                      child: Text('$count', style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w800, height: 1)),
+                    ),
+                  ],
+                  if (trailingIcon != null) ...[const SizedBox(width: 2), Icon(trailingIcon, size: 18, color: AppColors.textSecondary)],
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

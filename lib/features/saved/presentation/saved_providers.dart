@@ -115,6 +115,29 @@ List<SavedPlaceItem> withDistanceFrom(GeoPoint? me, List<SavedPlaceItem> items, 
 /// 탭을 바꾸거나 상세에 다녀와도 유지하고, 앱을 다시 켜면 풀린다.
 final savedCategoryFilterProvider = NotifierProvider<SavedCategoryFilter, Set<String>>(SavedCategoryFilter.new);
 
+/// 저장됨 지역별 보기의 지역 필터 (구 · 시 이름, 여러 개). 비면 전체
+final savedRegionFilterProvider = NotifierProvider<SavedCategoryFilter, Set<String>>(SavedCategoryFilter.new);
+
+/// 저장됨 전체 탭의 보기 방식. 앱을 켜 둔 동안 유지된다
+enum SavedView {
+  region('지역별'),
+  category('업종별'),
+  recent('최근 저장한 순'),
+  name('이름순');
+
+  const SavedView(this.label);
+  final String label;
+}
+
+class SavedViewController extends Notifier<SavedView> {
+  @override
+  SavedView build() => SavedView.region;
+
+  void set(SavedView view) => state = view;
+}
+
+final savedViewProvider = NotifierProvider<SavedViewController, SavedView>(SavedViewController.new);
+
 class SavedCategoryFilter extends Notifier<Set<String>> {
   @override
   Set<String> build() => const {};

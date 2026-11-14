@@ -25,7 +25,6 @@ import '../widgets/category_style.dart';
 import '../widgets/place_image.dart';
 import '../widgets/place_list_tile.dart';
 import '../widgets/saved_rows.dart';
-import '../widgets/source_chips.dart';
 
 /// #18 카테고리 기준 지도(저장 지도) / #19 보관함 기준 지도·목록
 ///
@@ -204,12 +203,20 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
     ));
   }
 
-  /// 필터 시트의 카테고리 · 개수: 켜 둔 쪽만 더한다
+  /// 필터 시트의 카테고리 · 개수: 둘 다 더한다 (켜고 끄기는 시트 안에서 바뀌므로)
   SavedSummary? _summary() {
-    final mine = _showMine ? ref.watch(savedSummaryProvider).value : _empty;
-    final ai = _showAi ? ref.watch(aiSavedSummaryProvider).value : _empty;
-    return mine == null || ai == null ? null : mergeSummaries(mine, ai);
+    final mine = ref.watch(savedSummaryProvider).value;
+    final ai = ref.watch(aiSavedSummaryProvider).value ?? _empty;
+    return mine == null ? null : mergeSummaries(mine, ai);
   }
+
+  /// 한쪽만 켰거나 둘 다 껐을 때 이름
+  String? get _sourceLabel => switch ((_showMine, _showAi)) {
+        (true, true) => null,
+        (true, false) => '직접 저장만',
+        (false, true) => '추천받은 곳만',
+        (false, false) => '보여 줄 장소 없음',
+      };
 
   /// 지도에 보이는 영역 안의 장소 + 내 위치에서 직선거리 (07 D36)
   List<SavedPlaceItem> _inView(List<SavedPlaceItem> items) {
@@ -235,14 +242,19 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
 
   Future<void> _openFilter(SavedSummary? summary) async {
     if (summary == null) return;
+    // 직접 저장 · 추천받은 곳, 자동 검색도 이 시트 안에서 바꾼다 (지도 아래 시트를 얇게, UI 리뷰 12)
     await showCategoryFilterSheet(
       context,
       summary: summary,
       selected: _categories,
+      sources: (mine: _showMine, ai: _showAi),
+      autoSearch: _autoSearch,
       onApply: (keys) => setState(() {
         _categories = keys;
         _selectedId = null;
       }),
+      onApplySources: (mine, ai) => _toggleSource(mine: mine, ai: ai),
+      onApplyAutoSearch: _setAutoSearch,
     );
   }
 
@@ -282,7 +294,8 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
         final height = constraints.maxHeight;
         // 위 검색창 + 필터 칩 영역. 시트는 이 아래까지만 올라온다
         final overlayHeight = topInset + AppSpacing.xs + 44 + AppSpacing.xs + 36 + AppSpacing.xs;
-        final sheetMin = (268 / height).clamp(0.28, 0.5);
+        // 지도 화면의 시트는 제목 줄 + 가로 카드 한 줄만 (자동 검색 · 칩은 필터 시트로)
+        final sheetMin = (176 / height).clamp(0.18, 0.4);
         final sheetMax = (1 - overlayHeight / height).clamp(sheetMin + 0.1, 0.95);
         return Stack(
           children: [
@@ -304,6 +317,16 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
               child: Visibility(
                 visible: !_expanded,
                 child: _FrostedIconButton(icon: Icons.my_location_rounded, tooltip: '내 위치', onPressed: _goToMyLocation),
+              ),
+            ),
+            // '목록으로 보기'는 지도 위 작은 버튼 (코스 만들기 3단계와 같은 자리)
+            // 지도 왼쪽 아래의 NAVER 로고를 가리지 않게 로고 위에 둔다
+            Positioned(
+              left: AppSpacing.sm,
+              bottom: height * sheetMin + AppSpacing.xs + 36,
+              child: Visibility(
+                visible: !_expanded,
+                child: _ListPill(count: mineInView.length + aiInView.length, onPressed: () => _moveSheet(sheetMax)),
               ),
             ),
             NotificationListener<DraggableScrollableNotification>(
@@ -348,6 +371,8 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
   /// 위: 뒤로 + 흐림 검색창, 그 아래 `필터` 칩
   Widget _savedTop(SavedSummary? summary) {
     final label = categoryFilterLabel(summary, _categories);
+    // 건 조건(켜고 끄기 · 카테고리)을 한 칩에 모은다
+    final active = [?_sourceLabel, if (_categories.isNotEmpty) label];
     return Padding(
       padding: const EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.xs, AppSpacing.sm, 0),
       child: Column(
@@ -371,10 +396,14 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
           ),
           const SizedBox(height: AppSpacing.xs),
           _FilterChip(
-            label: _categories.isEmpty ? '필터' : label,
-            active: _categories.isNotEmpty,
+            label: active.isEmpty ? '필터' : active.join(', '),
+            active: active.isNotEmpty,
             onTap: summary == null ? null : () => _openFilter(summary),
-            onClear: () => setState(() => _categories = const {}),
+            onClear: () => setState(() {
+              _categories = const {};
+              _showMine = true;
+              _showAi = true;
+            }),
           ),
         ],
       ),
@@ -404,7 +433,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
               Expanded(
                 child: Text(shown.hasValue ? '$count곳' : '', style: AppTypography.label.copyWith(color: AppColors.textTertiary)),
               ),
-              SourceChips(showMine: _showMine, showAi: _showAi, onChanged: _toggleSource),
+              if (_sourceLabel != null) Text(_sourceLabel!, style: AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
             ],
           ),
         ),
@@ -430,19 +459,6 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
                   onTap: () => context.push(AppRoutes.place(item.place.id)),
                 );
               },
-            ),
-          ),
-        ],
-        if (!_expanded) ...[
-          _AutoSearchRow(value: _autoSearch, onChanged: _setAutoSearch),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.xs, AppSpacing.screenH, 0),
-            child: AppButton(
-              label: '목록으로 보기',
-              icon: Icons.format_list_bulleted_rounded,
-              variant: AppButtonVariant.white,
-              height: 40,
-              onPressed: count == 0 ? null : () => _moveSheet(sheetMax),
             ),
           ),
         ],
@@ -883,24 +899,34 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-/// 시트의 `지도 이동 시 자동 검색` 스위치 한 줄
-class _AutoSearchRow extends StatelessWidget {
-  const _AutoSearchRow({required this.value, required this.onChanged});
-  final bool value;
-  final ValueChanged<bool> onChanged;
+/// 지도 위 '목록 n' 버튼 (흰 알약)
+class _ListPill extends StatelessWidget {
+  const _ListPill({required this.count, required this.onPressed});
+  final int count;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return MergeSemantics(
+    return Material(
+      color: Colors.white.withValues(alpha: 0.94),
+      shape: const StadiumBorder(),
+      elevation: 2,
+      shadowColor: const Color(0x2914223A),
       child: InkWell(
-        onTap: () => onChanged(!value),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, 0, AppSpacing.sm, 0),
-          child: Row(
-            children: [
-              Expanded(child: Text('지도 이동 시 자동 검색', style: AppTypography.meta)),
-              Switch(value: value, onChanged: onChanged),
-            ],
+        customBorder: const StadiumBorder(),
+        onTap: count == 0 ? null : onPressed,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 44),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.format_list_bulleted_rounded, size: 17, color: AppColors.textPrimary),
+                const SizedBox(width: 5),
+                Text('목록 $count', style: AppTypography.label),
+              ],
+            ),
           ),
         ),
       ),
