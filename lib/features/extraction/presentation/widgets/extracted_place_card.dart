@@ -91,13 +91,14 @@ class SourceRowAction extends StatelessWidget {
       onPressed: onPressed,
       style: TextButton.styleFrom(
         foregroundColor: AppColors.primary,
-        disabledForegroundColor: AppColors.primary.withValues(alpha: 0.35),
+        // 비활성은 파랑을 흐리게 하지 않고 회색으로 (흐린 파랑은 흰 바탕에서 거의 안 읽힌다)
+        disabledForegroundColor: AppColors.textTertiary,
         minimumSize: const Size(48, 44),
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       ),
       child: Text(
         label,
-        style: AppTypography.label.copyWith(color: onPressed == null ? AppColors.primary.withValues(alpha: 0.35) : AppColors.primary),
+        style: AppTypography.label.copyWith(color: onPressed == null ? AppColors.textTertiary : AppColors.primary),
       ),
     );
   }
@@ -179,8 +180,8 @@ class _CollectionButton extends StatelessWidget {
   final VoidCallback onTap;
   final String placeName;
 
-  static const _line = Color(0xFFCFD7E3);
-  static const _activeLine = Color(0xFF9FBDFD);
+  static const _line = AppColors.borderStrong;
+  static const _activeLine = AppColors.primaryBorder;
 
   @override
   Widget build(BuildContext context) {

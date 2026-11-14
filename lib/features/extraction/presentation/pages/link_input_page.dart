@@ -76,7 +76,7 @@ class _LinkInputPageState extends State<LinkInputPage> {
                               _url.clear();
                               _error = null;
                             }),
-                            icon: const Icon(Icons.close_rounded, size: 18, color: AppColors.textHint),
+                            icon: const Icon(Icons.close_rounded, size: 18, color: AppColors.textTertiary),
                             constraints: const BoxConstraints(minWidth: 40, minHeight: 44),
                           ),
                         SourceRowAction(label: '찾기', onPressed: hasText ? _submit : null),
@@ -90,7 +90,7 @@ class _LinkInputPageState extends State<LinkInputPage> {
                       style: AppTypography.bodyStrong,
                       decoration: InputDecoration(
                         hintText: '링크를 붙여 넣어 주세요',
-                        hintStyle: AppTypography.body.copyWith(color: AppColors.textHint),
+                        hintStyle: AppTypography.body.copyWith(color: AppColors.textTertiary),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,

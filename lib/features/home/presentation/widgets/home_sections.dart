@@ -80,7 +80,7 @@ class _GuideStep extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: appMark
-                ? Text('APT', style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 10))
+                ? Text('APT', style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w800))
                 : Icon(icon, size: 18, color: AppColors.textPrimary),
           ),
           const SizedBox(height: AppSpacing.xxs),
@@ -531,7 +531,7 @@ class _PhotoTile extends StatelessWidget {
                       ),
                       Text(
                         caption,
-                        style: AppTypography.caption.copyWith(color: hasImage ? Colors.white.withValues(alpha: 0.88) : AppColors.textSecondary, fontSize: 10),
+                        style: AppTypography.caption.copyWith(color: hasImage ? Colors.white.withValues(alpha: 0.88) : AppColors.textSecondary),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

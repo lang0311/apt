@@ -62,7 +62,7 @@ class AppTextChip extends StatelessWidget {
   final bool selected;
   final VoidCallback? onTap;
 
-  static const _line = Color(0xFFCFD7E3);
+  static const _line = AppColors.borderStrong;
 
   @override
   Widget build(BuildContext context) {

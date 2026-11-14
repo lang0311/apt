@@ -197,7 +197,7 @@ class _ActionRow extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                             decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(5)),
-                            child: Text('이번만', style: AppTypography.caption.copyWith(fontSize: 10, fontWeight: FontWeight.w800)),
+                            child: Text('이번만', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w800)),
                           ),
                         ],
                       ],

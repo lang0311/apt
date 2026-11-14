@@ -89,7 +89,7 @@ class _PreviewMapState extends State<PreviewMap> {
             Positioned(
               right: 10,
               bottom: widget.bottomPadding + 8,
-              child: Text('지도 미리보기 · NAVER 지도 연동 예정', style: AppTypography.caption.copyWith(fontSize: 10)),
+              child: Text('지도 미리보기 · NAVER 지도 연동 예정', style: AppTypography.caption),
             ),
           ],
         ),

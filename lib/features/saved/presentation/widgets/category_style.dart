@@ -10,11 +10,11 @@ class CategoryStyle {
   final Color color;
 
   static const _map = <String, CategoryStyle>{
-    'restaurant': CategoryStyle(Icons.restaurant_rounded, Color(0xFFF0645A)),
+    'restaurant': CategoryStyle(Icons.restaurant_rounded, AppColors.danger),
     'cafe': CategoryStyle(Icons.local_cafe_rounded, AppColors.primary),
-    'tour': CategoryStyle(Icons.landscape_rounded, Color(0xFF8A63E6)),
+    'tour': CategoryStyle(Icons.landscape_rounded, AppColors.extract),
     'culture': CategoryStyle(Icons.museum_rounded, AppColors.success),
-    'stay': CategoryStyle(Icons.hotel_rounded, AppColors.ai),
+    'stay': CategoryStyle(Icons.hotel_rounded, AppColors.stay),
   };
 
   static const fallback = CategoryStyle(Icons.place_rounded, AppColors.textSecondary);

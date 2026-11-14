@@ -24,6 +24,15 @@ abstract final class AppColors {
 
   static const border = Color(0xFFE4EAF3);
 
+  /// 버튼 외곽선처럼 `border`보다 진해야 하는 테두리 (`프로필 편집` 등)
+  static const borderStrong = Color(0xFFCFD7E3);
+
+  /// 선택된 칩의 테두리 (`primarySoft` 배경 위의 연한 파랑)
+  static const primaryBorder = Color(0xFF9FBDFD);
+
+  /// 떠 있는 카드·버튼의 그림자 (`ink` 20%)
+  static const shadow = Color(0x3314223A);
+
   /// 체크박스·라디오 미선택 테두리. `border`는 1.21:1이라 선택 컨트롤에는 이 색을 쓴다(약 3:1).
   static const controlBorder = Color(0xFF8B97AB);
   static const divider = Color(0xFFE9EEF5);
@@ -43,6 +52,9 @@ abstract final class AppColors {
   static const dangerText = Color(0xFFC8463C);
   static const success = Color(0xFF16A07D);
   static const successSoft = Color(0xFFE6F6F1);
+
+  /// 숙박 카테고리 아이콘 색. 주황(`ai`)은 AI 추천 전용이라 카테고리에는 쓰지 않는다 (07 D17).
+  static const stay = Color(0xFFD04C97);
 
   /// 추출 계열 보조(보라)
   static const extract = Color(0xFF8A63E6);

@@ -111,7 +111,7 @@ class _Profile extends StatelessWidget {
                 onPressed: onEdit,
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.textPrimary,
-                  side: const BorderSide(color: Color(0xFFCFD7E3)),
+                  side: const BorderSide(color: AppColors.borderStrong),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xs)),
                   minimumSize: const Size(0, 36),
                   tapTargetSize: MaterialTapTargetSize.padded,

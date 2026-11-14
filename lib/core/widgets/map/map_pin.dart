@@ -76,7 +76,7 @@ class MapPin extends StatelessWidget {
         color: bg,
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white, width: 3),
-        boxShadow: const [BoxShadow(color: Color(0x3314223A), blurRadius: 6, offset: Offset(0, 2))],
+        boxShadow: const [BoxShadow(color: AppColors.shadow, blurRadius: 6, offset: Offset(0, 2))],
       ),
       child: child,
     );

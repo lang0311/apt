@@ -248,7 +248,7 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(AppRadius.card),
                   elevation: 3,
-                  shadowColor: const Color(0x3314223A),
+                  shadowColor: AppColors.shadow,
                   clipBehavior: Clip.antiAlias,
                   child: _card(selected),
                 ),
@@ -517,7 +517,7 @@ class _CardButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fg = active ? AppColors.primary : AppColors.textPrimary;
-    final shape = StadiumBorder(side: BorderSide(color: active ? const Color(0xFF9FBDFD) : AppColors.border));
+    final shape = StadiumBorder(side: BorderSide(color: active ? AppColors.primaryBorder : AppColors.border));
     return Semantics(
       button: true,
       label: semanticLabel,
@@ -582,7 +582,7 @@ class _AreaSearchButton extends StatelessWidget {
       color: AppColors.surfaceRaised,
       shape: const StadiumBorder(),
       elevation: 2,
-      shadowColor: const Color(0x3314223A),
+      shadowColor: AppColors.shadow,
       child: InkWell(
         customBorder: const StadiumBorder(),
         onTap: onPressed,

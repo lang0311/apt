@@ -354,11 +354,11 @@ class _SearchBar extends StatelessWidget {
                         right: 6,
                         top: 6,
                         child: Container(
-                          width: 15,
-                          height: 15,
+                          width: 17,
+                          height: 17,
                           alignment: Alignment.center,
                           decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                          child: Text('$filterCount', style: AppTypography.caption.copyWith(color: Colors.white, fontSize: 9.5, fontWeight: FontWeight.w800, height: 1)),
+                          child: Text('$filterCount', style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w800, height: 1)),
                         ),
                       ),
                   ],
@@ -481,7 +481,7 @@ class _InCourseTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6)),
-      child: Text(label, style: AppTypography.caption.copyWith(fontSize: 10.5, fontWeight: FontWeight.w700)),
+      child: Text(label, style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700)),
     );
   }
 }

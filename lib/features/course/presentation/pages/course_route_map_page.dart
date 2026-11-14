@@ -146,7 +146,7 @@ class _CourseRouteMapPageState extends State<CourseRouteMapPage> {
   }
 }
 
-const _floatShadow = [BoxShadow(color: Color(0x3314223A), blurRadius: 8, offset: Offset(0, 2))];
+const _floatShadow = [BoxShadow(color: AppColors.shadow, blurRadius: 8, offset: Offset(0, 2))];
 
 class _RoundButton extends StatelessWidget {
   const _RoundButton({required this.icon, required this.tooltip, required this.onPressed, this.size = 40});
