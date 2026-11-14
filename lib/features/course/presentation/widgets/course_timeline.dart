@@ -345,6 +345,8 @@ class CourseTimeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final numbers = userStopNumbers(stops);
+    // 도착 시간이 하나도 없는 코스(서버가 시간을 안 줄 때)는 시간 칸을 접는다
+    final showTime = stops.any((s) => s.arrivalTime != null);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       child: Column(
@@ -352,16 +354,17 @@ class CourseTimeline extends StatelessWidget {
         children: [
           for (var i = 0; i < stops.length; i++) ...[
             if (loadingIds.contains(stops[i].place.id))
-              const _SkeletonTile(withTime: true)
+              _SkeletonTile(withTime: showTime)
             else
               _ViewTile(
                 stop: stops[i],
                 number: numbers[i],
+                showTime: showTime,
                 highlighted: highlightIds.contains(stops[i].place.id),
                 onTap: onTapStop == null ? null : () => onTapStop!(stops[i]),
                 onMore: onMore == null || !stops[i].isAi ? null : () => onMore!(stops[i]),
               ),
-            if (i < stops.length - 1) _LegRow(leg: stops[i].nextLeg),
+            if (i < stops.length - 1) _LegRow(leg: stops[i].nextLeg, showTime: showTime),
           ],
         ],
       ),
@@ -370,9 +373,10 @@ class CourseTimeline extends StatelessWidget {
 }
 
 class _ViewTile extends StatelessWidget {
-  const _ViewTile({required this.stop, required this.number, this.highlighted = false, this.onTap, this.onMore});
+  const _ViewTile({required this.stop, required this.number, this.showTime = true, this.highlighted = false, this.onTap, this.onMore});
   final CourseStop stop;
   final int? number;
+  final bool showTime;
   final bool highlighted;
   final VoidCallback? onTap;
   final VoidCallback? onMore;
@@ -391,15 +395,17 @@ class _ViewTile extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(AppSpacing.xs, 8, onMore == null ? AppSpacing.sm : 0, 8),
             child: Row(
               children: [
-                SizedBox(
-                  width: 40,
-                  child: Text(
-                    stop.arrivalTime == null ? '' : formatClock(stop.arrivalTime!),
-                    textAlign: TextAlign.right,
-                    style: AppTypography.caption.copyWith(fontWeight: FontWeight.w600),
+                if (showTime) ...[
+                  SizedBox(
+                    width: 40,
+                    child: Text(
+                      stop.arrivalTime == null ? '' : formatClock(stop.arrivalTime!),
+                      textAlign: TextAlign.right,
+                      style: AppTypography.caption.copyWith(fontWeight: FontWeight.w600),
+                    ),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.xs),
+                  const SizedBox(width: AppSpacing.xs),
+                ],
                 _marker(stop, number),
                 const SizedBox(width: 10),
                 Expanded(child: _StopText(stop: stop)),
@@ -420,8 +426,9 @@ class _ViewTile extends StatelessWidget {
 
 /// 장소 사이 이동 줄: 번호 원 아래 점선 + "도보 6분"
 class _LegRow extends StatelessWidget {
-  const _LegRow({this.leg});
+  const _LegRow({this.leg, this.showTime = true});
   final RouteLeg? leg;
+  final bool showTime;
 
   @override
   Widget build(BuildContext context) {
@@ -429,8 +436,8 @@ class _LegRow extends StatelessWidget {
       height: 30,
       child: Row(
         children: [
-          // 시각(40) + 간격(8) + 번호 원 가운데(13)
-          const SizedBox(width: AppSpacing.xs + 40 + AppSpacing.xs + 12),
+          // (시각(40) + 간격(8)) + 번호 원 가운데(13)
+          SizedBox(width: AppSpacing.xs + (showTime ? 40 + AppSpacing.xs : 0) + 12),
           CustomPaint(size: const Size(2, 30), painter: _DashPainter()),
           const SizedBox(width: 14),
           if (leg != null) ...[
