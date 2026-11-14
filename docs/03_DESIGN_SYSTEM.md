@@ -80,17 +80,17 @@
 | 요소 | 값 |
 |------|-----|
 | 좌우 여백 | 20 (`AppSpacing.screenH`, 일부 24) |
-| 입력 필드 | 높이 52, radius 15, `surface` + `border` |
-| 주 버튼 | `AppButton` 높이 52, radius 16, 비활성은 투명도 40%. 종류: `primary` · `dark` · `soft` · `outline` · `white` |
+| 입력 필드 | 높이 52, radius 14(중간), `surface` + `border` |
+| 주 버튼 | `AppButton` 높이 52, radius 14(중간), 비활성은 회색 바탕 + 진한 회색 글자. 종류와 뜻(07 D57): `primary` 화면마다 하나 · 다음 단계 / `white` 그 옆 보조 / `soft` 목록 줄 안 작은 행동 / `dark` 이미 켜진 상태(저장됨) · 지도 위 전환 / `danger` 지우기 · 차단(빨간 글자) / `outline`은 쓰지 않음 |
 | 하단 고정 버튼 | `BottomCta`: 바탕 `bg`, 여백 위 12 · 좌우 20 · 아래 16(SafeArea 포함) |
-| 카드 | radius 20, `surface`(#F9FAFC) + `border` 1px, 그림자 없음 (2026-10-20) |
+| 카드 | radius 20(크게), `surface`(#F9FAFC) + `border` 1px, 그림자 없음. **카드 안에 흰 칸을 또 띄우지 않고** 구분선 목록으로(07 D57) |
 | 섹션 묶음 | `SectionCard`: 제목을 컨테이너 안에 두는 섹션 카드(제목 16/700, 안쪽 16). 탭 화면 본문은 바깥 여백 12 · 카드 사이 10 (2026-10-20, 홈부터) |
 | 칩 | 높이 34, 풀 라운드, 선택=primary 채움 / 비선택=`surface`+`border` |
-| 썸네일 | radius 14 |
+| 모서리 | 네 단계(07 D56): 작게 10(썸네일 · 아이콘 칸 · 태그) · 중간 14(입력칸 · 버튼 · 사진 · 카드 안 타일) · 크게 20(카드) · 시트 28 · 알약 999 (`AppRadius.small · medium · large · sheet · pill`). 2~7은 모자이크 안 칸 · 진행 막대만 |
 | 뒤로가기 버튼 | **배경 없는 아이콘**(`PlainHeader`, 누르는 영역 48, 제목 17): 코스 화면 · 보관함 상세. 가입 화면은 `AuthHeader`(큰 제목 위 아이콘), 장소 상세는 사진 위 흰 원 버튼 — 2026-10-21, 10-30 07 D37 |
 | 진행 바 | 4분할, 높이 4, radius 2, 활성 primary / 비활성 `divider` |
 | 바텀시트 | 상단 radius 28 + 핸들 |
-| 하단 탭 | 5개 (홈·저장됨·코스·추출·마이), 활성=primary + 연한 배경. 가운데 코스는 검정 사각형 버튼을 바 위로 조금 띄우고, 선택되면 파란색 (07 D31) |
+| 하단 탭 | 5개 (홈·저장됨·코스·장소 추가·마이), 활성=primary + 연한 배경. 가운데 코스는 검정 사각형 버튼을 바 위로 조금 띄우고, 선택되면 파란색 (07 D31 · D55) |
 | 간격 스케일 | 4 · 8 · 12 · 16 · 20 · 24 · 32 |
 
 `AppColors / AppTypography / AppSpacing / AppRadius / AppShadow`로 먼저 토큰화하고, 화면마다 임의 값을 만들지 않는다.
@@ -104,7 +104,7 @@
 **표면 · 하단**: `SectionCard`(섹션 컨테이너, 제목 줄 오른쪽 `trailing`) `DividedRows`(컨테이너 안 구분선 행, 구분선은 왼쪽 `indent` + 오른쪽 `endIndent` 기본 16 — 카드 오른쪽 끝까지 뻗지 않음) `AppCard` `IconCircle` `BottomCta`(하단 고정 버튼 영역)
 **오버레이**: `showAppSnackBar`(하단 고정 버튼이 있으면 그 위 8에 뜸, 07 D36) `showAppBottomSheet` `showAppModal` `showConfirmDialog` `showActionSheet`
 **상태**: `AsyncValueView`(로딩 · 빈 · 오류를 한 번에) `AppLoading` `SkeletonBox` `SkeletonList` `AppEmptyState` `AppErrorState`
-**사진 · 장소**: `PlaceImage`(사진 없으면 카테고리 색 칸 + 아이콘, 같은 크기 유지) `AppNetworkImage` `PlaceListTile` `SavedPlaceRow` `CollectionRow`(2×2 `MiniCollage`) `ExtractedPlaceRow` `RatingText` `AppliedFilterChip`(걸린 필터, 남색 — 건 값만 하나씩) `showCategoryFilterSheet`(여러 개 고르는 카테고리 시트. `sources`를 주면 제목 `필터` + `보여 줄 장소`(직접 저장 · 추천받은 곳), `autoSearch`를 주면 `지도 이동 시 자동 검색` 스위치, 이때 버튼은 `적용`) `HeaderTextButton`
+**사진 · 장소**: `PlaceImage`(사진 없으면 카테고리 색 칸 + 아이콘, 같은 크기 유지. 아이콘 색은 `CategoryStyle.ink` — 음식점 · 전시는 바탕과 3:1이 되게 진한 값, 07 D56) `AppNetworkImage` `PlaceListTile` `SavedPlaceRow` `CollectionRow`(2×2 `MiniCollage`) `ExtractedPlaceRow` `RatingText` `AppliedFilterChip`(걸린 필터, 남색 — 건 값만 하나씩) `showCategoryFilterSheet`(여러 개 고르는 카테고리 시트. `sources`를 주면 제목 `필터` + `보여 줄 장소`(직접 저장 · 추천받은 곳), `autoSearch`를 주면 `지도 이동 시 자동 검색` 스위치, 이때 버튼은 `적용`) `HeaderTextButton`
 **홈**: `HomeCourseCard`(D-day · 이름 · 장소 순서 줄 — 5곳까지 모두, 6곳부터 앞 셋 · `+n` · 마지막, AI 칸에 작은 ✦ · 아이콘 줄) `HomeRegionGroups`(지역별로 시작하기 — 구 · 시 묶음 세 개, 모자이크 + `코스 만들기`) `HomeQuickActions` `HomeStartGuide` `NewSavesNudge` `RecentSavedStrip` `SuggestedCourseStrip` `TrendingPlaceGrid`
 **지도**: `AptMap`(네이버 · 웹 타일 · 미리보기 지도를 감쌈) `MapPin`(번호/선택/AI/내 위치/`picked` 파란 체크 — 3단계에서 고른 곳, 순서 번호 없음) `MapPlacePicker`(지도 위 장소 고르기, 3단계 · 장소 추가 공용. 카드 · 목록은 지금 지도 영역 안의 장소만, 목록은 아래에서 올라오는 시트) `CourseRouteMap`
 **코스**: `CourseHero`(이름 + 한 줄 정보, 요약 칸을 쓰는 화면은 정보 줄 없음) `CourseStats`(날짜 · 출발 · 직선 거리, 있는 칸만) `CourseStopLegend`(`내가 고른 곳 n · AI 추천 n`) `CourseThumb`(사진 없으면 업종 모자이크: 1곳 한 칸 · 2곳 반반 · 3곳 큰 칸 + 둘 · 4곳 2×2 · 5곳부터 셋 + `+n`) `CourseDayChips`(오늘부터 2주 날짜 칩 + 달력) `showCourseTimeSheet`(출발 시간 휠) `CourseTimeline`(보기, 마커 사이를 한 줄로 이음) `CourseEditList`(편집) `CourseEditButton` `StopMarker`(번호/✦) `CourseSummaryRow` `PickedChips`(고른 장소 칩 줄, ×로 빼기) `RecommendingBanner`(추천 진행 · 취소) 장소 시트(`StopSheetAction`, 차단은 빨간 글자로 떼어 둠)
