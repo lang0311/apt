@@ -67,7 +67,7 @@ int daysUntil(DateTime target, {DateTime? now}) {
 
 String ddayLabel(DateTime target, {DateTime? now}) {
   final days = daysUntil(target, now: now);
-  if (days == 0) return 'D-DAY';
+  if (days == 0) return '오늘';
   return days > 0 ? 'D-$days' : 'D+${-days}';
 }
 

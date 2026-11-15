@@ -42,7 +42,7 @@ void main() {
 
     test('D-day는 날짜 기준으로 계산한다 (시각 무시)', () {
       final now = DateTime(2026, 10, 4, 23, 59);
-      expect(ddayLabel(DateTime(2026, 10, 4, 0, 1), now: now), 'D-DAY');
+      expect(ddayLabel(DateTime(2026, 10, 4, 0, 1), now: now), '오늘');
       expect(ddayLabel(DateTime(2026, 10, 12), now: now), 'D-8');
       expect(ddayLabel(DateTime(2026, 10, 1), now: now), 'D+3');
     });
