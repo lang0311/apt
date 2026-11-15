@@ -395,10 +395,19 @@ class _StripCell extends StatelessWidget {
   static const _node = 28.0;
 
   /// 띄어쓰기가 있는 이름은 단어 사이에서만 줄이 바뀌게 글자 사이를 붙여 둔다('서촌두에 뜨 / 라또리아' 방지).
-  /// 띄어쓰기 없는 긴 이름은 그대로 두어 글자 단위로 넘어간다
-  static String _breakAtSpaces(String name) {
-    if (!name.contains(' ')) return name;
-    return name.split(' ').map((w) => w.runes.map(String.fromCharCode).join('⁠')).join(' ');
+  /// 띄어쓰기 없는 이름이 한 줄에 안 들어가면 글자 수 가운데에서 두 줄로 나눈다('더숲초소책 / 방' 대신 '더숲초 / 소책방')
+  static String _breakName(String name, TextStyle style, double maxWidth, TextScaler scaler) {
+    if (name.contains(' ')) {
+      return name.split(' ').map((w) => w.runes.map(String.fromCharCode).join('⁠')).join(' ');
+    }
+    final painter = TextPainter(text: TextSpan(text: name, style: style), textDirection: TextDirection.ltr, textScaler: scaler, maxLines: 1)
+      ..layout();
+    final fits = painter.width <= maxWidth;
+    painter.dispose();
+    final chars = name.runes.map(String.fromCharCode).toList();
+    if (fits || chars.length < 2) return name;
+    final half = (chars.length + 1) ~/ 2;
+    return '${chars.sublist(0, half).join()}\n${chars.sublist(half).join()}';
   }
 
   @override
@@ -430,7 +439,13 @@ class _StripCell extends StatelessWidget {
         const SizedBox(height: 6),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 3),
-          child: Text(_breakAtSpaces(label), style: AppTypography.meta.copyWith(color: AppColors.textPrimary, height: 1.35), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final style = AppTypography.meta.copyWith(color: AppColors.textPrimary, height: 1.35);
+              final text = _breakName(label, style, constraints.maxWidth, MediaQuery.textScalerOf(context));
+              return Text(text, style: style, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center);
+            },
+          ),
         ),
       ],
     );
