@@ -153,7 +153,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                             state.recommendation?.taste,
                             state.stops,
                             draft.partyId,
-                            legend: CourseStopLegend(stops: state.stops),
+                            legend: CourseStopLegend(stops: state.visibleStops),
                             banner: state.loading
                                 ? RecommendingBanner.of(
                                     state,
@@ -174,7 +174,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                     padding: const EdgeInsets.fromLTRB(6, AppSpacing.xs, 0, 0),
                     child: Text('시간과 이동 정보는 다시 추천하거나 완료하면 다시 계산돼요.', style: AppTypography.caption),
                   )
-                else if (state.stops.any((s) => s.isAi))
+                else if (state.visibleStops.any((s) => s.isAi))
                   Padding(
                     padding: const EdgeInsets.fromLTRB(6, AppSpacing.xs, 0, 0),
                     child: Text('다시 추천하면 AI 추천 장소만 바뀌고 내가 고른 곳은 그대로예요.', style: AppTypography.caption),
