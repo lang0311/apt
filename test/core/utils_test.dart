@@ -47,6 +47,13 @@ void main() {
       expect(ddayLabel(DateTime(2026, 10, 1), now: now), 'D+3');
     });
 
+    test('업종 짧은 이름은 마지막 단계의 쉼표 앞 첫 단어', () {
+      expect(categoryShortLabel('여행 > 관광,명소 > 고궁,궁'), '고궁');
+      expect(categoryShortLabel('음식점 > 술집 > 호프,요리주점'), '호프');
+      expect(categoryShortLabel('음식점 > 한식'), '한식');
+      expect(categoryShortLabel('카페'), '카페');
+    });
+
     test('상대 시간', () {
       final now = DateTime(2026, 10, 4, 12);
       expect(formatRelative(now.subtract(const Duration(days: 2)), now: now), '2일 전');

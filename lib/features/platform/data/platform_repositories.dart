@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:flutter/material.dart' show DateUtils, TimeOfDay;
 
+import '../../../core/utils/formatters.dart';
 import '../../../core/config/env.dart';
 import '../../../core/error/app_failure.dart';
 import '../../../core/models/geo_point.dart';
@@ -171,7 +172,7 @@ class PlatformSavedRepository extends ApiSavedRepository {
       totalCount: counts.values.fold(0, (sum, n) => sum + n),
       categories: [
         for (final entry in counts.entries)
-          PlaceCategory(key: entry.key, label: entry.key.split('>').last.trim(), count: entry.value),
+          PlaceCategory(key: entry.key, label: categoryShortLabel(entry.key), count: entry.value),
       ],
     );
   }

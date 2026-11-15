@@ -84,3 +84,10 @@ String withObjectParticle(String word) => '$word${_hasFinalConsonant(word) ? '�
 
 /// 성수 정원은 / 카페는
 String withTopicParticle(String word) => '$word${_hasFinalConsonant(word) ? '은' : '는'}';
+
+/// 서버 업종 경로('음식점 > 술집 > 호프,요리주점')에서 화면에 쓸 짧은 이름. 마지막 단계의 쉼표 앞 첫 단어만 쓴다('호프', '고궁')
+String categoryShortLabel(String path) {
+  final last = path.split('>').last.trim();
+  final first = last.split(',').first.trim();
+  return first.isEmpty ? last : first;
+}

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 
+import '../../../core/utils/formatters.dart';
 import '../../../app/di/repositories.dart';
 import '../../../app/di/data_source.dart';
 import '../../../core/location/location_service.dart';
@@ -47,7 +48,7 @@ SavedSummary summarizeByCategory(Iterable<Place> places) {
     totalCount: counts.values.fold(0, (sum, n) => sum + n),
     categories: [
       for (final MapEntry(:key, :value) in counts.entries)
-        PlaceCategory(key: key, label: key.split('>').last.trim(), count: value),
+        PlaceCategory(key: key, label: categoryShortLabel(key), count: value),
     ],
   );
 }
@@ -158,7 +159,7 @@ String categoryFilterLabel(SavedSummary? summary, Set<String> keys) {
     for (final c in summary?.categories ?? const <PlaceCategory>[])
       if (keys.contains(c.key)) c.label,
     for (final k in keys)
-      if (!(summary?.categories.any((c) => c.key == k) ?? false)) k.split('>').last.trim(),
+      if (!(summary?.categories.any((c) => c.key == k) ?? false)) categoryShortLabel(k),
   ];
   return ordered.length == 1 ? ordered.first : '${ordered.first} 외 ${ordered.length - 1}';
 }

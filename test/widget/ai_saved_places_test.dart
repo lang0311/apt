@@ -105,12 +105,12 @@ void main() {
     await tester.tap(find.text('업종별'));
     await tester.pumpAndSettle();
 
-    // 업종: 한식 2 · 고궁,궁 1
+    // 업종: 한식 2 · 고궁 1 (서버 '고궁,궁'은 쉼표 앞만)
     await tester.tap(find.text('필터'));
     await tester.pumpAndSettle();
     expect(find.text('3곳 보기'), findsOneWidget); // 아무것도 안 고르면 전체
     await tester.tap(find.text('한식').last); // 뒤 목록의 묶음 제목이 아니라 시트의 항목
-    await tester.tap(find.text('고궁,궁').last);
+    await tester.tap(find.text('고궁').last);
     await tester.pumpAndSettle();
     expect(find.text('3곳 보기'), findsOneWidget);
     await tester.tap(find.text('초기화'));
@@ -125,17 +125,17 @@ void main() {
     // 다시 열어 하나 더 고르면 칩이 두 개
     await tester.tap(find.text('필터'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('고궁,궁').last);
+    await tester.tap(find.text('고궁').last);
     await tester.pumpAndSettle();
     await tester.tap(find.text('3곳 보기'));
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('한식 필터 해제'), findsOneWidget);
-    expect(find.bySemanticsLabel('고궁,궁 필터 해제'), findsOneWidget);
+    expect(find.bySemanticsLabel('고궁 필터 해제'), findsOneWidget);
 
     // 칩의 ×로 하나씩 풀기
     await tester.tap(find.bySemanticsLabel('한식 필터 해제'));
     await tester.pumpAndSettle();
-    await tester.tap(find.bySemanticsLabel('고궁,궁 필터 해제'));
+    await tester.tap(find.bySemanticsLabel('고궁 필터 해제'));
     await tester.pumpAndSettle();
     expect(find.text('전체 3곳'), findsOneWidget);
   });

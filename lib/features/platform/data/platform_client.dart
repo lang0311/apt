@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart' show TimeOfDay;
+import '../../../core/utils/formatters.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/error/app_failure.dart';
 import '../../../core/models/geo_point.dart';
@@ -58,7 +59,7 @@ class PlatformClient {
       // 동 이름은 지번 주소(`address`)에만 있어서 짧은 동네 표기는 지번 주소로 뽑는다 ('상수동'). 장소 상세의 주소 줄은 도로명
       areaLabel: _text(p['address']),
       categoryKey: category,
-      categoryLabel: category.split('>').last.trim(),
+      categoryLabel: categoryShortLabel(category),
       location: p['lat'] is num && p['lon'] is num
           ? GeoPoint((p['lat'] as num).toDouble(), (p['lon'] as num).toDouble())
           : null,
