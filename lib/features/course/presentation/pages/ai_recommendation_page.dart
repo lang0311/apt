@@ -126,8 +126,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                   SectionCard(
                     title: '일정 편집',
                     child: _WithBanner(
-                      show: state.loading,
-                      count: state.loadingIds.length,
+                      state: state,
                       child: CourseEditList(
                         stops: state.stops,
                         enabled: !busy,
@@ -143,9 +142,9 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                   )
                 else
                   SectionCard(
-                    title: '일정 ${state.stops.length}곳',
+                    title: '일정 ${state.visibleStops.length}곳',
                     trailing: CourseEditButton(onPressed: busy ? null : () => setState(() => _editing = true)),
-                    child: state.stops.isEmpty
+                    child: state.visibleStops.isEmpty
                         ? Padding(
                             padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
                             child: Text('일정에 장소가 없어요. "편집"에서 장소를 추가해 주세요.', style: AppTypography.meta),
@@ -156,13 +155,13 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                             draft.partyId,
                             legend: CourseStopLegend(stops: state.stops),
                             banner: state.loading
-                                ? RecommendingBanner(
-                                    count: state.loadingIds.length,
+                                ? RecommendingBanner.of(
+                                    state,
                                     onCancel: () => cancelRecommendationWithNotice(context, ref),
                                   )
                                 : null,
                             CourseTimeline(
-                              stops: state.stops,
+                              stops: state.visibleStops,
                               highlightIds: state.changedIds,
                               loadingIds: state.loadingIds,
                               onTapStop: busy ? null : (s) => showResultSheet(context, ref, s),
@@ -244,18 +243,17 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
 
 /// 다시 추천하는 동안 일정 위에 진행 줄(+ 취소)을 붙인다
 class _WithBanner extends ConsumerWidget {
-  const _WithBanner({required this.show, required this.child, this.count = 0});
-  final bool show;
+  const _WithBanner({required this.state, required this.child});
+  final RecommendationState state;
   final Widget child;
-  final int count;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!show) return child;
+    if (!state.loading) return child;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        RecommendingBanner(count: count, onCancel: () => cancelRecommendationWithNotice(context, ref)),
+        RecommendingBanner.of(state, onCancel: () => cancelRecommendationWithNotice(context, ref)),
         child,
       ],
     );

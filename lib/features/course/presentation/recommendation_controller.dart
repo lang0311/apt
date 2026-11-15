@@ -10,6 +10,18 @@ import '../domain/course_draft.dart';
 import '../domain/course_models.dart';
 import 'course_draft_controller.dart';
 
+/// 기다리는 동안 무엇을 다시 고르는지 (문구와 뼈대 자리가 달라진다)
+enum RerollKind {
+  /// 다시 추천 — AI 자리 전부
+  all,
+
+  /// 바꾸기 — 고른 한 곳만 (나머지 AI 장소는 그대로)
+  one,
+
+  /// 바꾸기인데 그 전에 일정을 고쳐서 다른 AI 장소도 바뀔 수 있음
+  mixed,
+}
+
 /// 일정 편집 상태. 4단계 AI 추천과 저장한 코스 편집이 같이 쓴다.
 /// 재추천 중에도 이전 결과(stops)를 유지한다 (깜빡임 방지).
 class RecommendationState {
@@ -22,6 +34,10 @@ class RecommendationState {
     this.changedIds = const {},
     this.addedIds = const {},
     this.stage,
+    this.edited = false,
+    this.reroll = RerollKind.all,
+    this.replacing,
+    this.replacingIndex = 0,
   });
 
   /// 사용자가 편집 중인 현재 코스 (USER + AI)
@@ -42,10 +58,31 @@ class RecommendationState {
   /// 추천받는 동안 지금 단계 (앞으로만 진행한다)
   final RecommendationStage? stage;
 
+  /// 마지막 추천 결과에서 장소를 빼거나 넣었는지 (순서만 바꾼 건 아님).
+  /// 고친 뒤의 바꾸기는 서버가 한 곳 교체로 처리하지 못해 AI 자리를 전부 다시 고른다.
+  final bool edited;
+
+  /// 기다리는 동안 다시 고르는 범위
+  final RerollKind reroll;
+
+  /// 한 곳 바꾸기로 뺀 장소와 그 자리 — 기다리는 동안 그 자리에 뼈대를 둔다
+  final CourseStop? replacing;
+  final int replacingIndex;
+
   bool get hasResult => recommendation != null;
 
-  /// 다시 추천 중에 뼈대로 보여 줄 자리 (AI 장소)
-  Set<String> get loadingIds => loading && hasResult ? {for (final s in stops) if (s.isAi) s.place.id} : const {};
+  bool get _replacingOne => loading && reroll == RerollKind.one && replacing != null;
+
+  /// 화면에 그릴 일정. 한 곳 바꾸기 중에는 뺀 장소의 자리를 남겨 둔다(뼈대로 그린다).
+  List<CourseStop> get visibleStops =>
+      _replacingOne ? ([...stops]..insert(replacingIndex.clamp(0, stops.length), replacing!)) : stops;
+
+  /// 기다리는 동안 뼈대로 보여 줄 자리 — 한 곳 바꾸기는 그 자리만, 아니면 AI 장소 전부
+  Set<String> get loadingIds {
+    if (!loading || !hasResult) return const {};
+    if (_replacingOne) return {replacing!.place.id};
+    return {for (final s in stops) if (s.isAi) s.place.id};
+  }
 
   RecommendationState copyWith({
     List<CourseStop>? stops,
@@ -58,6 +95,11 @@ class RecommendationState {
     Set<String>? addedIds,
     RecommendationStage? stage,
     bool clearStage = false,
+    bool? edited,
+    RerollKind? reroll,
+    CourseStop? replacing,
+    int? replacingIndex,
+    bool clearReplacing = false,
   }) =>
       RecommendationState(
         stops: stops ?? this.stops,
@@ -68,6 +110,10 @@ class RecommendationState {
         changedIds: changedIds ?? this.changedIds,
         addedIds: addedIds ?? this.addedIds,
         stage: clearStage ? null : (stage ?? this.stage),
+        edited: edited ?? this.edited,
+        reroll: clearReplacing ? RerollKind.all : (reroll ?? this.reroll),
+        replacing: clearReplacing ? null : (replacing ?? this.replacing),
+        replacingIndex: clearReplacing ? 0 : (replacingIndex ?? this.replacingIndex),
       );
 }
 
@@ -134,7 +180,10 @@ class RecommendationController extends Notifier<RecommendationState> {
   /// 바뀐 AI 장소 수를 돌려준다(실패하면 null).
   Future<int?> recommendAgain({bool remember = true}) async {
     if (state.loading) return null;
-    if (remember) _remember();
+    if (remember) {
+      _remember();
+      state = state.copyWith(clearReplacing: true);
+    }
     final before = {for (final s in state.stops) if (s.isAi) s.place.id};
     // 취소하면 이 동작 전(바꾸기라면 빼기 전)으로 돌아간다
     final revert = _undo;
@@ -181,7 +230,7 @@ class RecommendationController extends Notifier<RecommendationState> {
       if (seq != _requestSeq || e is CancelledFailure) return false;
       _beforeRequest = null;
       // 실패하면 이전 결과로 복구 + 재시도 가능
-      state = previous.copyWith(loading: false, error: e, clearStage: true);
+      state = previous.copyWith(loading: false, error: e, clearStage: true, clearReplacing: true);
       return false;
     }
   }
@@ -195,7 +244,13 @@ class RecommendationController extends Notifier<RecommendationState> {
     _beforeRequest = null;
     if (identical(before, _undo)) _undo = null;
     _draft.update((_) => before.draft);
-    state = before.state.copyWith(loading: false, clearError: true, clearStage: true, changedIds: const {});
+    state = before.state.copyWith(
+      loading: false,
+      clearError: true,
+      clearStage: true,
+      changedIds: const {},
+      clearReplacing: true,
+    );
     // 서버 취소는 기다리지 않는다. 실패해도 다음 추천이 남은 job을 이어받거나 끝나길 기다린다.
     unawaited(ref.read(courseRepositoryProvider).cancelRecommendation().catchError((Object _) {}));
     return true;
@@ -213,6 +268,7 @@ class RecommendationController extends Notifier<RecommendationState> {
       stops: state.stops.where((s) => s.place.id != stop.place.id).toList(),
       basedOnPlaceIds: ref.read(courseDraftProvider).placeIds,
       changedIds: const {},
+      edited: true,
     );
   }
 
@@ -225,9 +281,18 @@ class RecommendationController extends Notifier<RecommendationState> {
   }
 
   /// AI 장소를 다른 곳으로 바꾸기 = 이번만 빼기 + 다시 추천
+  /// 일정을 고치지 않은 상태면 서버가 그 한 곳만 바꾸고, 고친 뒤면 AI 자리를 전부 다시 고른다.
   Future<int?> replaceAi(CourseStop stop) async {
+    if (state.loading) return null;
     _remember();
+    final one = !state.edited;
+    final index = state.stops.indexWhere((s) => s.place.id == stop.place.id);
     removeStop(stop, remember: false);
+    state = state.copyWith(
+      reroll: one ? RerollKind.one : RerollKind.mixed,
+      replacing: one ? stop : null,
+      replacingIndex: index < 0 ? state.stops.length : index,
+    );
     return recommendAgain(remember: false);
   }
 
@@ -240,7 +305,7 @@ class RecommendationController extends Notifier<RecommendationState> {
       await ref.read(courseRepositoryProvider).unblockPlace(snap.blockedPlaceId!);
     }
     _draft.update((_) => snap.draft);
-    state = snap.state.copyWith(loading: false, changedIds: const {});
+    state = snap.state.copyWith(loading: false, changedIds: const {}, clearReplacing: true);
   }
 
   void moveStop(int oldIndex, int newIndex) {
@@ -265,6 +330,7 @@ class RecommendationController extends Notifier<RecommendationState> {
       basedOnPlaceIds: ref.read(courseDraftProvider).placeIds,
       addedIds: {...state.addedIds, for (final s in added) s.place.id},
       changedIds: const {},
+      edited: state.edited || added.isNotEmpty,
     );
   }
 

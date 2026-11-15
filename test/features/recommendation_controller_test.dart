@@ -210,6 +210,50 @@ void main() {
     expect(state().stops.map((s) => s.place.id), ['a', 'b', 'ai1']);
   });
 
+  test('한 곳 바꾸기 중에는 그 자리만 뼈대로 남고, 끝나면 사라진다', () async {
+    await controller().syncWithDraft();
+    final gate = Completer<void>();
+    repo.gate = gate.future;
+    final replace = controller().replaceAi(state().stops.last);
+    await Future<void>.delayed(Duration.zero);
+    expect(state().reroll, RerollKind.one);
+    expect(state().stops.map((s) => s.place.id), ['a', 'b']);
+    expect(state().visibleStops.map((s) => s.place.id), ['a', 'b', 'ai1']);
+    expect(state().loadingIds, {'ai1'});
+    gate.complete();
+    expect(await replace, 1);
+    expect(state().reroll, RerollKind.all);
+    expect(state().replacing, isNull);
+    expect(state().visibleStops.map((s) => s.place.id), ['a', 'b', 'ai2']);
+    expect(state().loadingIds, isEmpty);
+  });
+
+  test('장소를 뺀 뒤의 바꾸기는 한 곳 바꾸기가 아니다 (AI 자리 전부 뼈대)', () async {
+    container.read(courseDraftProvider.notifier).start(places: [_p('a'), _p('b'), _p('c')]);
+    await controller().syncWithDraft();
+    controller().removeStop(state().stops.first);
+    expect(state().edited, isTrue);
+    final gate = Completer<void>();
+    repo.gate = gate.future;
+    final replace = controller().replaceAi(state().stops.last);
+    await Future<void>.delayed(Duration.zero);
+    expect(state().reroll, RerollKind.mixed);
+    expect(state().visibleStops.map((s) => s.place.id), ['b', 'c']);
+    gate.complete();
+    await replace;
+    expect(state().edited, isFalse);
+    expect(state().reroll, RerollKind.all);
+  });
+
+  test('바꾸기가 실패하면 뼈대 자리 없이 뺀 상태로 돌아온다', () async {
+    await controller().syncWithDraft();
+    repo.fail = true;
+    expect(await controller().replaceAi(state().stops.last), isNull);
+    expect(state().replacing, isNull);
+    expect(state().reroll, RerollKind.all);
+    expect(state().visibleStops.map((s) => s.place.id), ['a', 'b']);
+  });
+
   test('진행 중이 아니면 취소는 아무것도 하지 않는다', () async {
     await controller().syncWithDraft();
     expect(controller().cancel(), isFalse);

@@ -108,7 +108,7 @@ class _CourseEditPageState extends ConsumerState<CourseEditPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (state.loading)
-                  RecommendingBanner(count: state.loadingIds.length, onCancel: () => cancelRecommendationWithNotice(context, ref)),
+                  RecommendingBanner.of(state, onCancel: () => cancelRecommendationWithNotice(context, ref)),
                 CourseEditList(
                   stops: state.stops,
                   enabled: !busy,
