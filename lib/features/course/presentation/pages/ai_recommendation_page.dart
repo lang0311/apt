@@ -274,6 +274,10 @@ class _Waiting extends StatefulWidget {
 }
 
 class _WaitingState extends State<_Waiting> {
+  /// 지난 시간 줄('n초 지났어요')을 보여 줄지. 지금은 서버 추천이 몇 분씩 걸려 숫자가 오히려 길게 느껴져 끈다(11-15).
+  /// 서버 추천이 빨라지면 true로 바꾸기만 하면 타이머와 줄이 그대로 다시 나온다
+  static const _showElapsed = false;
+
   // 한 단계에 몇 분씩 머물 수 있어 멈춘 것처럼 보이지 않게 지난 시간을 센다(07 D60)
   final _watch = Stopwatch()..start();
   Timer? _tick;
@@ -281,6 +285,7 @@ class _WaitingState extends State<_Waiting> {
   @override
   void initState() {
     super.initState();
+    if (!_showElapsed) return;
     _tick = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
     });
@@ -320,12 +325,14 @@ class _WaitingState extends State<_Waiting> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _Stages(stage: stage ?? RecommendationStage.findCandidates, isParty: isParty),
-                    const Divider(height: AppSpacing.md, color: AppColors.divider),
-                    // 초마다 바뀌는 글자라 스크린리더에는 읽어 주지 않는다
-                    ExcludeSemantics(
-                      child: Text(_elapsed(_watch.elapsed), style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-                    ),
-                    const SizedBox(height: 2),
+                    if (_showElapsed) ...[
+                      const Divider(height: AppSpacing.md, color: AppColors.divider),
+                      // 초마다 바뀌는 글자라 스크린리더에는 읽어 주지 않는다
+                      ExcludeSemantics(
+                        child: Text(_elapsed(_watch.elapsed), style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+                      ),
+                      const SizedBox(height: 2),
+                    ],
                   ],
                 ),
               ),
