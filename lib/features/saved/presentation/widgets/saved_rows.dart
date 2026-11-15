@@ -415,7 +415,7 @@ class AppliedFilterChip extends StatelessWidget {
 /// 카테고리 시트: 서버 카테고리(아이콘 · 개수)를 **여러 개** 고른다(네모 체크, 07 D48).
 /// 아래 `초기화`는 고른 것을 모두 풀고, `n곳 보기`가 [onApply]로 고른 키들을 넘기며 닫는다(비면 전체).
 /// 그냥 닫으면 아무 일도 없다. 0곳은 고를 수 없다. 저장됨 · 코스 장소 고르기 · 저장 지도가 같이 쓴다.
-/// [title] · [styleOf]를 바꾸면 같은 시트로 지역을 고른다(저장됨 지역별 보기). [sources]를 주면 맨 위에
+/// [title] · [styleOf]를 바꾸면 같은 시트로 지역을 고른다(저장됨 지역별 보기, [styleOf]가 null을 주면 아이콘 칸 없이 이름 · 개수만). [sources]를 주면 맨 위에
 /// 직접 저장 · 추천받은 곳 켜고 끄기가 붙고 `적용`을 누를 때 [onApplySources]로 넘긴다(07 D47, 칩을 시트 안으로).
 Future<void> showCategoryFilterSheet(
   BuildContext context, {
@@ -423,7 +423,7 @@ Future<void> showCategoryFilterSheet(
   required Set<String> selected,
   required ValueChanged<Set<String>> onApply,
   String title = '카테고리',
-  CategoryStyle Function(String key)? styleOf,
+  CategoryStyle? Function(String key)? styleOf,
   ({bool mine, bool ai})? sources,
   void Function(bool mine, bool ai)? onApplySources,
   bool? autoSearch,
@@ -461,7 +461,7 @@ class _CategoryFilterSheet extends StatefulWidget {
   final Set<String> initial;
   final ValueChanged<Set<String>> onApply;
   final String title;
-  final CategoryStyle Function(String key) styleOf;
+  final CategoryStyle? Function(String key) styleOf;
   final ({bool mine, bool ai})? sources;
   final void Function(bool mine, bool ai)? onApplySources;
 
@@ -599,13 +599,14 @@ class _CategoryOption extends StatelessWidget {
   const _CategoryOption({required this.label, required this.count, required this.style, required this.selected, required this.onTap});
   final String label;
   final int count;
-  final CategoryStyle style;
+  final CategoryStyle? style;
   final bool selected;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final enabled = onTap != null;
+    final style = this.style;
     return Semantics(
       button: true,
       checked: selected,

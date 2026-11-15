@@ -18,7 +18,6 @@ import '../../../course/presentation/widgets/course_thumb.dart';
 import '../../domain/saved_models.dart';
 import '../saved_providers.dart';
 import '../saved_selection.dart';
-import '../widgets/category_style.dart';
 import '../widgets/create_collection_modal.dart';
 import '../widgets/saved_rows.dart';
 
@@ -227,8 +226,6 @@ class _CategoryTab extends ConsumerWidget {
     return SavedSummary(totalCount: all.length, categories: [for (final k in keys) PlaceCategory(key: k, label: k, count: counts[k]!)]);
   }
 
-  static const _regionStyle = CategoryStyle(Icons.place_outlined, AppColors.textSecondary);
-
   Future<void> _pickView(BuildContext context, WidgetRef ref, SavedView current) async {
     final picked = await showAppBottomSheet<SavedView>(
       context,
@@ -333,7 +330,8 @@ class _CategoryTab extends ConsumerWidget {
           summary: filterSummary!,
           selected: applied,
           title: byRegion ? '지역' : '카테고리',
-          styleOf: byRegion ? (_) => _regionStyle : null,
+          // 지역은 줄마다 같은 핀이라 아이콘 칸 없이 이름 · 개수만
+          styleOf: byRegion ? (_) => null : null,
           onApply: (picked) => byRegion
               ? ref.read(savedRegionFilterProvider.notifier).select(picked)
               : ref.read(savedCategoryFilterProvider.notifier).select(picked),
