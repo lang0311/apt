@@ -53,39 +53,10 @@ class MockMembersCourseRepository implements CourseRepository {
   MockMembersCourseRepository(this.server);
   final CourseRepository server;
 
-  CourseSummary _summary(CourseSummary c) => !c.isParty
-      ? c
-      : CourseSummary(
-          id: c.id,
-          title: c.title,
-          regionLabel: c.regionLabel,
-          placeCount: c.placeCount,
-          date: c.date,
-          thumbnailUrl: c.thumbnailUrl,
-          isParty: true,
-          memberCount: c.memberCount + mockPartyMembers.length,
-          memberNames: c.memberNames,
-          tags: c.tags,
-          stopCategoryKeys: c.stopCategoryKeys,
-        );
+  CourseSummary _summary(CourseSummary c) =>
+      c.isParty ? c.copyWith(memberCount: c.memberCount + mockPartyMembers.length) : c;
 
-  Course _course(Course c) => !c.isParty
-      ? c
-      : Course(
-          id: c.id,
-          title: c.title,
-          date: c.date,
-          startTime: c.startTime,
-          isParty: true,
-          memberCount: c.memberCount + mockPartyMembers.length,
-          totalDuration: c.totalDuration,
-          isShared: c.isShared,
-          stops: c.stops,
-          moodKeys: c.moodKeys,
-          partyId: c.partyId,
-          canEdit: c.canEdit,
-          taste: c.taste,
-        );
+  Course _course(Course c) => c.isParty ? c.copyWith(memberCount: c.memberCount + mockPartyMembers.length) : c;
 
   Future<List<CourseSummary>> _summaries(Future<List<CourseSummary>> list) async => [for (final c in await list) _summary(c)];
 

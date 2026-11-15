@@ -5,6 +5,7 @@ import 'package:apt/features/course/domain/course_repository.dart';
 import 'package:apt/features/party/domain/party_models.dart';
 import 'package:apt/features/party/domain/party_repository.dart';
 import 'package:apt/features/place/domain/place.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Place _p(String id) => Place(id: id, name: id, address: '', categoryKey: 'cafe', categoryLabel: '카페');
@@ -65,7 +66,17 @@ class _FakeServerCourses implements CourseRepository {
 
   @override
   Future<List<CourseSummary>> fetchPartyCourses() async => const [
-        CourseSummary(id: 'c1', title: '파티 코스', placeCount: 3, isParty: true),
+        CourseSummary(
+          id: 'c1',
+          title: '파티 코스',
+          placeCount: 3,
+          isParty: true,
+          stopCategoryKeys: ['cafe', 'park'],
+          stopNames: ['카페', '공원'],
+          stopIsAi: [false, true],
+          startTime: TimeOfDay(hour: 13, minute: 0),
+          distanceKm: 1.2,
+        ),
       ];
   @override
   Future<List<CourseSummary>> fetchMyCourses() async => const [CourseSummary(id: 'c2', title: '혼자 코스', placeCount: 2)];
@@ -115,5 +126,15 @@ void main() {
     expect((await repo.createCourse(draft: partyDraft, stops: const [])).memberCount, 3);
     expect((await repo.fetchPartyCourses()).single.memberCount, 3);
     expect((await repo.fetchMyCourses()).single.memberCount, 1);
+  });
+
+  test('파티 코스 카드에 쓰는 나머지 값은 서버가 준 그대로 넘긴다', () async {
+    final card = (await MockMembersCourseRepository(_FakeServerCourses()).fetchPartyCourses()).single;
+
+    expect(card.stopCategoryKeys, ['cafe', 'park']);
+    expect(card.stopNames, ['카페', '공원']);
+    expect(card.stopIsAi, [false, true]);
+    expect(card.startTime, const TimeOfDay(hour: 13, minute: 0));
+    expect(card.distanceKm, 1.2);
   });
 }

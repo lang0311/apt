@@ -163,6 +163,24 @@ class CourseSummary {
 
   /// 장소 사이 직선 거리 합 (팀 서버 `distance_km`). 없으면 null
   final double? distanceKm;
+
+  CourseSummary copyWith({required int memberCount}) => CourseSummary(
+        id: id,
+        title: title,
+        regionLabel: regionLabel,
+        placeCount: placeCount,
+        date: date,
+        thumbnailUrl: thumbnailUrl,
+        isParty: isParty,
+        memberCount: memberCount,
+        memberNames: memberNames,
+        tags: tags,
+        stopCategoryKeys: stopCategoryKeys,
+        stopNames: stopNames,
+        stopIsAi: stopIsAi,
+        startTime: startTime,
+        distanceKm: distanceKm,
+      );
 }
 
 /// "이런 코스는 어때요?" (서버 추천 코스)
@@ -210,4 +228,20 @@ class Course {
 
   /// 이 코스를 추천할 때 반영한 취향 (07 D46)
   final AppliedTaste? taste;
+
+  Course copyWith({required int memberCount}) => Course(
+        id: id,
+        title: title,
+        date: date,
+        startTime: startTime,
+        isParty: isParty,
+        memberCount: memberCount,
+        totalDuration: totalDuration,
+        isShared: isShared,
+        stops: stops,
+        moodKeys: moodKeys,
+        partyId: partyId,
+        canEdit: canEdit,
+        taste: taste,
+      );
 }
