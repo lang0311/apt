@@ -259,6 +259,12 @@ class PlatformClient {
     // 새로고침해도 같은 서버 job을 이어서 기다린다. 비용이 드는 추천 요청을 몰래 다시 보내지 않는다.
     activeJob = job;
     try {
+      // 요청을 보낸 뒤 job 번호를 받기 전에 취소를 눌렀으면 여기서 서버에 알린다
+      // (그때는 번호를 몰라 cancelRecommendation이 취소를 보내지 못했다).
+      if (cancelRequested) {
+        await post('/jobs/$job/cancel');
+        throw const CancelledFailure();
+      }
       for (var i = 0; i < 1200; i++) {
         if (cancelRequested) throw const CancelledFailure();
         final data = Map<String, dynamic>.from(await get('/jobs/$job') as Map);

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:apt/core/error/app_failure.dart';
 import 'package:apt/core/network/api_client.dart';
 import 'package:apt/features/platform/data/platform_client.dart';
 import 'package:dio/dio.dart';
@@ -59,5 +60,16 @@ void main() {
     expect(server.requests.single.path, '/me/places/k-onion');
     expect(client.places['1']!['is_saved'], isFalse);
     expect(client.places['k-onion']!['is_saved'], isFalse);
+  });
+
+  test('job 번호를 받기 전에 누른 취소는 번호를 받자마자 서버에 보낸다', () async {
+    await client.cancelRecommendation(); // 아직 번호가 없어 표시만 남는다
+    expect(server.requests, isEmpty);
+
+    await expectLater(client.poll('j1'), throwsA(isA<CancelledFailure>()));
+
+    expect(server.requests.single.method, 'POST');
+    expect(server.requests.single.path, '/jobs/j1/cancel');
+    expect(client.activeJob, isNull);
   });
 }
