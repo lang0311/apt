@@ -34,7 +34,7 @@ class _CourseRouteMapPageState extends State<CourseRouteMapPage> {
   final _map = AptMapController();
   final _pages = PageController(viewportFraction: 0.64);
   late final List<CourseStop> _stops = [for (final s in widget.args.stops) if (s.place.location != null) s];
-  late final List<int?> _numbers = userStopNumbers(_stops);
+  late final List<int> _numbers = userStopNumbers(_stops);
   String? _focusedId;
 
   @override
@@ -224,7 +224,7 @@ class _LineNote extends StatelessWidget {
 class _StopCard extends StatelessWidget {
   const _StopCard({required this.stop, required this.number, required this.focused, required this.onTap});
   final CourseStop stop;
-  final int? number;
+  final int number;
   final bool focused;
   final VoidCallback onTap;
 
@@ -251,7 +251,7 @@ class _StopCard extends StatelessWidget {
                 clipBehavior: Clip.none,
                 children: [
                   PlaceImage(place: place, width: 44, height: 44, radius: 10, iconSize: 20),
-                  Positioned(left: -6, top: -6, child: _Badge(number: number)),
+                  Positioned(left: -6, top: -6, child: _Badge(number: number, ai: stop.isAi)),
                 ],
               ),
               const SizedBox(width: 10),
@@ -273,14 +273,14 @@ class _StopCard extends StatelessWidget {
   }
 }
 
-/// 번호 원(선택 장소) 또는 주황 ✦ 원(AI 추천)
+/// 번호 원. AI 추천은 주황, 내가 고른 곳은 파랑 (번호는 일정 순서대로 이어진다, 07 D62)
 class _Badge extends StatelessWidget {
-  const _Badge({required this.number});
-  final int? number;
+  const _Badge({required this.number, required this.ai});
+  final int number;
+  final bool ai;
 
   @override
   Widget build(BuildContext context) {
-    final ai = number == null;
     return Container(
       width: 20,
       height: 20,
@@ -290,9 +290,7 @@ class _Badge extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white, width: 2),
       ),
-      child: ai
-          ? const Icon(Icons.auto_awesome, size: 11, color: Colors.white)
-          : Text('$number', style: AppTypography.caption.copyWith(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800, height: 1)),
+      child: Text('$number', style: AppTypography.caption.copyWith(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800, height: 1)),
     );
   }
 }

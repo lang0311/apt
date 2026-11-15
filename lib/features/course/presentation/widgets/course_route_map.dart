@@ -93,4 +93,4 @@ class _ExpandPill extends StatelessWidget {
 }
 
 /// 일정 순번. AI 추천 곳도 번호를 매겨 1부터 끊기지 않게 한다 (색과 ✦로만 구분)
-List<int?> userStopNumbers(List<CourseStop> stops) => [for (var i = 0; i < stops.length; i++) i + 1];
+List<int> userStopNumbers(List<CourseStop> stops) => [for (var i = 0; i < stops.length; i++) i + 1];
