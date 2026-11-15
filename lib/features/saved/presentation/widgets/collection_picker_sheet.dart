@@ -70,13 +70,15 @@ class _CollectionPickerState extends ConsumerState<_CollectionPicker> {
   Future<void> _save() async {
     setState(() => _saving = true);
     final repo = ref.read(savedRepositoryProvider);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
       if (widget.mode == CollectionPickerMode.change) {
         await repo.setPlaceCollections(placeId: widget.places.single.id, collectionIds: _selected.toList());
       } else {
         await repo.savePlaces(placeIds: widget.places.map((p) => p.id).toList(), collectionIds: _selected.toList());
       }
-      invalidateSavedData(ref);
+      // 저장 중에 시트를 닫았어도 목록은 맞춰 둔다
+      invalidateSavedDataIn(container);
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) showAppSnackBar(context, failureMessage(e));

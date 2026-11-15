@@ -65,15 +65,20 @@ class _CourseEditPageState extends ConsumerState<CourseEditPage> {
       );
       if (!leave) return;
     }
-    if (mounted) context.pop();
+    if (!mounted) return;
+    // 되돌리기 스낵바가 상세까지 따라가지 않게 내린다
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    context.pop();
   }
 
   Future<void> _save() async {
+    final container = ProviderScope.containerOf(context, listen: false);
     setState(() => _saving = true);
     try {
       final stops = ref.read(recommendationProvider).stops;
       await ref.read(courseRepositoryProvider).updateCourseStops(courseId: widget.courseId, stops: stops);
-      invalidateCourseData(ref);
+      // 저장 중에 화면을 나갔어도 목록 · 상세는 맞춰 둔다
+      invalidateCourseDataIn(container);
       if (!mounted) return;
       showAppSnackBar(context, '코스를 저장했어요');
       context.pop();

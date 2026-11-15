@@ -46,12 +46,14 @@ class _CreateCollectionFormState extends ConsumerState<_CreateCollectionForm> {
       _submitting = true;
       _error = null;
     });
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
       final created = await ref.read(savedRepositoryProvider).createCollection(_name.text.trim());
-      invalidateSavedData(ref);
+      // 만드는 중에 모달을 닫았어도 목록은 맞춰 둔다
+      invalidateSavedDataIn(container);
       if (mounted) Navigator.of(context).pop(created);
     } on ValidationFailure catch (e) {
-      setState(() => _error = e.message);
+      if (mounted) setState(() => _error = e.message);
     } catch (e) {
       if (mounted) showAppSnackBar(context, failureMessage(e));
     } finally {

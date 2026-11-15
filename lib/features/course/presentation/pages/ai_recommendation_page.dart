@@ -73,14 +73,19 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
     final draft = ref.read(courseDraftProvider);
     final stops = ref.read(recommendationProvider).stops;
     final repo = ref.read(courseRepositoryProvider);
+    final container = ProviderScope.containerOf(context, listen: false);
     setState(() => _saving = true);
     try {
       final course = await repo.createCourse(draft: draft, stops: stops);
-      invalidateCourseData(ref);
+      // 저장 중에 화면을 나갔어도 목록 · 홈은 맞춰 둔다
+      invalidateCourseDataIn(container);
       // 코스를 만들었으니 지금까지 저장한 곳은 홈 제안에서 뺀다
-      ref.read(homeNudgeSeenAtProvider.notifier).markSeen();
+      container.read(homeNudgeSeenAtProvider.notifier).markSeen();
+      if (!mounted) return;
+      // 되돌리기 스낵바가 상세까지 따라가지 않게 내린다
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       // 완료 화면 없이 바로 상세로 (위저드 화면은 스택에서 지워 뒤로 가면 코스 목록)
-      if (mounted) context.go(AppRoutes.course(course.id, justSaved: true));
+      context.go(AppRoutes.course(course.id, justSaved: true));
     } catch (e) {
       if (mounted) showAppSnackBar(context, failureMessage(e));
     } finally {

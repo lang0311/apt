@@ -41,12 +41,14 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
       extra: AddPlacesArgs(title: '보관함에 장소 추가', excludedPlaceIds: existing.toSet(), excludedLabel: '보관함에 있음', ctaLabel: '보관함에 추가'),
     );
     if (picked == null || picked.isEmpty || !mounted) return;
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
       await ref.read(savedRepositoryProvider).addPlacesToCollection(
             collectionId: widget.collectionId,
             placeIds: picked.map((p) => p.id).toList(),
           );
-      invalidateSavedData(ref);
+      // 추가하는 중에 화면을 나갔어도 목록은 맞춰 둔다
+      invalidateSavedDataIn(container);
       if (mounted) showAppSnackBar(context, '${picked.length}곳을 보관함에 추가했어요.');
     } catch (e) {
       if (mounted) showAppSnackBar(context, failureMessage(e));

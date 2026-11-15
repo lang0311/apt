@@ -54,8 +54,18 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
   static const _sheetInitial = 0.5;
   static const _moveThresholdMeters = 300.0;
 
+  ScaffoldMessengerState? _messenger;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _messenger = ScaffoldMessenger.maybeOf(context);
+  }
+
   @override
   void dispose() {
+    // '보관함에 담기' 스낵바는 이 화면이 있어야 동작하니 나갈 때 내린다
+    _messenger?.hideCurrentSnackBar();
     _text.dispose();
     _focus.dispose();
     _sheet.dispose();
@@ -141,6 +151,7 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
 
   /// 보관함 고르기 시트 (추출 결과와 같은 시트, 07 D26). 고르면 저장도 같이 된다.
   Future<void> _pickCollections(Place p) async {
+    if (!mounted) return;
     if (!ref.read(collectionsSupportedProvider)) {
       showAppSnackBar(context, const NotImplementedFailure('보관함').message);
       return;

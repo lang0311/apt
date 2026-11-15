@@ -15,8 +15,11 @@ import 'course_stop_sheets.dart';
 
 RecommendationController _rec(WidgetRef ref) => ref.read(recommendationProvider.notifier);
 
-void _undoSnack(BuildContext context, WidgetRef ref, String message) =>
-    showAppSnackBar(context, message, actionLabel: '되돌리기', onAction: () => _rec(ref).undo());
+void _undoSnack(BuildContext context, WidgetRef ref, String message) {
+  // 스낵바는 화면이 사라진 뒤에도 남으니 ref 대신 컨트롤러를 잡아 둔다
+  final rec = _rec(ref);
+  showAppSnackBar(context, message, actionLabel: '되돌리기', onAction: rec.undo);
+}
 
 /// 이 코스에서 빼기 (이번만)
 void removeStopWithUndo(BuildContext context, WidgetRef ref, CourseStop stop) {

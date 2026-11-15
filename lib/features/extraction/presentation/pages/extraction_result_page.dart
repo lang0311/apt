@@ -294,17 +294,19 @@ class _ReviewState extends ConsumerState<_Review> {
     setState(() => _saving = true);
     final repo = ref.read(savedRepositoryProvider);
     final router = GoRouter.of(context);
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
+      // 저장을 누른 뒤에는 화면을 닫아도 남은 묶음까지 끝까지 저장한다
       for (final MapEntry(key: groupKey, value: placeIds) in placeIdsByGroup.entries) {
         await repo.savePlaces(placeIds: placeIds, collectionIds: collectionIdsByGroup[groupKey]!);
-        if (!mounted) return;
+        if (!mounted) continue;
         // 묶음마다 반영해 두면 중간에 실패해도 이미 저장한 곳은 '저장됨'으로 남는다
         setState(() {
           _savedNow.addAll(placeIds);
           _selected.removeAll(placeIds);
         });
       }
-      invalidateSavedData(ref);
+      invalidateSavedDataIn(container);
       if (!mounted) return;
       // 저장 뒤에는 결과 화면에 남고 스낵바 (07 D26 ①)
       final names = {for (final c in ref.read(collectionsProvider).value ?? []) c.id: c.name};
@@ -329,7 +331,7 @@ class _ReviewState extends ConsumerState<_Review> {
         onAction: openSaved,
       );
     } catch (e) {
-      invalidateSavedData(ref);
+      invalidateSavedDataIn(container);
       if (mounted) showAppSnackBar(context, failureMessage(e));
     } finally {
       if (mounted) setState(() => _saving = false);

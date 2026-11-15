@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 
 import '../../../app/di/repositories.dart';
 import '../domain/course_models.dart';
@@ -29,12 +30,12 @@ final moodOptionsProvider = FutureProvider.autoDispose<List<MoodOption>>(
 );
 
 /// 코스 생성/수정 후 목록·상세를 새로 고친다.
-void invalidateCourseData(WidgetRef ref) {
-  ref.invalidate(myCoursesProvider);
-  ref.invalidate(partyCoursesProvider);
-  ref.invalidate(activeCoursesProvider);
-  ref.invalidate(courseDetailProvider);
-}
+void invalidateCourseData(WidgetRef ref) => _courseData.forEach(ref.invalidate);
+
+/// 화면이 사라진 뒤에도(저장 중 뒤로 가기 등) 쓸 수 있게 컨테이너로 새로 고친다.
+void invalidateCourseDataIn(ProviderContainer container) => _courseData.forEach(container.invalidate);
+
+final _courseData = <ProviderOrFamily>[myCoursesProvider, partyCoursesProvider, activeCoursesProvider, courseDetailProvider];
 
 /// 추천하지 않는 장소 (마이 → 추천하지 않는 장소)
 final blockedPlacesProvider = FutureProvider.autoDispose<List<BlockedPlace>>(
