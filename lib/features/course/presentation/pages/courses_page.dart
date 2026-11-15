@@ -92,7 +92,7 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                _Split(courses: _tab == 0 ? mine.value! : party.value!),
+                _Split(courses: _tab == 0 ? mine.value! : party.value!, others: _tab == 0 ? party.value! : const []),
               ],
             ],
           ),
@@ -104,13 +104,19 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
 
 /// 다가오는 코스(가까운 순) / 지난 코스(최근 순) 두 컨테이너
 class _Split extends ConsumerWidget {
-  const _Split({required this.courses});
+  const _Split({required this.courses, this.others = const []});
   final List<CourseSummary> courses;
+
+  /// 내 코스 탭에서만: 함께하는 코스. 내 예정 코스가 없을 때 가장 가까운 한 곳으로 가는 줄을 보여 준다
+  final List<CourseSummary> others;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final upcoming = [for (final c in courses) if (c.date == null || daysUntil(c.date!) >= 0) c]
       ..sort((a, b) => (a.date ?? DateTime(9999)).compareTo(b.date ?? DateTime(9999)));
+    final otherNext = ([for (final c in others) if (c.date != null && daysUntil(c.date!) >= 0) c]
+          ..sort((a, b) => a.date!.compareTo(b.date!)))
+        .firstOrNull;
     final past = [for (final c in courses) if (c.date != null && daysUntil(c.date!) < 0) c]
       ..sort((a, b) => b.date!.compareTo(a.date!));
 
@@ -136,10 +142,24 @@ class _Split extends ConsumerWidget {
           if (upcoming.isEmpty)
             SectionCard(
               title: '다가오는 코스',
-              child: _EmptyLine(
-                text: '예정된 코스가 없어요',
-                actionLabel: '코스 만들기',
-                onAction: () => startCourseWizard(context, ref),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (otherNext != null) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
+                      child: Text('내가 만든 예정 코스는 없어요', style: AppTypography.meta),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    _OtherUpcomingRow(course: otherNext, onTap: () => context.push(AppRoutes.course(otherNext.id))),
+                    const SizedBox(height: AppSpacing.xs),
+                  ],
+                  _EmptyLine(
+                    text: otherNext == null ? '예정된 코스가 없어요' : null,
+                    actionLabel: '코스 만들기',
+                    onAction: () => startCourseWizard(context, ref),
+                  ),
+                ],
               ),
             )
           else ...[
@@ -179,10 +199,55 @@ class _Split extends ConsumerWidget {
   }
 }
 
+/// 내 예정 코스가 없을 때 함께하는 코스 중 가장 가까운 코스로 가는 줄 (홈의 오늘 카드와 코스 탭이 어긋나 보이지 않게)
+class _OtherUpcomingRow extends StatelessWidget {
+  const _OtherUpcomingRow({required this.course, required this.onTap});
+  final CourseSummary course;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final sub = [
+      '함께하는 코스',
+      if (course.startTime != null) '${formatTimeOfDay(course.startTime!)} 출발',
+    ].join(' · ');
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
+      child: Material(
+        color: AppColors.primarySoft,
+        borderRadius: BorderRadius.circular(AppRadius.medium),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.medium),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            child: Row(
+              children: [
+                Text(ddayLabel(course.date!), style: AppTypography.label.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(course.title, style: AppTypography.label, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text(sub, style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// 컨테이너 안 한 줄 빈 상태
 class _EmptyLine extends StatelessWidget {
-  const _EmptyLine({required this.text, this.actionLabel, this.onAction});
-  final String text;
+  const _EmptyLine({this.text, this.actionLabel, this.onAction});
+  final String? text;
   final String? actionLabel;
   final VoidCallback? onAction;
 
@@ -194,7 +259,7 @@ class _EmptyLine extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(text, style: AppTypography.meta),
+          if (text != null) Text(text!, style: AppTypography.meta),
           if (actionLabel != null)
             // AppTextLink의 좌우 여백(4)만큼 당겨 위 문구와 글자 왼쪽을 맞춘다
             Transform.translate(
