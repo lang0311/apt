@@ -11,7 +11,7 @@ enum MapPinKind {
   /// 고른 장소 (파란 원 + 체크). 고른 순서는 추천에 쓰이지 않아 번호를 붙이지 않는다
   picked,
 
-  /// AI 추천 (주황 ✦)
+  /// AI 추천 (주황 원. 번호가 있으면 번호 + 작은 ✦, 없으면 ✦)
   ai,
 
   /// 저장 장소 핀 (카테고리 색 + 아이콘)
@@ -47,7 +47,7 @@ class MapPin extends StatelessWidget {
           Text('${number ?? ''}', style: AppTypography.bodyStrong.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
         ),
       MapPinKind.picked => _circle(color ?? AppColors.primary, const Icon(Icons.check_rounded, color: Colors.white, size: 20)),
-      MapPinKind.ai => _circle(AppColors.ai, const Icon(Icons.auto_awesome, color: Colors.white, size: 18)),
+      MapPinKind.ai => number == null ? _circle(AppColors.ai, const Icon(Icons.auto_awesome, color: Colors.white, size: 18)) : _aiNumbered(),
       MapPinKind.place => _teardrop(),
       MapPinKind.result => _result(),
     };
@@ -84,6 +84,30 @@ class MapPin extends StatelessWidget {
         boxShadow: const [BoxShadow(color: AppColors.shadow, blurRadius: 6, offset: Offset(0, 2))],
       ),
       child: child,
+    );
+  }
+
+  /// 주황 번호 원 오른쪽 위에 작은 ✦. 바깥 크기를 넓혀 가운데(지도 기준점)는 번호 원과 같게 둔다
+  Widget _aiNumbered() {
+    return SizedBox(
+      width: 46,
+      height: 46,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          _circle(AppColors.ai, Text('$number', style: AppTypography.bodyStrong.copyWith(color: Colors.white, fontWeight: FontWeight.w800))),
+          Positioned(
+            right: 0,
+            top: 0,
+            child: Container(
+              width: 18,
+              height: 18,
+              decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: AppColors.ai, width: 1.5)),
+              child: const Icon(Icons.auto_awesome, size: 11, color: AppColors.ai),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

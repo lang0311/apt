@@ -27,11 +27,8 @@ class CourseRouteMap extends StatelessWidget {
     final markers = <MapMarker>[];
     for (final s in stops) {
       if (s.place.location == null) continue;
-      if (s.isAi) {
-        markers.add(MapMarker(id: s.place.id, point: s.place.location!, kind: MapPinKind.ai));
-      } else {
-        markers.add(MapMarker(id: s.place.id, point: s.place.location!, kind: MapPinKind.numbered, number: ++userNo));
-      }
+      // 번호는 일정 순서 그대로(AI 추천 곳 포함), AI 추천은 주황 번호 + ✦
+      markers.add(MapMarker(id: s.place.id, point: s.place.location!, kind: s.isAi ? MapPinKind.ai : MapPinKind.numbered, number: ++userNo));
     }
     final canOpen = markers.isNotEmpty;
     void open() => context.push(AppRoutes.courseMap, extra: CourseMapArgs(title: title, stops: stops));
@@ -95,8 +92,5 @@ class _ExpandPill extends StatelessWidget {
   }
 }
 
-/// 선택 장소만 순번을 매긴다 (AI 추천은 ✦)
-List<int?> userStopNumbers(List<CourseStop> stops) {
-  var n = 0;
-  return [for (final s in stops) s.isAi ? null : ++n];
-}
+/// 일정 순번. AI 추천 곳도 번호를 매겨 1부터 끊기지 않게 한다 (색과 ✦로만 구분)
+List<int?> userStopNumbers(List<CourseStop> stops) => [for (var i = 0; i < stops.length; i++) i + 1];

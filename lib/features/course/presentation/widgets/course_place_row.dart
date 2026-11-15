@@ -4,7 +4,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../core/widgets/selection.dart';
 import '../../domain/course_models.dart';
 
-/// 코스 장소 번호 원 — 선택 장소는 진한 번호, AI 추천은 주황 ✦ (항상 구분)
+/// 코스 장소 번호 원 — 선택 장소는 진한 번호, AI 추천은 주황 번호 + 작은 ✦ (번호는 끊기지 않고 색으로 구분)
 class StopMarker extends StatelessWidget {
   const StopMarker({super.key, required this.source, this.number});
   final PlaceSource source;
@@ -16,12 +16,31 @@ class StopMarker extends StatelessWidget {
   Widget build(BuildContext context) {
     if (source == PlaceSource.ai) {
       return Semantics(
-        label: 'AI 추천',
-        child: Container(
-          width: _size,
-          height: _size,
-          decoration: const BoxDecoration(color: AppColors.ai, shape: BoxShape.circle),
-          child: const Icon(Icons.auto_awesome, size: _size * 0.5, color: Colors.white),
+        label: number == null ? 'AI 추천' : '$number번, AI 추천',
+        excludeSemantics: true,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            number == null
+                ? Container(
+                    width: _size,
+                    height: _size,
+                    decoration: const BoxDecoration(color: AppColors.ai, shape: BoxShape.circle),
+                    child: const Icon(Icons.auto_awesome, size: _size * 0.5, color: Colors.white),
+                  )
+                : NumberBadge(number!, size: _size, color: AppColors.ai),
+            if (number != null)
+              Positioned(
+                right: -5,
+                top: -5,
+                child: Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: AppColors.ai, width: 1)),
+                  child: const Icon(Icons.auto_awesome, size: 8, color: AppColors.ai),
+                ),
+              ),
+          ],
         ),
       );
     }

@@ -405,6 +405,14 @@ class _StopText extends StatelessWidget {
             if (changed) ...[
               const SizedBox(width: 6),
               Text('바뀜', style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w800)),
+            ] else if (stop.isAi) ...[
+              // 번호가 끊기지 않게 바뀐 뒤로 AI 추천 곳은 주황 번호와 이 작은 표시로 구분한다
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                decoration: BoxDecoration(color: AppColors.aiSoft, borderRadius: BorderRadius.circular(6)),
+                child: Text('AI 추천', style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w700)),
+              ),
             ],
           ],
         ),
