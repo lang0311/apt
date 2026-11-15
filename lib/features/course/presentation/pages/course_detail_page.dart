@@ -107,6 +107,7 @@ class _Body extends StatelessWidget {
                     if (course.taste != null) AppliedTasteSection(taste: course.taste!, stops: course.stops, partyId: course.partyId),
                     CourseTimeline(
                       stops: course.stops,
+                      courseDate: course.date,
                       onTapStop: (s) => context.push(AppRoutes.place(s.place.id)),
                     ),
                   ],

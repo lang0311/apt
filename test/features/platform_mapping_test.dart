@@ -74,6 +74,21 @@ void main() {
     expect(bare.phone, isNull);
     expect(bare.mapUrl, isNull);
   });
+  test('추천 일정의 temporal을 넘기고, 같은 장소를 temporal 없이 다시 받아도 유지한다 (서버 API 1번)', () {
+    final c = PlatformClient(ApiClient(Dio()));
+    final popup = c.place({
+      'key': 'k3',
+      'name': '무신사 스페이스 서울숲',
+      'address': '서울 성동구 성수동1가',
+      'temporal': {'kind': 'popup', 'start_date': '2026-11-11', 'end_date': '2026-11-29', 'checked_on': '2026-11-15'},
+    });
+    expect(popup.timing?.end, DateTime(2026, 11, 29));
+    expect(c.place({'key': 'k3', 'name': '무신사 스페이스 서울숲', 'address': '서울 성동구 성수동1가'}).timing?.end, DateTime(2026, 11, 29));
+
+    final plain = c.place({'key': 'k4', 'name': 'KT&G상상마당 홍대', 'address': '서울', 'temporal': {'kind': 'place', 'start_date': '', 'end_date': ''}});
+    expect(plain.timing, isNull);
+  });
+
   test('빈 추천 이유는 null로 넘긴다 (시트에 추천 이유 보기가 안 뜨게)', () {
     final c = PlatformClient(ApiClient(Dio()));
     final course = c.course({

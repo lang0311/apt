@@ -9,6 +9,8 @@ import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/surfaces.dart';
 import '../../../party/domain/party_models.dart';
 import '../../../party/presentation/widgets/party_avatar_stack.dart';
+import '../../../place/domain/place_timing.dart';
+import '../../../place/presentation/widgets/timing_tag.dart';
 import '../../domain/course_models.dart';
 import 'course_place_row.dart';
 import 'course_route_map.dart';
@@ -369,9 +371,10 @@ Widget _marker(CourseStop stop, int? number) => StopMarker(source: stop.source, 
 /// 장소 이름 아래 줄: 카테고리 · 지역. AI 추천 여부는 번호 원(주황 ✦)으로 구분하고,
 /// 추천 이유는 장소를 눌렀을 때 시트의 '추천 이유 보기'에서 보여 준다 (07 D40).
 class _StopText extends StatelessWidget {
-  const _StopText({required this.stop, this.prefix, this.changed = false});
+  const _StopText({required this.stop, this.prefix, this.changed = false, this.courseDate});
   final CourseStop stop;
   final String? prefix;
+  final DateTime? courseDate;
 
   /// 다시 추천으로 바뀐 장소 — 이름 옆에 작은 '바뀜' (주황은 AI 추천 장소 표시라 써도 된다, 07 D17 · D60)
   final bool changed;
@@ -381,6 +384,17 @@ class _StopText extends StatelessWidget {
     final place = stop.place;
     final area = place.shortArea;
     final sub = [place.categoryLabel, if (area.isNotEmpty) area].join(' · ');
+    final timing = timingBadge(place.timing, courseDate: courseDate);
+    final subLine = Text.rich(
+      TextSpan(children: [
+        if (prefix != null)
+          TextSpan(text: '$prefix · ', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700)),
+        TextSpan(text: sub),
+      ]),
+      style: AppTypography.caption,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -395,16 +409,17 @@ class _StopText extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 1),
-        Text.rich(
-          TextSpan(children: [
-            if (prefix != null)
-              TextSpan(text: '$prefix · ', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700)),
-            TextSpan(text: sub),
-          ]),
-          style: AppTypography.caption,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+        // 팝업 · 행사 · 신규 오픈은 카테고리 줄 맨 앞에 작은 태그 (서버 API 1번)
+        if (timing == null)
+          subLine
+        else
+          Row(
+            children: [
+              TimingTag(timing),
+              const SizedBox(width: 6),
+              Flexible(child: subLine),
+            ],
+          ),
       ],
     );
   }
@@ -421,9 +436,13 @@ class CourseTimeline extends StatelessWidget {
     this.onMore,
     this.highlightIds = const {},
     this.loadingIds = const {},
+    this.courseDate,
   });
 
   final List<CourseStop> stops;
+
+  /// 코스 날짜. 팝업 · 행사가 그날 열려 있는지 볼 때 쓴다(없으면 오늘 기준)
+  final DateTime? courseDate;
   final void Function(CourseStop stop)? onTapStop;
 
   /// AI 장소 행 끝의 ⋯ (없으면 표시하지 않음)
@@ -456,6 +475,7 @@ class CourseTimeline extends StatelessWidget {
                 lineAbove: i > 0,
                 lineBelow: i < stops.length - 1,
                 highlighted: highlightIds.contains(stops[i].place.id),
+                courseDate: courseDate,
                 onTap: onTapStop == null ? null : () => onTapStop!(stops[i]),
                 onMore: onMore == null || !stops[i].isAi ? null : () => onMore!(stops[i]),
               ),
@@ -475,10 +495,12 @@ class _ViewTile extends StatelessWidget {
     this.highlighted = false,
     this.lineAbove = false,
     this.lineBelow = false,
+    this.courseDate,
     this.onTap,
     this.onMore,
   });
   final CourseStop stop;
+  final DateTime? courseDate;
   final bool lineAbove;
   final bool lineBelow;
   final int? number;
@@ -528,7 +550,7 @@ class _ViewTile extends StatelessWidget {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Align(alignment: Alignment.centerLeft, child: _StopText(stop: stop, changed: highlighted)),
+                    child: Align(alignment: Alignment.centerLeft, child: _StopText(stop: stop, changed: highlighted, courseDate: courseDate)),
                   ),
                 ),
                 if (onMore != null)

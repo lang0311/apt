@@ -1,4 +1,5 @@
 import '../../../core/models/geo_point.dart';
+import 'place_timing.dart';
 
 /// 장소 (서버의 장소 데이터). 저장 여부는 [isSaved]로만 표현하고,
 /// 보관함 소속(SavedPlace ↔ Collection, 다대다)은 saved feature에서 다룬다.
@@ -20,6 +21,7 @@ class Place {
     this.sourceHandle,
     this.phone,
     this.mapUrl,
+    this.timing,
     this.isSaved = false,
   });
 
@@ -49,6 +51,9 @@ class Place {
 
   /// 지도 서비스의 장소 페이지 주소 (팀 서버: 카카오맵 `place_url`). 없으면 null
   final String? mapUrl;
+
+  /// 팝업 · 행사 · 신규 오픈 기간 (팀 서버 `temporal`). 일반 장소는 null
+  final PlaceTiming? timing;
   final bool isSaved;
 
   String get displayArea => areaLabel ?? address;
@@ -77,6 +82,7 @@ class Place {
         sourceHandle: sourceHandle,
         phone: phone,
         mapUrl: mapUrl,
+        timing: timing,
         isSaved: isSaved ?? this.isSaved,
       );
 }

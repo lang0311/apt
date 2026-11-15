@@ -164,6 +164,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                               stops: state.visibleStops,
                               highlightIds: state.changedIds,
                               loadingIds: state.loadingIds,
+                              courseDate: draft.date,
                               onTapStop: busy ? null : (s) => showResultSheet(context, ref, s),
                               onMore: busy ? null : (s) => showResultSheet(context, ref, s),
                             ),

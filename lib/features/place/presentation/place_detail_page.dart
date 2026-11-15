@@ -20,6 +20,7 @@ import '../../saved/presentation/widgets/collection_picker_sheet.dart';
 import '../../saved/presentation/widgets/place_image.dart';
 import '../../saved/presentation/widgets/saved_rows.dart';
 import '../domain/place.dart';
+import '../domain/place_timing.dart';
 
 /// #20 장소 상세: 일반 헤더(뒤로 · 장소 상세 · 공유) → 사진(있을 때) → 이름 카드(저장 버튼, 추천받은 곳이면 ✦ 코스 이름) →
 /// 장소 정보(값이 있는 줄만) → 담은 보관함, 하단 고정 '이 장소로 코스 만들기'
@@ -126,7 +127,21 @@ class _Body extends ConsumerWidget {
     final aiItem = ref.watch(aiSavedPlacesProvider).value?.where((i) => i.place.id == place.id).firstOrNull;
     final recommendedIn = aiItem == null ? null : SavedPlaceRow.recommendedLabel(aiItem.recommendedIn);
     // 값이 없는 줄은 숨긴다 (추천받은 곳은 주소가 비어 있을 수 있다)
+    final period = timingPeriod(place.timing);
     final infoRows = <Widget>[
+      // 팝업 · 행사 · 신규 오픈 기간은 맨 위 (서버 API 1번)
+      if (period != null)
+        _InfoRow(
+          label: period.label,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(period.value, style: AppTypography.bodyStrong.copyWith(color: period.ended ? AppColors.textSecondary : null)),
+              const SizedBox(height: 2),
+              Text(period.note, style: AppTypography.caption),
+            ],
+          ),
+        ),
       if (place.address.trim().isNotEmpty) _InfoRow(label: '주소', child: Text(place.address, style: AppTypography.body)),
       if (place.phone != null)
         _InfoRow(label: '전화', onTap: () => openDialer(context, place.phone!), child: Text(place.phone!, style: AppTypography.bodyStrong)),

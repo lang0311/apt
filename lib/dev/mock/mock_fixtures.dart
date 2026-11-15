@@ -6,8 +6,11 @@ import 'package:flutter/material.dart';
 import '../../core/models/geo_point.dart';
 import '../../features/course/domain/course_models.dart';
 import '../../features/place/domain/place.dart';
+import '../../features/place/domain/place_timing.dart';
 import '../../features/preference/domain/preference_models.dart';
 import '../../features/saved/domain/saved_models.dart';
+
+final _today = DateUtils.dateOnly(DateTime.now());
 
 String _img(String seed) => 'https://picsum.photos/seed/apt-$seed/480/360';
 
@@ -134,6 +137,8 @@ abstract final class MockFixtures {
       rating: 4.3,
       keywords: const ['전시', '실내'],
       location: const GeoPoint(37.5425, 127.0548),
+      // 팝업 표시 확인용 (서버 `temporal`, 07 D61). 날짜는 오늘 기준이라 늘 진행 중인 팝업
+      timing: PlaceTiming(kind: PlaceTimingKind.popup, start: _today.subtract(const Duration(days: 4)), end: _today.add(const Duration(days: 14)), checkedOn: _today),
     ),
     Place(
       id: 'p10',
@@ -146,6 +151,7 @@ abstract final class MockFixtures {
       rating: 4.6,
       keywords: const ['숙소', '감성'],
       location: const GeoPoint(37.5451, 127.0532),
+      timing: PlaceTiming(kind: PlaceTimingKind.newOpening, checkedOn: _today),
     ),
   ];
 

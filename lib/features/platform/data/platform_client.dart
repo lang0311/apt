@@ -4,6 +4,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/error/app_failure.dart';
 import '../../../core/models/geo_point.dart';
 import '../../place/domain/place.dart';
+import '../../place/domain/place_timing.dart';
 import '../../course/domain/course_models.dart';
 
 typedef Json = Map<String, dynamic>;
@@ -64,6 +65,8 @@ class PlatformClient {
       keywords: _tags(p['attribute_profile']),
       phone: _text(p['phone']),
       mapUrl: _webUrl(p['place_url']),
+      // 추천 일정에만 온다. 저장 목록 등 다른 응답에는 없어서 앞서 받은 값(places 캐시)을 쓴다
+      timing: PlaceTiming.fromJson(p['temporal'] ?? places[id]?['temporal']),
       isSaved: saved || places[id]?['is_saved'] == true,
     );
   }
