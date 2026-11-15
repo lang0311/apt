@@ -105,9 +105,9 @@
 **오버레이**: `showAppSnackBar`(하단 고정 버튼이 있으면 그 위 8에 뜸, 07 D36) `showAppBottomSheet` `showAppModal` `showConfirmDialog` `showActionSheet`
 **상태**: `AsyncValueView`(로딩 · 빈 · 오류를 한 번에) `AppLoading` `SkeletonBox` `SkeletonList` `AppEmptyState` `AppErrorState`
 **사진 · 장소**: `PlaceImage`(사진 없으면 카테고리 색 칸 + 아이콘, 같은 크기 유지. 아이콘 색은 `CategoryStyle.ink` — 음식점 · 전시는 바탕과 3:1이 되게 진한 값, 07 D56) `AppNetworkImage` `PlaceListTile` `SavedPlaceRow` `CollectionRow`(2×2 `MiniCollage`) `ExtractedPlaceRow` `RatingText` `AppliedFilterChip`(걸린 필터, 남색 — 건 값만 하나씩) `showCategoryFilterSheet`(여러 개 고르는 카테고리 시트. `sources`를 주면 제목 `필터` + `보여 줄 장소`(직접 저장 · 추천받은 곳), `autoSearch`를 주면 `지도 이동 시 자동 검색` 스위치, 이때 버튼은 `적용`) `HeaderTextButton`
-**홈**: `HomeCourseCard`(D-day · 이름 · 장소 순서 줄 — 5곳까지 모두, 6곳부터 앞 셋 · `+n` · 마지막, AI 칸에 작은 ✦ · 아이콘 줄) `HomeRegionGroups`(지역별로 시작하기 — 구 · 시 묶음 세 개, 모자이크 + `코스 만들기`) `HomeQuickActions` `HomeStartGuide` `NewSavesNudge` `RecentSavedStrip` `SuggestedCourseStrip` `TrendingPlaceGrid`
+**홈**: `HomeCourseCard`(D-day + 옆에 날짜 · 출발 · 이름 + 오른쪽 거리 · 인원 · 장소 순서 줄 — 선으로 이은 28 업종 동그라미 + 이름 두 줄, 5곳까지 모두, 6곳부터 앞 셋 · `+n` · 마지막, AI 동그라미에 작은 ✦) `HomeRegionGroups`(지역별로 시작하기 — 구 · 시 묶음 세 개, 모자이크 + `코스 만들기`) `HomeQuickActions` `HomeStartGuide` `NewSavesNudge` `RecentSavedStrip` `SuggestedCourseStrip` `TrendingPlaceGrid`
 **지도**: `AptMap`(네이버 · 웹 타일 · 미리보기 지도를 감쌈) `MapPin`(번호/선택/AI/내 위치/`picked` 파란 체크 — 3단계에서 고른 곳, 순서 번호 없음) `MapPlacePicker`(지도 위 장소 고르기, 3단계 · 장소 추가 공용. 카드 · 목록은 지금 지도 영역 안의 장소만, 목록은 아래에서 올라오는 시트) `CourseRouteMap`
-**코스**: `CourseHero`(이름 + 한 줄 정보, 요약 칸을 쓰는 화면은 정보 줄 없음) `CourseStats`(날짜 · 출발 · 직선 거리, 있는 칸만) `CourseStopLegend`(`내가 고른 곳 n · AI 추천 n`) `CourseThumb`(사진 없으면 업종 모자이크: 1곳 한 칸 · 2곳 반반 · 3곳 큰 칸 + 둘 · 4곳 2×2 · 5곳부터 셋 + `+n`) `CourseDayChips`(오늘부터 2주 날짜 칩 + 달력) `showCourseTimeSheet`(출발 시간 휠) `CourseTimeline`(보기, 마커 사이를 한 줄로 이음) `CourseEditList`(편집) `CourseEditButton` `StopMarker`(번호/✦) `CourseSummaryRow` `PickedChips`(고른 장소 칩 줄, ×로 빼기) `RecommendingBanner`(추천 진행 · 취소) 장소 시트(`StopSheetAction`, 차단은 빨간 글자로 떼어 둠)
+**코스**: `CourseHero`(이름 + 한 줄 정보, 요약 칸을 쓰는 화면은 정보 줄 없음) `CourseStats`(날짜 · 출발 · 직선 거리, 있는 칸만) `CourseStopLegend`(`내가 고른 곳 n · AI 추천 n`) `CourseThumb`(사진 없으면 업종 모자이크: 1곳 한 칸 · 2곳 반반 · 3곳 큰 칸 + 둘 · 4곳 2×2 · 5곳부터 셋 + `+n`) `CourseDayChips`(오늘부터 2주 날짜 칩 + 달력) `showCourseTimeSheet`(출발 시간 휠) `CourseTimeline`(보기, 마커 사이를 한 줄로 이음) `CourseEditList`(편집) `CourseEditButton` `StopMarker`(번호, AI 추천은 주황 번호 + 작은 ✦ — 번호는 AI 곳까지 이어짐, 07 D62) `CourseSummaryRow` `PickedChips`(고른 장소 칩 줄, ×로 빼기) `RecommendingBanner`(추천 진행 · 취소) 장소 시트(`StopSheetAction`, 차단은 빨간 글자로 떼어 둠)
 **파티 · 공유 · 인증**: `PartyAvatarStack` `ShareOption`(초대 · 코스 알리기 시트 공통) `SocialLoginButton` `SocialIconButton`
 규칙: 페이지 안에서 같은 UI를 반복 작성하지 않는다. 새 화면 전에 **기존 컴포넌트를 검색해 재사용/확장**한다.
 
@@ -135,7 +135,7 @@
 4. 관련 항목은 **`SectionCard` 안 구분선 행(`DividedRows`)** 으로 묶는다. 선택형 항목은 높이 34 풀 라운드 칩, 라디오 · 체크는 `CheckMark`
 5. 오류는 **빨강 테두리 + 아이콘 + 한 줄 메시지** (큰 별도 화면은 정말 필요한 때만). 상황 설명은 제목으로 올리고 장식용 `!` 원 카드는 쓰지 않는다 (07 D37)
 6. 꾸미는 아이콘 원 · 일러스트를 넣지 않는다. 안내는 문장과 행동 버튼으로 (07 D37)
-7. ✦ · 주황(`ai`)은 **AI가 추천한 장소 표시로만** 쓴다(번호 원 · 태그 · 시트의 추천 이유 줄 아이콘 · 저장됨의 `코스에서 추천`). 제목 · 배경 · 버튼 장식 금지 (07 D17)
+7. ✦ · 주황(`ai`)은 **AI가 추천한 장소 표시로만** 쓴다(주황 번호 원 · 작은 ✦ · `AI 추천` 태그 · 시트의 추천 이유 줄 아이콘 · 저장됨의 `코스에서 추천`). 제목 · 배경 · 버튼 장식 금지 (07 D17)
 8. 하단 탭 화면(홈·저장됨·코스·추출·마이) 헤더는 **큰 제목 + 오른쪽 버튼만** 둔다. 정보 없는 분위기 부제는 쓰지 않는다 (2026-10-20, 07 D16)
 9. 강조는 카드마다 한 곳만(예: 코스 카드는 D-day만 크게). 숫자 통계 타일은 쓰지 않는다 (2026-10-20, 07 D20)
 10. 문구는 해요체, 짧고 행동 중심 ("~해주세요", "~할 수 있어요")
