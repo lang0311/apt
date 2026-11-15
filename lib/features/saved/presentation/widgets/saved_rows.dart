@@ -275,7 +275,7 @@ class MiniCollage extends StatelessWidget {
   }
 }
 
-/// 보관함 탭의 '저장한 장소 전체 n곳 · 보기 ›' 안내 줄 (07 D21 ②)
+/// 보관함 탭의 '저장한 장소 전체 · n곳 ›' 줄 (07 D21 ②). 카드 안 카드로 보이지 않게 테두리 없는 목록 줄로 둔다
 class AllPlacesLink extends StatelessWidget {
   const AllPlacesLink({super.key, required this.count, required this.onTap});
   final int count;
@@ -283,35 +283,34 @@ class AllPlacesLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.xxs),
-      child: Material(
-        color: AppColors.surfaceRaised,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm), side: const BorderSide(color: AppColors.border)),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: SizedBox(
-            height: 44,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-              child: Row(
-                children: [
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(7)),
-                    child: const Icon(Icons.bookmark_border_rounded, size: 15, color: AppColors.primary),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Expanded(
-                    child: Text('저장한 장소 전체 $count곳', style: AppTypography.label, maxLines: 1, overflow: TextOverflow.ellipsis),
-                  ),
-                  Text('보기', style: AppTypography.caption),
-                  const Icon(Icons.chevron_right_rounded, size: 16, color: AppColors.textSecondary),
-                ],
+    return Semantics(
+      button: true,
+      label: '저장한 장소 전체 $count곳 보기',
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xxs, AppSpacing.sm, AppSpacing.xs),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(AppRadius.small)),
+                child: const Icon(Icons.bookmark_rounded, size: 20, color: AppColors.primary),
               ),
-            ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('저장한 장소 전체', style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text('$count곳', style: AppTypography.meta),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+            ],
           ),
         ),
       ),
@@ -618,18 +617,20 @@ class _CategoryOption extends StatelessWidget {
         child: Opacity(
           opacity: enabled ? 1 : 0.4,
           child: SizedBox(
-            height: 56,
+            height: style == null ? 48 : 56,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: Row(
                 children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.small)),
-                    child: Icon(style.icon, size: 19, color: style.ink),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
+                  if (style != null) ...[
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.small)),
+                      child: Icon(style.icon, size: 19, color: style.ink),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                  ],
                   Text(
                     label,
                     style: AppTypography.bodyStrong.copyWith(
