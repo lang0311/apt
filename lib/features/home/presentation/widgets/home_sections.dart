@@ -159,7 +159,7 @@ class NewSavesNudge extends StatelessWidget {
   }
 }
 
-/// ③ 다가오는 코스 / ④ 오늘 코스. D-day(또는 '오늘')를 크게, 이름, 장소 순서 줄, 출발 · 거리 · 인원(있는 값만).
+/// ③ 다가오는 코스 / ④ 오늘 코스. D-day(또는 '오늘')를 크게 두고 그 옆에 날짜 · 출발 시간, 이름 오른쪽에 거리 · 인원(있는 값만), 아래에 장소 순서 줄.
 /// 서버가 장소 이름을 주지 않으면(목 데이터 등) 장소 줄 대신 '날짜 · n곳' 한 줄.
 class HomeCourseCard extends StatelessWidget {
   const HomeCourseCard({
@@ -199,6 +199,16 @@ class HomeCourseCard extends StatelessWidget {
       if (course.isParty) (Icons.group_outlined, '${course.memberCount}명'),
     ];
 
+    // 장소 줄이 있는 카드: 언제(날짜 · 출발)는 D-day 옆 한 문장으로, 거리 · 인원은 아이콘 없이 이름 오른쪽에 조용히
+    final when = [
+      if (date != null && !isToday) formatMonthDayWeekday(date),
+      if (course.startTime != null) '${formatTimeOfDay(course.startTime!)} 출발',
+    ].join(' ');
+    final side = [
+      if (course.distanceKm != null) formatDistance((course.distanceKm! * 1000).round()),
+      if (course.isParty) '${course.memberCount}명',
+    ];
+
     return Material(
       color: AppColors.surface,
       shape: RoundedRectangleBorder(borderRadius: AppRadius.cardAll, side: const BorderSide(color: AppColors.border)),
@@ -209,10 +219,37 @@ class HomeCourseCard extends StatelessWidget {
           InkWell(
             onTap: onOpen,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.md, 14, AppSpacing.md, AppSpacing.md),
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (hasStops) ...[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        headline,
+                        if (when.isNotEmpty) ...[
+                          const SizedBox(width: AppSpacing.xs),
+                          Flexible(child: Text(when, style: AppTypography.label, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Expanded(child: Text(course.title, style: AppTypography.cardTitle, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                        for (final text in side) ...[
+                          const SizedBox(width: 10),
+                          Text(text, style: AppTypography.meta),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    _StopStrip(keys: course.stopCategoryKeys, names: course.stopNames, isAi: course.stopIsAi),
+                  ] else
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -239,11 +276,7 @@ class HomeCourseCard extends StatelessWidget {
                       ],
                     ],
                   ),
-                  if (hasStops) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    _StopStrip(keys: course.stopCategoryKeys, names: course.stopNames, isAi: course.stopIsAi),
-                  ],
-                  if (facts.isNotEmpty) ...[
+                  if (!hasStops && facts.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.sm),
                     Wrap(
                       spacing: AppSpacing.md,
@@ -262,7 +295,7 @@ class HomeCourseCard extends StatelessWidget {
                     ),
                   ],
                   if (isToday) ...[
-                    const SizedBox(height: AppSpacing.sm),
+                    SizedBox(height: hasStops ? AppSpacing.md : AppSpacing.sm),
                     AppButton(label: '코스 보기', height: 44, onPressed: onOpen),
                   ],
                 ],
@@ -291,7 +324,8 @@ class HomeCourseCard extends StatelessWidget {
   }
 }
 
-/// 장소 순서 줄: 업종 칸 + 이름. 5곳까지는 모두, 6곳부터는 앞 셋 · 남은 수 · 마지막 곳. AI 추천 칸에는 작은 ✦
+/// 장소 순서 줄: 선으로 이은 작은 업종 동그라미 + 이름(두 줄까지). 5곳까지는 모두, 6곳부터는 앞 셋 · 남은 수 · 마지막 곳.
+/// AI 추천 동그라미에는 작은 ✦. 색 면을 줄여 이름이 먼저 읽히게 한다
 class _StopStrip extends StatelessWidget {
   const _StopStrip({required this.keys, required this.names, required this.isAi});
   final List<String> keys;
@@ -302,43 +336,28 @@ class _StopStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final n = keys.length;
     final shown = n <= 5 ? [for (var i = 0; i < n; i++) i] : [0, 1, 2, -1, n - 1];
-    Widget cell(int i) {
+    Widget cell(int j) {
+      final i = shown[j];
+      final first = j == 0;
+      final last = j == shown.length - 1;
       if (i < 0) {
         return _StripCell(
-          tile: Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.small)),
-            child: Text('+${n - 4}', style: AppTypography.label.copyWith(color: AppColors.textSecondary)),
-          ),
+          lineBefore: !first,
+          lineAfter: !last,
+          color: AppColors.surfaceMuted,
           label: '',
+          child: Text('+${n - 4}', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700)),
         );
       }
       final style = CategoryStyle.of(keys[i]);
-      final ai = i < isAi.length && isAi[i];
       return _StripCell(
-        tile: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.small)),
-                child: Icon(style.icon, size: 18, color: style.ink),
-              ),
-            ),
-            if (ai)
-              Positioned(
-                right: -3,
-                top: -3,
-                child: Container(
-                  width: 14,
-                  height: 14,
-                  decoration: BoxDecoration(color: AppColors.ai, shape: BoxShape.circle, border: Border.all(color: AppColors.surface, width: 1.5)),
-                  child: const Icon(Icons.auto_awesome, size: 8, color: Colors.white),
-                ),
-              ),
-          ],
-        ),
+        lineBefore: !first,
+        lineAfter: !last,
+        // 선이 비치지 않게 12% 색을 카드 바탕에 미리 섞어 불투명하게 쓴다
+        color: Color.alphaBlend(style.color.withValues(alpha: 0.12), AppColors.surface),
+        ai: i < isAi.length && isAi[i],
         label: names[i],
+        child: Icon(style.icon, size: 16, color: style.ink),
       );
     }
 
@@ -348,12 +367,9 @@ class _StopStrip extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (final (j, i) in shown.indexed) ...[
-            if (j > 0) const SizedBox(width: 6),
-            Expanded(child: cell(i)),
-          ],
+          for (var j = 0; j < shown.length; j++) Expanded(child: cell(j)),
           // 곳 수가 적어도 칸 폭이 너무 커지지 않게 빈 자리를 채운다
-          for (var k = shown.length; k < 5; k++) ...[const SizedBox(width: 6), const Expanded(child: SizedBox.shrink())],
+          for (var k = shown.length; k < 5; k++) const Expanded(child: SizedBox.shrink()),
         ],
       ),
     );
@@ -361,18 +377,61 @@ class _StopStrip extends StatelessWidget {
 }
 
 class _StripCell extends StatelessWidget {
-  const _StripCell({required this.tile, required this.label});
-  final Widget tile;
+  const _StripCell({
+    required this.child,
+    required this.color,
+    required this.label,
+    required this.lineBefore,
+    required this.lineAfter,
+    this.ai = false,
+  });
+  final Widget child;
+  final Color color;
   final String label;
+  final bool lineBefore;
+  final bool lineAfter;
+  final bool ai;
+
+  static const _node = 28.0;
+
+  /// 띄어쓰기가 있는 이름은 단어 사이에서만 줄이 바뀌게 글자 사이를 붙여 둔다('서촌두에 뜨 / 라또리아' 방지).
+  /// 띄어쓰기 없는 긴 이름은 그대로 두어 글자 단위로 넘어간다
+  static String _breakAtSpaces(String name) {
+    if (!name.contains(' ')) return name;
+    return name.split(' ').map((w) => w.runes.map(String.fromCharCode).join('⁠')).join(' ');
+  }
 
   @override
   Widget build(BuildContext context) {
+    Widget line(bool on) => Expanded(child: Container(height: 1, color: on ? AppColors.border : null));
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(height: 36, child: tile),
-        const SizedBox(height: 4),
-        Text(label, style: AppTypography.caption.copyWith(color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+        SizedBox(
+          height: _node,
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              Row(children: [line(lineBefore), const SizedBox(width: _node + 6), line(lineAfter)]),
+              Container(width: _node, height: _node, alignment: Alignment.center, decoration: BoxDecoration(color: color, shape: BoxShape.circle), child: child),
+              if (ai)
+                Transform.translate(
+                  offset: const Offset(11, -11),
+                  child: Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(color: AppColors.ai, shape: BoxShape.circle, border: Border.all(color: AppColors.surface, width: 1.5)),
+                    child: const Icon(Icons.auto_awesome, size: 8, color: Colors.white),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 6),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 3),
+          child: Text(_breakAtSpaces(label), style: AppTypography.meta.copyWith(color: AppColors.textPrimary, height: 1.35), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+        ),
       ],
     );
   }
