@@ -75,9 +75,9 @@ class _LinkInputPageState extends ConsumerState<LinkInputPage> {
                       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                       child: Column(
                         children: const [
-                          _GuideRow(step: 1, icon: Icons.share_outlined, text: '릴스에서 공유를 눌러요'),
-                          _GuideRow(step: 2, icon: Icons.more_horiz_rounded, text: '앱 목록에서 APT를 골라요'),
-                          _GuideRow(step: 3, icon: Icons.check_rounded, text: '찾은 장소를 확인하고 저장해요'),
+                          _GuideRow(step: 1, text: '릴스에서 공유를 눌러요'),
+                          _GuideRow(step: 2, text: '앱 목록에서 APT를 골라요'),
+                          _GuideRow(step: 3, text: '찾은 장소를 확인하고 저장해요'),
                         ],
                       ),
                     ),
@@ -227,9 +227,8 @@ class _SearchRowLabel extends StatelessWidget {
 }
 
 class _GuideRow extends StatelessWidget {
-  const _GuideRow({required this.step, required this.icon, required this.text});
+  const _GuideRow({required this.step, required this.text});
   final int step;
-  final IconData icon;
   final String text;
 
   @override
@@ -238,26 +237,16 @@ class _GuideRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         children: [
+          // 아이콘 칸과 번호가 같은 뜻을 두 번 말하지 않게 번호 원 하나만 둔다
           Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceRaised,
-              borderRadius: BorderRadius.circular(AppRadius.small),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Icon(icon, size: 17, color: AppColors.textPrimary),
+            width: 24,
+            height: 24,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
+            child: Text('$step', style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
           ),
           const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text.rich(
-              TextSpan(children: [
-                TextSpan(text: '$step  ', style: AppTypography.bodyStrong.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
-                TextSpan(text: text),
-              ]),
-              style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w500),
-            ),
-          ),
+          Expanded(child: Text(text, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w500))),
         ],
       ),
     );
