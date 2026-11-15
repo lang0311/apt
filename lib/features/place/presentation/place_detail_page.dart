@@ -11,11 +11,14 @@ import '../../../core/widgets/bottom_cta.dart';
 import '../../../core/widgets/buttons.dart';
 import '../../../core/widgets/chips.dart';
 import '../../../core/widgets/headers.dart';
+import '../../../core/widgets/map/apt_map.dart';
+import '../../../core/widgets/map/map_pin.dart';
 import '../../../core/widgets/overlays.dart';
 import '../../../core/widgets/states.dart';
 import '../../../core/widgets/surfaces.dart';
 import '../../course/presentation/course_draft_controller.dart';
 import '../../saved/presentation/saved_providers.dart';
+import '../../saved/presentation/widgets/category_style.dart';
 import '../../saved/presentation/widgets/collection_picker_sheet.dart';
 import '../../saved/presentation/widgets/place_image.dart';
 import '../../saved/presentation/widgets/saved_rows.dart';
@@ -171,6 +174,13 @@ class _Body extends ConsumerWidget {
                 padding: AppSpacing.screenPadding,
                 child: _TitleCard(detail: detail, recommendedIn: recommendedIn, onSave: () => _onSaveButton(context, ref)),
               ),
+              if (place.location != null) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Padding(
+                  padding: AppSpacing.screenPadding,
+                  child: _LocationMap(place: place),
+                ),
+              ],
               if (infoRows.isNotEmpty) ...[
                 const SectionHeader(title: '장소 정보', padding: EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.lg, AppSpacing.screenH, AppSpacing.xs)),
                 Padding(
@@ -280,6 +290,47 @@ class _TitleCard extends StatelessWidget {
             onPressed: onSave,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 이름 카드 아래 위치 지도 (움직이지 않는 작은 지도, 누르면 카카오맵). 정보 몇 줄 뒤 화면이 비어 보이지 않게, 나가기 전에 위치를 알 수 있게
+class _LocationMap extends StatelessWidget {
+  const _LocationMap({required this.place});
+  final Place place;
+
+  static const double _height = 150;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = CategoryStyle.of(place.categoryKey);
+    final url = place.mapUrl;
+    return SizedBox(
+      height: _height,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: AptMap(
+                markers: [MapMarker(id: place.id, point: place.location!, kind: MapPinKind.place, icon: style.icon, color: style.color)],
+              ),
+            ),
+            // 작은 지도는 움직이지 않고 누르면 카카오맵으로
+            Positioned.fill(
+              child: Semantics(
+                button: url != null,
+                label: url != null ? '${place.name} 위치, 카카오맵에서 보기' : '${place.name} 위치 지도',
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: url == null ? null : () => openExternalLink(context, url),
+                  child: const SizedBox.expand(),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
