@@ -8,11 +8,10 @@ enum SocialProvider {
 }
 
 class AuthUser {
-  const AuthUser({required this.id, required this.nickname, this.handle, this.profileImageUrl});
+  const AuthUser({required this.id, required this.nickname, this.handle});
   final String id;
   final String nickname;
   final String? handle;
-  final String? profileImageUrl;
 }
 
 /// 소셜/이메일 로그인 결과. 서버 응답 → 이 타입으로의 매핑은 API 명세 기준 (NEEDS BACKEND).

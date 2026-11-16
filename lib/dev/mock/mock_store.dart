@@ -49,13 +49,12 @@ class MockStore {
       placeCount: ids.length,
       thumbnailUrls: [for (final pid in ids.take(3)) MockFixtures.place(pid).imageUrl!],
       updatedAt: c.updatedAt,
-      createdAt: c.createdAt,
     );
   }
 
   void touchCollection(String id) {
     final c = collections[id]!;
-    collections[id] = PlaceCollection(id: c.id, name: c.name, placeCount: 0, updatedAt: DateTime.now(), createdAt: c.createdAt);
+    collections[id] = PlaceCollection(id: c.id, name: c.name, placeCount: 0, updatedAt: DateTime.now());
   }
 
   void _seedCourses() {
@@ -78,7 +77,6 @@ class MockStore {
           ('p5', PlaceSource.ai, '산책 취향 보완'),
           ('p4', PlaceSource.user, null),
         ]),
-        totalDuration: const Duration(hours: 5, minutes: 20),
         moodKeys: const {'emotional', 'walk'},
       ),
       meta: const CourseSummaryMeta(region: '서울', tags: ['카페', '감성']),
@@ -94,7 +92,6 @@ class MockStore {
           ('p9', PlaceSource.ai, '요즘 인기 전시'),
           ('p2', PlaceSource.user, null),
         ], start: const TimeOfDay(hour: 12, minute: 0)),
-        totalDuration: const Duration(hours: 4),
       ),
       meta: const CourseSummaryMeta(region: '서울', tags: ['맛집', '전시']),
     );
@@ -107,7 +104,6 @@ class MockStore {
           ('p8', PlaceSource.user, null),
           ('p7', PlaceSource.user, null),
         ]),
-        totalDuration: const Duration(hours: 6),
       ),
       meta: const CourseSummaryMeta(region: '부산', tags: ['바다', '카페', '힐링']),
     );
@@ -124,7 +120,6 @@ class MockStore {
           ('p6', PlaceSource.ai, '남는 50분 활용'),
           ('p4', PlaceSource.user, null),
         ]),
-        totalDuration: const Duration(hours: 5),
       ),
       meta: const CourseSummaryMeta(region: '제주', tags: ['바다'], memberNames: ['나', '민지', '랑이']),
     );

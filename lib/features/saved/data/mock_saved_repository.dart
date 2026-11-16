@@ -31,7 +31,6 @@ class MockSavedRepository implements SavedRepository {
     var places = q.collectionId == null
         ? _store.savedPlaces
         : [for (final id in _store.members[q.collectionId] ?? const <String>[]) _store.placeWithSaved(id)];
-    if (q.categoryKey != null) places = places.where((p) => p.categoryKey == q.categoryKey).toList();
     final keyword = q.keyword?.trim();
     if (keyword != null && keyword.isNotEmpty) {
       places = places
@@ -92,7 +91,7 @@ class MockSavedRepository implements SavedRepository {
           throw const ValidationFailure('같은 이름의 보관함이 있어요.');
         }
         final id = _store.nextId('c');
-        _store.collections[id] = PlaceCollection(id: id, name: trimmed, placeCount: 0, updatedAt: DateTime.now(), createdAt: DateTime.now());
+        _store.collections[id] = PlaceCollection(id: id, name: trimmed, placeCount: 0, updatedAt: DateTime.now());
         _store.members[id] = [];
         return _store.collectionView(id);
       });

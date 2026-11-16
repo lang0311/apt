@@ -14,13 +14,7 @@ class MockPreferenceRepository implements PreferenceRepository {
 
   @override
   Future<MyPreferences> fetchMine() => _store.behavior.query(
-        () => MyPreferences(
-          selectedKeys: {..._store.preferenceKeys},
-          autoAnalysisSupported: true,
-          autoAnalysisEnabled: _store.autoAnalysis,
-          analyzedLabels: const ['카페', '오션뷰', '베이커리'],
-          analysisBasisCount: _store.savedIds.length,
-        ),
+        () => MyPreferences(selectedKeys: {..._store.preferenceKeys}, autoAnalysisEnabled: _store.autoAnalysis),
         empty: () => const MyPreferences(selectedKeys: {}),
       );
 

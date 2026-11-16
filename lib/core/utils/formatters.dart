@@ -39,15 +39,6 @@ String formatRecentDate(DateTime at) {
   return withinWeek ? formatRelative(at) : '${at.month}월 ${at.day}일';
 }
 
-/// 5시간 20분
-String formatDuration(Duration d) {
-  final h = d.inHours;
-  final m = d.inMinutes % 60;
-  if (h == 0) return '$m분';
-  if (m == 0) return '$h시간';
-  return '$h시간 $m분';
-}
-
 /// 850m / 1.4km / 325km / 9,073km — 10km부터는 정수
 String formatDistance(int meters) {
   if (meters < 1000) return '${meters}m';

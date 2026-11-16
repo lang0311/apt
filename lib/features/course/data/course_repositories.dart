@@ -138,7 +138,6 @@ class MockCourseRepository implements CourseRepository {
           spec.add((p.$1, PlaceSource.ai, p.$2));
         }
         return Recommendation(
-          recommendationId: 'rec-${draft.recommendationRound}',
           stops: MockFixtures.stopsFor(spec, start: draft.startTime ?? const TimeOfDay(hour: 11, minute: 0)),
         );
       },
@@ -146,7 +145,6 @@ class MockCourseRepository implements CourseRepository {
     );
   }
 
-  Duration _duration(List<CourseStop> stops) => Duration(minutes: stops.length * 70);
 
   @override
   Future<Course> createCourse({required CourseDraft draft, required List<CourseStop> stops}) =>
@@ -162,7 +160,6 @@ class MockCourseRepository implements CourseRepository {
           partyId: draft.partyId,
           stops: stops,
           moodKeys: draft.moodKeys,
-          totalDuration: _duration(stops),
         );
         _store.courses[id] = course;
         _store.courseCreatedAt[id] = DateTime.now();
@@ -185,8 +182,6 @@ class MockCourseRepository implements CourseRepository {
           startTime: old.startTime,
           isParty: old.isParty,
           memberCount: old.memberCount,
-          totalDuration: _duration(stops),
-          isShared: old.isShared,
           stops: stops,
           moodKeys: old.moodKeys,
           partyId: old.partyId,

@@ -14,7 +14,6 @@ class MockPlaceRepository implements PlaceRepository {
         return PlaceDetail(
           place: place,
           openStatusLabel: '영업 중',
-          isOpen: true,
           closingLabel: '21:00 마감',
           collectionIds: [
             for (final entry in _store.members.entries)

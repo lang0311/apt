@@ -1,6 +1,5 @@
 import '../../../core/error/app_failure.dart';
 import '../../../core/network/api_client.dart';
-import '../../../dev/mock/mock_fixtures.dart';
 import '../../../dev/mock/mock_store.dart';
 import '../domain/party_models.dart';
 import '../domain/party_repository.dart';
@@ -26,8 +25,7 @@ class MockPartyRepository implements PartyRepository {
     ],
   };
 
-  Party _party(String id) =>
-      Party(id: id, members: _parties[id] ?? _members, preferenceSummary: const ['카페', '맛집', '자연']);
+  Party _party(String id) => Party(id: id, members: _parties[id] ?? _members);
 
   @override
   Future<Party> createParty() => _store.behavior.mutate(() {
@@ -63,7 +61,6 @@ class MockPartyRepository implements PartyRepository {
           memberCount: 3,
           selectedPlaceCount: 3,
           previewPlaceNames: const ['카페 온더뷰', '코지 베이커리', '성수 정원'],
-          previewImageUrl: MockFixtures.place('p1').imageUrl,
         );
       });
 

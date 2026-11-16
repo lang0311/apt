@@ -11,13 +11,8 @@ class MockHomeRepository implements HomeRepository {
 
   @override
   Future<HomeStats> fetchStats() => _store.behavior.query(
-        () => HomeStats(
-          savedPlaceCount: _store.savedIds.length,
-          activeCourseCount: _store.courses.length,
-          recentExtractionCount: 12,
-          recentExtractionPeriodLabel: '이번 주',
-        ),
-        empty: () => const HomeStats(savedPlaceCount: 0, activeCourseCount: 0, recentExtractionCount: 0),
+        () => HomeStats(savedPlaceCount: _store.savedIds.length),
+        empty: () => const HomeStats(savedPlaceCount: 0),
       );
 
   @override

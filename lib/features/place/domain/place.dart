@@ -92,7 +92,6 @@ class PlaceDetail {
   const PlaceDetail({
     required this.place,
     this.openStatusLabel,
-    this.isOpen,
     this.closingLabel,
     this.collectionIds = const [],
   });
@@ -101,7 +100,6 @@ class PlaceDetail {
 
   /// 영업 상태 문구 (예: 영업 중). 서버 제공 값 그대로 표시.
   final String? openStatusLabel;
-  final bool? isOpen;
 
   /// 마감 문구 (예: 21:00 마감)
   final String? closingLabel;

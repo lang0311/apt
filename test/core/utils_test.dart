@@ -29,9 +29,7 @@ void main() {
       expect(formatTimeOfDay(const TimeOfDay(hour: 0, minute: 30)), '오전 12:30');
     });
 
-    test('소요 시간/거리', () {
-      expect(formatDuration(const Duration(hours: 5, minutes: 20)), '5시간 20분');
-      expect(formatDuration(const Duration(minutes: 50)), '50분');
+    test('거리', () {
       expect(formatDistance(1400), '1.4km');
       expect(formatDistance(850), '850m');
       expect(formatDistance(9949), '9.9km');

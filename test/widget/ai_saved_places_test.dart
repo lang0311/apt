@@ -33,7 +33,7 @@ class _FakeSavedRepository implements SavedRepository {
   @override
   Future<List<SavedPlaceItem>> fetchSavedPlaces(SavedPlaceQuery query) async => [
         for (final p in mine)
-          if ((query.categoryKey == null || p.categoryKey == query.categoryKey) && (query.keyword == null || p.name.contains(query.keyword!)))
+          if (query.keyword == null || p.name.contains(query.keyword!))
             SavedPlaceItem(place: p),
       ];
 

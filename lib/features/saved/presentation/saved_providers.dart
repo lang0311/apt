@@ -99,11 +99,7 @@ List<SavedPlaceItem> withDistanceFrom(GeoPoint? me, List<SavedPlaceItem> items, 
     for (final item in items)
       item.place.location == null
           ? item
-          : SavedPlaceItem(
-              place: item.place,
-              distanceMeters: me.distanceTo(item.place.location!).round(),
-              walkMinutes: item.walkMinutes,
-            ),
+          : SavedPlaceItem(place: item.place, distanceMeters: me.distanceTo(item.place.location!).round()),
   ];
   if (sort == SavedSort.nearest) {
     // 위치가 없는 장소는 맨 뒤

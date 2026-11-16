@@ -8,17 +8,15 @@ class ExtractedPlace {
 }
 
 class ExtractionResult {
-  const ExtractionResult({required this.sourceUrl, this.sourceHandle, required this.places});
-  final String sourceUrl;
+  const ExtractionResult({this.sourceHandle, required this.places});
   final String? sourceHandle;
   final List<ExtractedPlace> places;
 }
 
 /// 홈의 "최근 추출한 장소"
 class RecentExtraction {
-  const RecentExtraction({required this.place, required this.sourceUrl, required this.extractedAt});
+  const RecentExtraction({required this.place, required this.extractedAt});
   final Place place;
-  final String sourceUrl;
   final DateTime extractedAt;
 }
 

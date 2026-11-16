@@ -54,17 +54,12 @@ class MoodOption {
 /// AI 추천 결과
 class Recommendation {
   const Recommendation({
-    this.recommendationId,
     required this.stops,
-    this.headline,
     this.description,
     this.taste,
   });
 
-  /// 서버가 추천 세션을 보존하는 경우의 ID (NEEDS BACKEND: 무상태 여부 확인)
-  final String? recommendationId;
   final List<CourseStop> stops;
-  final String? headline;
   final String? description;
 
   /// 이 추천에 반영한 취향 (없으면 일정 카드에 한 줄을 띄우지 않는다)
@@ -202,8 +197,6 @@ class Course {
     this.startTime,
     this.isParty = false,
     this.memberCount = 1,
-    this.totalDuration,
-    this.isShared = false,
     required this.stops,
     this.moodKeys = const {},
     this.partyId,
@@ -217,8 +210,6 @@ class Course {
   final TimeOfDay? startTime;
   final bool isParty;
   final int memberCount;
-  final Duration? totalDuration;
-  final bool isShared;
   final List<CourseStop> stops;
   final Set<String> moodKeys;
   final String? partyId;
@@ -236,8 +227,6 @@ class Course {
         startTime: startTime,
         isParty: isParty,
         memberCount: memberCount,
-        totalDuration: totalDuration,
-        isShared: isShared,
         stops: stops,
         moodKeys: moodKeys,
         partyId: partyId,

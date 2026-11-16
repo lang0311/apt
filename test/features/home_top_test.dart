@@ -10,7 +10,6 @@ CourseSummary _course(String id, DateTime? date) => CourseSummary(id: id, title:
 
 RecentExtraction _saved(String id, int daysAgo) => RecentExtraction(
       place: Place(id: id, name: id, address: '', categoryKey: 'cafe', categoryLabel: '카페'),
-      sourceUrl: '',
       extractedAt: _now.subtract(Duration(days: daysAgo)),
     );
 

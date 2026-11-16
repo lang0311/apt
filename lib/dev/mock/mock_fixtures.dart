@@ -165,7 +165,6 @@ abstract final class MockFixtures {
       name: '성수동 데이트',
       placeCount: 0,
       updatedAt: DateTime.now(),
-      createdAt: DateTime.now().subtract(const Duration(days: 20)),
     ),
     PlaceCollection(
       id: 'c2',

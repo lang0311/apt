@@ -21,7 +21,6 @@ class MockExtractionRepository implements ExtractionRepository {
         if (url.contains('fail')) throw const ExtractionFailure(ExtractionFailureKind.failed);
         final ids = url.contains('reel') ? ['p4', 'p6'] : ['p1', 'p2'];
         return ExtractionResult(
-          sourceUrl: url,
           sourceHandle: '@seoul_daily',
           places: [
             for (final id in ids)
@@ -37,16 +36,9 @@ class MockExtractionRepository implements ExtractionRepository {
   @override
   Future<List<RecentExtraction>> fetchRecent({required int limit}) => _store.behavior.query(
         () => [
-          for (final (id, url, days) in const [
-            ('p1', 'https://www.instagram.com/p/C3k9xYzAbcD/', 2),
-            ('p4', 'https://www.instagram.com/reel/DA7mNpQrStU/', 3),
-            ('p9', 'https://www.instagram.com/reel/DB1aBcDeFgH/', 5),
-            ('p2', 'https://www.instagram.com/p/C9zYxWvUtSr/', 8),
-            ('p5', 'https://www.instagram.com/reel/DC4kLmNoPqR/', 12),
-          ])
+          for (final (id, days) in const [('p1', 2), ('p4', 3), ('p9', 5), ('p2', 8), ('p5', 12)])
             RecentExtraction(
               place: _store.placeWithSaved(id),
-              sourceUrl: url,
               extractedAt: DateTime.now().subtract(Duration(days: days)),
             ),
         ].take(limit).toList(),

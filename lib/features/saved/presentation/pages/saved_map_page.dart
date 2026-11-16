@@ -783,12 +783,8 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
   }
 }
 
-/// 도보 20분 이내면 도보 시간, 아니면 직선거리. 둘 다 없으면 null
-String? _distanceLabel(SavedPlaceItem item) {
-  if (item.walkMinutes != null && item.walkMinutes! <= 20) return '도보 ${item.walkMinutes}분';
-  if (item.distanceMeters != null) return formatDistance(item.distanceMeters!);
-  return null;
-}
+/// 직선거리. 없으면 null
+String? _distanceLabel(SavedPlaceItem item) => item.distanceMeters == null ? null : formatDistance(item.distanceMeters!);
 
 /// 지도 위 흐림 반투명 바탕 (코스 만들기 3/4 지도와 같은 모양)
 class _Frosted extends StatelessWidget {

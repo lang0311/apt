@@ -14,21 +14,10 @@ class PreferenceItem {
 }
 
 class MyPreferences {
-  const MyPreferences({
-    required this.selectedKeys,
-    this.autoAnalysisSupported = false,
-    this.autoAnalysisEnabled = false,
-    this.analyzedLabels = const [],
-    this.analysisBasisCount,
-  });
+  const MyPreferences({required this.selectedKeys, this.autoAnalysisEnabled = false});
 
   final Set<String> selectedKeys;
 
-  /// 서버가 암묵적 취향 분석을 지원하는지. false면 자동 분석 카드를 숨긴다 (가정 A4).
-  final bool autoAnalysisSupported;
+  /// 자동 분석은 화면에 없는 기능이라 서버에서 받은 값을 그대로 다시 보낸다 (07 §3)
   final bool autoAnalysisEnabled;
-  final List<String> analyzedLabels;
-
-  /// "저장한 N곳을 바탕으로"
-  final int? analysisBasisCount;
 }

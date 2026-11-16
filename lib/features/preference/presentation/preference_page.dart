@@ -62,13 +62,7 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
       await ref.read(preferenceRepositoryProvider).save(selectedKeys: _selected!, autoAnalysisEnabled: saved.autoAnalysisEnabled);
       ref.invalidate(myPreferencesProvider);
       // 저장한 값을 새 기준으로 — 변경 없음 상태가 되어 이탈 확인이 뜨지 않는다
-      _initial = MyPreferences(
-        selectedKeys: {..._selected!},
-        autoAnalysisSupported: saved.autoAnalysisSupported,
-        autoAnalysisEnabled: saved.autoAnalysisEnabled,
-        analyzedLabels: saved.analyzedLabels,
-        analysisBasisCount: saved.analysisBasisCount,
-      );
+      _initial = MyPreferences(selectedKeys: {..._selected!}, autoAnalysisEnabled: saved.autoAnalysisEnabled);
       if (!mounted) return;
       if (!widget.onboarding) showAppSnackBar(context, '취향을 저장했어요.');
       _leave();

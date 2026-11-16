@@ -20,7 +20,6 @@ class MockMembersPartyRepository implements PartyRepository {
   Party _withMockMembers(Party party) => Party(
         id: party.id,
         members: [...party.members, ...mockPartyMembers],
-        preferenceSummary: party.preferenceSummary,
         isOwner: party.isOwner,
       );
 

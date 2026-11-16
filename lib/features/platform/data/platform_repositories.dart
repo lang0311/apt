@@ -189,9 +189,7 @@ class PlatformSavedRepository extends ApiSavedRepository {
   @override
   Future<List<SavedPlaceItem>> fetchSavedPlaces(SavedPlaceQuery query) async {
     if (query.collectionId != null) throw const NotImplementedFailure('보관함');
-    bool matches(Json place) =>
-        (query.categoryKey == null || categoryKeyOf(place) == query.categoryKey) &&
-        (query.keyword == null || place['name'].toString().contains(query.keyword!));
+    bool matches(Json place) => query.keyword == null || place['name'].toString().contains(query.keyword!);
     return [
       for (final place in (await _split()).mine)
         if (matches(place)) SavedPlaceItem(place: _platform.place(place, saved: true)),
@@ -503,10 +501,8 @@ class PlatformCourseRepository implements CourseRepository {
   };
 
   Recommendation _recommendation(Json course) => Recommendation(
-    recommendationId: course['id'] as String,
     stops: _platform.stops(course),
     taste: PlatformClient.appliedTaste(course['taste_profile'], itinerary: course['itinerary'] as List?),
-    headline: '코스를 확인해주세요',
     description: [
       course['recommendation_reason'],
       ...(course['warnings'] as List? ?? []),
@@ -602,8 +598,6 @@ class PlatformHomeRepository implements HomeRepository {
     final summary = await _platform.get('/mobile/summary');
     return HomeStats(
       savedPlaceCount: summary['saved_count'] as int,
-      activeCourseCount: summary['active_course_count'] as int,
-      recentExtractionCount: 0,
     );
   }
 
@@ -771,7 +765,6 @@ class PlatformExtractionRepository implements ExtractionRepository {
       for (final (place, savedAt) in dated.take(limit))
         RecentExtraction(
           place: _platform.place(place, saved: true),
-          sourceUrl: (place['place_url'] ?? '').toString(),
           extractedAt: savedAt,
         ),
     ];

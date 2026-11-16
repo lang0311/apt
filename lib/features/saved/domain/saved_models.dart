@@ -23,7 +23,6 @@ class PlaceCollection {
     required this.placeCount,
     this.thumbnailUrls = const [],
     this.updatedAt,
-    this.createdAt,
   });
 
   final String id;
@@ -33,7 +32,6 @@ class PlaceCollection {
   /// 콜라주 썸네일 (최대 4장 사용)
   final List<String> thumbnailUrls;
   final DateTime? updatedAt;
-  final DateTime? createdAt;
 }
 
 enum SavedSort {
@@ -47,8 +45,7 @@ enum SavedSort {
 
 /// 저장 장소 조회 조건
 class SavedPlaceQuery {
-  const SavedPlaceQuery({this.categoryKey, this.collectionId, this.keyword, this.sort = SavedSort.recent});
-  final String? categoryKey;
+  const SavedPlaceQuery({this.collectionId, this.keyword, this.sort = SavedSort.recent});
   final String? collectionId;
   final String? keyword;
   final SavedSort sort;
@@ -56,21 +53,19 @@ class SavedPlaceQuery {
   @override
   bool operator ==(Object other) =>
       other is SavedPlaceQuery &&
-      other.categoryKey == categoryKey &&
       other.collectionId == collectionId &&
       other.keyword == keyword &&
       other.sort == sort;
 
   @override
-  int get hashCode => Object.hash(categoryKey, collectionId, keyword, sort);
+  int get hashCode => Object.hash(collectionId, keyword, sort);
 }
 
 /// 지도/목록에 쓰는 저장 장소 + 내 위치 기준 거리 정보 (서버 제공 시)
 class SavedPlaceItem {
-  const SavedPlaceItem({required this.place, this.distanceMeters, this.walkMinutes, this.recommendedIn});
+  const SavedPlaceItem({required this.place, this.distanceMeters, this.recommendedIn});
   final Place place;
   final int? distanceMeters;
-  final int? walkMinutes;
 
   /// AI 추천 탭: 이 장소를 추천한 코스 이름. 어느 코스인지 모르면 null (07 D44)
   final String? recommendedIn;
