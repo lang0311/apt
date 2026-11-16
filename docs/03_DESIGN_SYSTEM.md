@@ -44,7 +44,7 @@
 | `textSecondary` | `#5F6E86` (2026-10-20 변경, 시안 `#7B8AA3`는 대비 3.50:1로 미달 → 흰 배경 5.17:1) | 설명, 메타 |
 | `textHint` | `#98A3B5` | 장식용 아이콘만 (2.55:1이라 글자에는 쓰지 않음). placeholder·미선택 안내 글자는 `textSecondary` (2026-10-20) |
 | `textTertiary` | `#6B7890` | 탭 개수·대기 단계처럼 한 단계 낮춰 읽는 보조 글자 (흰 배경 약 4.7:1, 2026-10-21) |
-| `ink` | `#14223A` | 다크 버튼(`AppButton.dark`), 하단 탭 가운데 코스 버튼 |
+| `ink` | `#14223A` | 다크 버튼(`AppButtonVariant.dark`), 하단 탭 가운데 코스 버튼 |
 | `bg` | `#EEF1F5` (2026-10-20 변경, 시안 `#F6F8FC`는 흰 카드와 거의 구분되지 않음) | 화면 배경, 탭 화면 상단바 |
 | `surface` | `#F9FAFC` (2026-10-20 변경, 시안 `#FFFFFF`) | 섹션 묶음·카드·입력·탭바. 카드는 `border` 1px로 경계를 잡는다(그림자 없음) |
 | `surfaceRaised` | `#FFFFFF` | `surface` 카드 **안**에 놓이는 카드 (2026-10-20) |
@@ -86,7 +86,7 @@
 |------|-----|
 | 좌우 여백 | 20 (`AppSpacing.screenH`, 일부 24) |
 | 입력 필드 | 높이 52, radius 14(중간), `surface` + `border` |
-| 주 버튼 | `AppButton` 높이 52, radius 14(중간), 비활성은 회색 바탕 + 진한 회색 글자. 종류와 뜻(07 D57): `primary` 화면마다 하나 · 다음 단계 / `white` 그 옆 보조 / `soft` 목록 줄 안 작은 행동 / `dark` 이미 켜진 상태(저장됨) · 지도 위 전환 / `danger` 지우기 · 차단(빨간 글자) / `outline`은 쓰지 않음 |
+| 주 버튼 | `AppButton` 높이 52, radius 14(중간), 비활성은 회색 바탕 + 진한 회색 글자. 종류와 뜻(07 D57): `primary` 화면마다 하나 · 다음 단계 / `white` 그 옆 보조 / `soft` 목록 줄 안 작은 행동 / `dark` 이미 켜진 상태(저장됨) · 지도 위 전환 / `danger` 지우기 · 차단(빨간 글자) |
 | 하단 고정 버튼 | `BottomCta`: 바탕 `bg`, 여백 위 12 · 좌우 20 · 아래 16(SafeArea 포함) |
 | 카드 | radius 20(크게), `surface`(#F9FAFC) + `border` 1px, 그림자 없음. **카드 안에 흰 칸을 또 띄우지 않고** 구분선 목록으로(07 D57) |
 | 섹션 묶음 | `SectionCard`: 제목을 컨테이너 안에 두는 섹션 카드(제목 16/700, 안쪽 16). 탭 화면 본문은 바깥 여백 12 · 카드 사이 10 (2026-10-20, 홈부터) |
@@ -104,7 +104,7 @@
 
 2026-10-30 코드(`lib/core/widgets/`, 각 기능의 `presentation/widgets/`) 기준 이름이다. 2026-11-14 UI 리뷰 후속(07 D50~D55)에서 바뀐 것을 더했다.
 
-**기본 (`core/widgets`)**: `AppButton`(`primary`·`dark`·`soft`·`outline`·`white`) `AppTextLink` `AppIconBox` `AppTextField` `AppFieldError` `AppSearchField` `AppChip` `AppTextChip` `ChipScroller` `AppTag` `TagWrap` `CheckMark`(체크 아이콘만, 07 D26) `NumberBadge` `SegmentedTabs`(track / pills / underline) `KakaoSymbol` `AppLogo`
+**기본 (`core/widgets`)**: `AppButton`(`primary`·`dark`·`soft`·`white`·`danger`) `AppTextLink` `AppIconBox` `AppTextField` `AppFieldError` `AppSearchField` `AppChip` `AppTextChip` `ChipScroller` `AppTag` `TagWrap` `CheckMark`(체크 아이콘만, 07 D26) `NumberBadge` `SegmentedTabs`(track / pills / underline) `KakaoSymbol` `AppLogo`
 **헤더**: `PageTitleHeader`(탭 화면 큰 제목) `PlainHeader`(배경 없는 뒤로 + 제목) `AuthHeader`(가입 화면) `StepHeader`(위저드 뒤로 + 제목 + n/4) `StepProgressBar`(막대 아래 단계 이름 `정보 · 동행 · 장소 · 추천`, 지금 단계만 파랑 · 굵게) `SectionHeader`
 **표면 · 하단**: `SectionCard`(섹션 컨테이너, 제목 줄 오른쪽 `trailing`) `DividedRows`(컨테이너 안 구분선 행, 구분선은 왼쪽 `indent` + 오른쪽 `endIndent` 기본 16 — 카드 오른쪽 끝까지 뻗지 않음) `AppCard` `IconCircle` `BottomCta`(하단 고정 버튼 영역)
 **오버레이**: `showAppSnackBar`(하단 고정 버튼이 있으면 그 위 8에 뜸, 07 D36) `showAppBottomSheet` `showAppModal` `showConfirmDialog` `showActionSheet`
