@@ -22,8 +22,9 @@ abstract final class AppSpacing {
 
 /// 디자인 토큰 — 모서리. 크기에 따라 네 단계 + 알약 (UI 리뷰 디자인 언어 ①, 07 D56)
 /// 작게 10(썸네일 · 아이콘 칸 · 태그) · 중간 14(입력칸 · 버튼 · 사진 · 카드 안 타일) · 크게 20(카드) · 시트 28 · 알약 999.
-/// 모자이크 안 작은 칸 · 진행 막대처럼 아주 작은 것(2~7)만 숫자를 그대로 쓴다.
+/// 작은 태그 · 모자이크 칸 · 체크박스는 `tiny` 6, 진행 막대 · 손잡이처럼 선에 가까운 것(2~3)만 숫자를 그대로 쓴다.
 abstract final class AppRadius {
+  static const tiny = 6.0;
   static const small = 10.0;
   static const medium = 14.0;
   static const large = 20.0;

@@ -807,9 +807,9 @@ class _Frosted extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.85),
+              color: AppColors.mapGlass,
               borderRadius: r,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
+              border: Border.all(color: AppColors.mapGlassBorder),
             ),
             child: child,
           ),
@@ -849,7 +849,7 @@ class _FilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = active ? AppColors.primary : AppColors.textPrimary;
     return Material(
-      color: Colors.white.withValues(alpha: 0.95),
+      color: AppColors.mapPill,
       elevation: 1,
       shadowColor: AppColors.shadowFloat,
       shape: StadiumBorder(side: BorderSide(color: active ? AppColors.primary : AppColors.border)),
@@ -872,7 +872,7 @@ class _FilterChip extends StatelessWidget {
                     children: [
                       Icon(Icons.tune_rounded, size: 16, color: color),
                       const SizedBox(width: 4),
-                      Text(label, style: AppTypography.label.copyWith(color: color, fontSize: 12.5)),
+                      Text(label, style: AppTypography.label.copyWith(color: color)),
                     ],
                   ),
                 ),
@@ -908,7 +908,7 @@ class _ListPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withValues(alpha: 0.94),
+      color: AppColors.mapPill,
       shape: const StadiumBorder(),
       elevation: 2,
       shadowColor: AppColors.shadowFloat,
@@ -951,14 +951,14 @@ class _MapFab extends StatelessWidget {
         onTap: onPressed,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 44),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.map_outlined, size: 18, color: Colors.white),
-                SizedBox(width: 6),
-                Text('지도', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
+                const Icon(Icons.map_outlined, size: 18, color: Colors.white),
+                const SizedBox(width: 6),
+                Text('지도', style: AppTypography.label.copyWith(color: Colors.white)),
               ],
             ),
           ),
@@ -1005,7 +1005,7 @@ class _MapPlaceCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(place.name, style: AppTypography.bodyStrong.copyWith(fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text(place.name, style: AppTypography.label, maxLines: 1, overflow: TextOverflow.ellipsis),
                       Text(
                         [place.categoryLabel, ?distance].join(' · '),
                         style: AppTypography.caption,

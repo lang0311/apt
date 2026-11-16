@@ -253,7 +253,7 @@ class _TitleCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(place.name, style: AppTypography.title.copyWith(fontSize: 22, fontWeight: FontWeight.w800)),
+                Text(place.name, style: AppTypography.hero),
                 const SizedBox(height: 4),
                 Text([place.categoryLabel, if (place.shortArea.isNotEmpty) place.shortArea].join(' · '), style: AppTypography.body),
                 if (status.isNotEmpty) ...[

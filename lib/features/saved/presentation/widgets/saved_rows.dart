@@ -171,7 +171,7 @@ class SelectCheckbox extends StatelessWidget {
           activeColor: AppColors.primary,
           checkColor: Colors.white,
           side: const BorderSide(color: AppColors.controlBorder, width: 1.6),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.tiny)),
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           visualDensity: VisualDensity.compact,
         ),
@@ -399,7 +399,7 @@ class AppliedFilterChip extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(label, style: AppTypography.label.copyWith(color: Colors.white, fontSize: 12.5)),
+                Text(label, style: AppTypography.label.copyWith(color: Colors.white)),
                 const SizedBox(width: 2),
                 const Icon(Icons.close_rounded, size: 15, color: Colors.white70),
               ],

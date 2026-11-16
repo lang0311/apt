@@ -85,7 +85,7 @@ class PlainHeader extends StatelessWidget {
                   ? const SizedBox()
                   : Text(
                       title!,
-                      style: AppTypography.header.copyWith(fontSize: 17, fontWeight: FontWeight.w800),
+                      style: AppTypography.header,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

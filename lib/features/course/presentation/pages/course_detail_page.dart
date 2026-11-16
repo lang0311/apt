@@ -219,7 +219,7 @@ class _CrewStrip extends ConsumerWidget {
                       const SizedBox(width: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6)),
+                        decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.tiny)),
                         child: Text(canInvite ? '나, 파티장' : '나', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700)),
                       ),
                     ],

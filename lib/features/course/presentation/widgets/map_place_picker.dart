@@ -471,9 +471,9 @@ class _SearchBar extends StatelessWidget {
           child: Container(
             height: height,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.8),
+              color: AppColors.mapGlass,
               borderRadius: BorderRadius.circular(AppRadius.small),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
+              border: Border.all(color: AppColors.mapGlassBorder),
             ),
             child: Row(
               children: [
@@ -493,7 +493,7 @@ class _SearchBar extends StatelessWidget {
                     ),
                   ),
                 ),
-                Container(width: 1, height: 22, color: AppColors.ink.withValues(alpha: 0.1)),
+                Container(width: 1, height: 22, color: AppColors.divider),
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
@@ -537,7 +537,7 @@ class _MapPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final fg = dark ? Colors.white : AppColors.textPrimary;
     return Material(
-      color: dark ? AppColors.ink : Colors.white.withValues(alpha: 0.92),
+      color: dark ? AppColors.ink : AppColors.mapPill,
       shape: const StadiumBorder(),
       elevation: 2,
       shadowColor: AppColors.shadowFloat,
@@ -633,7 +633,7 @@ class _InCourseTag extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6)),
+      decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.tiny)),
       child: Text(label, style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700)),
     );
   }
@@ -697,7 +697,7 @@ class _PlaceCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(place.name, style: AppTypography.bodyStrong.copyWith(fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text(place.name, style: AppTypography.label, maxLines: 1, overflow: TextOverflow.ellipsis),
                       Text(_areaAndCategory(place), style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
                       if (recommended != null) _RecommendedLine(recommended!),
                     ],
@@ -943,7 +943,7 @@ class PickedChips extends StatelessWidget {
                         children: [
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 140),
-                            child: Text(p.name, style: AppTypography.label.copyWith(fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                            child: Text(p.name, style: AppTypography.label, maxLines: 1, overflow: TextOverflow.ellipsis),
                           ),
                           const SizedBox(width: 4),
                           const Icon(Icons.close_rounded, size: 15, color: AppColors.textTertiary),

@@ -22,7 +22,7 @@ class AppLogo extends StatelessWidget {
           child: CustomPaint(painter: _LogoPainter()),
         ),
         const SizedBox(height: 18),
-        Text(copy, style: AppTypography.cardTitle.copyWith(fontSize: 17), textAlign: TextAlign.center),
+        Text(copy, style: AppTypography.cardTitle, textAlign: TextAlign.center),
       ],
     );
   }

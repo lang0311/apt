@@ -29,7 +29,7 @@ class CourseThumb extends StatelessWidget {
         width: w,
         height: h,
         alignment: Alignment.center,
-        decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(7)),
+        decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.tiny)),
         child: Icon(style.icon, size: (w < h ? w : h) * 0.56, color: style.ink),
       );
     }
@@ -56,7 +56,7 @@ class CourseThumb extends StatelessWidget {
               width: half,
               height: half,
               alignment: Alignment.center,
-              decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(7)),
+              decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.tiny)),
               child: Text('+${n - 3}', style: TextStyle(fontSize: half * 0.36, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
             );
       mosaic = Column(

@@ -56,7 +56,7 @@ class CourseHero extends StatelessWidget {
             Text(dday!, style: AppTypography.label.copyWith(color: AppColors.primary)),
             const SizedBox(height: 2),
           ],
-          Text(title, style: AppTypography.title.copyWith(fontSize: 22, fontWeight: FontWeight.w800)),
+          Text(title, style: AppTypography.hero),
           if (meta != null && meta!.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(meta!, style: AppTypography.meta),
@@ -410,7 +410,7 @@ class _StopText extends StatelessWidget {
               const SizedBox(width: 6),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                decoration: BoxDecoration(color: AppColors.aiSoft, borderRadius: BorderRadius.circular(6)),
+                decoration: BoxDecoration(color: AppColors.aiSoft, borderRadius: BorderRadius.circular(AppRadius.tiny)),
                 child: Text('AI 추천', style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w700)),
               ),
             ],

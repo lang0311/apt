@@ -14,6 +14,9 @@ abstract final class AppColors {
   /// 개수·입력칸 안내·하단 탭 이름처럼 읽어야 하는 보조 글자 (흰 바탕 약 4.7:1). `textHint`는 장식용.
   static const textTertiary = Color(0xFF6B7890);
 
+  /// 안 고른 칩의 글자 (`surface` 위 `textPrimary` 75%와 같은 색)
+  static const chipText = Color(0xFF4D5869);
+
   static const ink = Color(0xFF14223A);
 
   /// 밝기 3단계로 층을 나눈다(그림자 없음): 배경 `bg` → 섹션·카드 `surface`(+ `border` 1px) → 그 안의 카드 `surfaceRaised`.
@@ -46,6 +49,24 @@ abstract final class AppColors {
 
   /// 사진 위 작은 아이콘 칸 바탕 (`ink` 45%)
   static const photoBadge = Color(0x7314223A);
+
+  /// 사진 위 둘째 줄 글자 (흰색 88%)
+  static const onPhotoMuted = Color(0xE0FFFFFF);
+
+  /// 지도 위 흐린 바탕(뒤를 흐리게 한 검색 줄 · 묶음)과 그 테두리 (흰색 85% · 90%)
+  static const mapGlass = Color(0xD9FFFFFF);
+  static const mapGlassBorder = Color(0xE6FFFFFF);
+
+  /// 지도 위 알약 바탕 (흰색 94%). 예전에 화면마다 92~95%로 적던 값을 하나로 합쳤다
+  static const mapPill = Color(0xF0FFFFFF);
+
+  /// 파티원 얼굴 색(바탕 · 글자)과 흰 바탕에 이름만 쓸 때의 진한 색. 파랑 · 보라는 `primary` · `extract` 계열을 쓴다
+  static const avatarCoralSoft = Color(0xFFFDE4DD);
+  static const avatarCoral = Color(0xFFD0573C);
+  static const avatarGreenSoft = Color(0xFFE2F3EA);
+  static const avatarCoralText = Color(0xFFB5432B);
+  static const avatarGreenText = Color(0xFF0C7259);
+  static const avatarPurpleText = Color(0xFF6B45C9);
 
   /// 별점 별
   static const rating = Color(0xFFF5A524);

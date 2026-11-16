@@ -215,7 +215,7 @@ class _Stats extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(_short(count), style: AppTypography.title.copyWith(fontSize: 22, fontWeight: FontWeight.w800)),
+                          Text(_short(count), style: AppTypography.hero),
                           const SizedBox(height: 2),
                           Text(label, style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
                         ],

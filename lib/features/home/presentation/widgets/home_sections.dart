@@ -180,14 +180,14 @@ class HomeCourseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final date = course.date;
-    final big = AppTypography.title.copyWith(fontSize: 22, fontWeight: FontWeight.w800, height: 1.1);
+    final big = AppTypography.hero.copyWith(height: 1.1);
     final hasStops = course.stopNames.length == course.stopCategoryKeys.length && course.stopNames.isNotEmpty;
 
     final Widget headline;
     if (isToday) {
       headline = Text('오늘', style: big.copyWith(color: AppColors.primary));
     } else if (date == null) {
-      headline = Text('날짜 미정', style: big.copyWith(fontSize: 18, color: AppColors.textSecondary));
+      headline = Text('날짜 미정', style: AppTypography.section.copyWith(color: AppColors.textSecondary, height: 1.1));
     } else {
       headline = Text(ddayLabel(date), style: big.copyWith(color: AppColors.primary));
     }
@@ -549,7 +549,7 @@ class HomeRegionGroups extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                             alignment: Alignment.center,
                             decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: AppRadius.pillAll),
-                            child: Text('코스 만들기', style: AppTypography.label.copyWith(fontSize: 13, color: AppColors.primary)),
+                            child: Text('코스 만들기', style: AppTypography.label.copyWith(color: AppColors.primary)),
                           ),
                         ),
                       ),
@@ -832,13 +832,13 @@ class _PhotoTile extends StatelessWidget {
                     children: [
                       Text(
                         place.name,
-                        style: AppTypography.label.copyWith(color: textColor, fontSize: 12),
+                        style: AppTypography.label.copyWith(color: textColor),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         caption,
-                        style: AppTypography.caption.copyWith(color: hasImage ? Colors.white.withValues(alpha: 0.88) : AppColors.textSecondary),
+                        style: AppTypography.caption.copyWith(color: hasImage ? AppColors.onPhotoMuted : AppColors.textSecondary),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

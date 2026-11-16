@@ -155,7 +155,7 @@ class _DayChip extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(top, style: AppTypography.caption.copyWith(color: selected ? Colors.white : AppColors.textSecondary)),
-                Text('${date.day}', style: AppTypography.cardTitle.copyWith(fontSize: 17, color: dayColor)),
+                Text('${date.day}', style: AppTypography.cardTitle.copyWith(color: dayColor)),
               ],
             ),
           ),
@@ -264,7 +264,7 @@ class _TimeWheelState extends State<_TimeWheel> {
           onSelectedItemChanged: onSelected,
           children: [
             for (final v in items)
-              Center(child: Text(v, style: AppTypography.cardTitle.copyWith(fontSize: 18, fontFeatures: const [FontFeature.tabularFigures()]))),
+              Center(child: Text(v, style: AppTypography.section.copyWith(fontFeatures: const [FontFeature.tabularFigures()]))),
           ],
         ),
       ),
@@ -287,7 +287,7 @@ class _TimeWheelState extends State<_TimeWheel> {
             children: [
               _column(width: 72, label: '오전 오후', controller: _ap, items: const ['오전', '오후'], onSelected: (i) => widget.onPm(i == 1)),
               _column(width: 64, label: '시', controller: _hour, items: [for (var h = 1; h <= 12; h++) '$h'], onSelected: _onHour),
-              Text(':', style: AppTypography.cardTitle.copyWith(fontSize: 18)),
+              Text(':', style: AppTypography.section),
               _column(
                 width: 64,
                 label: '분',
@@ -434,7 +434,6 @@ class _CalendarDialogState extends State<_CalendarDialog> {
               child: Text(
                 '$day',
                 style: AppTypography.bodyStrong.copyWith(
-                  fontSize: 15,
                   color: color,
                   fontWeight: isSelected || isToday ? FontWeight.w700 : FontWeight.w500,
                 ),
@@ -460,7 +459,7 @@ class _RoundIconButton extends StatelessWidget {
       onPressed: onPressed,
       style: IconButton.styleFrom(
         backgroundColor: AppColors.surfaceMuted,
-        disabledBackgroundColor: AppColors.surfaceMuted.withValues(alpha: 0.5),
+        disabledBackgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         fixedSize: const Size(36, 36),
         minimumSize: const Size(36, 36),

@@ -575,7 +575,7 @@ class _ToolChip extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (leadingIcon != null) ...[Icon(leadingIcon, size: 15, color: AppColors.textPrimary), const SizedBox(width: 4)],
-                  Text(label, style: AppTypography.label.copyWith(fontSize: 13)),
+                  Text(label, style: AppTypography.label),
                   if (count > 0) ...[
                     const SizedBox(width: 5),
                     Container(

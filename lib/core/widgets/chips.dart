@@ -39,7 +39,7 @@ class AppChip extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(label, style: AppTypography.label.copyWith(color: selected ? Colors.white : AppColors.textPrimary.withValues(alpha: 0.75))),
+                Text(label, style: AppTypography.label.copyWith(color: selected ? Colors.white : AppColors.chipText)),
                 if (trailingCount != null) ...[
                   const SizedBox(width: 6),
                   Text('$trailingCount', style: AppTypography.label.copyWith(color: fg)),

@@ -19,11 +19,14 @@ abstract final class AppTypography {
   /// 화면 대제목 (탭 루트, 인증 첫 화면)
   static final display = _s(26, FontWeight.w800, height: 1.3);
 
+  /// 화면의 주인공 제목 (코스 이름 · 장소 이름 · 홈 코스 카드 D-day · 마이 숫자)
+  static final hero = _s(22, FontWeight.w800, height: 1.35);
+
   /// 위저드/섹션 큰 제목
   static final title = _s(21, FontWeight.w700, height: 1.35);
 
   /// 서브 화면 헤더 타이틀
-  static final header = _s(20, FontWeight.w700, height: 1.3);
+  static final header = _s(17, FontWeight.w800, height: 1.3);
 
   /// 섹션 제목
   static final section = _s(18, FontWeight.w700, height: 1.35);

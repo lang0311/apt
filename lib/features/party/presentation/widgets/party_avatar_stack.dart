@@ -19,8 +19,8 @@ class PartyAvatarStack extends StatelessWidget {
 
   static const _palette = [
     (AppColors.primarySoftStrong, AppColors.primary),
-    (Color(0xFFFDE4DD), Color(0xFFD0573C)),
-    (Color(0xFFE2F3EA), AppColors.success),
+    (AppColors.avatarCoralSoft, AppColors.avatarCoral),
+    (AppColors.avatarGreenSoft, AppColors.success),
     (AppColors.extractSoft, AppColors.extract),
   ];
 
@@ -28,9 +28,9 @@ class PartyAvatarStack extends StatelessWidget {
   /// [index]는 얼굴을 그릴 때와 같은 순서(서버 파티원 순서)
   static Color nameColor(int index) => const [
         AppColors.primary,
-        Color(0xFFB5432B),
-        Color(0xFF0C7259),
-        Color(0xFF6B45C9),
+        AppColors.avatarCoralText,
+        AppColors.avatarGreenText,
+        AppColors.avatarPurpleText,
       ][index % _palette.length];
 
   Widget _face(int index, PartyMember member) {

@@ -204,7 +204,7 @@ class _LineNote extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.94),
+        color: AppColors.mapPill,
         borderRadius: BorderRadius.circular(AppRadius.large),
         boxShadow: AppShadow.soft,
       ),
@@ -213,7 +213,7 @@ class _LineNote extends StatelessWidget {
         children: [
           Container(width: 16, height: 3, decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(2))),
           const SizedBox(width: 6),
-          Text('장소를 직선으로 이어 보여 줘요', style: AppTypography.caption.copyWith(fontSize: 11.5)),
+          Text('장소를 직선으로 이어 보여 줘요', style: AppTypography.caption),
         ],
       ),
     );
@@ -260,7 +260,7 @@ class _StopCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(place.name, style: AppTypography.bodyStrong.copyWith(fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(place.name, style: AppTypography.label, maxLines: 1, overflow: TextOverflow.ellipsis),
                     Text(place.categoryLabel, style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
                   ],
                 ),
@@ -290,7 +290,7 @@ class _Badge extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white, width: 2),
       ),
-      child: Text('$number', style: AppTypography.caption.copyWith(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800, height: 1)),
+      child: Text('$number', style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w800, height: 1)),
     );
   }
 }
