@@ -169,21 +169,24 @@ class _NaverMapViewState extends State<NaverMapView> implements AptMapCommands {
       ));
     }
     for (final m in widget.markers) {
+      final icon = await _iconFor(m);
+      // 아이콘을 그리는 동안 화면을 나갔거나 새 props가 들어왔으면 이번 결과는 버린다.
+      if (!mounted || token != _syncToken) return;
       final marker = NMarker(
         id: m.id,
         position: _latLng(m.point),
-        icon: await _iconFor(m),
+        icon: icon,
         size: _pinSize,
         anchor: const NPoint(0.5, 0.5),
       )..setZIndex(m.id == widget.selectedId ? 10 : 0);
       if (widget.onMarkerTap != null) marker.setOnTapListener((_) => widget.onMarkerTap!(m));
       overlays.add(marker);
     }
-    // 아이콘을 그리는 동안 새 props가 들어왔으면 이번 결과는 버린다.
     if (!mounted || token != _syncToken) return;
 
     await c.clearOverlays();
     await c.addOverlayAll(overlays);
+    if (!mounted || token != _syncToken) return;
     await _fitIfNeeded(c);
   }
 
