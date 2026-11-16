@@ -47,6 +47,9 @@ class WebTileMap extends StatefulWidget {
 class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
   final _map = MapController();
   bool _ready = false;
+
+  /// 지도가 준비되기 전에 온 마지막 카메라 명령. 준비되면 적용한다.
+  VoidCallback? _pendingCamera;
   GeoPoint? _locationDot;
   Timer? _idleTimer;
 
@@ -85,12 +88,20 @@ class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
 
   @override
   void moveTo(GeoPoint target, {double zoom = 15}) {
-    if (_ready) _map.move(_latLng(target), zoom);
+    if (!_ready) {
+      _pendingCamera = () => moveTo(target, zoom: zoom);
+      return;
+    }
+    _map.move(_latLng(target), zoom);
   }
 
   @override
   void fitTo(List<GeoPoint> points) {
-    if (!_ready || points.isEmpty) return;
+    if (points.isEmpty) return;
+    if (!_ready) {
+      _pendingCamera = () => fitTo(points);
+      return;
+    }
     final b = focusBounds(points)!;
     _map.fitCamera(
       CameraFit.bounds(
@@ -149,6 +160,8 @@ class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
               ),
         onMapReady: () {
           _ready = true;
+          _pendingCamera?.call();
+          _pendingCamera = null;
           _onCameraChanged(_map.camera);
         },
         onPositionChanged: (camera, gesture) => _onCameraChanged(camera),
