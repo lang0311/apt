@@ -77,15 +77,6 @@ class CourseDraft {
   CourseDraft removePlace(String placeId) =>
       copyWith(places: places.where((p) => p.id != placeId).toList());
 
-  /// ReorderableListView 규칙(newIndex는 제거 전 기준)을 따른다.
-  CourseDraft reorder(int oldIndex, int newIndex) {
-    final list = [...places];
-    if (newIndex > oldIndex) newIndex -= 1;
-    final item = list.removeAt(oldIndex);
-    list.insert(newIndex, item);
-    return copyWith(places: list);
-  }
-
   CourseDraft reject(String placeId) => copyWith(rejectedPlaceIds: {...rejectedPlaceIds, placeId});
 
   static CourseDraft fromCourse(Course course) => CourseDraft(

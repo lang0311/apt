@@ -6,9 +6,9 @@ import '../../app/theme/app_typography.dart';
 
 /// 색 규칙(07 D57): primary = 화면마다 하나, 다음 단계로 가는 주 행동 · white = 그 옆 보조 행동 ·
 /// soft = 목록 줄 안 작은 행동 · dark = 이미 켜진 상태(저장됨 등) · danger = 지우기 · 차단(빨간 글자)
-enum AppButtonVariant { primary, dark, outline, soft, white, danger }
+enum AppButtonVariant { primary, dark, soft, white, danger }
 
-/// 공통 버튼 (Primary / Dark / Outline / Soft / White). 높이 52, radius 16.
+/// 공통 버튼 (Primary / Dark / Soft / White / Danger). 높이 52, radius 14.
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
@@ -20,26 +20,6 @@ class AppButton extends StatelessWidget {
     this.expand = true,
     this.height = AppSpacing.buttonHeight,
   });
-
-  const AppButton.dark({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    this.icon,
-    this.loading = false,
-    this.expand = true,
-    this.height = AppSpacing.buttonHeight,
-  }) : variant = AppButtonVariant.dark;
-
-  const AppButton.outline({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    this.icon,
-    this.loading = false,
-    this.expand = true,
-    this.height = AppSpacing.buttonHeight,
-  }) : variant = AppButtonVariant.outline;
 
   final String label;
   final VoidCallback? onPressed;
@@ -58,7 +38,6 @@ class AppButton extends StatelessWidget {
         : switch (variant) {
             AppButtonVariant.primary => (AppColors.primary, Colors.white, null),
             AppButtonVariant.dark => (AppColors.ink, Colors.white, null),
-            AppButtonVariant.outline => (AppColors.surface, AppColors.primary, AppColors.primary),
             AppButtonVariant.soft => (AppColors.primarySoft, AppColors.primary, null),
             AppButtonVariant.white => (AppColors.surface, AppColors.textPrimary, AppColors.border),
             AppButtonVariant.danger => (AppColors.surface, AppColors.dangerText, AppColors.border),
@@ -113,14 +92,12 @@ class AppTextLink extends StatelessWidget {
     required this.onPressed,
     this.color = AppColors.primary,
     this.style,
-    this.trailingChevron = false,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final Color color;
   final TextStyle? style;
-  final bool trailingChevron;
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +116,6 @@ class AppTextLink extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            if (trailingChevron) Icon(Icons.chevron_right_rounded, size: 18, color: color),
           ],
         ),
       ),

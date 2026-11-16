@@ -8,8 +8,6 @@ import '../recommendation_controller.dart';
 /// 다시 추천하는 동안 일정 위에 두는 한 줄(작은 진행 원 + 문구 + 취소). 이전 결과는 아래에 그대로 둔다.
 /// 카드 안에 칸을 또 띄우지 않으려고 바탕 없이 글자 줄로만 둔다(07 D57 · D60).
 class RecommendingBanner extends StatelessWidget {
-  const RecommendingBanner({super.key, required this.onCancel, this.count = 0, this.kind = RerollKind.all});
-
   /// 지금 상태에 맞는 줄 — 다시 추천은 AI 자리 수, 한 곳 바꾸기는 다른 문구
   RecommendingBanner.of(RecommendationState state, {super.key, required this.onCancel})
       : count = state.loadingIds.length,

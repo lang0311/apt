@@ -220,12 +220,10 @@ class _DetailRow extends StatelessWidget {
       );
 }
 
-/// "10월 22일 (목) · 오전 11:00 출발 · 5곳 · 약 6시간"
-String courseMetaLine({DateTime? date, TimeOfDay? start, int? placeCount, Duration? duration}) => [
+/// "10월 22일 (목) · 오전 11:00 출발"
+String courseMetaLine({DateTime? date, TimeOfDay? start}) => [
       if (date != null) formatMonthDayWeekday(date),
       if (start != null) '${formatTimeOfDay(start)} 출발',
-      if (placeCount != null) '$placeCount곳',
-      if (duration != null) '약 ${formatDuration(duration)}',
     ].join(' · ');
 
 /// 장소 사이 직선 거리 합(m). 팀 서버 `distance_km`와 같은 방식(`route_type: straight_line`)이라 편집 뒤에도 앱에서 다시 센다.

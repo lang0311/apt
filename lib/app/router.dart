@@ -119,11 +119,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.courseNewPlaces, builder: (_, _) => const PlaceSelectionPage()),
       GoRoute(path: AppRoutes.courseNewCompanion, builder: (_, _) => const CompanionPage()),
       GoRoute(path: AppRoutes.courseNewAi, builder: (_, _) => const AiRecommendationPage()),
-      // 완료 화면은 없앴다(저장하면 바로 상세). 예전 링크는 상세로 보낸다.
-      GoRoute(
-        path: '/courses/new/done',
-        redirect: (_, s) => AppRoutes.course(s.uri.queryParameters['id'] ?? '', justSaved: true),
-      ),
       GoRoute(path: AppRoutes.blockedPlaces, builder: (_, _) => const BlockedPlacesPage()),
       GoRoute(path: AppRoutes.placeSearch, builder: (_, _) => const PlaceSearchPage()),
       GoRoute(path: '/course-edit/:id', builder: (_, s) => CourseEditPage(courseId: s.pathParameters['id']!)),

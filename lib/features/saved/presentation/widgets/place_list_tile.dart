@@ -14,8 +14,7 @@ class PlaceListTile extends StatelessWidget {
     required this.place,
     this.onTap,
     this.subtitle,
-    this.footer,
-    this.trailing,
+    required this.footer,
     this.showBookmark = true,
     this.thumbSize = 68,
     this.flat = false,
@@ -27,9 +26,9 @@ class PlaceListTile extends StatelessWidget {
   /// 기본: "지역 · 카테고리"
   final String? subtitle;
 
-  /// 기본: ★ 평점
-  final Widget? footer;
-  final Widget? trailing;
+  /// 설명 아래 줄 (거리 등). 없으면 `SizedBox.shrink()`
+  final Widget footer;
+
   final bool showBookmark;
   final double thumbSize;
 
@@ -55,23 +54,22 @@ class PlaceListTile extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 6),
-              footer ?? (place.rating == null ? const SizedBox.shrink() : RatingText(place.rating!)),
+              footer,
             ],
           ),
         ),
-        trailing ??
-            Column(
-              children: [
-                if (showBookmark)
-                  Icon(
-                    place.isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-                    color: AppColors.primary,
-                    semanticLabel: place.isSaved ? '저장됨' : '저장 안 됨',
-                  ),
-                const SizedBox(height: AppSpacing.xs),
-                const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
-              ],
-            ),
+        Column(
+          children: [
+            if (showBookmark)
+              Icon(
+                place.isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                color: AppColors.primary,
+                semanticLabel: place.isSaved ? '저장됨' : '저장 안 됨',
+              ),
+            const SizedBox(height: AppSpacing.xs),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+          ],
+        ),
       ],
     );
 
@@ -82,19 +80,5 @@ class PlaceListTile extends StatelessWidget {
       );
     }
     return AppCard(onTap: onTap, padding: const EdgeInsets.all(AppSpacing.md), child: content);
-  }
-}
-
-class RatingText extends StatelessWidget {
-  const RatingText(this.rating, {super.key, this.suffix});
-  final double rating;
-  final String? suffix;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      '★ ${rating.toStringAsFixed(1)}${suffix == null ? '' : ' · $suffix'}',
-      style: AppTypography.label.copyWith(color: AppColors.primary),
-    );
   }
 }

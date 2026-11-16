@@ -25,12 +25,6 @@ void main() {
       expect(d.places.map((p) => p.id), ['a', 'b', 'c']);
     });
 
-    test('순서 변경 (ReorderableListView 규칙)', () {
-      final d = const CourseDraft().addPlaces([_p('a'), _p('b'), _p('c')]);
-      expect(d.reorder(0, 3).places.map((p) => p.id), ['b', 'c', 'a']);
-      expect(d.reorder(2, 0).places.map((p) => p.id), ['c', 'a', 'b']);
-    });
-
     test('삭제와 추천 제외', () {
       final d = const CourseDraft().addPlaces([_p('a'), _p('b')]).removePlace('a').reject('x');
       expect(d.places.map((p) => p.id), ['b']);
