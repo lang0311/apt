@@ -125,13 +125,7 @@ class _CourseInfoPageState extends ConsumerState<CourseInfoPage> {
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.sm, AppSpacing.screenH, 0),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.auto_awesome, size: 14, color: AppColors.ai),
-                          const SizedBox(width: 6),
-                          Text('선택한 분위기는 추천에 반영돼요.', style: AppTypography.caption),
-                        ],
-                      ),
+                      child: Text('선택한 분위기는 추천에 반영돼요.', style: AppTypography.caption),
                     ),
                   ],
                 ],
