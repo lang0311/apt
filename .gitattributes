@@ -13,3 +13,6 @@
 /.agents/ export-ignore
 /skills-lock.json export-ignore
 /.gitattributes export-ignore
+/tools/figma/ export-ignore
+/integration_test/_figma/ export-ignore
+/scripts/run-server-high-limit.ps1 export-ignore
