@@ -15,10 +15,10 @@ class PlaceTiming {
   final DateTime? checkedOn;
 
   String get kindLabel => switch (kind) {
-        PlaceTimingKind.popup => '팝업',
-        PlaceTimingKind.event => '행사',
-        PlaceTimingKind.newOpening => '신규 오픈',
-      };
+    PlaceTimingKind.popup => '팝업',
+    PlaceTimingKind.event => '행사',
+    PlaceTimingKind.newOpening => '신규 오픈',
+  };
 
   bool get isLimited => kind != PlaceTimingKind.newOpening;
 
@@ -128,11 +128,5 @@ TimingPeriod? timingPeriod(PlaceTiming? timing, {DateTime? today}) {
   final end = timing.end!;
   final value = timing.start == null ? '~ ${_mdw(end)}' : '${_mdw(timing.start!)} ~ ${_mdw(end)}';
   final ended = now.isAfter(end);
-  return (
-    label: '기간',
-    value: value,
-    note: ended ? '종료된 ${timing.kindLabel}이에요' : note,
-    tip: ended ? null : timingVisitTip,
-    ended: ended,
-  );
+  return (label: '기간', value: value, note: ended ? '종료된 ${timing.kindLabel}이에요' : note, tip: ended ? null : timingVisitTip, ended: ended);
 }

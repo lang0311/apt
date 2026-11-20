@@ -114,8 +114,7 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
     setState(() => _center = center);
   }
 
-  bool get _mapMoved =>
-      _center != null && _fittedCenter != null && _center!.distanceTo(_fittedCenter!) > _moveThresholdMeters;
+  bool get _mapMoved => _center != null && _fittedCenter != null && _center!.distanceTo(_fittedCenter!) > _moveThresholdMeters;
 
   void _select(Place p) {
     setState(() {
@@ -159,8 +158,7 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
     final repo = ref.read(savedRepositoryProvider);
     try {
       // 이미 저장한 곳은 지금 들어 있는 보관함을 체크해 두고 시작한다 (시트 결과로 통째로 바꾸기 때문)
-      final current = _collectionIds[p.id] ??
-          (_isSaved(p) ? (await repo.fetchPlaceCollectionIds(p.id)).toSet() : <String>{});
+      final current = _collectionIds[p.id] ?? (_isSaved(p) ? (await repo.fetchPlaceCollectionIds(p.id)).toSet() : <String>{});
       if (!mounted) return;
       final picked = await showCollectionSelectSheet(context, placeName: p.name, initialSelected: current);
       if (picked == null || !mounted) return;
@@ -193,14 +191,20 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
   Future<List<String>> _collectionNames(Set<String> ids) async {
     if (ids.isEmpty) return const [];
     final all = await ref.read(collectionsProvider.future);
-    return [for (final c in all) if (ids.contains(c.id)) c.name];
+    return [
+      for (final c in all)
+        if (ids.contains(c.id)) c.name,
+    ];
   }
 
   String? _collectionLabel(Place p) {
     final ids = _collectionIds[p.id];
     if (ids == null || ids.isEmpty) return null;
     final all = ref.watch(collectionsProvider).value ?? const [];
-    final names = [for (final c in all) if (ids.contains(c.id)) c.name];
+    final names = [
+      for (final c in all)
+        if (ids.contains(c.id)) c.name,
+    ];
     if (names.isEmpty) return null;
     return names.length == 1 ? names.first : '${names.first} 외 ${names.length - 1}';
   }
@@ -231,58 +235,60 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
     ];
 
     return Scaffold(
-      body: LayoutBuilder(builder: (context, constraints) {
-        final top = MediaQuery.paddingOf(context).top;
-        return Stack(
-          children: [
-            Positioned.fill(
-              child: AptMap(
-                markers: markers,
-                selectedId: _selectedId,
-                bottomPadding: _single ? 200 : constraints.maxHeight * _sheetInitial,
-                topPadding: top + 120,
-                onCameraIdle: _onCameraIdle,
-                onMarkerTap: (marker) {
-                  final place = places.where((p) => p.id == marker.id).firstOrNull;
-                  if (place != null) _select(place);
-                },
-                controller: _map,
-              ),
-            ),
-            SafeArea(child: _topBar(onMap: true)),
-            if (_single && selected != null)
-              Positioned(
-                left: AppSpacing.md,
-                right: AppSpacing.md,
-                bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.md,
-                child: Material(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadius.card),
-                  elevation: 3,
-                  shadowColor: AppColors.shadow,
-                  clipBehavior: Clip.antiAlias,
-                  child: _card(selected),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final top = MediaQuery.paddingOf(context).top;
+          return Stack(
+            children: [
+              Positioned.fill(
+                child: AptMap(
+                  markers: markers,
+                  selectedId: _selectedId,
+                  bottomPadding: _single ? 200 : constraints.maxHeight * _sheetInitial,
+                  topPadding: top + 120,
+                  onCameraIdle: _onCameraIdle,
+                  onMarkerTap: (marker) {
+                    final place = places.where((p) => p.id == marker.id).firstOrNull;
+                    if (place != null) _select(place);
+                  },
+                  controller: _map,
                 ),
-              )
-            else
-              DraggableScrollableSheet(
-                controller: _sheet,
-                initialChildSize: _sheetInitial,
-                minChildSize: 0.2,
-                maxChildSize: 0.92,
-                snap: true,
-                builder: (context, scroll) => DecoratedBox(
-                  decoration: const BoxDecoration(
+              ),
+              SafeArea(child: _topBar(onMap: true)),
+              if (_single && selected != null)
+                Positioned(
+                  left: AppSpacing.md,
+                  right: AppSpacing.md,
+                  bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.md,
+                  child: Material(
                     color: AppColors.surface,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
-                    boxShadow: AppShadow.soft,
+                    borderRadius: BorderRadius.circular(AppRadius.card),
+                    elevation: 3,
+                    shadowColor: AppColors.shadow,
+                    clipBehavior: Clip.antiAlias,
+                    child: _card(selected),
                   ),
-                  child: _resultList(scroll, results, query),
+                )
+              else
+                DraggableScrollableSheet(
+                  controller: _sheet,
+                  initialChildSize: _sheetInitial,
+                  minChildSize: 0.2,
+                  maxChildSize: 0.92,
+                  snap: true,
+                  builder: (context, scroll) => DecoratedBox(
+                    decoration: const BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
+                      boxShadow: AppShadow.soft,
+                    ),
+                    child: _resultList(scroll, results, query),
+                  ),
                 ),
-              ),
-          ],
-        );
-      }),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -296,10 +302,7 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
             _topBar(onMap: false),
             Padding(
               padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.md, AppSpacing.screenH, 0),
-              child: Text(
-                '가게 이름으로 찾아요. 지점이 여러 곳이면 동네 이름을 같이 넣어 보세요.',
-                style: AppTypography.meta,
-              ),
+              child: Text('가게 이름으로 찾아요. 지점이 여러 곳이면 동네 이름을 같이 넣어 보세요.', style: AppTypography.meta),
             ),
           ],
         ),
@@ -395,10 +398,7 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
           ),
           data: (list) => Column(
             children: [
-              for (final p in list) ...[
-                const Divider(height: 1, thickness: 1, color: AppColors.divider),
-                _card(p),
-              ],
+              for (final p in list) ...[const Divider(height: 1, thickness: 1, color: AppColors.divider), _card(p)],
             ],
           ),
         ),
@@ -577,11 +577,7 @@ class _CardButton extends StatelessWidget {
 
 /// 검색칸 아래 흰 알약 버튼 ('현재 지도에서 검색하기', '목록 보기')
 class _AreaSearchButton extends StatelessWidget {
-  const _AreaSearchButton({
-    required this.onPressed,
-    this.label = '현재 지도에서 검색하기',
-    this.icon = Icons.refresh_rounded,
-  });
+  const _AreaSearchButton({required this.onPressed, this.label = '현재 지도에서 검색하기', this.icon = Icons.refresh_rounded});
 
   final VoidCallback onPressed;
   final String label;

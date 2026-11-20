@@ -13,18 +13,17 @@ class MockPlaceSearchRepository implements PlaceSearchRepository {
 
   @override
   Future<List<Place>> search(String query, {GeoPoint? near}) => _store.behavior.query(() {
-        final text = query.trim().toLowerCase();
-        final found = [
-          for (final p in MockFixtures.places)
-            if ([p.name, p.categoryLabel, p.address].any((field) => field.toLowerCase().contains(text)))
-              _store.placeWithSaved(p.id),
-        ];
-        if (near != null) {
-          double distanceOf(Place p) => p.location == null ? double.infinity : near.distanceTo(p.location!);
-          found.sort((a, b) => distanceOf(a).compareTo(distanceOf(b)));
-        }
-        return found;
-      });
+    final text = query.trim().toLowerCase();
+    final found = [
+      for (final p in MockFixtures.places)
+        if ([p.name, p.categoryLabel, p.address].any((field) => field.toLowerCase().contains(text))) _store.placeWithSaved(p.id),
+    ];
+    if (near != null) {
+      double distanceOf(Place p) => p.location == null ? double.infinity : near.distanceTo(p.location!);
+      found.sort((a, b) => distanceOf(a).compareTo(distanceOf(b)));
+    }
+    return found;
+  });
 }
 
 // NEEDS BACKEND: API 명세의 장소 검색 (팀 서버는 GET /places/search, 06 §0)
@@ -34,6 +33,5 @@ class ApiPlaceSearchRepository implements PlaceSearchRepository {
   final ApiClient _client;
 
   @override
-  Future<List<Place>> search(String query, {GeoPoint? near}) async =>
-      throw const NotImplementedFailure('지도에서 검색하기');
+  Future<List<Place>> search(String query, {GeoPoint? near}) async => throw const NotImplementedFailure('지도에서 검색하기');
 }

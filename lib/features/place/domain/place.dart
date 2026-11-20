@@ -68,33 +68,28 @@ class Place {
   }
 
   Place copyWith({bool? isSaved}) => Place(
-        id: id,
-        name: name,
-        address: address,
-        areaLabel: areaLabel,
-        categoryKey: categoryKey,
-        categoryLabel: categoryLabel,
-        imageUrl: imageUrl,
-        rating: rating,
-        keywords: keywords,
-        location: location,
-        sourceUrl: sourceUrl,
-        sourceHandle: sourceHandle,
-        phone: phone,
-        mapUrl: mapUrl,
-        timing: timing,
-        isSaved: isSaved ?? this.isSaved,
-      );
+    id: id,
+    name: name,
+    address: address,
+    areaLabel: areaLabel,
+    categoryKey: categoryKey,
+    categoryLabel: categoryLabel,
+    imageUrl: imageUrl,
+    rating: rating,
+    keywords: keywords,
+    location: location,
+    sourceUrl: sourceUrl,
+    sourceHandle: sourceHandle,
+    phone: phone,
+    mapUrl: mapUrl,
+    timing: timing,
+    isSaved: isSaved ?? this.isSaved,
+  );
 }
 
 /// 장소 상세 (상세 화면 전용 추가 정보)
 class PlaceDetail {
-  const PlaceDetail({
-    required this.place,
-    this.openStatusLabel,
-    this.closingLabel,
-    this.collectionIds = const [],
-  });
+  const PlaceDetail({required this.place, this.openStatusLabel, this.closingLabel, this.collectionIds = const []});
 
   final Place place;
 

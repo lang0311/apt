@@ -1,4 +1,4 @@
-﻿import '../../../core/error/app_failure.dart';
+import '../../../core/error/app_failure.dart';
 import '../../../core/network/api_client.dart';
 import '../../../dev/mock/mock_store.dart';
 import '../domain/place.dart';
@@ -10,17 +10,17 @@ class MockPlaceRepository implements PlaceRepository {
 
   @override
   Future<PlaceDetail> fetchPlace(String placeId) => _store.behavior.query(() {
-        final place = _store.placeWithSaved(placeId);
-        return PlaceDetail(
-          place: place,
-          openStatusLabel: '영업 중',
-          closingLabel: '21:00 마감',
-          collectionIds: [
-            for (final entry in _store.members.entries)
-              if (entry.value.contains(placeId)) entry.key,
-          ],
-        );
-      });
+    final place = _store.placeWithSaved(placeId);
+    return PlaceDetail(
+      place: place,
+      openStatusLabel: '영업 중',
+      closingLabel: '21:00 마감',
+      collectionIds: [
+        for (final entry in _store.members.entries)
+          if (entry.value.contains(placeId)) entry.key,
+      ],
+    );
+  });
 }
 
 // NEEDS BACKEND: 장소 상세 API (영업 상태, 평점 출처, 원본 SNS 링크, 내 저장 상태/소속 보관함)

@@ -24,6 +24,7 @@ import '../../saved/presentation/widgets/place_image.dart';
 import '../../saved/presentation/widgets/saved_rows.dart';
 import '../domain/place.dart';
 import '../domain/place_timing.dart';
+import 'widgets/place_action_tiles.dart';
 
 /// #20 장소 상세: 일반 헤더(뒤로 · 장소 상세 · 공유) → 사진(있을 때) → 이름 카드(저장 버튼, 추천받은 곳이면 ✦ 코스 이름) →
 /// 장소 정보(값이 있는 줄만) → 담은 보관함, 하단 고정 '이 장소로 코스 만들기'
@@ -31,7 +32,7 @@ class PlaceDetailPage extends ConsumerWidget {
   const PlaceDetailPage({super.key, required this.placeId});
   final String placeId;
 
-  static const _photoHeight = 200.0;
+  static const _photoHeight = 240.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -131,29 +132,30 @@ class _Body extends ConsumerWidget {
     final recommendedIn = aiItem == null ? null : SavedPlaceRow.recommendedLabel(aiItem.recommendedIn);
     // 값이 없는 줄은 숨긴다 (추천받은 곳은 주소가 비어 있을 수 있다)
     final period = timingPeriod(place.timing);
+    final hasPhoto = place.imageUrl != null && place.imageUrl!.isNotEmpty;
     final infoRows = <Widget>[
-      // 팝업 · 행사 · 신규 오픈 기간은 맨 위 (서버 API 1번)
-      if (period != null)
+      if (place.address.trim().isNotEmpty)
         _InfoRow(
-          label: period.label,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(period.value, style: AppTypography.bodyStrong.copyWith(color: period.ended ? AppColors.textSecondary : null)),
-              const SizedBox(height: 2),
-              Text(period.note, style: AppTypography.caption),
-              if (period.tip != null) Text(period.tip!, style: AppTypography.caption),
-            ],
-          ),
+          label: '주소',
+          child: Text(place.address, style: AppTypography.bodyMuted),
         ),
-      if (place.address.trim().isNotEmpty) _InfoRow(label: '주소', child: Text(place.address, style: AppTypography.bodyMuted)),
       if (place.phone != null)
-        _InfoRow(label: '전화', onTap: () => openDialer(context, place.phone!), child: Text(place.phone!, style: AppTypography.bodyStrong)),
-      if (place.keywords.isNotEmpty) _InfoRow(label: '키워드', child: TagWrap(place.keywords, tone: AppTagTone.primary)),
-      if (place.mapUrl != null)
-        _InfoRow(label: '지도', onTap: () => openExternalLink(context, place.mapUrl!), child: Text('카카오맵에서 보기', style: AppTypography.bodyStrong)),
+        _InfoRow(
+          label: '전화',
+          onTap: () => openDialer(context, place.phone!),
+          child: Text(place.phone!, style: AppTypography.bodyStrong),
+        ),
+      if (place.keywords.isNotEmpty)
+        _InfoRow(
+          label: '키워드',
+          child: TagWrap(place.keywords, tone: AppTagTone.primary),
+        ),
       if (place.sourceUrl != null)
-        _InfoRow(label: '원본', onTap: () => openExternalLink(context, place.sourceUrl!), child: Text('Instagram 게시물', style: AppTypography.bodyStrong)),
+        _InfoRow(
+          label: '원본',
+          onTap: () => openExternalLink(context, place.sourceUrl!),
+          child: Text('Instagram 게시물', style: AppTypography.bodyStrong),
+        ),
     ];
 
     return Column(
@@ -162,19 +164,28 @@ class _Body extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.only(bottom: AppSpacing.lg),
             children: [
-              // 사진이 있으면 이름 카드 위에, 없으면 이름 카드부터
-              if (place.imageUrl != null && place.imageUrl!.isNotEmpty) ...[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.xs, AppSpacing.screenH, 0),
-                  child: PlaceImage(place: place, width: double.infinity, height: PlaceDetailPage._photoHeight, radius: AppRadius.card, iconSize: 40),
-                ),
-                const SizedBox(height: AppSpacing.sm),
+              // v2: 사진이 있으면 화면 폭 전체 사진, 없으면 업종 색 칸 + 이름 (서버 모드는 사진이 없다)
+              if (hasPhoto) ...[
+                PlaceImage(place: place, width: double.infinity, height: PlaceDetailPage._photoHeight, radius: 0, iconSize: 40),
+                const SizedBox(height: AppSpacing.lg),
               ] else
-                const SizedBox(height: AppSpacing.xs),
+                const SizedBox(height: AppSpacing.xxs),
               Padding(
                 padding: AppSpacing.screenPadding,
-                child: _TitleCard(detail: detail, recommendedIn: recommendedIn, onSave: () => _onSaveButton(context, ref)),
+                child: _TitleCard(
+                  detail: detail,
+                  recommendedIn: recommendedIn,
+                  hasPhoto: hasPhoto,
+                  onSave: () => _onSaveButton(context, ref),
+                ),
               ),
+              if (period != null) ...[
+                const SizedBox(height: 14),
+                Padding(
+                  padding: AppSpacing.screenPadding,
+                  child: _PeriodPanel(period: period),
+                ),
+              ],
               if (place.location != null) ...[
                 const SizedBox(height: AppSpacing.sm),
                 Padding(
@@ -183,13 +194,14 @@ class _Body extends ConsumerWidget {
                 ),
               ],
               if (infoRows.isNotEmpty) ...[
-                const SectionHeader(title: '장소 정보', padding: EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.lg, AppSpacing.screenH, AppSpacing.xs)),
+                const SectionHeader(
+                  title: '장소 정보',
+                  padding: EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.lg, AppSpacing.screenH, AppSpacing.xs),
+                ),
+                // v2: 상자 없이 왼쪽 회색 이름표 + 값
                 Padding(
-                  padding: AppSpacing.screenPadding,
-                  child: AppCard(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
-                    child: DividedRows(indent: SectionCard.innerPadding, children: infoRows),
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
+                  child: DividedRows(indent: SectionCard.innerPadding, children: infoRows),
                 ),
               ],
               if (place.isSaved && collections.isNotEmpty) ...[
@@ -228,11 +240,12 @@ class _Body extends ConsumerWidget {
   }
 }
 
-/// 이름 · 카테고리 · 동네 · 평점 · 영업 상태 + 저장 버튼
+/// 이름 머리 (v2): (사진 없으면 업종 색 칸 64) · 업종 · 동네 · 이름 24 · 평점 · 영업 상태 → 행동 칸(저장 · 카카오맵 · 전화)
 class _TitleCard extends StatelessWidget {
-  const _TitleCard({required this.detail, required this.onSave, this.recommendedIn});
+  const _TitleCard({required this.detail, required this.onSave, required this.hasPhoto, this.recommendedIn});
   final PlaceDetail detail;
   final VoidCallback onSave;
+  final bool hasPhoto;
 
   /// "test3 코스에서 추천" — 추천받아 저장된 곳만 (✦ · 주황은 AI 추천 표시 전용)
   final String? recommendedIn;
@@ -245,51 +258,80 @@ class _TitleCard extends StatelessWidget {
       ?detail.openStatusLabel,
       ?detail.closingLabel,
     ].join(' · ');
-    return AppCard(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.md),
-      child: Row(
+    final kind = [place.categoryLabel, if (place.shortArea.isNotEmpty) place.shortArea].join(' · ');
+    final names = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(kind, style: AppTypography.meta),
+        Text(place.name, style: AppTypography.hero),
+      ],
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (hasPhoto)
+          names
+        else
+          Row(
+            children: [
+              PlaceImage(place: place, width: 64, height: 64, radius: 18, iconSize: 28),
+              const SizedBox(width: 14),
+              Expanded(child: names),
+            ],
+          ),
+        if (status.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(status, style: AppTypography.meta.copyWith(color: AppColors.textSecondary)),
+        ],
+        if (recommendedIn != null) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Row(
+            children: [
+              const Text('✦', style: TextStyle(color: AppColors.ai, fontSize: 13)),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  '$recommendedIn받은 곳이에요',
+                  style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w700),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ],
+        const SizedBox(height: AppSpacing.md),
+        PlaceActionTiles(
+          saved: place.isSaved,
+          onSave: onSave,
+          onMap: place.mapUrl == null ? null : () => openExternalLink(context, place.mapUrl!),
+          onCall: place.phone == null ? null : () => openDialer(context, place.phone!),
+        ),
+      ],
+    );
+  }
+}
+
+/// 팝업 · 행사 · 신규 오픈 기간 (v2: 연파랑 판, 기간 굵게 · 확인한 날 · 방문 안내)
+class _PeriodPanel extends StatelessWidget {
+  const _PeriodPanel({required this.period});
+  final TimingPeriod period;
+
+  @override
+  Widget build(BuildContext context) {
+    final ended = period.ended;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(color: ended ? AppColors.fill : AppColors.primarySoft, borderRadius: BorderRadius.circular(14)),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(place.name, style: AppTypography.hero),
-                const SizedBox(height: 4),
-                Text([place.categoryLabel, if (place.shortArea.isNotEmpty) place.shortArea].join(' · '), style: AppTypography.bodyMuted),
-                if (status.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(status, style: AppTypography.label.copyWith(color: AppColors.primary)),
-                ],
-                if (recommendedIn != null) ...[
-                  const SizedBox(height: AppSpacing.xs),
-                  Row(
-                    children: [
-                      const Icon(Icons.auto_awesome, size: 13, color: AppColors.ai),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          '$recommendedIn받은 곳이에요',
-                          style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w700),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
-            ),
+          Text(
+            '${period.label} ${period.value}',
+            style: AppTypography.bodyStrong.copyWith(color: ended ? AppColors.textSecondary : AppColors.primary),
           ),
-          const SizedBox(width: AppSpacing.xs),
-          AppButton(
-            label: place.isSaved ? '저장됨' : '저장하기',
-            variant: place.isSaved ? AppButtonVariant.dark : AppButtonVariant.white,
-            icon: place.isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-            expand: false,
-            height: 40,
-            onPressed: onSave,
-          ),
+          const SizedBox(height: 4),
+          Text([period.note, ?period.tip].join(' '), style: AppTypography.meta.copyWith(color: AppColors.textSecondary)),
         ],
       ),
     );
@@ -349,8 +391,13 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: AppSpacing.sm),
       child: Row(
         children: [
-          SizedBox(width: 56, child: Text(label, style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700))),
-          Expanded(child: Align(alignment: Alignment.centerLeft, child: child)),
+          SizedBox(
+            width: 56,
+            child: Text(label, style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700)),
+          ),
+          Expanded(
+            child: Align(alignment: Alignment.centerLeft, child: child),
+          ),
           if (onTap != null) const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
         ],
       ),
