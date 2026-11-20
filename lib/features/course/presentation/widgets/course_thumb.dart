@@ -20,7 +20,13 @@ class CourseThumb extends StatelessWidget {
     final url = course.thumbnailUrl;
     final keys = course.stopCategoryKeys;
     if ((url != null && url.isNotEmpty) || keys.isEmpty) {
-      return AppNetworkImage(url: url, width: size, height: size, radius: size >= 60 ? AppRadius.thumb : 12, placeholderIcon: Icons.route_rounded);
+      return AppNetworkImage(
+        url: url,
+        width: size,
+        height: size,
+        radius: size >= 60 ? AppRadius.thumb : 12,
+        placeholderIcon: Icons.route_rounded,
+      );
     }
     final half = (size - _gap) / 2;
     Widget tile(String key, double w, double h) {
@@ -57,7 +63,10 @@ class CourseThumb extends StatelessWidget {
               height: half,
               alignment: Alignment.center,
               decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.tiny)),
-              child: Text('+${n - 3}', style: TextStyle(fontSize: half * 0.36, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
+              child: Text(
+                '+${n - 3}',
+                style: TextStyle(fontSize: half * 0.36, fontWeight: FontWeight.w800, color: AppColors.textSecondary),
+              ),
             );
       mosaic = Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -69,6 +78,8 @@ class CourseThumb extends StatelessWidget {
     }
 
     // 카테고리 아이콘은 장식이라 스크린리더에는 읽히지 않게 한다 (코스 이름 · 곳 수가 이미 읽힌다)
-    return ExcludeSemantics(child: SizedBox(width: size, height: size, child: mosaic));
+    return ExcludeSemantics(
+      child: SizedBox(width: size, height: size, child: mosaic),
+    );
   }
 }

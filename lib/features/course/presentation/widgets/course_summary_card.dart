@@ -33,10 +33,7 @@ class CourseSummaryRow extends StatelessWidget {
                 children: [
                   // 이름은 두 줄까지, 파티원·지역 줄은 한 줄로 줄인다
                   Text(course.title, style: AppTypography.bodyStrong, maxLines: 2, overflow: TextOverflow.ellipsis),
-                  if (course.isParty) ...[
-                    const SizedBox(height: 3),
-                    _People(names: course.memberNames, count: course.memberCount),
-                  ],
+                  if (course.isParty) ...[const SizedBox(height: 3), _People(names: course.memberNames, count: course.memberCount)],
                   const SizedBox(height: 2),
                   Text(where, style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
                 ],
@@ -96,7 +93,10 @@ class _When extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         if (upcoming) ...[
-          Text(ddayLabel(date), style: AppTypography.label.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
+          Text(
+            ddayLabel(date),
+            style: AppTypography.label.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800),
+          ),
           const SizedBox(height: 2),
         ],
         Text(formatMonthDayWeekday(date), style: AppTypography.caption.copyWith(color: upcoming ? null : AppColors.textSecondary)),

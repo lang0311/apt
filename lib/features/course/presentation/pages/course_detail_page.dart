@@ -55,7 +55,10 @@ class CourseDetailPage extends ConsumerWidget {
                 value: course,
                 onRetry: () => ref.invalidate(courseDetailProvider(courseId)),
                 data: (c) => justSaved && c.isParty && c.partyId != null
-                    ? _ShareAfterSave(course: c, child: _Body(course: c, justSaved: true))
+                    ? _ShareAfterSave(
+                        course: c,
+                        child: _Body(course: c, justSaved: true),
+                      )
                     : _Body(course: c, justSaved: justSaved),
               ),
             ),
@@ -91,10 +94,7 @@ class _Body extends StatelessWidget {
             children: [
               CourseStats(date: course.date, start: course.startTime, stops: course.stops),
               const SizedBox(height: AppSpacing.xs),
-              if (course.isParty) ...[
-                _CrewStrip(course: course),
-                const SizedBox(height: AppSpacing.xs),
-              ],
+              if (course.isParty) ...[_CrewStrip(course: course), const SizedBox(height: AppSpacing.xs)],
               CourseRouteMap(title: course.title, stops: course.stops, height: course.isParty ? 120 : 160),
               const SizedBox(height: AppSpacing.sm),
               SectionCard(
@@ -167,7 +167,10 @@ class _CrewStrip extends ConsumerWidget {
     final names = members == null ? '파티 ${course.memberCount}명' : members.crewNames;
     return Material(
       color: AppColors.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.medium), side: const BorderSide(color: AppColors.border)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.medium),
+        side: const BorderSide(color: AppColors.border),
+      ),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppRadius.medium),
         onTap: members == null ? null : () => _showMembers(context, members, partyId!, canInvite: party!.isOwner),
@@ -181,7 +184,9 @@ class _CrewStrip extends ConsumerWidget {
                   PartyAvatarStack(members: members, size: 24, max: 3, overlap: true),
                   const SizedBox(width: AppSpacing.xs),
                 ],
-                Expanded(child: Text(names, style: AppTypography.label, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                Expanded(
+                  child: Text(names, style: AppTypography.label, maxLines: 1, overflow: TextOverflow.ellipsis),
+                ),
                 if (members != null) const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
               ],
             ),
@@ -214,7 +219,9 @@ class _CrewStrip extends ConsumerWidget {
                     // 얼굴 색은 서버 순서 그대로 (상세의 얼굴 묶음과 같은 색)
                     PartyAvatarStack(members: [m], size: 36, max: 1, colorOffset: members.indexOf(m)),
                     const SizedBox(width: AppSpacing.sm),
-                    Flexible(child: Text(m.nickname, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                    Flexible(
+                      child: Text(m.nickname, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ),
                     if (m.isMe) ...[
                       const SizedBox(width: 6),
                       Container(

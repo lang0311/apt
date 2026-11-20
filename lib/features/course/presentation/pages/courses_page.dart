@@ -112,20 +112,23 @@ class _Split extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final upcoming = [for (final c in courses) if (c.date == null || daysUntil(c.date!) >= 0) c]
-      ..sort((a, b) => (a.date ?? DateTime(9999)).compareTo(b.date ?? DateTime(9999)));
-    final otherNext = ([for (final c in others) if (c.date != null && daysUntil(c.date!) >= 0) c]
-          ..sort((a, b) => a.date!.compareTo(b.date!)))
-        .firstOrNull;
-    final past = [for (final c in courses) if (c.date != null && daysUntil(c.date!) < 0) c]
-      ..sort((a, b) => b.date!.compareTo(a.date!));
+    final upcoming = [
+      for (final c in courses)
+        if (c.date == null || daysUntil(c.date!) >= 0) c,
+    ]..sort((a, b) => (a.date ?? DateTime(9999)).compareTo(b.date ?? DateTime(9999)));
+    final otherNext = ([
+      for (final c in others)
+        if (c.date != null && daysUntil(c.date!) >= 0) c,
+    ]..sort((a, b) => a.date!.compareTo(b.date!))).firstOrNull;
+    final past = [
+      for (final c in courses)
+        if (c.date != null && daysUntil(c.date!) < 0) c,
+    ]..sort((a, b) => b.date!.compareTo(a.date!));
 
     Widget rows(List<CourseSummary> list) => DividedRows(
-          indent: SectionCard.innerPadding + 48 + AppSpacing.sm,
-          children: [
-            for (final c in list) CourseSummaryRow(course: c, onTap: () => context.push(AppRoutes.course(c.id))),
-          ],
-        );
+      indent: SectionCard.innerPadding + 48 + AppSpacing.sm,
+      children: [for (final c in list) CourseSummaryRow(course: c, onTap: () => context.push(AppRoutes.course(c.id)))],
+    );
 
     // 지난 코스는 달마다 묶는다 (최근 달부터)
     final months = <String, List<CourseSummary>>{};
@@ -207,10 +210,7 @@ class _OtherUpcomingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sub = [
-      '함께하는 코스',
-      if (course.startTime != null) '${formatTimeOfDay(course.startTime!)} 출발',
-    ].join(' · ');
+    final sub = ['함께하는 코스', if (course.startTime != null) '${formatTimeOfDay(course.startTime!)} 출발'].join(' · ');
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
       child: Material(
@@ -223,7 +223,10 @@ class _OtherUpcomingRow extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.sm),
             child: Row(
               children: [
-                Text(ddayLabel(course.date!), style: AppTypography.label.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
+                Text(
+                  ddayLabel(course.date!),
+                  style: AppTypography.label.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800),
+                ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Column(
@@ -264,7 +267,11 @@ class _EmptyLine extends StatelessWidget {
             // AppTextLink의 좌우 여백(4)만큼 당겨 위 문구와 글자 왼쪽을 맞춘다
             Transform.translate(
               offset: const Offset(-4, 0),
-              child: AppTextLink(label: actionLabel!, onPressed: onAction, style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700)),
+              child: AppTextLink(
+                label: actionLabel!,
+                onPressed: onAction,
+                style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700),
+              ),
             ),
         ],
       ),
@@ -305,7 +312,10 @@ class _EmptyCourses extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          AspectRatio(aspectRatio: 2.1, child: AppNetworkImage(url: s.imageUrl, radius: 16, width: double.infinity)),
+                          AspectRatio(
+                            aspectRatio: 2.1,
+                            child: AppNetworkImage(url: s.imageUrl, radius: 16, width: double.infinity),
+                          ),
                           const SizedBox(height: AppSpacing.xs),
                           Text(s.title, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
                           Text(

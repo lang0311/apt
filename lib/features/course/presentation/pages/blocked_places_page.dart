@@ -73,9 +73,17 @@ class BlockedPlacesPage extends ConsumerWidget {
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                Text(b.place.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
                                                 Text(
-                                                  [b.place.categoryLabel, if (b.blockedAt case final at?) '${at.month}월 ${at.day}일'].join(' · '),
+                                                  b.place.name,
+                                                  style: AppTypography.bodyStrong,
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                                Text(
+                                                  [
+                                                    b.place.categoryLabel,
+                                                    if (b.blockedAt case final at?) '${at.month}월 ${at.day}일',
+                                                  ].join(' · '),
                                                   style: AppTypography.caption,
                                                 ),
                                               ],

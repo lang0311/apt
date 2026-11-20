@@ -10,8 +10,8 @@ import '../recommendation_controller.dart';
 class RecommendingBanner extends StatelessWidget {
   /// 지금 상태에 맞는 줄 — 다시 추천은 AI 자리 수, 한 곳 바꾸기는 다른 문구
   RecommendingBanner.of(RecommendationState state, {super.key, required this.onCancel})
-      : count = state.loadingIds.length,
-        kind = state.reroll;
+    : count = state.loadingIds.length,
+      kind = state.reroll;
 
   final VoidCallback onCancel;
 

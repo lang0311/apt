@@ -33,7 +33,10 @@ class _CourseRouteMapPageState extends State<CourseRouteMapPage> {
 
   final _map = AptMapController();
   final _pages = PageController(viewportFraction: 0.64);
-  late final List<CourseStop> _stops = [for (final s in widget.args.stops) if (s.place.location != null) s];
+  late final List<CourseStop> _stops = [
+    for (final s in widget.args.stops)
+      if (s.place.location != null) s,
+  ];
   late final List<int> _numbers = userStopNumbers(_stops);
   String? _focusedId;
 
@@ -67,12 +70,7 @@ class _CourseRouteMapPageState extends State<CourseRouteMapPage> {
     final inset = MediaQuery.paddingOf(context);
     final markers = [
       for (final (i, s) in _stops.indexed)
-        MapMarker(
-          id: s.place.id,
-          point: s.place.location!,
-          kind: s.isAi ? MapPinKind.ai : MapPinKind.numbered,
-          number: _numbers[i],
-        ),
+        MapMarker(id: s.place.id, point: s.place.location!, kind: s.isAi ? MapPinKind.ai : MapPinKind.numbered, number: _numbers[i]),
     ];
     final cardsBottom = inset.bottom + AppSpacing.sm;
     return Scaffold(
@@ -100,7 +98,9 @@ class _CourseRouteMapPageState extends State<CourseRouteMapPage> {
               children: [
                 _RoundButton(icon: Icons.arrow_back_rounded, tooltip: '뒤로', onPressed: () => context.pop()),
                 const SizedBox(width: AppSpacing.xs),
-                Flexible(child: _TitlePill(title: widget.args.title, count: _stops.length)),
+                Flexible(
+                  child: _TitlePill(title: widget.args.title, count: _stops.length),
+                ),
               ],
             ),
           ),
@@ -109,11 +109,7 @@ class _CourseRouteMapPageState extends State<CourseRouteMapPage> {
             top: inset.top + AppSpacing.xs + _topBar + AppSpacing.xs,
             child: _RoundButton(icon: Icons.center_focus_strong_outlined, tooltip: '전체 보기', size: 44, onPressed: _fitAll),
           ),
-          Positioned(
-            left: AppSpacing.sm,
-            bottom: cardsBottom + _cardHeight + AppSpacing.xs,
-            child: const _LineNote(),
-          ),
+          Positioned(left: AppSpacing.sm, bottom: cardsBottom + _cardHeight + AppSpacing.xs, child: const _LineNote()),
           Positioned(
             left: 0,
             right: 0,
@@ -183,10 +179,15 @@ class _TitlePill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppRadius.large), boxShadow: _floatShadow),
       child: Text.rich(
-        TextSpan(children: [
-          TextSpan(text: title),
-          TextSpan(text: '  $count곳', style: AppTypography.meta.copyWith(color: AppColors.textTertiary)),
-        ]),
+        TextSpan(
+          children: [
+            TextSpan(text: title),
+            TextSpan(
+              text: '  $count곳',
+              style: AppTypography.meta.copyWith(color: AppColors.textTertiary),
+            ),
+          ],
+        ),
         style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w700),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -203,15 +204,15 @@ class _LineNote extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-      decoration: BoxDecoration(
-        color: AppColors.mapPill,
-        borderRadius: BorderRadius.circular(AppRadius.large),
-        boxShadow: AppShadow.soft,
-      ),
+      decoration: BoxDecoration(color: AppColors.mapPill, borderRadius: BorderRadius.circular(AppRadius.large), boxShadow: AppShadow.soft),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(width: 16, height: 3, decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(2))),
+          Container(
+            width: 16,
+            height: 3,
+            decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(2)),
+          ),
           const SizedBox(width: 6),
           Text('장소를 직선으로 이어 보여 줘요', style: AppTypography.caption),
         ],
@@ -251,7 +252,11 @@ class _StopCard extends StatelessWidget {
                 clipBehavior: Clip.none,
                 children: [
                   PlaceImage(place: place, width: 44, height: 44, radius: 10, iconSize: 20),
-                  Positioned(left: -6, top: -6, child: _Badge(number: number, ai: stop.isAi)),
+                  Positioned(
+                    left: -6,
+                    top: -6,
+                    child: _Badge(number: number, ai: stop.isAi),
+                  ),
                 ],
               ),
               const SizedBox(width: 10),
@@ -290,7 +295,10 @@ class _Badge extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white, width: 2),
       ),
-      child: Text('$number', style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w800, height: 1)),
+      child: Text(
+        '$number',
+        style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w800, height: 1),
+      ),
     );
   }
 }

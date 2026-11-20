@@ -28,10 +28,15 @@ class CourseRouteMap extends StatelessWidget {
     for (final s in stops) {
       if (s.place.location == null) continue;
       // 번호는 일정 순서 그대로(AI 추천 곳 포함), AI 추천은 주황 번호 + ✦
-      markers.add(MapMarker(id: s.place.id, point: s.place.location!, kind: s.isAi ? MapPinKind.ai : MapPinKind.numbered, number: ++userNo));
+      markers.add(
+        MapMarker(id: s.place.id, point: s.place.location!, kind: s.isAi ? MapPinKind.ai : MapPinKind.numbered, number: ++userNo),
+      );
     }
     final canOpen = markers.isNotEmpty;
-    void open() => context.push(AppRoutes.courseMap, extra: CourseMapArgs(title: title, stops: stops));
+    void open() => context.push(
+      AppRoutes.courseMap,
+      extra: CourseMapArgs(title: title, stops: stops),
+    );
     return SizedBox(
       height: height,
       child: ClipRRect(
@@ -39,10 +44,7 @@ class CourseRouteMap extends StatelessWidget {
         child: Stack(
           children: [
             Positioned.fill(
-              child: AptMap(
-                markers: markers,
-                route: [for (final s in stops) ?s.place.location],
-              ),
+              child: AptMap(markers: markers, route: [for (final s in stops) ?s.place.location]),
             ),
             // 작은 지도에서는 움직이지 않고, 어디를 눌러도 큰 지도가 열린다
             if (canOpen)

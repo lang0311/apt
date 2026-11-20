@@ -57,12 +57,7 @@ class _CourseEditPageState extends ConsumerState<CourseEditPage> {
 
   Future<void> _close() async {
     if (_rec.isDirty) {
-      final leave = await showConfirmDialog(
-        context,
-        title: '변경한 내용을 저장하지 않고 나갈까요?',
-        confirmLabel: '나가기',
-        destructive: true,
-      );
+      final leave = await showConfirmDialog(context, title: '변경한 내용을 저장하지 않고 나갈까요?', confirmLabel: '나가기', destructive: true);
       if (!leave) return;
     }
     if (!mounted) return;
@@ -103,7 +98,10 @@ class _CourseEditPageState extends ConsumerState<CourseEditPage> {
     return ListView(
       padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       children: [
-        CourseHero(title: course.title, meta: courseMetaLine(date: course.date, start: course.startTime)),
+        CourseHero(
+          title: course.title,
+          meta: courseMetaLine(date: course.date, start: course.startTime),
+        ),
         const SizedBox(height: AppSpacing.sm),
         Padding(
           padding: AppSpacing.screenPadding,
@@ -112,8 +110,7 @@ class _CourseEditPageState extends ConsumerState<CourseEditPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (state.loading)
-                  RecommendingBanner.of(state, onCancel: () => cancelRecommendationWithNotice(context, ref)),
+                if (state.loading) RecommendingBanner.of(state, onCancel: () => cancelRecommendationWithNotice(context, ref)),
                 CourseEditList(
                   stops: state.stops,
                   enabled: !busy,
@@ -179,11 +176,7 @@ class _CourseEditPageState extends ConsumerState<CourseEditPage> {
                       const SizedBox(width: AppSpacing.xs),
                       Expanded(
                         flex: 3,
-                        child: AppButton(
-                          label: '저장',
-                          loading: _saving,
-                          onPressed: busy || state.stops.isEmpty ? null : _save,
-                        ),
+                        child: AppButton(label: '저장', loading: _saving, onPressed: busy || state.stops.isEmpty ? null : _save),
                       ),
                     ],
                   ),

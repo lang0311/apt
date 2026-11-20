@@ -48,7 +48,11 @@ class CourseDayChips extends StatelessWidget {
           ],
           for (var i = 0; i < _chipDays; i++) ...[
             _DayChip(
-              top: switch (i) { 0 => '오늘', 1 => '내일', _ => weekdayLabel(today.add(Duration(days: i))) },
+              top: switch (i) {
+                0 => '오늘',
+                1 => '내일',
+                _ => weekdayLabel(today.add(Duration(days: i))),
+              },
               date: today.add(Duration(days: i)),
               selected: picked == today.add(Duration(days: i)),
               onTap: () => onPick(today.add(Duration(days: i))),
@@ -186,7 +190,10 @@ class _CalendarChip extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.calendar_month_outlined, size: 18, color: AppColors.primary),
-              Text('달력', style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
+              Text(
+                '달력',
+                style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700),
+              ),
             ],
           ),
         ),
@@ -264,7 +271,9 @@ class _TimeWheelState extends State<_TimeWheel> {
           onSelectedItemChanged: onSelected,
           children: [
             for (final v in items)
-              Center(child: Text(v, style: AppTypography.section.copyWith(fontFeatures: const [FontFeature.tabularFigures()]))),
+              Center(
+                child: Text(v, style: AppTypography.section.copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
+              ),
           ],
         ),
       ),
@@ -358,7 +367,11 @@ class _CalendarDialogState extends State<_CalendarDialog> {
                         weekday,
                         style: AppTypography.meta.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: switch (i) { 0 => AppColors.danger, 6 => AppColors.primary, _ => AppColors.textSecondary },
+                          color: switch (i) {
+                            0 => AppColors.danger,
+                            6 => AppColors.primary,
+                            _ => AppColors.textSecondary,
+                          },
                         ),
                       ),
                     ),
@@ -368,12 +381,7 @@ class _CalendarDialogState extends State<_CalendarDialog> {
             const SizedBox(height: AppSpacing.xxs),
             // 달마다 줄 수가 달라 팝업 높이가 흔들리지 않게 항상 6줄
             for (var row = 0; row < 6; row++)
-              Row(
-                children: [
-                  for (var col = 0; col < 7; col++)
-                    Expanded(child: _dayCell(row * 7 + col - first + 1, days)),
-                ],
-              ),
+              Row(children: [for (var col = 0; col < 7; col++) Expanded(child: _dayCell(row * 7 + col - first + 1, days))]),
             const Divider(height: AppSpacing.lg),
             Row(
               children: [

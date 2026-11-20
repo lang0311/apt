@@ -36,7 +36,11 @@ class StopMarker extends StatelessWidget {
                 child: Container(
                   width: 14,
                   height: 14,
-                  decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: AppColors.ai, width: 1)),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.ai, width: 1),
+                  ),
                   child: const Icon(Icons.auto_awesome, size: 8, color: AppColors.ai),
                 ),
               ),

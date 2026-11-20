@@ -74,18 +74,17 @@ class CourseDraft {
     return copyWith(places: [...places, ...added.where((p) => !ids.contains(p.id))]);
   }
 
-  CourseDraft removePlace(String placeId) =>
-      copyWith(places: places.where((p) => p.id != placeId).toList());
+  CourseDraft removePlace(String placeId) => copyWith(places: places.where((p) => p.id != placeId).toList());
 
   CourseDraft reject(String placeId) => copyWith(rejectedPlaceIds: {...rejectedPlaceIds, placeId});
 
   static CourseDraft fromCourse(Course course) => CourseDraft(
-        name: course.title,
-        date: course.date,
-        startTime: course.startTime,
-        moodKeys: course.moodKeys,
-        places: course.stops.where((s) => !s.isAi).map((s) => s.place).toList(),
-        companion: course.isParty ? Companion.party : Companion.solo,
-        partyId: course.partyId,
-      );
+    name: course.title,
+    date: course.date,
+    startTime: course.startTime,
+    moodKeys: course.moodKeys,
+    places: course.stops.where((s) => !s.isAi).map((s) => s.place).toList(),
+    companion: course.isParty ? Companion.party : Companion.solo,
+    partyId: course.partyId,
+  );
 }

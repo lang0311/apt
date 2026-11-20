@@ -99,7 +99,7 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.lg, AppSpacing.screenH, AppSpacing.lg),
                 children: [
-                  Text('누구와 함께 가나요?', style: AppTypography.title),
+                  Text('누구와 함께 가나요?', style: AppTypography.display),
                   const SizedBox(height: AppSpacing.md),
                   // 혼자 / 함께는 나란한 두 칸 (고르는 단계가 한눈에 보이게)
                   IntrinsicHeight(
@@ -143,11 +143,7 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
               ),
             ),
             BottomCta(
-              child: AppButton(
-                label: '다음',
-                loading: _creatingParty,
-                onPressed: canNext ? _next : null,
-              ),
+              child: AppButton(label: '다음', loading: _creatingParty, onPressed: canNext ? _next : null),
             ),
           ],
         ),
@@ -175,10 +171,11 @@ class _CompanionTile extends StatelessWidget {
       label: '$title, $description',
       excludeSemantics: true,
       child: Material(
-        color: selected ? AppColors.primarySoft : AppColors.surface,
+        // v2: 안 고른 칸은 채움 바탕 · 테두리 없음, 고른 칸은 연파랑 + 파란 2px. 크기는 지금 앱 그대로(사용자 결정)
+        color: selected ? AppColors.primarySoft : AppColors.fill,
         shape: RoundedRectangleBorder(
           borderRadius: radius,
-          side: BorderSide(color: selected ? AppColors.primary : AppColors.border, width: selected ? 1.5 : 1),
+          side: selected ? const BorderSide(color: AppColors.primary, width: 2) : BorderSide.none,
         ),
         child: InkWell(
           onTap: onTap,
@@ -228,7 +225,10 @@ class _PartyPicker extends ConsumerWidget {
       loading: const SkeletonBox(height: 160),
       data: (list) {
         // 나 혼자인 파티는 '혼자 가요'와 같아서 목록에서 뺀다 (지금 고른 파티는 남긴다)
-        final shown = [for (final p in list) if (p.members.length > 1 || p.id == selectedId) p];
+        final shown = [
+          for (final p in list)
+            if (p.members.length > 1 || p.id == selectedId) p,
+        ];
         if (shown.isEmpty) return newCard;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -295,7 +295,7 @@ class _PartyRow extends StatelessWidget {
             child: Row(
               children: [
                 if (leadingIcon != null && !selected)
-                    SizedBox.square(dimension: 24, child: Icon(leadingIcon, size: 22, color: AppColors.primary))
+                  SizedBox.square(dimension: 24, child: Icon(leadingIcon, size: 22, color: AppColors.primary))
                 else
                   CheckMark(checked: selected),
                 const SizedBox(width: AppSpacing.sm),
@@ -307,10 +307,7 @@ class _PartyRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                if (count != null) ...[
-                  const SizedBox(width: AppSpacing.xs),
-                  Text(count!, style: AppTypography.meta),
-                ],
+                if (count != null) ...[const SizedBox(width: AppSpacing.xs), Text(count!, style: AppTypography.meta)],
               ],
             ),
           ),
@@ -391,7 +388,10 @@ class _SoloCard extends ConsumerWidget {
       trailing: TextButton(
         onPressed: () => context.push(AppRoutes.preferences),
         style: TextButton.styleFrom(foregroundColor: AppColors.primary, minimumSize: const Size(44, 44)),
-        child: Text(manual ? '취향 수정' : '취향 보기', style: AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
+        child: Text(
+          manual ? '취향 수정' : '취향 보기',
+          style: AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),

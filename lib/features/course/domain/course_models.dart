@@ -53,11 +53,7 @@ class MoodOption {
 
 /// AI 추천 결과
 class Recommendation {
-  const Recommendation({
-    required this.stops,
-    this.description,
-    this.taste,
-  });
+  const Recommendation({required this.stops, this.description, this.taste});
 
   final List<CourseStop> stops;
   final String? description;
@@ -160,22 +156,22 @@ class CourseSummary {
   final double? distanceKm;
 
   CourseSummary copyWith({required int memberCount}) => CourseSummary(
-        id: id,
-        title: title,
-        regionLabel: regionLabel,
-        placeCount: placeCount,
-        date: date,
-        thumbnailUrl: thumbnailUrl,
-        isParty: isParty,
-        memberCount: memberCount,
-        memberNames: memberNames,
-        tags: tags,
-        stopCategoryKeys: stopCategoryKeys,
-        stopNames: stopNames,
-        stopIsAi: stopIsAi,
-        startTime: startTime,
-        distanceKm: distanceKm,
-      );
+    id: id,
+    title: title,
+    regionLabel: regionLabel,
+    placeCount: placeCount,
+    date: date,
+    thumbnailUrl: thumbnailUrl,
+    isParty: isParty,
+    memberCount: memberCount,
+    memberNames: memberNames,
+    tags: tags,
+    stopCategoryKeys: stopCategoryKeys,
+    stopNames: stopNames,
+    stopIsAi: stopIsAi,
+    startTime: startTime,
+    distanceKm: distanceKm,
+  );
 }
 
 /// "이런 코스는 어때요?" (서버 추천 코스)
@@ -221,16 +217,16 @@ class Course {
   final AppliedTaste? taste;
 
   Course copyWith({required int memberCount}) => Course(
-        id: id,
-        title: title,
-        date: date,
-        startTime: startTime,
-        isParty: isParty,
-        memberCount: memberCount,
-        stops: stops,
-        moodKeys: moodKeys,
-        partyId: partyId,
-        canEdit: canEdit,
-        taste: taste,
-      );
+    id: id,
+    title: title,
+    date: date,
+    startTime: startTime,
+    isParty: isParty,
+    memberCount: memberCount,
+    stops: stops,
+    moodKeys: moodKeys,
+    partyId: partyId,
+    canEdit: canEdit,
+    taste: taste,
+  );
 }

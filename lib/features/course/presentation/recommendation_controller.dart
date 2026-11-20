@@ -74,14 +74,16 @@ class RecommendationState {
   bool get _replacingOne => loading && reroll == RerollKind.one && replacing != null;
 
   /// 화면에 그릴 일정. 한 곳 바꾸기 중에는 뺀 장소의 자리를 남겨 둔다(뼈대로 그린다).
-  List<CourseStop> get visibleStops =>
-      _replacingOne ? ([...stops]..insert(replacingIndex.clamp(0, stops.length), replacing!)) : stops;
+  List<CourseStop> get visibleStops => _replacingOne ? ([...stops]..insert(replacingIndex.clamp(0, stops.length), replacing!)) : stops;
 
   /// 기다리는 동안 뼈대로 보여 줄 자리 — 한 곳 바꾸기는 그 자리만, 아니면 AI 장소 전부
   Set<String> get loadingIds {
     if (!loading || !hasResult) return const {};
     if (_replacingOne) return {replacing!.place.id};
-    return {for (final s in stops) if (s.isAi) s.place.id};
+    return {
+      for (final s in stops)
+        if (s.isAi) s.place.id,
+    };
   }
 
   RecommendationState copyWith({
@@ -100,21 +102,20 @@ class RecommendationState {
     CourseStop? replacing,
     int? replacingIndex,
     bool clearReplacing = false,
-  }) =>
-      RecommendationState(
-        stops: stops ?? this.stops,
-        recommendation: recommendation ?? this.recommendation,
-        loading: loading ?? this.loading,
-        error: clearError ? null : (error ?? this.error),
-        basedOnPlaceIds: basedOnPlaceIds ?? this.basedOnPlaceIds,
-        changedIds: changedIds ?? this.changedIds,
-        addedIds: addedIds ?? this.addedIds,
-        stage: clearStage ? null : (stage ?? this.stage),
-        edited: edited ?? this.edited,
-        reroll: clearReplacing ? RerollKind.all : (reroll ?? this.reroll),
-        replacing: clearReplacing ? null : (replacing ?? this.replacing),
-        replacingIndex: clearReplacing ? 0 : (replacingIndex ?? this.replacingIndex),
-      );
+  }) => RecommendationState(
+    stops: stops ?? this.stops,
+    recommendation: recommendation ?? this.recommendation,
+    loading: loading ?? this.loading,
+    error: clearError ? null : (error ?? this.error),
+    basedOnPlaceIds: basedOnPlaceIds ?? this.basedOnPlaceIds,
+    changedIds: changedIds ?? this.changedIds,
+    addedIds: addedIds ?? this.addedIds,
+    stage: clearStage ? null : (stage ?? this.stage),
+    edited: edited ?? this.edited,
+    reroll: clearReplacing ? RerollKind.all : (reroll ?? this.reroll),
+    replacing: clearReplacing ? null : (replacing ?? this.replacing),
+    replacingIndex: clearReplacing ? 0 : (replacingIndex ?? this.replacingIndex),
+  );
 }
 
 /// 되돌리기용 직전 상태
@@ -173,8 +174,7 @@ class RecommendationController extends Notifier<RecommendationState> {
     );
   }
 
-  void _remember({String? blockedPlaceId}) =>
-      _undo = _Snapshot(state, ref.read(courseDraftProvider), blockedPlaceId: blockedPlaceId);
+  void _remember({String? blockedPlaceId}) => _undo = _Snapshot(state, ref.read(courseDraftProvider), blockedPlaceId: blockedPlaceId);
 
   /// 다시 추천 — 내가 고른 장소는 두고 AI 장소 자리만 다시 채운다.
   /// 바뀐 AI 장소 수를 돌려준다(실패하면 null).
@@ -184,13 +184,19 @@ class RecommendationController extends Notifier<RecommendationState> {
       _remember();
       state = state.copyWith(clearReplacing: true);
     }
-    final before = {for (final s in state.stops) if (s.isAi) s.place.id};
+    final before = {
+      for (final s in state.stops)
+        if (s.isAi) s.place.id,
+    };
     // 취소하면 이 동작 전(바꾸기라면 빼기 전)으로 돌아간다
     final revert = _undo;
     _draft.update((d) => d.copyWith(recommendationRound: d.recommendationRound + 1));
     final ok = await _request(keepPrevious: true, revertTo: revert);
     if (!ok) return null;
-    final changed = {for (final s in state.stops) if (s.isAi && !before.contains(s.place.id)) s.place.id};
+    final changed = {
+      for (final s in state.stops)
+        if (s.isAi && !before.contains(s.place.id)) s.place.id,
+    };
     state = state.copyWith(changedIds: changed);
     return changed.length;
   }
@@ -206,7 +212,9 @@ class RecommendationController extends Notifier<RecommendationState> {
         : RecommendationState(loading: true, stops: state.stops);
     final draft = ref.read(courseDraftProvider);
     try {
-      final rec = await ref.read(courseRepositoryProvider).recommend(
+      final rec = await ref
+          .read(courseRepositoryProvider)
+          .recommend(
             draft: draft,
             currentStops: previous.stops,
             onStage: (s) {
@@ -218,12 +226,7 @@ class RecommendationController extends Notifier<RecommendationState> {
           );
       if (seq != _requestSeq) return false;
       _beforeRequest = null;
-      state = RecommendationState(
-        stops: rec.stops,
-        recommendation: rec,
-        basedOnPlaceIds: draft.placeIds,
-        addedIds: previous.addedIds,
-      );
+      state = RecommendationState(stops: rec.stops, recommendation: rec, basedOnPlaceIds: draft.placeIds, addedIds: previous.addedIds);
       return true;
     } catch (e) {
       // 취소한 요청이면 cancel()이 이미 화면을 되돌렸다
@@ -244,13 +247,7 @@ class RecommendationController extends Notifier<RecommendationState> {
     _beforeRequest = null;
     if (identical(before, _undo)) _undo = null;
     _draft.update((_) => before.draft);
-    state = before.state.copyWith(
-      loading: false,
-      clearError: true,
-      clearStage: true,
-      changedIds: const {},
-      clearReplacing: true,
-    );
+    state = before.state.copyWith(loading: false, clearError: true, clearStage: true, changedIds: const {}, clearReplacing: true);
     // 서버 취소는 기다리지 않는다. 실패해도 다음 추천이 남은 job을 이어받거나 끝나길 기다린다.
     unawaited(ref.read(courseRepositoryProvider).cancelRecommendation().catchError((Object _) {}));
     return true;
@@ -336,13 +333,14 @@ class RecommendationController extends Notifier<RecommendationState> {
 
   /// 코스의 사용자 장소 순서를 초안에도 반영
   void _syncUserOrder(List<CourseStop> stops) {
-    final order = [for (final s in stops) if (!s.isAi) s.place];
+    final order = [
+      for (final s in stops)
+        if (!s.isAi) s.place,
+    ];
     _draft.update((d) => d.copyWith(places: order));
   }
 
   static bool _sameSet(Set<String>? a, Set<String> b) => a != null && a.length == b.length && a.containsAll(b);
 }
 
-final recommendationProvider = NotifierProvider<RecommendationController, RecommendationState>(
-  RecommendationController.new,
-);
+final recommendationProvider = NotifierProvider<RecommendationController, RecommendationState>(RecommendationController.new);

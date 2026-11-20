@@ -57,9 +57,7 @@ Future<void> showStopSheet(
   final reason = stop.isAi && stop.aiReason != null ? _ReasonRow(reason: stop.aiReason!) : null;
   const line = Divider(height: 1, indent: AppSpacing.screenH, endIndent: AppSpacing.screenH, color: AppColors.divider);
   List<Widget> rows(BuildContext ctx, int g) {
-    final items = <Widget>[
-      for (final a in groups[g]) _ActionRow(action: a, sheetContext: ctx),
-    ];
+    final items = <Widget>[for (final a in groups[g]) _ActionRow(action: a, sheetContext: ctx)];
     if (g == 0 && reason != null) items.insert(reasonAfter.clamp(0, items.length), reason);
     return [
       for (final (i, w) in items.indexed) ...[if (i > 0) line, w],
@@ -140,7 +138,9 @@ class _ReasonRowState extends State<_ReasonRow> {
                   children: [
                     const SizedBox(width: 28, child: Icon(Icons.auto_awesome, size: 20, color: AppColors.ai)),
                     const SizedBox(width: AppSpacing.sm),
-                    Expanded(child: Text('추천 이유 보기', style: AppTypography.bodyStrong.copyWith(color: AppColors.aiText))),
+                    Expanded(
+                      child: Text('추천 이유 보기', style: AppTypography.bodyStrong.copyWith(color: AppColors.aiText)),
+                    ),
                     Icon(_open ? Icons.expand_less_rounded : Icons.expand_more_rounded, color: AppColors.textSecondary),
                   ],
                 ),
@@ -191,7 +191,9 @@ class _ActionRow extends StatelessWidget {
                         Flexible(
                           child: Text(
                             action.label,
-                            style: AppTypography.bodyStrong.copyWith(color: action.tone == StopSheetTone.danger ? AppColors.dangerText : null),
+                            style: AppTypography.bodyStrong.copyWith(
+                              color: action.tone == StopSheetTone.danger ? AppColors.dangerText : null,
+                            ),
                           ),
                         ),
                         if (action.onceScope) ...[
@@ -231,26 +233,35 @@ Future<void> showResultStopSheet(
 }) {
   final info = StopSheetAction(label: '장소 정보 보기', icon: Icons.place_outlined, onTap: onInfo, tone: StopSheetTone.link, chevron: true);
   if (!stop.isAi) {
-    return showStopSheet(context, stop: stop, groups: [
-      [info, _removeOwn(onRemove)],
-    ]);
+    return showStopSheet(
+      context,
+      stop: stop,
+      groups: [
+        [info, _removeOwn(onRemove)],
+      ],
+    );
   }
-  return showStopSheet(context, stop: stop, reasonAfter: onSwap != null ? 1 : 0, groups: [
-    [
-      if (onSwap != null)
-        StopSheetAction(
-          label: '다른 곳으로 바꾸기',
-          description: '이 자리에 다른 장소를 추천해요',
-          icon: Icons.swap_horiz_rounded,
-          tone: StopSheetTone.ai,
-          onceScope: true,
-          onTap: onSwap,
-        ),
-      _removeAi(onRemove),
-      info,
+  return showStopSheet(
+    context,
+    stop: stop,
+    reasonAfter: onSwap != null ? 1 : 0,
+    groups: [
+      [
+        if (onSwap != null)
+          StopSheetAction(
+            label: '다른 곳으로 바꾸기',
+            description: '이 자리에 다른 장소를 추천해요',
+            icon: Icons.swap_horiz_rounded,
+            tone: StopSheetTone.ai,
+            onceScope: true,
+            onTap: onSwap,
+          ),
+        _removeAi(onRemove),
+        info,
+      ],
+      if (onBlock != null) [_block(onBlock)],
     ],
-    if (onBlock != null) [_block(onBlock)],
-  ]);
+  );
 }
 
 /// 편집 화면에서 장소 타일을 누를 때: 앞으로 · 뒤로 · 이 코스에서 빼기 / (AI 장소만) 앞으로 추천하지 않기
@@ -262,35 +273,30 @@ Future<void> showEditStopSheet(
   required VoidCallback onRemove,
   VoidCallback? onBlock,
 }) {
-  return showStopSheet(context, stop: stop, groups: [
-    [
-      if (onUp != null) StopSheetAction(label: '앞으로', icon: Icons.arrow_upward_rounded, onTap: onUp),
-      if (onDown != null) StopSheetAction(label: '뒤로', icon: Icons.arrow_downward_rounded, onTap: onDown),
-      if (stop.isAi) _removeAi(onRemove) else _removeOwn(onRemove),
+  return showStopSheet(
+    context,
+    stop: stop,
+    groups: [
+      [
+        if (onUp != null) StopSheetAction(label: '앞으로', icon: Icons.arrow_upward_rounded, onTap: onUp),
+        if (onDown != null) StopSheetAction(label: '뒤로', icon: Icons.arrow_downward_rounded, onTap: onDown),
+        if (stop.isAi) _removeAi(onRemove) else _removeOwn(onRemove),
+      ],
+      if (stop.isAi && onBlock != null) [_block(onBlock)],
     ],
-    if (stop.isAi && onBlock != null) [_block(onBlock)],
-  ]);
+  );
 }
 
-StopSheetAction _removeAi(VoidCallback onTap) => StopSheetAction(
-      label: '이 코스에서 빼기',
-      description: '자리는 비우고 시간만 다시 계산해요',
-      icon: Icons.remove_rounded,
-      onceScope: true,
-      onTap: onTap,
-    );
+StopSheetAction _removeAi(VoidCallback onTap) =>
+    StopSheetAction(label: '이 코스에서 빼기', description: '자리는 비우고 시간만 다시 계산해요', icon: Icons.remove_rounded, onceScope: true, onTap: onTap);
 
-StopSheetAction _removeOwn(VoidCallback onTap) => StopSheetAction(
-      label: '이 코스에서 빼기',
-      description: '저장한 장소는 그대로 있어요',
-      icon: Icons.remove_rounded,
-      onTap: onTap,
-    );
+StopSheetAction _removeOwn(VoidCallback onTap) =>
+    StopSheetAction(label: '이 코스에서 빼기', description: '저장한 장소는 그대로 있어요', icon: Icons.remove_rounded, onTap: onTap);
 
 StopSheetAction _block(VoidCallback onTap) => StopSheetAction(
-      label: '앞으로 추천하지 않기',
-      description: '모든 코스 추천에서 이 장소를 빼요',
-      icon: Icons.block_rounded,
-      tone: StopSheetTone.danger,
-      onTap: onTap,
-    );
+  label: '앞으로 추천하지 않기',
+  description: '모든 코스 추천에서 이 장소를 빼요',
+  icon: Icons.block_rounded,
+  tone: StopSheetTone.danger,
+  onTap: onTap,
+);

@@ -9,12 +9,7 @@ import '../../../place/domain/place.dart';
 import '../widgets/map_place_picker.dart';
 
 class AddPlacesArgs {
-  const AddPlacesArgs({
-    this.title = '장소 추가',
-    this.excludedPlaceIds = const {},
-    this.excludedLabel = '코스에 있음',
-    this.ctaLabel = '일정에 추가',
-  });
+  const AddPlacesArgs({this.title = '장소 추가', this.excludedPlaceIds = const {}, this.excludedLabel = '코스에 있음', this.ctaLabel = '일정에 추가'});
 
   final String title;
 
@@ -38,9 +33,9 @@ class _AddPlacesPageState extends State<AddPlacesPage> {
   final _selected = <Place>[];
 
   void _toggle(Place p) => setState(() {
-        final i = _selected.indexWhere((s) => s.id == p.id);
-        i >= 0 ? _selected.removeAt(i) : _selected.add(p);
-      });
+    final i = _selected.indexWhere((s) => s.id == p.id);
+    i >= 0 ? _selected.removeAt(i) : _selected.add(p);
+  });
 
   void _done() => context.pop(List<Place>.unmodifiable(_selected));
 
@@ -64,10 +59,7 @@ class _AddPlacesPageState extends State<AddPlacesPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (_selected.isNotEmpty) ...[
-                    PickedChips(places: _selected, onRemove: _toggle),
-                    const SizedBox(height: AppSpacing.sm),
-                  ],
+                  if (_selected.isNotEmpty) ...[PickedChips(places: _selected, onRemove: _toggle), const SizedBox(height: AppSpacing.sm)],
                   AppButton(label: widget.args.ctaLabel, onPressed: _selected.isEmpty ? null : _done),
                 ],
               ),

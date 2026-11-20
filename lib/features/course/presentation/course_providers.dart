@@ -4,9 +4,7 @@ import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 import '../../../app/di/repositories.dart';
 import '../domain/course_models.dart';
 
-final myCoursesProvider = FutureProvider.autoDispose<List<CourseSummary>>(
-  (ref) => ref.watch(courseRepositoryProvider).fetchMyCourses(),
-);
+final myCoursesProvider = FutureProvider.autoDispose<List<CourseSummary>>((ref) => ref.watch(courseRepositoryProvider).fetchMyCourses());
 
 final partyCoursesProvider = FutureProvider.autoDispose<List<CourseSummary>>(
   (ref) => ref.watch(courseRepositoryProvider).fetchPartyCourses(),
@@ -25,9 +23,7 @@ final courseDetailProvider = FutureProvider.autoDispose.family<Course, String>(
   (ref, id) => ref.watch(courseRepositoryProvider).fetchCourse(id),
 );
 
-final moodOptionsProvider = FutureProvider.autoDispose<List<MoodOption>>(
-  (ref) => ref.watch(courseRepositoryProvider).fetchMoodOptions(),
-);
+final moodOptionsProvider = FutureProvider.autoDispose<List<MoodOption>>((ref) => ref.watch(courseRepositoryProvider).fetchMoodOptions());
 
 /// 코스 생성/수정 후 목록·상세를 새로 고친다.
 void invalidateCourseData(WidgetRef ref) => _courseData.forEach(ref.invalidate);

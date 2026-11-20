@@ -32,9 +32,7 @@ class PlaceSelectionPage extends ConsumerWidget {
               child: MapPlacePicker(
                 initialRegion: ref.read(pickerRegionProvider),
                 selectedIds: draft.places.map((p) => p.id).toList(),
-                onToggle: (p) => notifier.update(
-                  (d) => d.placeIds.contains(p.id) ? d.removePlace(p.id) : d.addPlaces([p]),
-                ),
+                onToggle: (p) => notifier.update((d) => d.placeIds.contains(p.id) ? d.removePlace(p.id) : d.addPlaces([p])),
               ),
             ),
             BottomCta(

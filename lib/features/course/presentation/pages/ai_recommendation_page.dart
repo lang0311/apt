@@ -103,12 +103,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
     if (!state.hasResult && state.error != null) {
       body = AppErrorState(error: state.error!, title: '추천을 받지 못했어요', onRetry: () => _rec.syncWithDraft());
     } else if (!state.hasResult) {
-      body = _Waiting(
-        title: draft.name,
-        date: draft.date,
-        stage: state.stage,
-        isParty: draft.companion == Companion.party,
-      );
+      body = _Waiting(title: draft.name, date: draft.date, stage: state.stage, isParty: draft.companion == Companion.party);
     } else {
       body = ListView(
         padding: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.lg),
@@ -160,10 +155,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                             draft.partyId,
                             legend: CourseStopLegend(stops: state.visibleStops),
                             banner: state.loading
-                                ? RecommendingBanner.of(
-                                    state,
-                                    onCancel: () => cancelRecommendationWithNotice(context, ref),
-                                  )
+                                ? RecommendingBanner.of(state, onCancel: () => cancelRecommendationWithNotice(context, ref))
                                 : null,
                             CourseTimeline(
                               stops: state.visibleStops,
@@ -226,11 +218,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                         flex: 3,
                         child: _editing
                             ? AppButton(label: '완료', onPressed: busy ? null : () => setState(() => _editing = false))
-                            : AppButton(
-                                label: '코스 저장',
-                                loading: _saving,
-                                onPressed: busy || state.stops.isEmpty ? null : _save,
-                              ),
+                            : AppButton(label: '코스 저장', loading: _saving, onPressed: busy || state.stops.isEmpty ? null : _save),
                       ),
                     ],
                   ),
@@ -324,8 +312,8 @@ class _WaitingState extends State<_Waiting> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              AppCard(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -334,7 +322,10 @@ class _WaitingState extends State<_Waiting> {
                       const Divider(height: AppSpacing.md, color: AppColors.divider),
                       // 초마다 바뀌는 글자라 스크린리더에는 읽어 주지 않는다
                       ExcludeSemantics(
-                        child: Text(_elapsed(_watch.elapsed), style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+                        child: Text(
+                          _elapsed(_watch.elapsed),
+                          style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+                        ),
                       ),
                       const SizedBox(height: 2),
                     ],
@@ -356,7 +347,13 @@ class _WaitingState extends State<_Waiting> {
                             children: [
                               const SkeletonBox(width: 26, height: 26, radius: 13),
                               const SizedBox(width: 10),
-                              Expanded(child: FractionallySizedBox(alignment: Alignment.centerLeft, widthFactor: w, child: const SkeletonBox(height: 11, radius: 5))),
+                              Expanded(
+                                child: FractionallySizedBox(
+                                  alignment: Alignment.centerLeft,
+                                  widthFactor: w,
+                                  child: const SkeletonBox(height: 11, radius: 5),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -395,21 +392,25 @@ class _Stages extends StatelessWidget {
     RecommendationStage.organize: '가기 좋은 순서로 정리하고 있어요',
   };
 
-  /// 끝난 단계 = 체크, 지금 단계 = 진행 원, 남은 단계 = 빈 원
-  Widget _icon(RecommendationStage s) {
+  /// v2 정거장: 끝난 단계 = 파란 원 + 체크, 지금 단계 = 파란 번호 원(천천히 맥박), 남은 단계 = 회색 테두리 번호 원
+  Widget _icon(RecommendationStage s, int number) {
     if (s.index < stage.index) {
       return Container(
-        decoration: const BoxDecoration(color: AppColors.successSoft, shape: BoxShape.circle),
-        child: const Icon(Icons.check_rounded, size: 14, color: AppColors.success),
+        decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+        child: const Icon(Icons.check_rounded, size: 15, color: Colors.white),
       );
     }
-    if (s == stage) return const CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary);
-    return Container(
+    final now = s == stage;
+    final circle = Container(
+      alignment: Alignment.center,
       decoration: BoxDecoration(
+        color: now ? AppColors.primary : AppColors.surface,
         shape: BoxShape.circle,
-        border: Border.all(color: AppColors.progressInactive, width: 2),
+        border: now ? null : Border.all(color: AppColors.borderStrong, width: 2),
       ),
+      child: Text('$number', style: AppTypography.label.copyWith(color: now ? Colors.white : AppColors.textTertiary, height: 1)),
     );
+    return now ? _Pulse(child: circle) : circle;
   }
 
   Color _textColor(RecommendationStage s) {
@@ -431,14 +432,21 @@ class _Stages extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (final s in stages)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
+          for (final (i, s) in stages.indexed)
+            IntrinsicHeight(
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox.square(dimension: 20, child: _icon(s)),
-                  const SizedBox(width: 10),
+                  SizedBox(
+                    width: 26,
+                    child: Column(
+                      children: [
+                        SizedBox.square(dimension: 26, child: _icon(s, i + 1)),
+                        if (i < stages.length - 1) Expanded(child: Container(width: 2, color: AppColors.divider)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,7 +458,8 @@ class _Stages extends StatelessWidget {
                             fontWeight: s == stage ? FontWeight.w700 : FontWeight.w500,
                           ),
                         ),
-                        if (s == stage) Text(_doing[s]!, style: AppTypography.caption),
+                        if (s == stage) Text(_doing[s]!, style: AppTypography.meta),
+                        if (i < stages.length - 1) const SizedBox(height: 20),
                       ],
                     ),
                   ),
@@ -463,13 +472,65 @@ class _Stages extends StatelessWidget {
   }
 }
 
+/// 지금 단계 원만 천천히 맥박 (움직임 줄이기 설정이면 멈춤)
+class _Pulse extends StatefulWidget {
+  const _Pulse({required this.child});
+  final Widget child;
+
+  @override
+  State<_Pulse> createState() => _PulseState();
+}
+
+class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600));
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _c.stop();
+    } else if (!_c.isAnimating) {
+      _c.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (context, child) => DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.4 * (1 - _c.value)),
+              spreadRadius: 10 * _c.value,
+            ),
+          ],
+        ),
+        child: child,
+      ),
+      child: widget.child,
+    );
+  }
+}
+
 /// 일정 위에 반영한 취향 한 줄 (07 D46)
 /// 일정 카드 안: 범례 → 반영한 취향 → 타임라인 (코스 상세와 같은 순서)
 Widget _withTaste(AppliedTaste? taste, List<CourseStop> stops, String? partyId, Widget timeline, {Widget? legend, Widget? banner}) =>
-    Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      ?legend,
-      if (taste != null) AppliedTasteSection(taste: taste, stops: stops, partyId: partyId),
-      // 다시 추천하는 동안의 한 줄 (07 D60)
-      ?banner,
-      timeline,
-    ]);
+    Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ?legend,
+        if (taste != null) AppliedTasteSection(taste: taste, stops: stops, partyId: partyId),
+        // 다시 추천하는 동안의 한 줄 (07 D60)
+        ?banner,
+        timeline,
+      ],
+    );

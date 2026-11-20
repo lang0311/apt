@@ -46,21 +46,18 @@ class CourseHero extends StatelessWidget {
                 children: [
                   const Icon(Icons.check_rounded, size: 14, color: AppColors.success),
                   const SizedBox(width: 4),
-                  Text('코스가 저장되었어요', style: AppTypography.caption.copyWith(color: AppColors.success, fontWeight: FontWeight.w700)),
+                  Text(
+                    '코스가 저장되었어요',
+                    style: AppTypography.caption.copyWith(color: AppColors.success, fontWeight: FontWeight.w700),
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
           ],
-          if (dday != null) ...[
-            Text(dday!, style: AppTypography.label.copyWith(color: AppColors.primary)),
-            const SizedBox(height: 2),
-          ],
+          if (dday != null) ...[Text(dday!, style: AppTypography.label.copyWith(color: AppColors.primary)), const SizedBox(height: 2)],
           Text(title, style: AppTypography.hero),
-          if (meta != null && meta!.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Text(meta!, style: AppTypography.meta),
-          ],
+          if (meta != null && meta!.isNotEmpty) ...[const SizedBox(height: 4), Text(meta!, style: AppTypography.meta)],
         ],
       ),
     );
@@ -94,8 +91,12 @@ class AppliedTasteLine extends StatelessWidget {
           ];
   }
 
-  Widget _text(List<TextSpan> spans, {int maxLines = 1}) =>
-      Text.rich(TextSpan(children: spans), style: AppTypography.meta, maxLines: maxLines, overflow: TextOverflow.ellipsis);
+  Widget _text(List<TextSpan> spans, {int maxLines = 1}) => Text.rich(
+    TextSpan(children: spans),
+    style: AppTypography.meta,
+    maxLines: maxLines,
+    overflow: TextOverflow.ellipsis,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +123,10 @@ class AppliedTasteLine extends StatelessWidget {
                   child: Align(
                     alignment: Alignment.centerLeft,
                     widthFactor: 1,
-                    child: Text('누구 취향인지 보기', style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
+                    child: Text(
+                      '누구 취향인지 보기',
+                      style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700),
+                    ),
                   ),
                 ),
               ),
@@ -161,30 +165,54 @@ class AppliedTasteLine extends StatelessWidget {
       final ids = {...?taste.matches[stop.place.id]}.where(index.containsKey).toSet();
       if (ids.isEmpty) continue;
       final everyone = ids.length == members.length;
-      final who = [for (final m in members) if (ids.contains(m.id)) m];
-      rows.add(_DetailRow(
-        semantics: '${stop.place.name}, ${everyone ? '모두' : who.map(name).join(', ')}',
-        child: Row(
-          children: [
-            Expanded(flex: 3, child: Text(stop.place.name, style: AppTypography.label.copyWith(fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis)),
-            const SizedBox(width: AppSpacing.xs),
-            // 이름은 오른쪽 끝에 붙인다
-            Expanded(
-              flex: 2,
-              child: Wrap(
-                alignment: WrapAlignment.end,
-                spacing: 8,
-                children: everyone
-                    ? [Text('모두', style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700))]
-                    : [
-                        for (final m in who)
-                          Text(name(m), style: AppTypography.meta.copyWith(color: PartyAvatarStack.nameColor(index[m.id]!), fontWeight: FontWeight.w700)),
-                      ],
+      final who = [
+        for (final m in members)
+          if (ids.contains(m.id)) m,
+      ];
+      rows.add(
+        _DetailRow(
+          semantics: '${stop.place.name}, ${everyone ? '모두' : who.map(name).join(', ')}',
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Text(
+                  stop.place.name,
+                  style: AppTypography.label.copyWith(fontWeight: FontWeight.w700),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(width: AppSpacing.xs),
+              // 이름은 오른쪽 끝에 붙인다
+              Expanded(
+                flex: 2,
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 8,
+                  children: everyone
+                      ? [
+                          Text(
+                            '모두',
+                            style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+                          ),
+                        ]
+                      : [
+                          for (final m in who)
+                            Text(
+                              name(m),
+                              style: AppTypography.meta.copyWith(
+                                color: PartyAvatarStack.nameColor(index[m.id]!),
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                        ],
+                ),
+              ),
+            ],
+          ),
         ),
-      ));
+      );
     }
     for (final gap in taste.gaps) {
       final member = members.where((m) => m.id == gap.memberId).firstOrNull;
@@ -195,7 +223,12 @@ class AppliedTasteLine extends StatelessWidget {
         (false, true) => '${withTopicParticle(member.nickname)} 저장한 장소가 없어 반영하지 못했어요',
         (false, false) => '${member.nickname} 취향에 잘 맞는 장소는 찾지 못했어요',
       };
-      rows.add(_DetailRow(semantics: text, child: Text(text, style: AppTypography.caption)));
+      rows.add(
+        _DetailRow(
+          semantics: text,
+          child: Text(text, style: AppTypography.caption),
+        ),
+      );
     }
     return rows;
   }
@@ -208,28 +241,31 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        label: semantics,
-        excludeSemantics: true,
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 36),
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.border))),
-          child: child,
-        ),
-      );
+    label: semantics,
+    excludeSemantics: true,
+    child: Container(
+      constraints: const BoxConstraints(minHeight: 36),
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: AppColors.border)),
+      ),
+      child: child,
+    ),
+  );
 }
 
 /// "10월 22일 (목) · 오전 11:00 출발"
-String courseMetaLine({DateTime? date, TimeOfDay? start}) => [
-      if (date != null) formatMonthDayWeekday(date),
-      if (start != null) '${formatTimeOfDay(start)} 출발',
-    ].join(' · ');
+String courseMetaLine({DateTime? date, TimeOfDay? start}) =>
+    [if (date != null) formatMonthDayWeekday(date), if (start != null) '${formatTimeOfDay(start)} 출발'].join(' · ');
 
 /// 장소 사이 직선 거리 합(m). 팀 서버 `distance_km`와 같은 방식(`route_type: straight_line`)이라 편집 뒤에도 앱에서 다시 센다.
 /// 좌표가 있는 장소가 둘보다 적으면 null
 int? straightDistanceMeters(List<CourseStop> stops) {
-  final points = [for (final s in stops) if (s.place.location != null) s.place.location!];
+  final points = [
+    for (final s in stops)
+      if (s.place.location != null) s.place.location!,
+  ];
   if (points.length < 2) return null;
   var sum = 0.0;
   for (var i = 1; i < points.length; i++) {
@@ -277,7 +313,12 @@ class CourseStats extends StatelessWidget {
                       children: [
                         Text(label, style: AppTypography.caption),
                         const SizedBox(height: 2),
-                        Text(value, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text(
+                          value,
+                          style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w800),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
                     ),
                   ),
@@ -301,9 +342,16 @@ class CourseStopLegend extends StatelessWidget {
     final ai = stops.where((s) => s.isAi).length;
     final mine = stops.length - ai;
     Widget item(Widget dot, String text) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [dot, const SizedBox(width: 6), Text(text, style: AppTypography.caption.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w700))],
-        );
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        dot,
+        const SizedBox(width: 6),
+        Text(
+          text,
+          style: AppTypography.caption.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w700),
+        ),
+      ],
+    );
     return Padding(
       padding: const EdgeInsets.fromLTRB(SectionCard.innerPadding, 0, SectionCard.innerPadding, AppSpacing.xs),
       child: Wrap(
@@ -311,7 +359,14 @@ class CourseStopLegend extends StatelessWidget {
         runSpacing: 4,
         children: [
           if (mine > 0)
-            item(Container(width: 12, height: 12, decoration: const BoxDecoration(color: AppColors.ink, shape: BoxShape.circle)), '내가 고른 곳 $mine'),
+            item(
+              Container(
+                width: 12,
+                height: 12,
+                decoration: const BoxDecoration(color: AppColors.ink, shape: BoxShape.circle),
+              ),
+              '내가 고른 곳 $mine',
+            ),
           if (ai > 0)
             item(
               Container(
@@ -352,7 +407,10 @@ class CourseEditButton extends StatelessWidget {
                 children: [
                   const Icon(Icons.edit_outlined, size: 14, color: AppColors.textPrimary),
                   const SizedBox(width: 4),
-                  Text('편집', style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+                  Text(
+                    '편집',
+                    style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+                  ),
                 ],
               ),
             ),
@@ -384,11 +442,16 @@ class _StopText extends StatelessWidget {
     final sub = [place.categoryLabel, if (area.isNotEmpty) area].join(' · ');
     final timing = timingBadge(place.timing, courseDate: courseDate);
     final subLine = Text.rich(
-      TextSpan(children: [
-        if (prefix != null)
-          TextSpan(text: '$prefix · ', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700)),
-        TextSpan(text: sub),
-      ]),
+      TextSpan(
+        children: [
+          if (prefix != null)
+            TextSpan(
+              text: '$prefix · ',
+              style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700),
+            ),
+          TextSpan(text: sub),
+        ],
+      ),
       style: AppTypography.caption,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
@@ -399,17 +462,25 @@ class _StopText extends StatelessWidget {
       children: [
         Row(
           children: [
-            Flexible(child: Text(place.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis)),
+            Flexible(
+              child: Text(place.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
             if (changed) ...[
               const SizedBox(width: 6),
-              Text('바뀜', style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w800)),
+              Text(
+                '바뀜',
+                style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w800),
+              ),
             ] else if (stop.isAi) ...[
               // 번호가 끊기지 않게 바뀐 뒤로 AI 추천 곳은 주황 번호와 이 작은 표시로 구분한다
               const SizedBox(width: 6),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(color: AppColors.aiSoft, borderRadius: BorderRadius.circular(AppRadius.tiny)),
-                child: Text('AI 추천', style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w700)),
+                child: Text(
+                  'AI 추천',
+                  style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w700),
+                ),
               ),
             ],
           ],
@@ -430,7 +501,6 @@ class _StopText extends StatelessWidget {
     );
   }
 }
-
 
 /// 일정 타임라인 (보는 상태). 번호 원을 한 줄기 선으로 잇고, 행 사이에 이동 정보를 둔다.
 /// 코스 상세와 4단계 결과가 같은 위젯을 쓴다.
@@ -520,57 +590,60 @@ class _ViewTile extends StatelessWidget {
     return _ChangedFlash(
       on: highlighted,
       child: Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(AppRadius.medium),
-      child: InkWell(
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(AppRadius.medium),
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 56),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(AppSpacing.xs, 0, onMore == null ? AppSpacing.sm : 0, 0),
-            child: IntrinsicHeight(
-              child: Row(
-              children: [
-                if (showTime) ...[
-                  Container(
-                    width: 40,
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      stop.arrivalTime == null ? '' : formatClock(stop.arrivalTime!),
-                      textAlign: TextAlign.right,
-                      style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                ],
-                // 번호 원 위아래로 선을 이어 일정 전체가 한 줄기로 보이게
-                Column(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.medium),
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 56),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(AppSpacing.xs, 0, onMore == null ? AppSpacing.sm : 0, 0),
+              child: IntrinsicHeight(
+                child: Row(
                   children: [
-                    Expanded(child: _Line(visible: lineAbove)),
-                    _marker(stop, number),
-                    Expanded(child: _Line(visible: lineBelow)),
+                    if (showTime) ...[
+                      Container(
+                        width: 40,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          stop.arrivalTime == null ? '' : formatClock(stop.arrivalTime!),
+                          textAlign: TextAlign.right,
+                          style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                    ],
+                    // 번호 원 위아래로 선을 이어 일정 전체가 한 줄기로 보이게
+                    Column(
+                      children: [
+                        Expanded(child: _Line(visible: lineAbove)),
+                        _marker(stop, number),
+                        Expanded(child: _Line(visible: lineBelow)),
+                      ],
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: _StopText(stop: stop, changed: highlighted, courseDate: courseDate),
+                        ),
+                      ),
+                    ),
+                    if (onMore != null)
+                      IconButton(
+                        tooltip: '${stop.place.name} 메뉴',
+                        onPressed: onMore,
+                        icon: const Icon(Icons.more_horiz_rounded, size: 20, color: AppColors.textSecondary),
+                      ),
                   ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Align(alignment: Alignment.centerLeft, child: _StopText(stop: stop, changed: highlighted, courseDate: courseDate)),
-                  ),
-                ),
-                if (onMore != null)
-                  IconButton(
-                    tooltip: '${stop.place.name} 메뉴',
-                    onPressed: onMore,
-                    icon: const Icon(Icons.more_horiz_rounded, size: 20, color: AppColors.textSecondary),
-                  ),
-              ],
               ),
             ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -595,7 +668,10 @@ class _ChangedFlashState extends State<_ChangedFlash> with SingleTickerProviderS
   void initState() {
     super.initState();
     _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 4600));
-    _fade = CurvedAnimation(parent: _c, curve: const Interval(4000 / 4600, 1, curve: Curves.easeOut));
+    _fade = CurvedAnimation(
+      parent: _c,
+      curve: const Interval(4000 / 4600, 1, curve: Curves.easeOut),
+    );
     if (widget.on) _c.forward();
   }
 
@@ -663,11 +739,8 @@ class _Line extends StatelessWidget {
   final bool visible;
 
   @override
-  Widget build(BuildContext context) => Container(
-        width: 2,
-        margin: const EdgeInsets.symmetric(horizontal: 12),
-        color: visible ? AppColors.borderStrong : Colors.transparent,
-      );
+  Widget build(BuildContext context) =>
+      Container(width: 2, margin: const EdgeInsets.symmetric(horizontal: 12), color: visible ? AppColors.borderStrong : Colors.transparent);
 }
 
 class _SkeletonTile extends StatelessWidget {
@@ -682,7 +755,10 @@ class _SkeletonTile extends StatelessWidget {
       child: Row(
         children: [
           if (withTime) ...[
-            const SizedBox(width: 40, child: Align(alignment: Alignment.centerRight, child: SkeletonBox(width: 30, height: 10, radius: 5))),
+            const SizedBox(
+              width: 40,
+              child: Align(alignment: Alignment.centerRight, child: SkeletonBox(width: 30, height: 10, radius: 5)),
+            ),
             const SizedBox(width: AppSpacing.xs),
           ] else
             const SizedBox(width: 24),
@@ -766,17 +842,17 @@ class CourseEditList extends StatelessWidget {
                 children: [
                   if (i > 0) const Divider(height: 1, indent: 40, endIndent: AppSpacing.xs, color: AppColors.divider),
                   loadingIds.contains(id)
-                    ? const _SkeletonTile()
-                    : _EditTile(
-                        stop: stop,
-                        index: i,
-                        number: numbers[i],
-                        added: addedIds.contains(id),
-                        highlighted: highlightIds.contains(id),
-                        enabled: enabled,
-                        onRemove: () => onRemove(stop),
-                        onTap: () => onTapTile(stop, i),
-                      ),
+                      ? const _SkeletonTile()
+                      : _EditTile(
+                          stop: stop,
+                          index: i,
+                          number: numbers[i],
+                          added: addedIds.contains(id),
+                          highlighted: highlightIds.contains(id),
+                          enabled: enabled,
+                          onRemove: () => onRemove(stop),
+                          onTap: () => onTapTile(stop, i),
+                        ),
                 ],
               );
             },
@@ -818,41 +894,43 @@ class _EditTile extends StatelessWidget {
     return _ChangedFlash(
       on: highlighted,
       child: Material(
-      color: added && !highlighted ? AppColors.primarySoft : Colors.transparent,
-      borderRadius: radius,
-      child: InkWell(
+        color: added && !highlighted ? AppColors.primarySoft : Colors.transparent,
         borderRadius: radius,
-        onTap: enabled ? onTap : null,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 56),
-          child: Row(
-            children: [
-              ReorderableDragStartListener(
-                index: index,
-                enabled: enabled,
-                child: const SizedBox(
-                  width: 40,
-                  height: 56,
-                  child: Icon(Icons.drag_handle_rounded, color: AppColors.controlBorder, semanticLabel: '끌어서 순서 변경'),
+        child: InkWell(
+          borderRadius: radius,
+          onTap: enabled ? onTap : null,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 56),
+            child: Row(
+              children: [
+                ReorderableDragStartListener(
+                  index: index,
+                  enabled: enabled,
+                  child: const SizedBox(
+                    width: 40,
+                    height: 56,
+                    child: Icon(Icons.drag_handle_rounded, color: AppColors.controlBorder, semanticLabel: '끌어서 순서 변경'),
+                  ),
                 ),
-              ),
-              _marker(stop, number),
-              const SizedBox(width: 10),
-              Expanded(child: _StopText(stop: stop, prefix: added ? '새로 추가' : null, changed: highlighted)),
-              IconButton(
-                tooltip: '${stop.place.name} 빼기',
-                onPressed: enabled ? onRemove : null,
-                icon: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: const BoxDecoration(color: AppColors.surfaceMuted, shape: BoxShape.circle),
-                  child: const Icon(Icons.close_rounded, size: 16, color: AppColors.textSecondary),
+                _marker(stop, number),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _StopText(stop: stop, prefix: added ? '새로 추가' : null, changed: highlighted),
                 ),
-              ),
-            ],
+                IconButton(
+                  tooltip: '${stop.place.name} 빼기',
+                  onPressed: enabled ? onRemove : null,
+                  icon: Container(
+                    width: 28,
+                    height: 28,
+                    decoration: const BoxDecoration(color: AppColors.surfaceMuted, shape: BoxShape.circle),
+                    child: const Icon(Icons.close_rounded, size: 16, color: AppColors.textSecondary),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }

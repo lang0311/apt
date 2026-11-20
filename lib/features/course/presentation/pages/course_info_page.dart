@@ -9,17 +9,14 @@ import '../../../../app/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/bottom_cta.dart';
 import '../../../../core/widgets/buttons.dart';
-import '../../../../core/widgets/chips.dart';
 import '../../../../core/widgets/headers.dart';
 import '../../../../core/widgets/inputs.dart';
-import '../../../../core/widgets/states.dart';
 import '../../../../core/widgets/surfaces.dart';
-import '../../domain/course_models.dart';
 import '../course_draft_controller.dart';
-import '../course_providers.dart';
 import '../widgets/course_when_sheet.dart';
 
-/// #23 코스 기본 정보 (1/4): 이름 · 날짜(화면의 칩) · 출발 시간(휠 시트) · 분위기. 장소는 3단계에서만 보여 준다
+/// #23 코스 기본 정보 (1/4, v2): 이름 · 날짜(화면의 칩) · 출발 시간(휠 시트). 분위기 칩은 뺐다(서버가 추천 입력으로 받지 않음,
+/// 2026-11-21 사용자 결정 — `CourseDraft.moodKeys` 데이터는 남김). 장소는 3단계에서만 보여 준다
 class CourseInfoPage extends ConsumerStatefulWidget {
   const CourseInfoPage({super.key});
 
@@ -54,9 +51,6 @@ class _CourseInfoPageState extends ConsumerState<CourseInfoPage> {
   @override
   Widget build(BuildContext context) {
     final draft = ref.watch(courseDraftProvider);
-    final moods = ref.watch(moodOptionsProvider);
-    // 서버가 분위기 목록을 주지 않으면(빈 목록) 분위기 영역 전체를 숨긴다 (팀 서버는 분위기 입력이 없다)
-    final showMoods = !(moods.hasValue && moods.value!.isEmpty);
 
     return Scaffold(
       body: SafeArea(
@@ -72,7 +66,7 @@ class _CourseInfoPageState extends ConsumerState<CourseInfoPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text('어떤 코스를 만들까요?', style: AppTypography.title),
+                        Text('어떤 코스를 만들까요?', style: AppTypography.display),
                         const SizedBox(height: AppSpacing.lg),
                         AppTextField(
                           controller: _name,
@@ -82,7 +76,7 @@ class _CourseInfoPageState extends ConsumerState<CourseInfoPage> {
                           onChanged: (v) => _draft.update((d) => d.copyWith(name: v)),
                         ),
                         const SizedBox(height: AppSpacing.md),
-                        Text('언제 떠나요', style: AppTypography.label),
+                        Text('언제 떠나요', style: AppTypography.label.copyWith(fontSize: 14, color: AppColors.textSecondary)),
                         const SizedBox(height: AppSpacing.xs),
                       ],
                     ),
@@ -105,29 +99,9 @@ class _CourseInfoPageState extends ConsumerState<CourseInfoPage> {
                           hint: '출발 시간을 골라 주세요',
                           onTap: _pickTime,
                         ),
-                        if (showMoods) ...[
-                          const SizedBox(height: AppSpacing.lg),
-                          Text('여행 분위기', style: AppTypography.label),
-                          const SizedBox(height: AppSpacing.xs),
-                        ],
                       ],
                     ),
                   ),
-                  // 분위기 칩은 개수와 상관없이 한 줄, 가로로 넘긴다 (서버 키워드 그대로)
-                  if (showMoods) ...[
-                    AsyncValueView(
-                      value: moods,
-                      compactError: true,
-                      loading: const Padding(padding: AppSpacing.screenPadding, child: SkeletonBox(height: 36)),
-                      onRetry: () => ref.invalidate(moodOptionsProvider),
-                      data: (list) =>
-                          _MoodRow(options: list, selected: draft.moodKeys, onToggle: (key) => _draft.update((d) => d.toggleMood(key))),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.sm, AppSpacing.screenH, 0),
-                      child: Text('선택한 분위기는 추천에 반영돼요.', style: AppTypography.caption),
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -181,51 +155,3 @@ class _PickerField extends StatelessWidget {
 }
 
 /// 분위기 칩 한 줄 (가로 스크롤, 오른쪽 끝을 흐리게 해 더 있다는 걸 보여 준다).
-/// 처음 열 때 고른 칩이 화면 밖에 있으면 그 칩이 보이게 넘긴다.
-class _MoodRow extends StatefulWidget {
-  const _MoodRow({required this.options, required this.selected, required this.onToggle});
-  final List<MoodOption> options;
-  final Set<String> selected;
-  final ValueChanged<String> onToggle;
-
-  @override
-  State<_MoodRow> createState() => _MoodRowState();
-}
-
-class _MoodRowState extends State<_MoodRow> {
-  final _firstSelected = GlobalKey();
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final ctx = _firstSelected.currentContext;
-      if (ctx != null) Scrollable.ensureVisible(ctx, alignment: 0.5, duration: Duration.zero);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final firstKey = widget.options.where((m) => widget.selected.contains(m.key)).firstOrNull?.key;
-    return SizedBox(
-      height: AppSpacing.chipHeight + 2,
-      child: ShaderMask(
-        shaderCallback: (rect) =>
-            const LinearGradient(colors: [Colors.black, Colors.black, Colors.transparent], stops: [0, 0.88, 1]).createShader(rect),
-        blendMode: BlendMode.dstIn,
-        child: ChipScroller(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, 0, AppSpacing.xxl, 0),
-          children: [
-            for (final m in widget.options)
-              AppChip(
-                key: m.key == firstKey ? _firstSelected : null,
-                label: m.label,
-                selected: widget.selected.contains(m.key),
-                onTap: () => widget.onToggle(m.key),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
