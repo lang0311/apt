@@ -48,6 +48,10 @@ String courseArea(List<Place> places, {String fallback = '서울 마포구'}) {
 /// 코스 안 장소의 키. 서버는 `key`(정규 키)를 주고, 없으면 `id`를 쓴다.
 String _placeKey(dynamic stop) => (stop['key'] ?? stop['id']).toString();
 
+/// TimeOfDay → 서버 `start_time` 형식 `HH:mm`
+String? _hhmm(TimeOfDay? t) =>
+    t == null ? null : '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
 class PlatformAuthRepository implements AuthRepository {
   PlatformAuthRepository(this._platform);
   final PlatformClient _platform;
@@ -478,6 +482,9 @@ class PlatformCourseRepository implements CourseRepository {
         'excluded_place_tokens': exclusionTokens,
         'place_count': (draft.places.length + 3).clamp(1, 6),
         'party_id': draft.companion == Companion.party ? draft.partyId : null,
+        // 서버가 출발 시간으로 식사 · 술집 수와 방문 순서를 정한다(없으면 12:00 기준)
+        'visit_date': draft.date?.toIso8601String().substring(0, 10),
+        'start_time': _hhmm(draft.startTime),
       });
     }
     return _recommendation(await _platform.poll(started['job_id'] as String, onStage: onServerStage));
@@ -517,15 +524,12 @@ class PlatformCourseRepository implements CourseRepository {
     final id = _platform.lastCourseId;
     if (id == null) throw const ValidationFailure('추천을 먼저 받아주세요.');
     final old = _platform.courses[id]!;
-    final startTime = draft.startTime;
     final changed = Map<String, dynamic>.from(
       await _platform.post('/mobile/courses/$id', {
             'revision': old['revision'],
             'title': draft.name,
             'date': draft.date?.toIso8601String(),
-            'start_time': startTime == null
-                ? null
-                : '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}',
+            'start_time': _hhmm(draft.startTime),
             'ordered_keys': stops.map((s) => s.place.id).toList(),
           })
           as Map,
