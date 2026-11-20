@@ -10,16 +10,16 @@ class MockHomeRepository implements HomeRepository {
   final MockStore _store;
 
   @override
-  Future<HomeStats> fetchStats() => _store.behavior.query(
-        () => HomeStats(savedPlaceCount: _store.savedIds.length),
-        empty: () => const HomeStats(savedPlaceCount: 0),
-      );
+  Future<HomeStats> fetchStats() =>
+      _store.behavior.query(() => HomeStats(savedPlaceCount: _store.savedIds.length), empty: () => const HomeStats(savedPlaceCount: 0));
 
   @override
   Future<List<Place>> fetchTrendingPlaces() => _store.behavior.query(
-        () => [for (final id in ['p7', 'p2', 'p8']) _store.placeWithSaved(id)],
-        empty: () => const [],
-      );
+    () => [
+      for (final id in ['p7', 'p2', 'p8']) _store.placeWithSaved(id),
+    ],
+    empty: () => const [],
+  );
 }
 
 // NEEDS BACKEND: 홈 aggregate(저장 장소 수·진행 코스 수·최근 추출 수) / 트렌딩 API

@@ -25,9 +25,9 @@ import 'widgets/home_sections.dart';
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
-  /// 섹션 묶음 바깥 여백 (컨테이너 안 여백은 SectionCard.innerPadding)
-  static const _outerPadding = AppSpacing.sm;
-  static const _sectionGap = 10.0;
+  /// 섹션 바깥 여백: SectionCard 안쪽 16과 더해 글자가 화면 왼쪽 20에 맞는다
+  static const _outerPadding = AppSpacing.xxs;
+  static const _headGap = 14.0;
 
   Future<void> _refresh(BuildContext context, WidgetRef ref) {
     ref.invalidate(homeStatsProvider);
@@ -82,38 +82,39 @@ class HomePage extends ConsumerWidget {
 
     final Widget? topWidget = switch (top) {
       null when courses.hasError => AppErrorState(
-          error: courses.error!,
-          compact: true,
-          onRetry: () => ref.invalidate(activeCoursesProvider),
-        ),
+        error: courses.error!,
+        compact: true,
+        onRetry: () => ref.invalidate(activeCoursesProvider),
+      ),
       null => const SkeletonBox(height: 104, radius: 20),
       HomeTopStart() => HomeStartGuide(onPasteLink: () => context.go(AppRoutes.extract)),
       HomeTopNudge(:final newSaves) when newSaves.isNotEmpty => NewSavesNudge(
-          items: newSaves,
-          onTap: () => startCourseWizard(context, ref, places: [for (final r in newSaves) r.place]),
-          onClose: () => _dismissNudge(context, ref),
-        ),
+        items: newSaves,
+        onTap: () => startCourseWizard(context, ref, places: [for (final r in newSaves) r.place]),
+        onClose: () => _dismissNudge(context, ref),
+      ),
       HomeTopNudge() => null,
       HomeTopCourse(:final course, :final isToday, :final moreCount) => HomeCourseCard(
-          course: course,
-          isToday: isToday,
-          moreCount: moreCount,
-          onOpen: () => context.push(AppRoutes.course(course.id)),
-          onMore: () => context.go(AppRoutes.courses),
-        ),
+        course: course,
+        isToday: isToday,
+        moreCount: moreCount,
+        onOpen: () => context.push(AppRoutes.course(course.id)),
+        onMore: () => context.go(AppRoutes.courses),
+      ),
     };
 
     final isFirstUse = top is HomeTopStart;
     // 날짜 없는 코스는 날짜 있는 코스가 없을 때만 따로 한 줄 (있으면 큰 카드의 "n개 더"에 들어간다, 07 D58)
     final undated = top is HomeTopCourse ? const <CourseSummary>[] : undatedCourses(courses.value ?? const []);
-    final sections = <Widget>[
+    // v2: 맨 위 카드 · 바로가기는 좌우 20 여백, 그 아래 섹션은 상자 없이 채움 띠로 나눈다
+    final heads = <Widget>[
       ?topWidget,
       // 바로가기는 처음 쓰는 사람(시작 안내)만 빼고 늘 둔다 — 맨 위 카드가 없어도 첫 줄이 비지 않게
       if (top != null && !isFirstUse)
-        HomeQuickActions(
-          onSavePlace: () => context.go(AppRoutes.extract),
-          onNewCourse: () => startCourseWizard(context, ref),
-        ),
+        HomeQuickActions(onSavePlace: () => context.go(AppRoutes.extract), onNewCourse: () => startCourseWizard(context, ref)),
+      if (undated.isNotEmpty) HomeUndatedCourses(courses: undated, onTap: () => context.go(AppRoutes.courses)),
+    ];
+    final sections = <Widget>[
       // 저장한 곳을 지역으로 묶어 코스 만들기로 (주소에 구 · 시가 있는 곳만, 없으면 섹션째 숨긴다)
       if (!isFirstUse && HomeRegionGroups.groups([for (final i in saved.value ?? const <SavedPlaceItem>[]) i.place]).isNotEmpty)
         SectionCard(
@@ -126,7 +127,6 @@ class HomePage extends ConsumerWidget {
             onOpenRegion: (_) => context.go(AppRoutes.saved),
           ),
         ),
-      if (undated.isNotEmpty) HomeUndatedCourses(courses: undated, onTap: () => context.go(AppRoutes.courses)),
       if (!isFirstUse)
         ?_section(
           value: recent,
@@ -176,17 +176,21 @@ class HomePage extends ConsumerWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: _outerPadding),
+                padding: AppSpacing.screenPadding,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    for (var i = 0; i < sections.length; i++) ...[
-                      if (i > 0) const SizedBox(height: _sectionGap),
-                      sections[i],
-                    ],
+                    for (var i = 0; i < heads.length; i++) ...[if (i > 0) const SizedBox(height: _headGap), heads[i]],
                   ],
                 ),
               ),
+              for (var i = 0; i < sections.length; i++) ...[
+                if (i > 0 || heads.isNotEmpty) ...[const SizedBox(height: 18), const SectionGap(), const SizedBox(height: 6)],
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: _outerPadding),
+                  child: sections[i],
+                ),
+              ],
             ],
           ),
         ),

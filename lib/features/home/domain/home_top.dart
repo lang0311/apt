@@ -31,7 +31,10 @@ class HomeTopCourse extends HomeTop {
 }
 
 /// 날짜를 정하지 않은 다가오는 코스 (맨 위 큰 카드로 쓰지 않고 지역별로 시작하기 아래 한 줄로, 07 D58)
-List<CourseSummary> undatedCourses(List<CourseSummary> courses) => [for (final c in courses) if (c.date == null) c];
+List<CourseSummary> undatedCourses(List<CourseSummary> courses) => [
+  for (final c in courses)
+    if (c.date == null) c,
+];
 
 /// 코스는 당일 일정 기준이다. 지난 코스는 맨 위 자리에 쓰지 않는다(⑤ → ②와 같음).
 /// 맨 위 큰 카드는 날짜가 있는 다가오는 코스만 쓴다. 날짜 없는 코스는 그 카드의 "n개 더"에 함께 센다(07 D58).

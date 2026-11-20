@@ -14,10 +14,7 @@ class HomeNudgeStorage {
     return raw == null ? null : DateTime.tryParse(raw);
   }
 
-  Future<void> write(DateTime? at) =>
-      at == null ? _storage.delete(key: _key) : _storage.write(key: _key, value: at.toIso8601String());
+  Future<void> write(DateTime? at) => at == null ? _storage.delete(key: _key) : _storage.write(key: _key, value: at.toIso8601String());
 }
 
-final homeNudgeStorageProvider = Provider<HomeNudgeStorage>(
-  (ref) => HomeNudgeStorage(const FlutterSecureStorage()),
-);
+final homeNudgeStorageProvider = Provider<HomeNudgeStorage>((ref) => HomeNudgeStorage(const FlutterSecureStorage()));

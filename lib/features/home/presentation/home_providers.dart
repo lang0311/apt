@@ -6,13 +6,9 @@ import '../data/home_nudge_storage.dart';
 import '../domain/home_models.dart';
 
 /// 홈 섹션은 각각 독립적으로 로딩/오류를 처리한다 (docs/05 #9).
-final homeStatsProvider = FutureProvider.autoDispose<HomeStats>(
-  (ref) => ref.watch(homeRepositoryProvider).fetchStats(),
-);
+final homeStatsProvider = FutureProvider.autoDispose<HomeStats>((ref) => ref.watch(homeRepositoryProvider).fetchStats());
 
-final trendingPlacesProvider = FutureProvider.autoDispose<List<Place>>(
-  (ref) => ref.watch(homeRepositoryProvider).fetchTrendingPlaces(),
-);
+final trendingPlacesProvider = FutureProvider.autoDispose<List<Place>>((ref) => ref.watch(homeRepositoryProvider).fetchTrendingPlaces());
 
 /// "최근 n곳을 저장했어요" 제안을 마지막으로 닫은(또는 코스를 만든) 시각
 final homeNudgeSeenAtProvider = AsyncNotifierProvider<HomeNudgeController, DateTime?>(HomeNudgeController.new);
