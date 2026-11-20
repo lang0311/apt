@@ -106,7 +106,10 @@ TimingBadge? timingBadge(PlaceTiming? timing, {DateTime? courseDate, DateTime? t
 }
 
 /// 장소 상세 '기간' 줄 (label · 값 · 아래 작은 글씨). 표시할 게 없으면 null
-typedef TimingPeriod = ({String label, String value, String note, bool ended});
+/// [tip]: 진행 중인 팝업 · 행사에만 붙는 방문 안내 (서버가 찾은 기간이 그날 운영 · 입장 · 예약을 보장하지 않음, 팀 추천 정책 문서)
+typedef TimingPeriod = ({String label, String value, String note, String? tip, bool ended});
+
+const timingVisitTip = '방문 전 운영시간·예약 여부를 확인해 주세요.';
 
 String _mdw(DateTime d) => '${d.month}.${d.day} (${weekdayLabel(d)})';
 
@@ -120,10 +123,16 @@ TimingPeriod? timingPeriod(PlaceTiming? timing, {DateTime? today}) {
   if (timing.kind == PlaceTimingKind.newOpening) {
     final start = timing.start;
     if (start == null || now.difference(start).inDays > newOpeningDays) return null;
-    return (label: '오픈', value: _mdw(start), note: note, ended: false);
+    return (label: '오픈', value: _mdw(start), note: note, tip: null, ended: false);
   }
   final end = timing.end!;
   final value = timing.start == null ? '~ ${_mdw(end)}' : '${_mdw(timing.start!)} ~ ${_mdw(end)}';
   final ended = now.isAfter(end);
-  return (label: '기간', value: value, note: ended ? '종료된 ${timing.kindLabel}이에요' : note, ended: ended);
+  return (
+    label: '기간',
+    value: value,
+    note: ended ? '종료된 ${timing.kindLabel}이에요' : note,
+    tip: ended ? null : timingVisitTip,
+    ended: ended,
+  );
 }

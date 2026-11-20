@@ -82,12 +82,14 @@ void main() {
       expect(p.label, '기간');
       expect(p.value, '11.11 (수) ~ 11.29 (일)');
       expect(p.note, '팝업 · 웹 글에서 날짜를 확인했어요 (11/15)');
+      expect(p.tip, timingVisitTip);
       expect(p.ended, isFalse);
     });
 
     test('끝난 팝업', () {
       final p = timingPeriod(popup, today: DateTime(2026, 12, 1))!;
       expect(p.note, '종료된 팝업이에요');
+      expect(p.tip, isNull); // 끝난 곳엔 방문 안내를 붙이지 않는다
       expect(p.ended, isTrue);
     });
 
@@ -96,6 +98,7 @@ void main() {
       final undated = PlaceTiming.fromJson({'kind': 'new_opening', 'start_date': '', 'end_date': ''});
       expect(timingPeriod(dated, today: today)!.value, '11.11 (수)');
       expect(timingPeriod(dated, today: today)!.label, '오픈');
+      expect(timingPeriod(dated, today: today)!.tip, isNull);
       expect(timingPeriod(undated, today: today), isNull);
     });
   });

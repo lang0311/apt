@@ -142,6 +142,7 @@ class _Body extends ConsumerWidget {
               Text(period.value, style: AppTypography.bodyStrong.copyWith(color: period.ended ? AppColors.textSecondary : null)),
               const SizedBox(height: 2),
               Text(period.note, style: AppTypography.caption),
+              if (period.tip != null) Text(period.tip!, style: AppTypography.caption),
             ],
           ),
         ),
