@@ -125,6 +125,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                 if (_editing)
                   SectionCard(
                     title: '일정 편집',
+                    boxed: true,
                     child: _WithBanner(
                       state: state,
                       child: CourseEditList(
@@ -143,6 +144,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                 else
                   SectionCard(
                     title: '일정 ${state.visibleStops.length}곳',
+                    boxed: true,
                     trailing: CourseEditButton(onPressed: busy ? null : () => setState(() => _editing = true)),
                     child: state.visibleStops.isEmpty
                         ? Padding(

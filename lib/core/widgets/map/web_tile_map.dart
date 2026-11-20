@@ -15,8 +15,7 @@ import 'map_pin.dart';
 /// 브라우저가 이미지를 직접 받게 한다 (타일 서버 CORS 회피).
 class _BrowserTileProvider extends TileProvider {
   @override
-  ImageProvider getImage(TileCoordinates coordinates, TileLayer options) =>
-      NetworkImage(getTileUrl(coordinates, options));
+  ImageProvider getImage(TileCoordinates coordinates, TileLayer options) => NetworkImage(getTileUrl(coordinates, options));
 }
 
 class WebTileMap extends StatefulWidget {
@@ -76,10 +75,7 @@ class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
       old.controller?.attach(null);
       widget.controller?.attach(this);
     }
-    if (_ready &&
-        widget.fitMarkersOnLoad &&
-        old.markers.map((m) => m.id).join('|') !=
-            widget.markers.map((m) => m.id).join('|')) {
+    if (_ready && widget.fitMarkersOnLoad && old.markers.map((m) => m.id).join('|') != widget.markers.map((m) => m.id).join('|')) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) fitTo(widget.markers.map((m) => m.point).toList());
       });
@@ -106,12 +102,7 @@ class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
     _map.fitCamera(
       CameraFit.bounds(
         bounds: LatLngBounds(_latLng(b.southWest), _latLng(b.northEast)),
-        padding: EdgeInsets.fromLTRB(
-          40,
-          40 + widget.topPadding,
-          40,
-          40 + widget.bottomPadding,
-        ),
+        padding: EdgeInsets.fromLTRB(40, 40 + widget.topPadding, 40, 40 + widget.bottomPadding),
         maxZoom: 16,
       ),
     );
@@ -127,34 +118,22 @@ class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
     _idleTimer = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) return;
       final b = camera.visibleBounds;
-      widget.onCameraIdle?.call(
-        GeoBounds(
-          southWest: GeoPoint(b.south, b.west),
-          northEast: GeoPoint(b.north, b.east),
-        ),
-      );
+      widget.onCameraIdle?.call(GeoBounds(southWest: GeoPoint(b.south, b.west), northEast: GeoPoint(b.north, b.east)));
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final initial = widget.fitMarkersOnLoad
-        ? focusBounds(widget.markers.map((m) => m.point).toList())
-        : null;
+    final initial = widget.fitMarkersOnLoad ? focusBounds(widget.markers.map((m) => m.point).toList()) : null;
     return FlutterMap(
       mapController: _map,
       options: MapOptions(
-        initialCenter: widget.markers.isEmpty
-            ? const LatLng(37.557, 126.925)
-            : _latLng(widget.markers.first.point),
+        initialCenter: widget.markers.isEmpty ? const LatLng(37.557, 126.925) : _latLng(widget.markers.first.point),
         initialZoom: 14,
         initialCameraFit: initial == null
             ? null
             : CameraFit.bounds(
-                bounds: LatLngBounds(
-                  _latLng(initial.southWest),
-                  _latLng(initial.northEast),
-                ),
+                bounds: LatLngBounds(_latLng(initial.southWest), _latLng(initial.northEast)),
                 padding: const EdgeInsets.all(40),
                 maxZoom: 16,
               ),
@@ -172,18 +151,11 @@ class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
           userAgentPackageName: 'com.teamjkk.apt',
           tileProvider: _BrowserTileProvider(),
           tileDisplay: const TileDisplay.instantaneous(),
-          errorTileCallback: (tile, error, stack) =>
-              debugPrint('[map-tile] $error'),
+          errorTileCallback: (tile, error, stack) => debugPrint('[map-tile] $error'),
         ),
         if (widget.route.length > 1)
           PolylineLayer(
-            polylines: [
-              Polyline(
-                points: widget.route.map(_latLng).toList(),
-                strokeWidth: 5,
-                color: AppColors.primary,
-              ),
-            ],
+            polylines: [Polyline(points: widget.route.map(_latLng).toList(), strokeWidth: 5, color: AppColors.primary)],
           ),
         MarkerLayer(
           markers: [
@@ -196,13 +168,7 @@ class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
                   onTap: () => widget.onMarkerTap?.call(m),
                   child: Tooltip(
                     message: m.label ?? '',
-                    child: MapPin(
-                      kind: m.kind,
-                      number: m.number,
-                      icon: m.icon,
-                      color: m.color,
-                      selected: m.id == widget.selectedId,
-                    ),
+                    child: MapPin(kind: m.kind, number: m.number, icon: m.icon, color: m.color, selected: m.id == widget.selectedId),
                   ),
                 ),
               ),
@@ -221,9 +187,7 @@ class _WebTileMapState extends State<WebTileMap> implements AptMapCommands {
               ),
           ],
         ),
-        const SimpleAttributionWidget(
-          source: Text('OpenStreetMap contributors'),
-        ),
+        const SimpleAttributionWidget(source: Text('OpenStreetMap contributors')),
       ],
     );
   }

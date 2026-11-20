@@ -8,26 +8,22 @@ import '../../app/theme/app_typography.dart';
 import 'bottom_cta.dart';
 import 'buttons.dart';
 
-void showAppSnackBar(
-  BuildContext context,
-  String message, {
-  String? actionLabel,
-  VoidCallback? onAction,
-  Duration? duration,
-}) {
+void showAppSnackBar(BuildContext context, String message, {String? actionLabel, VoidCallback? onAction, Duration? duration}) {
   final action = actionLabel == null || onAction == null ? null : SnackBarAction(label: actionLabel, onPressed: onAction);
   // 누를 버튼이 있으면 조금 더 오래 둔다
   final shown = duration ?? Duration(seconds: action == null ? 2 : 4);
   final lift = _bottomCtaLift(context);
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(
-      content: Text(message),
-      action: action,
-      duration: shown,
-      // 기본 여백(15, 5, 15, 10)에서 아래만 하단 버튼 위로 올린다
-      margin: lift == null ? null : EdgeInsets.fromLTRB(15, 5, 15, lift),
-    ));
+    ..showSnackBar(
+      SnackBar(
+        content: Text(message),
+        action: action,
+        duration: shown,
+        // 기본 여백(15, 5, 15, 10)에서 아래만 하단 버튼 위로 올린다
+        margin: lift == null ? null : EdgeInsets.fromLTRB(15, 5, 15, lift),
+      ),
+    );
 }
 
 /// 화면에 하단 고정 버튼(BottomCta)이 있으면 스낵바를 그 위(8)로 띄울 아래 여백. 없으면 null.
@@ -56,19 +52,14 @@ double? _bottomCtaLift(BuildContext context) {
 }
 
 /// 바텀시트 (상단 큰 radius + 핸들). 탭바를 덮도록 root navigator 사용.
-Future<T?> showAppBottomSheet<T>(
-  BuildContext context, {
-  required WidgetBuilder builder,
-}) {
+Future<T?> showAppBottomSheet<T>(BuildContext context, {required WidgetBuilder builder}) {
   return showModalBottomSheet<T>(
     context: context,
     useRootNavigator: true,
     isScrollControlled: true,
     backgroundColor: AppColors.surface,
     barrierColor: AppColors.scrim,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
-    ),
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet))),
     builder: (ctx) => Padding(
       // 키보드가 올라오면 시트도 함께 올라간다.
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
@@ -101,11 +92,7 @@ class SheetHandle extends StatelessWidget {
 }
 
 /// 가운데 모달 카드 (제목 + 닫기 X). 새 보관함 만들기, 파티원 초대.
-Future<T?> showAppModal<T>(
-  BuildContext context, {
-  required String title,
-  required WidgetBuilder builder,
-}) {
+Future<T?> showAppModal<T>(BuildContext context, {required String title, required WidgetBuilder builder}) {
   return showDialog<T>(
     context: context,
     useRootNavigator: true,
@@ -123,12 +110,7 @@ Future<T?> showAppModal<T>(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(child: Text(title, style: AppTypography.title)),
-                AppIconBox(
-                  icon: Icons.close_rounded,
-                  background: AppColors.bg,
-                  tooltip: '닫기',
-                  onPressed: () => Navigator.of(ctx).pop(),
-                ),
+                AppIconBox(icon: Icons.close_rounded, background: AppColors.bg, tooltip: '닫기', onPressed: () => Navigator.of(ctx).pop()),
               ],
             ),
             const SizedBox(height: AppSpacing.lg),

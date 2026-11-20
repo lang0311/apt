@@ -20,12 +20,7 @@ class BottomCta extends StatelessWidget {
         minimum: const EdgeInsets.only(bottom: AppSpacing.md),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.sm, AppSpacing.screenH, 0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              child,
-            ],
-          ),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [child]),
         ),
       ),
     );

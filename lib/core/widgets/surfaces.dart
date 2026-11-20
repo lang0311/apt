@@ -7,7 +7,16 @@ import '../../app/theme/app_typography.dart';
 /// 섹션 묶음 (v2: 상자 없이 굵은 제목 18 + 내용). 구역 사이는 [SectionGap] 띠로 나눈다.
 /// [child]는 좌우 여백 없이 받는다 — 가로 스크롤 목록이 컨테이너 끝까지 닿게 하고, 여백은 child가 정한다.
 class SectionCard extends StatelessWidget {
-  const SectionCard({super.key, required this.title, required this.child, this.actionLabel, this.onAction, this.trailing, this.titleWidget});
+  const SectionCard({
+    super.key,
+    required this.title,
+    required this.child,
+    this.actionLabel,
+    this.onAction,
+    this.trailing,
+    this.titleWidget,
+    this.boxed = false,
+  });
 
   final String title;
 
@@ -20,11 +29,21 @@ class SectionCard extends StatelessWidget {
   final Widget? trailing;
   final Widget child;
 
+  /// 일정 카드처럼 흰 바탕 + 1px 선(모서리 20)으로 묶어야 할 때 (v2 추천 결과 · 코스 상세, 사용자가 휑하지 않게 요청)
+  final bool boxed;
+
   static const innerPadding = AppSpacing.md;
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      decoration: boxed
+          ? BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.divider),
+            )
+          : null,
       padding: const EdgeInsets.fromLTRB(0, AppSpacing.xs, 0, AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -66,8 +85,11 @@ class SectionGap extends StatelessWidget {
   const SectionGap({super.key});
 
   @override
-  Widget build(BuildContext context) =>
-      const SizedBox(height: AppSpacing.sectionGap, width: double.infinity, child: ColoredBox(color: AppColors.fill));
+  Widget build(BuildContext context) => const SizedBox(
+    height: AppSpacing.sectionGap,
+    width: double.infinity,
+    child: ColoredBox(color: AppColors.fill),
+  );
 }
 
 /// SectionCard 안의 행 목록. 행 사이에만 구분선을 넣고, 선은 사진 오른쪽(왼쪽 [indent])부터 시작한다.
@@ -154,4 +176,3 @@ class IconCircle extends StatelessWidget {
     );
   }
 }
-

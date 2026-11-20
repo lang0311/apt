@@ -48,22 +48,22 @@ void main() {
     await expectArea('서울 성동구 성수동', '공원 · 성수동');
   });
 
-  testWidgets("시트의 '추천 이유 보기'를 누르면 시트가 닫히지 않고 이유가 펼쳐진다", (tester) async {
+  testWidgets("시트의 추천 이유는 처음부터 펼쳐져 있고, '추천 이유 보기'로 접고 펼친다 (v2, 시트는 닫히지 않음)", (tester) async {
     await tester.pumpWidget(_sheetOpener(_ai));
     await tester.tap(find.text('열기'));
     await tester.pumpAndSettle();
 
     expect(find.text('추천 이유 보기'), findsOneWidget);
-    expect(find.text(_reason), findsNothing);
+    expect(find.text(_reason), findsOneWidget);
 
     await tester.tap(find.text('추천 이유 보기'));
     await tester.pumpAndSettle();
-    expect(find.text(_reason), findsOneWidget);
+    expect(find.text(_reason), findsNothing);
     expect(find.text('장소 정보 보기'), findsOneWidget); // 시트는 그대로 열려 있다
 
     await tester.tap(find.text('추천 이유 보기'));
     await tester.pumpAndSettle();
-    expect(find.text(_reason), findsNothing);
+    expect(find.text(_reason), findsOneWidget);
   });
 
   testWidgets("추천 이유가 없으면 '추천 이유 보기' 줄이 없다", (tester) async {

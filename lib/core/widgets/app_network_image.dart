@@ -44,8 +44,7 @@ class AppNetworkImage extends StatelessWidget {
               // 썸네일 크기로 디코딩해 메모리 절약 (원본 무조건 사용 금지)
               cacheWidth: displayWidth == null || !displayWidth.isFinite ? null : (displayWidth * dpr).round(),
               errorBuilder: (_, _, _) => placeholder,
-              frameBuilder: (_, child, frame, wasSync) =>
-                  wasSync || frame != null ? child : placeholder,
+              frameBuilder: (_, child, frame, wasSync) => wasSync || frame != null ? child : placeholder,
             ),
     );
   }

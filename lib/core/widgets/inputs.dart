@@ -99,28 +99,30 @@ class _AppTextFieldState extends State<AppTextField> {
             const SizedBox(width: AppSpacing.sm),
           ],
           Expanded(
-            child: _withInnerLabel(TextField(
-              controller: _controller,
-              focusNode: _focus,
-              autofocus: widget.autofocus,
-              enabled: widget.enabled,
-              obscureText: widget.obscureText,
-              keyboardType: widget.keyboardType,
-              textInputAction: widget.textInputAction,
-              onChanged: widget.onChanged,
-              onSubmitted: widget.onSubmitted,
-              autofillHints: widget.autofillHints,
-              maxLength: widget.maxLength,
-              style: AppTypography.bodyStrong,
-              decoration: InputDecoration(
-                isCollapsed: true,
-                border: InputBorder.none,
-                counterText: '',
-                hintText: widget.hint,
-                hintStyle: AppTypography.bodyStrong.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
-                contentPadding: EdgeInsets.symmetric(vertical: widget.innerLabel == null ? 16 : 4),
+            child: _withInnerLabel(
+              TextField(
+                controller: _controller,
+                focusNode: _focus,
+                autofocus: widget.autofocus,
+                enabled: widget.enabled,
+                obscureText: widget.obscureText,
+                keyboardType: widget.keyboardType,
+                textInputAction: widget.textInputAction,
+                onChanged: widget.onChanged,
+                onSubmitted: widget.onSubmitted,
+                autofillHints: widget.autofillHints,
+                maxLength: widget.maxLength,
+                style: AppTypography.bodyStrong,
+                decoration: InputDecoration(
+                  isCollapsed: true,
+                  border: InputBorder.none,
+                  counterText: '',
+                  hintText: widget.hint,
+                  hintStyle: AppTypography.bodyStrong.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                  contentPadding: EdgeInsets.symmetric(vertical: widget.innerLabel == null ? 16 : 4),
+                ),
               ),
-            )),
+            ),
           ),
           if (widget.showCounter && widget.maxLength != null)
             Text('${_controller.text.characters.length} / ${widget.maxLength}', style: AppTypography.caption),
@@ -139,6 +141,7 @@ class _AppTextFieldState extends State<AppTextField> {
       ],
     );
   }
+
   Widget _withInnerLabel(Widget input) {
     if (widget.innerLabel == null) return input;
     return Padding(
@@ -146,12 +149,14 @@ class _AppTextFieldState extends State<AppTextField> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: [Text(widget.innerLabel!, style: AppTypography.caption), input],
+        children: [
+          Text(widget.innerLabel!, style: AppTypography.caption),
+          input,
+        ],
       ),
     );
   }
 }
-
 
 /// 필드 아래 한 줄 오류 메시지 (빨강 아이콘 + 문장)
 class AppFieldError extends StatelessWidget {
@@ -164,7 +169,12 @@ class AppFieldError extends StatelessWidget {
       children: [
         const Icon(Icons.error_outline_rounded, size: 16, color: AppColors.danger),
         const SizedBox(width: 6),
-        Expanded(child: Text(message, style: AppTypography.meta.copyWith(color: AppColors.dangerText, fontWeight: FontWeight.w500))),
+        Expanded(
+          child: Text(
+            message,
+            style: AppTypography.meta.copyWith(color: AppColors.dangerText, fontWeight: FontWeight.w500),
+          ),
+        ),
       ],
     );
   }

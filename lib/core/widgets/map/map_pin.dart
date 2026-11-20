@@ -22,15 +22,7 @@ enum MapPinKind {
 }
 
 class MapPin extends StatelessWidget {
-  const MapPin({
-    super.key,
-    required this.kind,
-    this.number,
-    this.label,
-    this.icon,
-    this.color,
-    this.selected = false,
-  });
+  const MapPin({super.key, required this.kind, this.number, this.label, this.icon, this.color, this.selected = false});
 
   final MapPinKind kind;
   final int? number;
@@ -43,11 +35,15 @@ class MapPin extends StatelessWidget {
   Widget build(BuildContext context) {
     final pin = switch (kind) {
       MapPinKind.numbered => _circle(
-          color ?? AppColors.primary,
-          Text('${number ?? ''}', style: AppTypography.bodyStrong.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
+        color ?? AppColors.primary,
+        Text(
+          '${number ?? ''}',
+          style: AppTypography.bodyStrong.copyWith(color: Colors.white, fontWeight: FontWeight.w800),
         ),
+      ),
       MapPinKind.picked => _circle(color ?? AppColors.primary, const Icon(Icons.check_rounded, color: Colors.white, size: 20)),
-      MapPinKind.ai => number == null ? _circle(AppColors.ai, const Icon(Icons.auto_awesome, color: Colors.white, size: 18)) : _aiNumbered(),
+      MapPinKind.ai =>
+        number == null ? _circle(AppColors.ai, const Icon(Icons.auto_awesome, color: Colors.white, size: 18)) : _aiNumbered(),
       MapPinKind.place => _teardrop(),
       MapPinKind.result => _result(),
     };
@@ -65,7 +61,10 @@ class MapPin extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadius.small),
               boxShadow: const [BoxShadow(color: AppColors.shadowFloat, blurRadius: 6)],
             ),
-            child: Text(label!, style: AppTypography.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+            child: Text(
+              label!,
+              style: AppTypography.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+            ),
           ),
         AnimatedScale(scale: selected ? 1.15 : 1, duration: const Duration(milliseconds: 150), child: pin),
       ],
@@ -95,14 +94,24 @@ class MapPin extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          _circle(AppColors.ai, Text('$number', style: AppTypography.bodyStrong.copyWith(color: Colors.white, fontWeight: FontWeight.w800))),
+          _circle(
+            AppColors.ai,
+            Text(
+              '$number',
+              style: AppTypography.bodyStrong.copyWith(color: Colors.white, fontWeight: FontWeight.w800),
+            ),
+          ),
           Positioned(
             right: 0,
             top: 0,
             child: Container(
               width: 18,
               height: 18,
-              decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: AppColors.ai, width: 1.5)),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.ai, width: 1.5),
+              ),
               child: const Icon(Icons.auto_awesome, size: 11, color: AppColors.ai),
             ),
           ),
@@ -135,11 +144,13 @@ class MapPin extends StatelessWidget {
       child: Stack(
         alignment: Alignment.topCenter,
         children: [
-          Icon(Icons.location_on, size: 42, color: c, shadows: const [Shadow(color: AppColors.shadowStrong, blurRadius: 4)]),
-          Positioned(
-            top: 8,
-            child: Icon(icon ?? Icons.place, size: 15, color: Colors.white),
+          Icon(
+            Icons.location_on,
+            size: 42,
+            color: c,
+            shadows: const [Shadow(color: AppColors.shadowStrong, blurRadius: 4)],
           ),
+          Positioned(top: 8, child: Icon(icon ?? Icons.place, size: 15, color: Colors.white)),
         ],
       ),
     );

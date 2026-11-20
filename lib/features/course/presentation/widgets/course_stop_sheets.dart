@@ -117,7 +117,8 @@ class _ReasonRow extends StatefulWidget {
 }
 
 class _ReasonRowState extends State<_ReasonRow> {
-  bool _open = false;
+  /// v2: 처음부터 펼쳐 둔다 (07 D40을 바꿈, 2026-11-21 사용자 결정 — 시안 v2 장소 시트)
+  bool _open = true;
 
   @override
   Widget build(BuildContext context) {

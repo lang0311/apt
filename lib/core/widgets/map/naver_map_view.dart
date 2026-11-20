@@ -85,10 +85,7 @@ class _NaverMapViewState extends State<NaverMapView> implements AptMapCommands {
     final initial = focusBounds([...widget.markers.map((m) => m.point), ...widget.route]);
     return NaverMap(
       options: NaverMapViewOptions(
-        initialCameraPosition: NCameraPosition(
-          target: initial == null ? _seoulCityHall : _latLng(initial.center),
-          zoom: 14,
-        ),
+        initialCameraPosition: NCameraPosition(target: initial == null ? _seoulCityHall : _latLng(initial.center), zoom: 14),
         // 로고·축척·카메라 중심이 상단 칩/하단 시트에 가려지지 않게 한다 (logoMargin은 이 안쪽 기준)
         contentPadding: _contentPadding,
         locale: const Locale('ko'),
@@ -109,8 +106,7 @@ class _NaverMapViewState extends State<NaverMapView> implements AptMapCommands {
   }
 
   @override
-  void moveTo(GeoPoint target, {double zoom = 15}) =>
-      _camera(NCameraUpdate.scrollAndZoomTo(target: _latLng(target), zoom: zoom));
+  void moveTo(GeoPoint target, {double zoom = 15}) => _camera(NCameraUpdate.scrollAndZoomTo(target: _latLng(target), zoom: zoom));
 
   @override
   void fitTo(List<GeoPoint> points) => _camera(_fitUpdate(points));
@@ -144,10 +140,12 @@ class _NaverMapViewState extends State<NaverMapView> implements AptMapCommands {
     if (c == null) return;
     final b = await c.getContentBounds(withPadding: true);
     if (!mounted) return;
-    widget.onCameraIdle?.call(GeoBounds(
-      southWest: GeoPoint(b.southWest.latitude, b.southWest.longitude),
-      northEast: GeoPoint(b.northEast.latitude, b.northEast.longitude),
-    ));
+    widget.onCameraIdle?.call(
+      GeoBounds(
+        southWest: GeoPoint(b.southWest.latitude, b.southWest.longitude),
+        northEast: GeoPoint(b.northEast.latitude, b.northEast.longitude),
+      ),
+    );
   }
 
   /// 오버레이를 현재 props로 다시 그린다.
@@ -159,26 +157,23 @@ class _NaverMapViewState extends State<NaverMapView> implements AptMapCommands {
 
     final overlays = <NAddableOverlay>{};
     if (widget.route.length > 1) {
-      overlays.add(NPathOverlay(
-        id: 'route',
-        // SDK가 List만 직렬화한다 (lazy Iterable이면 예외 → 같은 배치의 마커까지 안 그려짐)
-        coords: widget.route.map(_latLng).toList(),
-        width: 5,
-        color: AppColors.primary,
-        outlineWidth: 0,
-      ));
+      overlays.add(
+        NPathOverlay(
+          id: 'route',
+          // SDK가 List만 직렬화한다 (lazy Iterable이면 예외 → 같은 배치의 마커까지 안 그려짐)
+          coords: widget.route.map(_latLng).toList(),
+          width: 5,
+          color: AppColors.primary,
+          outlineWidth: 0,
+        ),
+      );
     }
     for (final m in widget.markers) {
       final icon = await _iconFor(m);
       // 아이콘을 그리는 동안 화면을 나갔거나 새 props가 들어왔으면 이번 결과는 버린다.
       if (!mounted || token != _syncToken) return;
-      final marker = NMarker(
-        id: m.id,
-        position: _latLng(m.point),
-        icon: icon,
-        size: _pinSize,
-        anchor: const NPoint(0.5, 0.5),
-      )..setZIndex(m.id == widget.selectedId ? 10 : 0);
+      final marker = NMarker(id: m.id, position: _latLng(m.point), icon: icon, size: _pinSize, anchor: const NPoint(0.5, 0.5))
+        ..setZIndex(m.id == widget.selectedId ? 10 : 0);
       if (widget.onMarkerTap != null) marker.setOnTapListener((_) => widget.onMarkerTap!(m));
       overlays.add(marker);
     }
@@ -222,14 +217,7 @@ class _NaverMapViewState extends State<NaverMapView> implements AptMapCommands {
       context: context,
       size: _pinSize,
       widget: Center(
-        child: MapPin(
-          kind: m.kind,
-          number: m.number,
-          label: m.label,
-          icon: m.icon,
-          color: m.color,
-          selected: selected,
-        ),
+        child: MapPin(kind: m.kind, number: m.number, label: m.label, icon: m.icon, color: m.color, selected: selected),
       ),
     );
   }

@@ -45,10 +45,7 @@ class AppButton extends StatelessWidget {
           };
 
     final child = loading
-        ? SizedBox.square(
-            dimension: 20,
-            child: CircularProgressIndicator(strokeWidth: 2.4, color: fg),
-          )
+        ? SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2.4, color: fg))
         : Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -87,13 +84,7 @@ class AppButton extends StatelessWidget {
 
 /// 텍스트 링크 버튼 (예: "다른 계정으로 로그인", "모두 선택")
 class AppTextLink extends StatelessWidget {
-  const AppTextLink({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    this.color = AppColors.primary,
-    this.style,
-  });
+  const AppTextLink({super.key, required this.label, required this.onPressed, this.color = AppColors.primary, this.style});
 
   final String label;
   final VoidCallback? onPressed;
@@ -149,7 +140,10 @@ class AppIconBox extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(size / 3),
         onTap: onPressed,
-        child: SizedBox.square(dimension: size, child: Icon(icon, size: size * 0.55, color: AppColors.textPrimary)),
+        child: SizedBox.square(
+          dimension: size,
+          child: Icon(icon, size: size * 0.55, color: AppColors.textPrimary),
+        ),
       ),
     );
     return tooltip == null ? box : Tooltip(message: tooltip!, child: box);

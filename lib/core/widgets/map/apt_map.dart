@@ -12,15 +12,7 @@ import 'web_tile_map.dart';
 
 /// 지도 마커 (SDK 타입과 분리된 앱 모델)
 class MapMarker {
-  const MapMarker({
-    required this.id,
-    required this.point,
-    required this.kind,
-    this.number,
-    this.label,
-    this.icon,
-    this.color,
-  });
+  const MapMarker({required this.id, required this.point, required this.kind, this.number, this.label, this.icon, this.color});
 
   final String id;
   final GeoPoint point;
@@ -159,4 +151,3 @@ class AptMap extends StatelessWidget {
     );
   }
 }
-

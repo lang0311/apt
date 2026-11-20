@@ -34,7 +34,10 @@ class StationSteps extends StatelessWidget {
                         height: 26,
                         alignment: Alignment.center,
                         decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                        child: Text('${i + 1}', style: AppTypography.label.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
+                        child: Text(
+                          '${i + 1}',
+                          style: AppTypography.label.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+                        ),
                       ),
                       if (i < steps.length - 1) Expanded(child: Container(width: 2, color: AppColors.divider)),
                     ],
@@ -48,10 +51,7 @@ class StationSteps extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(steps[i].$1, style: AppTypography.bodyStrong.copyWith(fontSize: 16)),
-                        if (steps[i].$2 != null) ...[
-                          const SizedBox(height: 2),
-                          Text(steps[i].$2!, style: AppTypography.meta),
-                        ],
+                        if (steps[i].$2 != null) ...[const SizedBox(height: 2), Text(steps[i].$2!, style: AppTypography.meta)],
                       ],
                     ),
                   ),

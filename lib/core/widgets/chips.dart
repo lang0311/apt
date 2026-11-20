@@ -110,10 +110,7 @@ class ChipScroller extends StatelessWidget {
       padding: padding,
       child: Row(
         children: [
-          for (var i = 0; i < children.length; i++) ...[
-            if (i > 0) const SizedBox(width: AppSpacing.xs),
-            children[i],
-          ],
+          for (var i = 0; i < children.length; i++) ...[if (i > 0) const SizedBox(width: AppSpacing.xs), children[i]],
         ],
       ),
     );
@@ -140,7 +137,10 @@ class AppTag extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label, style: AppTypography.caption.copyWith(color: fg, fontWeight: FontWeight.w700)),
+          Text(
+            label,
+            style: AppTypography.caption.copyWith(color: fg, fontWeight: FontWeight.w700),
+          ),
         ],
       ),
     );
@@ -155,10 +155,6 @@ class TagWrap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
-      children: [for (final l in labels) AppTag(l, tone: tone)],
-    );
+    return Wrap(spacing: 6, runSpacing: 6, children: [for (final l in labels) AppTag(l, tone: tone)]);
   }
 }

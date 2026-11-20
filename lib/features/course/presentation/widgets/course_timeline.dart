@@ -290,43 +290,38 @@ class CourseStats extends StatelessWidget {
       if (meters != null) ('직선 거리', formatDistance(meters)),
     ];
     if (cells.isEmpty) return const SizedBox.shrink();
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.thumb),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (final (i, (label, value)) in cells.indexed) ...[
-              if (i > 0) const VerticalDivider(width: 1, thickness: 1, indent: 12, endIndent: 12, color: AppColors.divider),
-              Expanded(
-                child: Semantics(
-                  label: '$label $value',
-                  excludeSemantics: true,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(AppSpacing.sm, 10, AppSpacing.xs, 11),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(label, style: AppTypography.caption),
-                        const SizedBox(height: 2),
-                        Text(
-                          value,
-                          style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w800),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
+    // v2: 칸마다 따로 떨어진 채움 칸 (모서리 12, 사이 6)
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final (i, (label, value)) in cells.indexed) ...[
+            if (i > 0) const SizedBox(width: 6),
+            Expanded(
+              child: Semantics(
+                label: '$label $value',
+                excludeSemantics: true,
+                child: Container(
+                  decoration: BoxDecoration(color: AppColors.fill, borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.sm, 8, AppSpacing.xs, 9),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(label, style: AppTypography.caption),
+                      const SizedBox(height: 2),
+                      Text(
+                        value,
+                        style: AppTypography.bodyStrong.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }

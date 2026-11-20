@@ -33,9 +33,7 @@ class PageTitleHeader extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: AppTypography.display),
-              ],
+              children: [Text(title, style: AppTypography.display)],
             ),
           ),
           if (trailing != null) trailing!,
@@ -83,15 +81,14 @@ class PlainHeader extends StatelessWidget {
             Expanded(
               child: title == null
                   ? const SizedBox()
-                  : Text(
-                      title!,
-                      style: AppTypography.header,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  : Text(title!, style: AppTypography.header, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
             ...actions,
-            if (trailing != null) Padding(padding: const EdgeInsets.only(right: AppSpacing.sm), child: trailing),
+            if (trailing != null)
+              Padding(
+                padding: const EdgeInsets.only(right: AppSpacing.sm),
+                child: trailing,
+              ),
           ],
         ),
       ),
@@ -137,10 +134,7 @@ class AuthHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title, style: AppTypography.display),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 6),
-                    Text(subtitle!, style: AppTypography.bodyMuted),
-                  ],
+                  if (subtitle != null) ...[const SizedBox(height: 6), Text(subtitle!, style: AppTypography.bodyMuted)],
                 ],
               ),
             ),

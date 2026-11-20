@@ -41,10 +41,7 @@ class _PreviewMapState extends State<PreviewMap> {
   bool _visible(GeoBounds? b, GeoPoint p) {
     if (b == null) return true;
     const e = 1e-9;
-    return p.lat >= b.southWest.lat - e &&
-        p.lat <= b.northEast.lat + e &&
-        p.lng >= b.southWest.lng - e &&
-        p.lng <= b.northEast.lng + e;
+    return p.lat >= b.southWest.lat - e && p.lat <= b.northEast.lat + e && p.lng >= b.southWest.lng - e && p.lng <= b.northEast.lng + e;
   }
 
   @override
@@ -70,31 +67,32 @@ class _PreviewMapState extends State<PreviewMap> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final size = Size(constraints.maxWidth, constraints.maxHeight);
-      final top = widget.topPadding + 44;
-      final usable = Rect.fromLTRB(44, top, size.width - 44, math.max(top + 60, size.height - widget.bottomPadding - 44));
-      final bounds = _bounds;
-      final project = _projector(usable, bounds);
-      final routeOffsets = widget.route.where((p) => _visible(bounds, p)).map(project).toList();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = Size(constraints.maxWidth, constraints.maxHeight);
+        final top = widget.topPadding + 44;
+        final usable = Rect.fromLTRB(44, top, size.width - 44, math.max(top + 60, size.height - widget.bottomPadding - 44));
+        final bounds = _bounds;
+        final project = _projector(usable, bounds);
+        final routeOffsets = widget.route.where((p) => _visible(bounds, p)).map(project).toList();
 
-      return ClipRect(
-        child: Stack(
-          children: [
-            Positioned.fill(child: CustomPaint(painter: _MapBackgroundPainter())),
-            if (routeOffsets.length > 1)
-              Positioned.fill(child: CustomPaint(painter: _RoutePainter(routeOffsets))),
-            for (final m in widget.markers)
-              if (_visible(bounds, m.point)) _positioned(project(m.point), m),
-            Positioned(
-              right: 10,
-              bottom: widget.bottomPadding + 8,
-              child: Text('지도 미리보기 · NAVER 지도 연동 예정', style: AppTypography.caption),
-            ),
-          ],
-        ),
-      );
-    });
+        return ClipRect(
+          child: Stack(
+            children: [
+              Positioned.fill(child: CustomPaint(painter: _MapBackgroundPainter())),
+              if (routeOffsets.length > 1) Positioned.fill(child: CustomPaint(painter: _RoutePainter(routeOffsets))),
+              for (final m in widget.markers)
+                if (_visible(bounds, m.point)) _positioned(project(m.point), m),
+              Positioned(
+                right: 10,
+                bottom: widget.bottomPadding + 8,
+                child: Text('지도 미리보기 · NAVER 지도 연동 예정', style: AppTypography.caption),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Offset Function(GeoPoint) _projector(Rect area, GeoBounds? b) {
@@ -102,9 +100,9 @@ class _PreviewMapState extends State<PreviewMap> {
     final latSpan = math.max(b.northEast.lat - b.southWest.lat, 0.002);
     final lngSpan = math.max(b.northEast.lng - b.southWest.lng, 0.002);
     return (p) => Offset(
-          area.left + (p.lng - b.southWest.lng) / lngSpan * area.width,
-          area.bottom - (p.lat - b.southWest.lat) / latSpan * area.height,
-        );
+      area.left + (p.lng - b.southWest.lng) / lngSpan * area.width,
+      area.bottom - (p.lat - b.southWest.lat) / latSpan * area.height,
+    );
   }
 
   Widget _positioned(Offset o, MapMarker m) {
@@ -117,14 +115,7 @@ class _PreviewMapState extends State<PreviewMap> {
       child: Center(
         child: GestureDetector(
           onTap: widget.onMarkerTap == null ? null : () => widget.onMarkerTap!(m),
-          child: MapPin(
-            kind: m.kind,
-            number: m.number,
-            label: m.label,
-            icon: m.icon,
-            color: m.color,
-            selected: m.id == widget.selectedId,
-          ),
+          child: MapPin(kind: m.kind, number: m.number, label: m.label, icon: m.icon, color: m.color, selected: m.id == widget.selectedId),
         ),
       ),
     );

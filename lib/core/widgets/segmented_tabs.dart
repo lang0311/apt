@@ -6,13 +6,7 @@ import '../../app/theme/app_typography.dart';
 
 /// 밑줄 탭: 선택=남색 굵은 글자 + 2px 밑줄 (저장됨, 코스 목록)
 class SegmentedTabs extends StatelessWidget {
-  const SegmentedTabs({
-    super.key,
-    required this.labels,
-    required this.selectedIndex,
-    required this.onChanged,
-    this.counts,
-  });
+  const SegmentedTabs({super.key, required this.labels, required this.selectedIndex, required this.onChanged, this.counts});
 
   final List<String> labels;
 
@@ -24,7 +18,9 @@ class SegmentedTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.border))),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppColors.border)),
+      ),
       child: Row(
         children: [
           for (var i = 0; i < labels.length; i++)
@@ -38,19 +34,19 @@ class SegmentedTabs extends StatelessWidget {
                   margin: EdgeInsets.only(right: i == labels.length - 1 ? 0 : AppSpacing.lg),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: i == selectedIndex ? AppColors.ink : Colors.transparent, width: 2),
-                    ),
+                    border: Border(bottom: BorderSide(color: i == selectedIndex ? AppColors.ink : Colors.transparent, width: 2)),
                   ),
                   child: Text.rich(
-                    TextSpan(children: [
-                      TextSpan(text: labels[i]),
-                      if (counts?[i] != null)
-                        TextSpan(
-                          text: ' ${counts![i]}',
-                          style: const TextStyle(color: AppColors.textTertiary, fontWeight: FontWeight.w700),
-                        ),
-                    ]),
+                    TextSpan(
+                      children: [
+                        TextSpan(text: labels[i]),
+                        if (counts?[i] != null)
+                          TextSpan(
+                            text: ' ${counts![i]}',
+                            style: const TextStyle(color: AppColors.textTertiary, fontWeight: FontWeight.w700),
+                          ),
+                      ],
+                    ),
                     style: AppTypography.bodyStrong.copyWith(
                       color: i == selectedIndex ? AppColors.ink : AppColors.textSecondary,
                       fontWeight: i == selectedIndex ? FontWeight.w800 : FontWeight.w500,

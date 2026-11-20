@@ -99,6 +99,7 @@ class _Body extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
               SectionCard(
                 title: '일정 ${course.stops.length}곳',
+                boxed: true,
                 trailing: course.canEdit ? CourseEditButton(onPressed: () => context.push(AppRoutes.courseEdit(course.id))) : null,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,

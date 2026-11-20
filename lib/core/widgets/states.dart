@@ -21,12 +21,7 @@ class AppLoading extends StatelessWidget {
       child: const Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox.square(
-              dimension: 28,
-              child: CircularProgressIndicator(strokeWidth: 3, color: AppColors.primary),
-            ),
-          ],
+          children: [SizedBox.square(dimension: 28, child: CircularProgressIndicator(strokeWidth: 3, color: AppColors.primary))],
         ),
       ),
     );
@@ -73,11 +68,7 @@ class SkeletonList extends StatelessWidget {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SkeletonBox(width: 120, height: 14),
-                          SizedBox(height: 10),
-                          SkeletonBox(height: 12),
-                        ],
+                        children: [SkeletonBox(width: 120, height: 14), SizedBox(height: 10), SkeletonBox(height: 12)],
                       ),
                     ),
                   ],
@@ -156,12 +147,7 @@ class AppErrorState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconCircle(
-            icon: Icons.error_outline_rounded,
-            size: compact ? 44 : 64,
-            color: AppColors.danger,
-            background: AppColors.dangerSoft,
-          ),
+          IconCircle(icon: Icons.error_outline_rounded, size: compact ? 44 : 64, color: AppColors.danger, background: AppColors.dangerSoft),
           const SizedBox(height: AppSpacing.sm),
           Text(title ?? '불러오지 못했어요', style: AppTypography.cardTitle, textAlign: TextAlign.center),
           const SizedBox(height: 4),
