@@ -25,10 +25,11 @@ class ExtractSourceRow extends StatelessWidget {
       duration: const Duration(milliseconds: 150),
       constraints: const BoxConstraints(minHeight: 56),
       padding: const EdgeInsets.fromLTRB(AppSpacing.md, 6, AppSpacing.xxs, 6),
+      // v2: 채움 바탕 · 테두리 없음, 입력 중에만 흰 바탕 + 파란 2px
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: AppRadius.cardAll,
-        border: Border.all(color: focused ? AppColors.primary : AppColors.border, width: focused ? 1.5 : 1),
+        color: focused ? AppColors.surface : AppColors.fill,
+        borderRadius: AppRadius.inputAll,
+        border: Border.all(color: focused ? AppColors.primary : Colors.transparent, width: 2),
       ),
       child: Row(
         children: [
@@ -49,12 +50,7 @@ class LinkTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 30,
-      height: 30,
-      decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.small)),
-      child: Icon(icon, size: 18, color: AppColors.textSecondary),
-    );
+    return SizedBox(width: 24, height: 30, child: Icon(icon, size: 20, color: AppColors.textSecondary));
   }
 }
 
@@ -96,15 +92,12 @@ class SourceRowAction extends StatelessWidget {
         minimumSize: const Size(48, 44),
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       ),
-      child: Text(
-        label,
-        style: AppTypography.label.copyWith(color: onPressed == null ? AppColors.textTertiary : AppColors.primary),
-      ),
+      child: Text(label, style: AppTypography.label.copyWith(color: onPressed == null ? AppColors.textTertiary : AppColors.primary)),
     );
   }
 }
 
-/// 찾은 장소 한 행: 사진 48 · 이름 · '카테고리 · 동네' · 넣을 보관함 · [보관함] · 체크.
+/// 찾은 장소 한 행: 사진 56 · 이름 · '카테고리 · 동네' · 넣을 보관함 · [보관함] · 체크.
 /// 이미 저장한 장소는 흐리게 '저장됨'.
 class ExtractedPlaceRow extends StatelessWidget {
   const ExtractedPlaceRow({
@@ -133,25 +126,43 @@ class ExtractedPlaceRow extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(AppSpacing.md, 10, AppSpacing.xs, 10),
       child: Row(
         children: [
-          PlaceImage(place: place, width: 48, height: 48, radius: 12),
+          PlaceImage(place: place, width: 56, height: 56, radius: 14),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(place.name, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(
+                  place.name,
+                  style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w700),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const SizedBox(height: 2),
-                Text([place.categoryLabel, if (area.isNotEmpty) area].join(' · '), style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(
+                  [place.categoryLabel, if (area.isNotEmpty) area].join(' · '),
+                  style: AppTypography.meta,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 if (collectionLabel != null && !saved) ...[
                   const SizedBox(height: 2),
-                  Text(collectionLabel!, style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(
+                    collectionLabel!,
+                    style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ],
             ),
           ),
           const SizedBox(width: AppSpacing.xs),
           if (saved)
-            const Padding(padding: EdgeInsets.only(right: AppSpacing.xs), child: AppTag('저장됨'))
+            const Padding(
+              padding: EdgeInsets.only(right: AppSpacing.xs),
+              child: AppTag('저장됨'),
+            )
           else ...[
             _CollectionButton(active: collectionLabel != null, onTap: onPickCollection, placeName: place.name),
             Semantics(
@@ -161,7 +172,11 @@ class ExtractedPlaceRow extends StatelessWidget {
               child: InkResponse(
                 onTap: onToggle,
                 radius: 22,
-                child: SizedBox(width: 40, height: 44, child: Center(child: CheckMark(checked: selected))),
+                child: SizedBox(
+                  width: 40,
+                  height: 44,
+                  child: Center(child: CheckMark(checked: selected)),
+                ),
               ),
             ),
           ],

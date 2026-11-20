@@ -22,10 +22,7 @@ class MockExtractionRepository implements ExtractionRepository {
         final ids = url.contains('reel') ? ['p4', 'p6'] : ['p1', 'p2'];
         return ExtractionResult(
           sourceHandle: '@seoul_daily',
-          places: [
-            for (final id in ids)
-              ExtractedPlace(place: _store.placeWithSaved(id), alreadySaved: _store.savedIds.contains(id)),
-          ],
+          places: [for (final id in ids) ExtractedPlace(place: _store.placeWithSaved(id), alreadySaved: _store.savedIds.contains(id))],
         );
       },
       // LLM 분석은 느리다 → 단계형 로딩 확인용 지연
@@ -35,15 +32,15 @@ class MockExtractionRepository implements ExtractionRepository {
 
   @override
   Future<List<RecentExtraction>> fetchRecent({required int limit}) => _store.behavior.query(
-        () => [
-          for (final (id, days) in const [('p1', 2), ('p4', 3), ('p9', 5), ('p2', 8), ('p5', 12)])
-            RecentExtraction(
-              place: _store.placeWithSaved(id),
-              extractedAt: DateTime.now().subtract(Duration(days: days)),
-            ),
-        ].take(limit).toList(),
-        empty: () => const [],
-      );
+    () => [
+      for (final (id, days) in const [('p1', 2), ('p4', 3), ('p9', 5), ('p2', 8), ('p5', 12)])
+        RecentExtraction(
+          place: _store.placeWithSaved(id),
+          extractedAt: DateTime.now().subtract(Duration(days: days)),
+        ),
+    ].take(limit).toList(),
+    empty: () => const [],
+  );
 }
 
 // NEEDS BACKEND: 추출 API (동기/비동기, 진행 상태 조회, 결과 후보, 이미 저장 여부, 실패 사유 코드)

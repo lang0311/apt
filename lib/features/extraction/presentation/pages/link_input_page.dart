@@ -64,29 +64,10 @@ class _LinkInputPageState extends ConsumerState<LinkInputPage> {
           children: [
             const PageTitleHeader(title: '장소 추가'),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              padding: AppSpacing.screenPadding,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 주 경로: 릴스에서 공유 (순서가 있어 번호를 붙인다)
-                  SectionCard(
-                    title: '릴스에서 바로 저장하기',
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                      child: Column(
-                        children: const [
-                          _GuideRow(step: 1, text: '릴스에서 공유를 눌러요'),
-                          _GuideRow(step: 2, text: '앱 목록에서 APT를 골라요'),
-                          _GuideRow(step: 3, text: '찾은 장소를 확인하고 저장해요'),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(AppSpacing.xs, 0, AppSpacing.xs, AppSpacing.xs),
-                    child: Text('다른 방법', style: AppTypography.section),
-                  ),
                   ExtractSourceRow(
                     focused: _focus.hasFocus,
                     leading: const LinkTile(),
@@ -113,7 +94,7 @@ class _LinkInputPageState extends ConsumerState<LinkInputPage> {
                       textInputAction: TextInputAction.go,
                       style: AppTypography.bodyStrong,
                       decoration: InputDecoration(
-                        hintText: '링크를 붙여 넣어 주세요',
+                        hintText: '인스타그램 링크 붙여넣기',
                         hintStyle: AppTypography.bodyMuted.copyWith(color: AppColors.textTertiary),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
@@ -131,7 +112,6 @@ class _LinkInputPageState extends ConsumerState<LinkInputPage> {
                       padding: const EdgeInsets.fromLTRB(AppSpacing.xs, AppSpacing.xs, AppSpacing.xs, 0),
                       child: AppFieldError(_error!),
                     ),
-                  const SizedBox(height: AppSpacing.sm),
                   // 링크를 모를 때: 가게 이름으로 지도에서 찾기 (07 D32)
                   Semantics(
                     button: true,
@@ -141,20 +121,15 @@ class _LinkInputPageState extends ConsumerState<LinkInputPage> {
                     child: InkWell(
                       borderRadius: AppRadius.cardAll,
                       onTap: () => context.push(AppRoutes.placeSearch),
-                      child: const ExtractSourceRow(
-                        leading: LinkTile(icon: Icons.search_rounded),
-                        action: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                          child: Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
-                        ),
-                        child: _SearchRowLabel(),
-                      ),
+                      child: const _SearchRowLabel(),
                     ),
                   ),
-                  const _RecentAdded(),
+                  const SizedBox(height: AppSpacing.xs),
+                  const _ReelsGuide(),
                 ],
               ),
             ),
+            const _RecentAdded(),
           ],
         ),
       ),
@@ -171,9 +146,9 @@ class _RecentAdded extends ConsumerWidget {
     final recent = ref.watch(recentExtractionsProvider).value ?? const [];
     if (recent.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.lg),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.xxs, AppSpacing.md, AppSpacing.xxs, 0),
       child: SectionCard(
-        title: '최근 추가한 곳',
+        title: '최근 추가한 장소',
         actionLabel: '모두 보기',
         onAction: () => context.go(AppRoutes.saved),
         child: DividedRows(
@@ -219,34 +194,80 @@ class _SearchRowLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // v2: 연파랑 아이콘 칸 · 제목 · 설명 · ›
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Text('지도에서 검색하기', style: AppTypography.bodyMuted.copyWith(color: AppColors.textSecondary)),
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(12)),
+            child: const Icon(Icons.map_outlined, size: 20, color: AppColors.primary),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('지도에서 찾기', style: AppTypography.bodyStrong),
+                Text('이름이나 주소로 검색해 저장', style: AppTypography.meta),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+        ],
+      ),
     );
   }
 }
 
-class _GuideRow extends StatelessWidget {
-  const _GuideRow({required this.step, required this.text});
-  final int step;
-  final String text;
+/// 릴스에서 저장하는 방법 (v2: 채움 판 + 흰 칸 세 개)
+class _ReelsGuide extends StatelessWidget {
+  const _ReelsGuide();
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Row(
+    Widget step(int n, String text) => Expanded(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(10, 12, 10, 12),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 22,
+              height: 22,
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+              child: Text(
+                '$n',
+                style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w700, height: 1),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(text, style: AppTypography.label, maxLines: 2),
+          ],
+        ),
+      ),
+    );
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(color: AppColors.fill, borderRadius: BorderRadius.circular(20)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 아이콘 칸과 번호가 같은 뜻을 두 번 말하지 않게 번호 원 하나만 둔다
-          Container(
-            width: 24,
-            height: 24,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
-            child: Text('$step', style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
+          Text('릴스에서 바로 저장하는 게 가장 빨라요', style: AppTypography.bodyStrong.copyWith(fontSize: 17)),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              step(1, '⋯ 누르기'),
+              const SizedBox(width: AppSpacing.xs),
+              step(2, '공유 → APT'),
+              const SizedBox(width: AppSpacing.xs),
+              step(3, '장소 저장'),
+            ],
           ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(child: Text(text, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w500))),
         ],
       ),
     );

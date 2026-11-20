@@ -37,25 +37,18 @@ class ExtractionResultPage extends ConsumerWidget {
         bottom: false,
         child: Column(
           children: [
-            PlainHeader(
-              title: '찾은 장소',
-              onLeading: () => context.canPop() ? context.pop() : context.go(AppRoutes.extract),
-            ),
+            PlainHeader(title: '찾은 장소', onLeading: () => context.canPop() ? context.pop() : context.go(AppRoutes.extract)),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH),
               child: _SourceRow(url: url, handle: handle),
             ),
             const SizedBox(height: AppSpacing.sm),
             Expanded(
               child: result.when(
                 loading: () => const _Searching(),
-                error: (e, _) => _Failure(
-                  kind: e is ExtractionFailure ? e.kind : ExtractionFailureKind.failed,
-                  onRetry: retry,
-                ),
-                data: (data) => data.places.isEmpty
-                    ? _Failure(kind: ExtractionFailureKind.noPlaceFound, onRetry: retry)
-                    : _Review(result: data),
+                error: (e, _) => _Failure(kind: e is ExtractionFailure ? e.kind : ExtractionFailureKind.failed, onRetry: retry),
+                data: (data) =>
+                    data.places.isEmpty ? _Failure(kind: ExtractionFailureKind.noPlaceFound, onRetry: retry) : _Review(result: data),
               ),
             ),
           ],
@@ -90,10 +83,15 @@ class _SourceRow extends StatelessWidget {
       child: displayHandle == null
           ? Text(shortUrl, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis)
           : Text.rich(
-              TextSpan(children: [
-                TextSpan(text: displayHandle, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w700)),
-                TextSpan(text: ' · $kind', style: AppTypography.meta),
-              ]),
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: displayHandle,
+                    style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  TextSpan(text: ' · $kind', style: AppTypography.meta),
+                ],
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -107,30 +105,33 @@ class _Searching extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget row() => const Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 10),
-          child: Row(
-            children: [
-              SkeletonBox(width: 48, height: 48),
-              SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    FractionallySizedBox(widthFactor: 0.55, child: SkeletonBox(height: 13, radius: 6)),
-                    SizedBox(height: 7),
-                    FractionallySizedBox(widthFactor: 0.35, child: SkeletonBox(height: 11, radius: 6)),
-                  ],
-                ),
-              ),
-            ],
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 10),
+      child: Row(
+        children: [
+          SkeletonBox(width: 48, height: 48),
+          SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FractionallySizedBox(widthFactor: 0.55, child: SkeletonBox(height: 13, radius: 6)),
+                SizedBox(height: 7),
+                FractionallySizedBox(widthFactor: 0.35, child: SkeletonBox(height: 11, radius: 6)),
+              ],
+            ),
           ),
-        );
+        ],
+      ),
+    );
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
       children: [
         Semantics(
           liveRegion: true,
-          child: SectionCard(title: '장소를 찾고 있어요', child: Column(children: [row(), row()])),
+          child: SectionCard(
+            title: '장소를 찾고 있어요',
+            child: Column(children: [row(), row()]),
+          ),
         ),
       ],
     );
@@ -150,7 +151,7 @@ class _Failure extends StatelessWidget {
       children: [
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
             children: [
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
@@ -204,9 +205,7 @@ class _Failure extends StatelessWidget {
           ),
         ),
         BottomCta(
-          child: retryable
-              ? AppButton(label: '다시 시도', onPressed: onRetry)
-              : AppButton(label: '다른 링크 넣기', onPressed: toInput),
+          child: retryable ? AppButton(label: '다시 시도', onPressed: onRetry) : AppButton(label: '다른 링크 넣기', onPressed: toInput),
         ),
       ],
     );
@@ -356,11 +355,7 @@ class _ReviewState extends ConsumerState<_Review> {
     if (allSaved) {
       return AppButton(label: '저장됨에서 보기', variant: AppButtonVariant.soft, onPressed: () => context.go(AppRoutes.saved));
     }
-    return AppButton(
-      label: '${_selected.length}곳 저장',
-      loading: _saving,
-      onPressed: _selected.isEmpty ? null : _save,
-    );
+    return AppButton(label: '${_selected.length}곳 저장', loading: _saving, onPressed: _selected.isEmpty ? null : _save);
   }
 
   @override
@@ -377,13 +372,8 @@ class _ReviewState extends ConsumerState<_Review> {
             padding: const EdgeInsets.fromLTRB(AppSpacing.sm, 0, AppSpacing.sm, AppSpacing.lg),
             children: [
               SectionCard(
-                title: '찾은 장소 ${result.places.length}',
-                trailing: allSaved
-                    ? null
-                    : AppTextLink(
-                        label: allSelected ? '모두 해제' : '모두 선택',
-                        onPressed: () => _toggleAll(allSelected),
-                      ),
+                title: '${result.places.length}곳을 찾았어요',
+                trailing: allSaved ? null : AppTextLink(label: allSelected ? '모두 해제' : '모두 선택', onPressed: () => _toggleAll(allSelected)),
                 child: DividedRows(
                   indent: AppSpacing.md,
                   children: [
