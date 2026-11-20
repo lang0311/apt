@@ -39,7 +39,7 @@ class _SavedPageState extends ConsumerState<SavedPage> {
   bool _deleting = false;
 
   /// 섹션 묶음 바깥 여백 (홈과 같은 값)
-  static const _outer = AppSpacing.sm;
+  static const _outer = AppSpacing.xxs; // v2: SectionCard 안쪽 16과 더해 글자가 왼쪽 20에 맞게
 
   Future<void> _createCollection() async {
     final created = await showCreateCollectionModal(context);
@@ -784,7 +784,6 @@ class _CollectionsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final collections = ref.watch(collectionsProvider);
-    final total = ref.watch(savedSummaryProvider).value?.totalCount;
     final count = collections.value?.length;
 
     return SectionCard(
@@ -793,8 +792,7 @@ class _CollectionsTab extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 전체 저장 장소는 보관함 행이 아니라 안내 줄 한 줄 → 카테고리 탭 (07 D21)
-          if (total != null && total > 0) AllPlacesLink(count: total, onTap: onShowAll),
+          // v2: '저장한 장소 전체' 줄은 전체 탭과 겹쳐 뺐다
           AsyncValueView(
             value: collections,
             compactError: true,
@@ -809,17 +807,10 @@ class _CollectionsTab extends ConsumerWidget {
               onAction: onCreate,
             ),
             // 순서는 서버가 준 그대로 (NEEDS BACKEND: 최근 수정순인지, 페이지로 나눠 주는지)
-            data: (list) => DividedRows(
-              indent: 86,
-              children: [
-                for (final collection in list)
-                  CollectionRow(
-                    collection: collection,
-                    onTap: () => context.push(AppRoutes.collection(collection.id)),
-                    // 보관함 ⋯ 메뉴(이름 변경·삭제)는 디자인/정책 확정 필요 (docs/07 §3)
-                    onMore: () => showAppSnackBar(context, '보관함 관리 메뉴는 준비 중이에요.'),
-                  ),
-              ],
+            // v2: 2열 표지 그리드 (⋯ 메뉴는 보관함 상세 머리에서)
+            data: (list) => CollectionGrid(
+              collections: list,
+              onOpen: (collection) => context.push(AppRoutes.collection(collection.id)),
             ),
           ),
         ],

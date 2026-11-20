@@ -10,6 +10,7 @@ import '../../../../app/theme/app_typography.dart';
 import '../../../../core/error/app_failure.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/bottom_cta.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/buttons.dart';
 import '../../../../core/widgets/headers.dart';
 import '../../../../core/widgets/overlays.dart';
@@ -67,7 +68,8 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
           data: (collection) => Column(
             children: [
               PlainHeader(
-                title: collection.name,
+                // v2: 이름은 머리가 아니라 표지 아래에 크게
+                title: '',
                 actions: [
                   IconButton(
                     tooltip: '보관함 메뉴',
@@ -85,41 +87,57 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
     );
   }
 
-  /// 이름 · 업데이트 · 장소 개수 · 지도 보기. 비어 있을 때와 장소가 있을 때 같은 모양이다.
+  /// v2: 큰 표지 콜라주(사진이 있을 때) → 이름 26 → 'n곳 · 수정' → '지도로 보기' 칩. 비어 있을 때도 같은 자리.
   Widget _summaryCard(PlaceCollection collection) {
     final empty = collection.placeCount == 0;
     final updated = collection.updatedAt == null ? null : formatRelative(collection.updatedAt!);
-    return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(collection.name, style: AppTypography.section),
-                const SizedBox(height: 4),
-                Text(
-                  [
-                    if (empty) '방금 생성됨' else if (updated != null) '최근 업데이트 $updated',
-                    '장소 ${collection.placeCount}곳',
-                  ].join(' · '),
-                  style: AppTypography.meta,
-                ),
-              ],
+    final urls = collection.thumbnailUrls;
+    Widget tile(int i) => i < urls.length ? AppNetworkImage(url: urls[i], radius: 0) : const ColoredBox(color: AppColors.fill);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (urls.isNotEmpty) ...[
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: SizedBox(
+              height: 170,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(flex: 2, child: tile(0)),
+                  const SizedBox(width: 3),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [Expanded(child: tile(1)), const SizedBox(height: 3), Expanded(child: tile(2))],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          // 저장한 곳이 없어도 지도는 열 수 있다 (07 D32)
-          AppButton(
-            label: '지도 보기',
-            variant: AppButtonVariant.soft,
-            icon: Icons.map_outlined,
-            expand: false,
-            height: 40,
-            onPressed: () => context.push(AppRoutes.collectionMap(collectionId: collection.id)),
-          ),
+          const SizedBox(height: 18),
         ],
-      ),
+        Text(collection.name, style: AppTypography.display),
+        const SizedBox(height: 4),
+        Text(
+          [
+            '${collection.placeCount}곳',
+            if (empty) '방금 만듦' else if (updated != null) '$updated 수정',
+          ].join(' · '),
+          style: AppTypography.meta,
+        ),
+        const SizedBox(height: 14),
+        // 저장한 곳이 없어도 지도는 열 수 있다 (07 D32)
+        ActionChip(
+          avatar: const Icon(Icons.map_outlined, size: 16, color: AppColors.textPrimary),
+          label: Text('지도로 보기', style: AppTypography.label.copyWith(fontSize: 14)),
+          backgroundColor: AppColors.fill,
+          side: BorderSide.none,
+          shape: const StadiumBorder(),
+          onPressed: () => context.push(AppRoutes.collectionMap(collectionId: collection.id)),
+        ),
+      ],
     );
   }
 

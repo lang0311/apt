@@ -237,11 +237,82 @@ class CollectionRow extends StatelessWidget {
   }
 }
 
+/// 보관함 2열 표지 그리드 (리디자인 v2). 좌우 20 여백 · 칸 사이 10, 줄 사이 16
+class CollectionGrid extends StatelessWidget {
+  const CollectionGrid({super.key, required this.collections, required this.onOpen});
+  final List<PlaceCollection> collections;
+  final ValueChanged<PlaceCollection> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <Widget>[];
+    for (var i = 0; i < collections.length; i += 2) {
+      rows.add(Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: CollectionGridCard(collection: collections[i], onTap: () => onOpen(collections[i]))),
+          const SizedBox(width: 10),
+          Expanded(
+            child: i + 1 < collections.length
+                ? CollectionGridCard(collection: collections[i + 1], onTap: () => onOpen(collections[i + 1]))
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ));
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.screenH - AppSpacing.xxs, AppSpacing.xxs, AppSpacing.screenH - AppSpacing.xxs, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < rows.length; i++) ...[if (i > 0) const SizedBox(height: 16), rows[i]],
+        ],
+      ),
+    );
+  }
+}
+
+/// 그리드 한 칸: 정사각 표지 콜라주(모서리 16) · 이름 · 'n곳 · 수정'
+class CollectionGridCard extends StatelessWidget {
+  const CollectionGridCard({super.key, required this.collection, required this.onTap});
+  final PlaceCollection collection;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final meta = collection.placeCount == 0
+        ? '비어 있어요'
+        : [
+            '${collection.placeCount}곳',
+            if (collection.updatedAt != null) formatRecentDate(collection.updatedAt!),
+          ].join(' · ');
+    return Semantics(
+      button: true,
+      label: '${collection.name}, $meta',
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LayoutBuilder(builder: (context, c) => MiniCollage(urls: collection.thumbnailUrls, size: c.maxWidth, radius: 16)),
+            const SizedBox(height: 8),
+            Text(collection.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(meta, style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// 썸네일 최대 4장, 모자라면 회색 칸, 0장이면 폴더 아이콘
 class MiniCollage extends StatelessWidget {
-  const MiniCollage({super.key, required this.urls, this.size = 56});
+  const MiniCollage({super.key, required this.urls, this.size = 56, this.radius = AppRadius.thumb});
   final List<String> urls;
   final double size;
+  final double radius;
 
   @override
   Widget build(BuildContext context) {
@@ -249,8 +320,8 @@ class MiniCollage extends StatelessWidget {
       return Container(
         width: size,
         height: size,
-        decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.thumb)),
-        child: const Icon(Icons.folder_outlined, color: AppColors.textSecondary),
+        decoration: BoxDecoration(color: AppColors.fill, borderRadius: BorderRadius.circular(radius)),
+        child: Icon(Icons.bookmark_border_rounded, color: AppColors.textTertiary, size: size > 80 ? 28 : 22),
       );
     }
     final cell = (size - 1.5) / 2;
@@ -259,7 +330,7 @@ class MiniCollage extends StatelessWidget {
       return Container(width: cell, height: cell, color: AppColors.surfaceMuted);
     }
     return ClipRRect(
-      borderRadius: BorderRadius.circular(AppRadius.thumb),
+      borderRadius: BorderRadius.circular(radius),
       child: SizedBox(
         width: size,
         height: size,
