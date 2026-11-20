@@ -14,9 +14,13 @@ abstract final class AppSpacing {
   static const screenH = lg;
   static const screenPadding = EdgeInsets.symmetric(horizontal: screenH);
 
-  static const buttonHeight = 52.0;
+  static const buttonHeight = 54.0;
+  static const smallButtonHeight = 40.0;
   static const inputHeight = 52.0;
-  static const chipHeight = 34.0;
+  static const chipHeight = 36.0;
+
+  /// 구역 사이 채움 띠 높이 (v2)
+  static const sectionGap = 10.0;
   static const backButtonSize = 36.0;
 }
 

@@ -37,7 +37,7 @@ class SocialAuthErrorPage extends StatelessWidget {
                         for (final tip in const ['인터넷 연결 상태를 확인해 주세요', '소셜 계정 접근 권한을 허용해 주세요'])
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: AppSpacing.sm),
-                            child: Text(tip, style: AppTypography.body),
+                            child: Text(tip, style: AppTypography.bodyMuted),
                           ),
                       ],
                     ),

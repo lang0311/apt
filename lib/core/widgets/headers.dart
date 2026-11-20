@@ -130,7 +130,7 @@ class AuthHeader extends StatelessWidget {
                   Text(title, style: AppTypography.display),
                   if (subtitle != null) ...[
                     const SizedBox(height: 6),
-                    Text(subtitle!, style: AppTypography.body),
+                    Text(subtitle!, style: AppTypography.bodyMuted),
                   ],
                 ],
               ),

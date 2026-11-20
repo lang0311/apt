@@ -125,7 +125,7 @@ class AppEmptyState extends StatelessWidget {
           Text(title, style: compact ? AppTypography.cardTitle : AppTypography.title, textAlign: TextAlign.center),
           if (description != null) ...[
             const SizedBox(height: AppSpacing.xs),
-            Text(description!, style: AppTypography.body, textAlign: TextAlign.center),
+            Text(description!, style: AppTypography.bodyMuted, textAlign: TextAlign.center),
           ],
           if (actionLabel != null) ...[
             SizedBox(height: compact ? AppSpacing.md : AppSpacing.xl),

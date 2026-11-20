@@ -152,7 +152,7 @@ class _ReasonRowState extends State<_ReasonRow> {
           Padding(
             // 아이콘(28) + 간격만큼 들여 써서 줄 제목 아래에 맞춘다
             padding: const EdgeInsets.fromLTRB(AppSpacing.screenH + 28 + AppSpacing.sm, 0, AppSpacing.screenH, AppSpacing.sm),
-            child: Text(widget.reason, style: AppTypography.body.copyWith(color: AppColors.textPrimary, height: 1.55)),
+            child: Text(widget.reason, style: AppTypography.bodyMuted.copyWith(color: AppColors.textPrimary, height: 1.55)),
           ),
       ],
     );

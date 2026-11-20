@@ -471,7 +471,7 @@ class PlaceSearchCard extends StatelessWidget {
                     ],
                     if (place.address.isNotEmpty) ...[
                       const SizedBox(height: 2),
-                      Text(place.address, style: AppTypography.body, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text(place.address, style: AppTypography.bodyMuted, maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],
                     const SizedBox(height: AppSpacing.xxs),
                     Wrap(

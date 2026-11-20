@@ -30,7 +30,7 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: AppColors.bg,
     );
     return base.copyWith(
-      textTheme: GoogleFonts.notoSansKrTextTheme(base.textTheme).apply(
+      textTheme: GoogleFonts.ibmPlexSansKrTextTheme(base.textTheme).apply(
         bodyColor: AppColors.textPrimary,
         displayColor: AppColors.textPrimary,
       ),

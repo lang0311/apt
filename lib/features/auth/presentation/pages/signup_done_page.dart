@@ -30,7 +30,7 @@ class SignupDonePage extends ConsumerWidget {
                       const SizedBox(height: AppSpacing.xs),
                       Text(
                         '릴스에서 공유를 누르고 APT를 고르면\n게시물 속 장소를 찾아 저장할 수 있어요.',
-                        style: AppTypography.body,
+                        style: AppTypography.bodyMuted,
                         textAlign: TextAlign.center,
                       ),
                     ],

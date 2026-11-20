@@ -208,7 +208,7 @@ class AppSearchField extends StatelessWidget {
                 isCollapsed: true,
                 border: InputBorder.none,
                 hintText: hint,
-                hintStyle: AppTypography.body.copyWith(color: AppColors.textSecondary),
+                hintStyle: AppTypography.bodyMuted.copyWith(color: AppColors.textSecondary),
               ),
             ),
           ),

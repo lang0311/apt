@@ -19,11 +19,14 @@ abstract final class AppColors {
 
   static const ink = Color(0xFF14223A);
 
-  /// 밝기 3단계로 층을 나눈다(그림자 없음): 배경 `bg` → 섹션·카드 `surface`(+ `border` 1px) → 그 안의 카드 `surfaceRaised`.
-  static const bg = Color(0xFFEEF1F5);
-  static const surface = Color(0xFFF9FAFC);
+  /// 리디자인 v2: 화면 바탕은 흰색. 구역은 상자 대신 `fill` 띠(10px)와 굵은 제목으로 나눈다.
+  static const bg = Color(0xFFFFFFFF);
+  static const surface = Color(0xFFFFFFFF);
   static const surfaceRaised = Color(0xFFFFFFFF);
   static const surfaceMuted = Color(0xFFEEF2F8);
+
+  /// 채움 — 입력칸 · 보조 버튼 · 칩 · 구역 띠 바탕 (v2)
+  static const fill = surfaceMuted;
 
   static const border = Color(0xFFE4EAF3);
 

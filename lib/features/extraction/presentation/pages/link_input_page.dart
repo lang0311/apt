@@ -114,7 +114,7 @@ class _LinkInputPageState extends ConsumerState<LinkInputPage> {
                       style: AppTypography.bodyStrong,
                       decoration: InputDecoration(
                         hintText: '링크를 붙여 넣어 주세요',
-                        hintStyle: AppTypography.body.copyWith(color: AppColors.textTertiary),
+                        hintStyle: AppTypography.bodyMuted.copyWith(color: AppColors.textTertiary),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
@@ -221,7 +221,7 @@ class _SearchRowLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Text('지도에서 검색하기', style: AppTypography.body.copyWith(color: AppColors.textSecondary)),
+      child: Text('지도에서 검색하기', style: AppTypography.bodyMuted.copyWith(color: AppColors.textSecondary)),
     );
   }
 }

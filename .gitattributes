@@ -16,3 +16,4 @@
 /tools/figma/ export-ignore
 /integration_test/_figma/ export-ignore
 /scripts/run-server-high-limit.ps1 export-ignore
+/docs/superpowers/ export-ignore

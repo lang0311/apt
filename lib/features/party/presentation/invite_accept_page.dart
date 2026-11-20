@@ -135,7 +135,7 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
               Text('${inv.inviterName}님이 코스에 초대했어요', style: AppTypography.display),
               const SizedBox(height: 6),
               // 초대된 파티원도 장소를 추가·편집할 수 있다 (07 D23)
-              Text('참여하면 같이 장소를 고르고 코스를 고칠 수 있어요.', style: AppTypography.body),
+              Text('참여하면 같이 장소를 고르고 코스를 고칠 수 있어요.', style: AppTypography.bodyMuted),
             ],
           ),
         ),
@@ -164,7 +164,7 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
                 for (final name in inv.previewPlaceNames)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: AppSpacing.sm),
-                    child: Text(name, style: AppTypography.body),
+                    child: Text(name, style: AppTypography.bodyMuted),
                   ),
               ],
             ),

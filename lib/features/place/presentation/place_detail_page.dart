@@ -146,7 +146,7 @@ class _Body extends ConsumerWidget {
             ],
           ),
         ),
-      if (place.address.trim().isNotEmpty) _InfoRow(label: '주소', child: Text(place.address, style: AppTypography.body)),
+      if (place.address.trim().isNotEmpty) _InfoRow(label: '주소', child: Text(place.address, style: AppTypography.bodyMuted)),
       if (place.phone != null)
         _InfoRow(label: '전화', onTap: () => openDialer(context, place.phone!), child: Text(place.phone!, style: AppTypography.bodyStrong)),
       if (place.keywords.isNotEmpty) _InfoRow(label: '키워드', child: TagWrap(place.keywords, tone: AppTagTone.primary)),
@@ -207,7 +207,7 @@ class _Body extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
                       child: Text(
                         names.isEmpty ? '아직 담은 보관함이 없어요' : names.join(' · '),
-                        style: names.isEmpty ? AppTypography.meta : AppTypography.body,
+                        style: names.isEmpty ? AppTypography.meta : AppTypography.bodyMuted,
                       ),
                     ),
                   ),
@@ -256,7 +256,7 @@ class _TitleCard extends StatelessWidget {
               children: [
                 Text(place.name, style: AppTypography.hero),
                 const SizedBox(height: 4),
-                Text([place.categoryLabel, if (place.shortArea.isNotEmpty) place.shortArea].join(' · '), style: AppTypography.body),
+                Text([place.categoryLabel, if (place.shortArea.isNotEmpty) place.shortArea].join(' · '), style: AppTypography.bodyMuted),
                 if (status.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.xs),
                   Text(status, style: AppTypography.label.copyWith(color: AppColors.primary)),

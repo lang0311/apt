@@ -143,7 +143,7 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
       children: [
         Text('어떤 곳을 좋아하세요?', style: AppTypography.title),
         const SizedBox(height: 4),
-        Text('선택한 취향은 AI 추천과 파티 코스에 반영돼요.', style: AppTypography.body),
+        Text('선택한 취향은 AI 추천과 파티 코스에 반영돼요.', style: AppTypography.bodyMuted),
         for (final g in groups) ...[
           const SizedBox(height: AppSpacing.xl),
           Row(
@@ -198,7 +198,7 @@ class _AutoTaste extends ConsumerWidget {
               children: [
                 Text('저장한 장소로 취향을 읽어요', style: AppTypography.cardTitle),
                 const SizedBox(height: 6),
-                Text('지금은 취향을 직접 고르지 않아도 돼요. 저장한 장소가 늘수록 추천이 더 잘 맞아요.', style: AppTypography.body),
+                Text('지금은 취향을 직접 고르지 않아도 돼요. 저장한 장소가 늘수록 추천이 더 잘 맞아요.', style: AppTypography.bodyMuted),
               ],
             ),
           ),
