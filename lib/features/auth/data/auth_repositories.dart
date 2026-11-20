@@ -31,15 +31,13 @@ class MockAuthRepository implements AuthRepository {
     try {
       final token = await _social.authenticate(provider);
       if (token == null) return const SignInCancelled();
-      return await _store.behavior.mutate<SignInResult>(() => switch (provider) {
-            SocialProvider.kakao => const NeedsSignup(suggestedNickname: '여행하는 지상'),
-            SocialProvider.google => const SignedIn(_user),
-            SocialProvider.apple => AccountConflict(
-                maskedEmail: 'jis***@gmail.com',
-                existingMethodLabel: '이메일로 가입한 계정',
-                provider: provider,
-              ),
-          });
+      return await _store.behavior.mutate<SignInResult>(
+        () => switch (provider) {
+          SocialProvider.kakao => const NeedsSignup(suggestedNickname: '여행하는 지상'),
+          SocialProvider.google => const SignedIn(_user),
+          SocialProvider.apple => AccountConflict(maskedEmail: 'jis***@gmail.com', existingMethodLabel: '이메일로 가입한 계정', provider: provider),
+        },
+      );
     } on AppFailure catch (e) {
       return SignInFailed(e.message);
     }
@@ -49,24 +47,25 @@ class MockAuthRepository implements AuthRepository {
   Future<AuthUser> linkExistingAccount(AccountConflict conflict) => _store.behavior.mutate(() => _user);
 
   @override
-  Future<List<TermsItem>> fetchTerms() => _store.behavior.query(() => const [
-        TermsItem(id: 'age14', title: '만 14세 이상입니다.', required: true),
-        TermsItem(id: 'service', title: '서비스 이용약관 동의', required: true, contentUrl: 'https://example.com/terms'),
-        TermsItem(id: 'privacy', title: '개인정보 수집·이용 동의', required: true, contentUrl: 'https://example.com/privacy'),
-        TermsItem(id: 'marketing', title: '맞춤 장소 추천 정보 수신', required: false),
-      ]);
+  Future<List<TermsItem>> fetchTerms() => _store.behavior.query(
+    () => const [
+      TermsItem(id: 'age14', title: '만 14세 이상입니다.', required: true),
+      TermsItem(id: 'service', title: '서비스 이용약관 동의', required: true, contentUrl: 'https://example.com/terms'),
+      TermsItem(id: 'privacy', title: '개인정보 수집·이용 동의', required: true, contentUrl: 'https://example.com/privacy'),
+      TermsItem(id: 'marketing', title: '맞춤 장소 추천 정보 수신', required: false),
+    ],
+  );
 
   @override
   Future<void> agreeTerms(Set<String> agreedIds) => _store.behavior.mutate(() {});
 
   @override
-  Future<AuthUser> completeProfile({required String nickname}) =>
-      _store.behavior.mutate(() {
-        final n = nickname.trim();
-        if (n.length < 2) throw const ValidationFailure('닉네임은 2자 이상 입력해주세요.');
-        if (n == '관리자') throw const ValidationFailure('이미 사용 중인 닉네임이에요.');
-        return AuthUser(id: 'u2', nickname: n);
-      });
+  Future<AuthUser> completeProfile({required String nickname}) => _store.behavior.mutate(() {
+    final n = nickname.trim();
+    if (n.length < 2) throw const ValidationFailure('닉네임은 2자 이상 입력해주세요.');
+    if (n == '관리자') throw const ValidationFailure('이미 사용 중인 닉네임이에요.');
+    return AuthUser(id: 'u2', nickname: n);
+  });
 
   @override
   Future<void> signOut() async {}
@@ -82,15 +81,14 @@ class MockAuthRepository implements AuthRepository {
 
   /// Mock 규칙: 아이디 `taken`은 이미 사용 중. 형식 검사는 팀 서버 규칙과 같다.
   @override
-  Future<AuthUser> signUpWithId({required String login, required String password, required String nickname}) =>
-      _store.behavior.mutate(() {
-        if (login.trim().toLowerCase() == 'taken') {
-          throw const ValidationFailure(IdSignupRules.loginTaken, fieldErrors: {'login': IdSignupRules.loginTaken});
-        }
-        final errors = IdSignupRules.validate(login: login, password: password, nickname: nickname);
-        if (errors.isNotEmpty) throw ValidationFailure(errors.values.first, fieldErrors: errors);
-        return AuthUser(id: 'u3', nickname: nickname.trim(), handle: login.trim().toLowerCase());
-      });
+  Future<AuthUser> signUpWithId({required String login, required String password, required String nickname}) => _store.behavior.mutate(() {
+    if (login.trim().toLowerCase() == 'taken') {
+      throw const ValidationFailure(IdSignupRules.loginTaken, fieldErrors: {'login': IdSignupRules.loginTaken});
+    }
+    final errors = IdSignupRules.validate(login: login, password: password, nickname: nickname);
+    if (errors.isNotEmpty) throw ValidationFailure(errors.values.first, fieldErrors: errors);
+    return AuthUser(id: 'u3', nickname: nickname.trim(), handle: login.trim().toLowerCase());
+  });
 }
 
 /// 아이디 가입 입력 규칙 (팀 서버 `platform_store.register`와 같게). 문구는 화면 말투(해요체).
@@ -105,10 +103,10 @@ abstract final class IdSignupRules {
 
   /// 칸별 오류. 비어 있으면 통과. 아이디는 서버처럼 소문자로 바꿔 검사한다.
   static Map<String, String> validate({required String login, required String password, required String nickname}) => {
-        if (!_login.hasMatch(login.trim().toLowerCase())) 'login': loginInvalid,
-        if (password.length < 8 || password.length > 128) 'password': passwordInvalid,
-        if (nickname.trim().isEmpty || nickname.trim().length > 60) 'nickname': nicknameEmpty,
-      };
+    if (!_login.hasMatch(login.trim().toLowerCase())) 'login': loginInvalid,
+    if (password.length < 8 || password.length > 128) 'password': passwordInvalid,
+    if (nickname.trim().isEmpty || nickname.trim().length > 60) 'nickname': nicknameEmpty,
+  };
 }
 
 // NEEDS BACKEND: 소셜 토큰 교환, 신규/기존 판별, 계정 충돌 응답, 약관 버전/동의, 닉네임 규칙, 토큰 갱신
@@ -150,6 +148,5 @@ class ApiAuthRepository implements AuthRepository {
   @override
   Future<SignInResult> signInWithId({required String login, required String password}) async => throw _f;
   @override
-  Future<AuthUser> signUpWithId({required String login, required String password, required String nickname}) async =>
-      throw _f;
+  Future<AuthUser> signUpWithId({required String login, required String password, required String nickname}) async => throw _f;
 }

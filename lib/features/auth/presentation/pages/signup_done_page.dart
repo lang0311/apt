@@ -6,9 +6,11 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/widgets/bottom_cta.dart';
 import '../../../../core/widgets/buttons.dart';
+import '../../../../core/widgets/station_steps.dart';
 import '../auth_controller.dart';
 
-/// #4 가입 완료. 시작하기 → 홈 (보류된 공유 URL이 있으면 이어서 추출)
+/// #4 가입 완료 (리디자인 v2): 왼쪽 정렬 제목 + 첫 저장 방법을 정거장 세 개로.
+/// 시작하기 → 홈 (보류된 공유 URL이 있으면 이어서 추출)
 class SignupDonePage extends ConsumerWidget {
   const SignupDonePage({super.key});
 
@@ -19,30 +21,35 @@ class SignupDonePage extends ConsumerWidget {
         child: Column(
           children: [
             Expanded(
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: AppSpacing.screenPadding,
-                  child: Column(
-                    children: [
-                      const Icon(Icons.check_circle_rounded, size: 48, color: AppColors.primary),
-                      const SizedBox(height: AppSpacing.md),
-                      Text('가입이 완료됐어요', style: AppTypography.title, textAlign: TextAlign.center),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        '릴스에서 공유를 누르고 APT를 고르면\n게시물 속 장소를 찾아 저장할 수 있어요.',
-                        style: AppTypography.bodyMuted,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, 64, AppSpacing.screenH, AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                      child: const Icon(Icons.check_rounded, color: Colors.white, size: 30),
+                    ),
+                    const SizedBox(height: 22),
+                    Text('가입이 끝났어요', style: AppTypography.display),
+                    const SizedBox(height: 6),
+                    Text('이제 릴스에서 마음에 드는 곳을 보면 이렇게 저장해요.', style: AppTypography.bodyMuted),
+                    const SizedBox(height: 30),
+                    const StationSteps(
+                      steps: [
+                        ('릴스에서 ⋯ 누르기', '게시물 오른쪽 아래 메뉴'),
+                        ('공유 → APT 고르기', '앱 목록에 없으면 ‘더 보기’'),
+                        ('찾은 장소 확인하고 저장', '게시물 속 장소를 AI가 찾아요'),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
             BottomCta(
-              child: AppButton(
-                label: '시작하기',
-                onPressed: () => ref.read(authControllerProvider.notifier).finishOnboarding(),
-              ),
+              child: AppButton(label: '시작하기', onPressed: () => ref.read(authControllerProvider.notifier).finishOnboarding()),
             ),
           ],
         ),

@@ -42,8 +42,8 @@ class _IdSignupPageState extends ConsumerState<IdSignupPage> {
 
   /// 고친 칸의 오류를 지우고 버튼 활성 상태를 다시 계산한다.
   void _edited(String field) => setState(() {
-        if (_errors.containsKey(field)) _errors = {..._errors}..remove(field);
-      });
+    if (_errors.containsKey(field)) _errors = {..._errors}..remove(field);
+  });
 
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
@@ -54,11 +54,7 @@ class _IdSignupPageState extends ConsumerState<IdSignupPage> {
     }
     setState(() => _submitting = true);
     try {
-      await ref.read(authControllerProvider.notifier).signUpWithId(
-            login: _login.text,
-            password: _password.text,
-            nickname: _nickname.text,
-          );
+      await ref.read(authControllerProvider.notifier).signUpWithId(login: _login.text, password: _password.text, nickname: _nickname.text);
     } on ValidationFailure catch (e) {
       if (!mounted) return;
       if (e.fieldErrors.isNotEmpty) {
@@ -99,16 +95,19 @@ class _IdSignupPageState extends ConsumerState<IdSignupPage> {
           suffix: password
               ? IconButton(
                   tooltip: _obscure ? '비밀번호 보기' : '비밀번호 숨기기',
-                  icon: Icon(
-                    _obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                    color: AppColors.textSecondary,
-                  ),
+                  icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: AppColors.textSecondary),
                   onPressed: () => setState(() => _obscure = !_obscure),
                 )
               : null,
         ),
         const SizedBox(height: AppSpacing.xs),
-        if (error != null) AppFieldError(error) else if (help != null) Text(help, style: AppTypography.meta),
+        if (error != null)
+          AppFieldError(error)
+        else if (password && controller.text.isNotEmpty && controller.text.length < 8)
+          // v2: 짧으면 지금 글자 수를 바로 알려 준다
+          Text('8자 이상 입력해 주세요 (지금 ${controller.text.length}자)', style: AppTypography.meta.copyWith(color: AppColors.dangerText))
+        else if (help != null)
+          Text(help, style: AppTypography.meta),
       ],
     );
   }
@@ -120,7 +119,10 @@ class _IdSignupPageState extends ConsumerState<IdSignupPage> {
       body: SafeArea(
         child: Column(
           children: [
-            const AuthHeader(title: '회원가입', subtitle: '로그인에 쓸 아이디와 비밀번호를 정해주세요.'),
+            AuthHeader(
+              title: '계정을 만들어 주세요',
+              trailing: Text('2 / 2', style: AppTypography.meta),
+            ),
             Expanded(
               child: AutofillGroup(
                 child: ListView(
@@ -147,7 +149,7 @@ class _IdSignupPageState extends ConsumerState<IdSignupPage> {
                       key: 'nickname',
                       label: '닉네임',
                       controller: _nickname,
-                      help: '코스와 파티에서 다른 사람에게 보이는 이름이에요.',
+                      help: '파티원에게 보이는 이름이에요.',
                       autofill: const [AutofillHints.nickname],
                       action: TextInputAction.done,
                     ),

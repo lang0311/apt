@@ -43,9 +43,9 @@ class _EmailLoginPageState extends ConsumerState<EmailLoginPage> {
 
   /// 입력이 바뀌면 오류를 지우고 버튼 활성 상태를 다시 계산한다.
   void _clearErrors() => setState(() {
-        _credentialError = null;
-        _emailFormatError = null;
-      });
+    _credentialError = null;
+    _emailFormatError = null;
+  });
 
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
@@ -110,7 +110,11 @@ class _EmailLoginPageState extends ConsumerState<EmailLoginPage> {
                   Row(
                     children: [
                       Expanded(child: error == null ? const SizedBox.shrink() : AppFieldError(error)),
-                      AppTextLink(label: '비밀번호 찾기', onPressed: _todo, style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700)),
+                      AppTextLink(
+                        label: '비밀번호 찾기',
+                        onPressed: _todo,
+                        style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700),
+                      ),
                     ],
                   ),
                 ],

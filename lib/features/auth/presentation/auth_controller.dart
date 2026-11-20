@@ -17,13 +17,7 @@ enum AuthStatus {
 }
 
 class AuthState {
-  const AuthState({
-    required this.status,
-    this.user,
-    this.suggestedNickname,
-    this.justSignedUp = false,
-    this.idSignup = false,
-  });
+  const AuthState({required this.status, this.user, this.suggestedNickname, this.justSignedUp = false, this.idSignup = false});
 
   final AuthStatus status;
   final AuthUser? user;
@@ -77,9 +71,7 @@ class AuthController extends Notifier<AuthState> {
   /// 계정 정보 입력 끝 → 가입(바로 로그인) → 가입 완료(#4). 실패하면 [ValidationFailure]를 그대로 던진다.
   Future<void> signUpWithId({required String login, required String password, required String nickname}) async {
     ref.read(dataSourceProvider.notifier).reset();
-    final user = await ref
-        .read(authRepositoryProvider)
-        .signUpWithId(login: login, password: password, nickname: nickname);
+    final user = await ref.read(authRepositoryProvider).signUpWithId(login: login, password: password, nickname: nickname);
     state = AuthState(status: AuthStatus.authenticated, user: user, justSignedUp: true);
   }
 

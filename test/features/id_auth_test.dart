@@ -142,6 +142,9 @@ void main() {
       child: MaterialApp(theme: AppTheme.light(), home: const SocialLoginPage()),
     ));
 
+    // v2 노선 그림 때문에 간편 로그인이 아래로 내려갔다: 스크롤해서 누른다
+    await tester.ensureVisible(find.bySemanticsLabel('카카오로 로그인'));
+    await tester.pump();
     await tester.tap(find.bySemanticsLabel('카카오로 로그인'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));

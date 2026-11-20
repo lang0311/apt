@@ -46,9 +46,7 @@ class SocialIconButton extends StatelessWidget {
             child: SizedBox.square(
               dimension: size,
               child: Center(
-                child: loading
-                    ? SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2.4, color: fg))
-                    : icon,
+                child: loading ? SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2.4, color: fg)) : icon,
               ),
             ),
           ),
@@ -82,10 +80,7 @@ class _GoogleMarkPainter extends CustomPainter {
     canvas.drawArc(rect, rad(215), rad(105), false, paint..color = _red);
     // 가운데 가로 막대
     final center = size.height / 2;
-    canvas.drawRect(
-      Rect.fromLTRB(size.width / 2, center - stroke / 2, size.width, center + stroke / 2),
-      Paint()..color = _blue,
-    );
+    canvas.drawRect(Rect.fromLTRB(size.width / 2, center - stroke / 2, size.width, center + stroke / 2), Paint()..color = _blue);
   }
 
   @override

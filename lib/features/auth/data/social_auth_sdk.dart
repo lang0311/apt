@@ -27,11 +27,10 @@ class SdkSocialAuthProvider implements SocialAuthProvider {
   static bool get _isIOS => defaultTargetPlatform == TargetPlatform.iOS;
 
   static bool isConfigured(SocialProvider provider) => switch (provider) {
-        SocialProvider.kakao => Env.kakaoNativeAppKey.isNotEmpty,
-        SocialProvider.google =>
-          Env.googleServerClientId.isNotEmpty && (!_isIOS || Env.googleIosClientId.isNotEmpty),
-        SocialProvider.apple => false,
-      };
+    SocialProvider.kakao => Env.kakaoNativeAppKey.isNotEmpty,
+    SocialProvider.google => Env.googleServerClientId.isNotEmpty && (!_isIOS || Env.googleIosClientId.isNotEmpty),
+    SocialProvider.apple => false,
+  };
 
   @override
   Future<String?> authenticate(SocialProvider provider) {
@@ -75,10 +74,7 @@ class SdkSocialAuthProvider implements SocialAuthProvider {
   Future<String?> _google() async {
     final google = GoogleSignIn.instance;
     try {
-      await (_googleInit ??= google.initialize(
-        clientId: _isIOS ? Env.googleIosClientId : null,
-        serverClientId: Env.googleServerClientId,
-      ));
+      await (_googleInit ??= google.initialize(clientId: _isIOS ? Env.googleIosClientId : null, serverClientId: Env.googleServerClientId));
       final account = await google.authenticate();
       return account.authentication.idToken;
     } on GoogleSignInException catch (e) {

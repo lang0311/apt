@@ -47,7 +47,8 @@ class _AccountConflictPageState extends ConsumerState<AccountConflictPage> {
           children: [
             AuthHeader(
               title: '이미 가입된 이메일이에요',
-              subtitle: '이 이메일은 다른 방법으로 가입돼 있어요. '
+              subtitle:
+                  '이 이메일은 다른 방법으로 가입돼 있어요. '
                   '연결하면 다음부터 ${conflict?.provider.label ?? '소셜 계정'}로도 로그인할 수 있어요.',
             ),
             Expanded(
@@ -75,17 +76,9 @@ class _AccountConflictPageState extends ConsumerState<AccountConflictPage> {
             BottomCta(
               child: Column(
                 children: [
-                  AppButton(
-                    label: '기존 계정과 연결하기',
-                    loading: _linking,
-                    onPressed: conflict == null ? null : () => _link(conflict),
-                  ),
+                  AppButton(label: '기존 계정과 연결하기', loading: _linking, onPressed: conflict == null ? null : () => _link(conflict)),
                   const SizedBox(height: AppSpacing.xs),
-                  AppTextLink(
-                    label: '다른 계정으로 로그인',
-                    color: AppColors.textSecondary,
-                    onPressed: () => context.go(AppRoutes.login),
-                  ),
+                  AppTextLink(label: '다른 계정으로 로그인', color: AppColors.textSecondary, onPressed: () => context.go(AppRoutes.login)),
                 ],
               ),
             ),

@@ -101,11 +101,14 @@ class PlainHeader extends StatelessWidget {
 
 /// 인증 화면: 테두리 없는 뒤로 아이콘 + 큰 제목 + 설명
 class AuthHeader extends StatelessWidget {
-  const AuthHeader({super.key, required this.title, this.subtitle, this.onBack});
+  const AuthHeader({super.key, required this.title, this.subtitle, this.onBack, this.trailing});
 
   final String title;
   final String? subtitle;
   final VoidCallback? onBack;
+
+  /// 뒤로 줄 오른쪽 (예: 단계 `2 / 2`)
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -117,10 +120,16 @@ class AuthHeader extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            IconButton(
-              onPressed: onBack ?? () => popOrGoHome(context),
-              icon: const Icon(Icons.chevron_left_rounded, size: 32, color: AppColors.textPrimary),
-              tooltip: '뒤로',
+            Row(
+              children: [
+                IconButton(
+                  onPressed: onBack ?? () => popOrGoHome(context),
+                  icon: const Icon(Icons.chevron_left_rounded, size: 32, color: AppColors.textPrimary),
+                  tooltip: '뒤로',
+                ),
+                const Spacer(),
+                if (trailing != null) trailing!,
+              ],
             ),
             Padding(
               padding: const EdgeInsets.only(left: AppSpacing.sm),

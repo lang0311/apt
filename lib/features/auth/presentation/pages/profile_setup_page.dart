@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../app/routes.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
@@ -12,8 +10,6 @@ import '../../../../core/widgets/buttons.dart';
 import '../../../../core/widgets/headers.dart';
 import '../../../../core/widgets/inputs.dart';
 import '../../../../core/widgets/overlays.dart';
-import '../../../../core/widgets/surfaces.dart';
-import '../../../preference/presentation/preference_providers.dart';
 import '../auth_controller.dart';
 
 /// #3 프로필 설정. 닉네임 규칙/중복은 서버 기준 (검증 오류는 인라인 표시).
@@ -60,18 +56,19 @@ class _ProfileSetupPageState extends ConsumerState<ProfileSetupPage> {
       body: SafeArea(
         child: Column(
           children: [
-            const AuthHeader(title: '프로필 설정', subtitle: '코스와 파티에서 다른 사람에게 보이는 이름이에요.'),
+            const AuthHeader(title: '어떻게 불러\n드릴까요?'),
             Expanded(
               child: ListView(
                 padding: AppSpacing.screenPadding,
                 children: [
-                  Center(
+                  Align(
+                    alignment: Alignment.centerLeft,
                     child: Container(
-                      width: 84,
-                      height: 84,
+                      width: 72,
+                      height: 72,
                       alignment: Alignment.center,
-                      decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
-                      child: Text(initial, style: AppTypography.title.copyWith(color: AppColors.primary)),
+                      decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                      child: Text(initial, style: AppTypography.title.copyWith(color: Colors.white)),
                     ),
                   ),
                   // 프로필 사진 변경은 이미지 선택 패키지 + 업로드 API가 생기면 넣는다 (NEEDS BACKEND)
@@ -79,65 +76,20 @@ class _ProfileSetupPageState extends ConsumerState<ProfileSetupPage> {
                   AppTextField(
                     controller: _nickname,
                     label: '닉네임',
-                    hint: '닉네임을 입력해주세요',
+                    hint: '닉네임을 입력해 주세요',
                     hasError: _error != null,
                     maxLength: 20,
                     onChanged: (_) => setState(() => _error = null),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   if (_error != null) AppFieldError(_error!) else Text('나중에 마이에서 바꿀 수 있어요.', style: AppTypography.meta),
-                  const SizedBox(height: AppSpacing.xl),
-                  const _PreferenceCard(),
                 ],
               ),
             ),
             BottomCta(
-              child: AppButton(
-                label: '가입 완료하기',
-                loading: _submitting,
-                onPressed: name.isEmpty ? null : _submit,
-              ),
+              child: AppButton(label: '가입 완료', loading: _submitting, onPressed: name.isEmpty ? null : _submit),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// 추천에 쓸 취향: 고른 키워드 한 줄 + 오른쪽 '고르기'
-class _PreferenceCard extends ConsumerWidget {
-  const _PreferenceCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // 불러오는 중이거나 실패해도 가입은 막지 않는다: 고르지 않은 것으로 보여 준다
-    final labels = ref.watch(myPreferenceLabelsProvider).value ?? const <String>[];
-    Future<void> pick() async {
-      await context.push(AppRoutes.preferencesOnboarding);
-      ref.invalidate(myPreferencesProvider);
-    }
-
-    return SectionCard(
-      title: '추천에 쓸 취향',
-      child: InkWell(
-        onTap: pick,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: AppSpacing.xs),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  labels.isEmpty ? '아직 고르지 않았어요' : labels.join(' · '),
-                  style: AppTypography.meta,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(labels.isEmpty ? '고르기' : '바꾸기', style: AppTypography.label.copyWith(color: AppColors.primary)),
-            ],
-          ),
         ),
       ),
     );

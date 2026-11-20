@@ -21,10 +21,7 @@ class SocialAuthErrorPage extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            AuthHeader(
-              title: '로그인할 수 없어요',
-              subtitle: message ?? '일시적인 오류가 발생했어요. 잠시 후 다시 시도해주세요.',
-            ),
+            AuthHeader(title: '로그인할 수 없어요', subtitle: message ?? '일시적인 오류가 발생했어요. 잠시 후 다시 시도해주세요.'),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
