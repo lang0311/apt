@@ -6,9 +6,10 @@ import '../../app/theme/app_typography.dart';
 
 /// 색 규칙(07 D57): primary = 화면마다 하나, 다음 단계로 가는 주 행동 · white = 그 옆 보조 행동 ·
 /// soft = 목록 줄 안 작은 행동 · dark = 이미 켜진 상태(저장됨 등) · danger = 지우기 · 차단(빨간 글자)
-enum AppButtonVariant { primary, dark, soft, white, danger }
+/// v2: 보조(secondary · white)는 채움 바탕 + 잉크 글자, 테두리 없음.
+enum AppButtonVariant { primary, dark, soft, white, secondary, danger }
 
-/// 공통 버튼 (Primary / Dark / Soft / White / Danger). 높이 52, radius 14.
+/// 공통 버튼 (Primary / Dark / Soft / Secondary(White) / Danger). 높이 54, radius 14.
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
@@ -39,8 +40,8 @@ class AppButton extends StatelessWidget {
             AppButtonVariant.primary => (AppColors.primary, Colors.white, null),
             AppButtonVariant.dark => (AppColors.ink, Colors.white, null),
             AppButtonVariant.soft => (AppColors.primarySoft, AppColors.primary, null),
-            AppButtonVariant.white => (AppColors.surface, AppColors.textPrimary, AppColors.border),
-            AppButtonVariant.danger => (AppColors.surface, AppColors.dangerText, AppColors.border),
+            AppButtonVariant.white || AppButtonVariant.secondary => (AppColors.fill, AppColors.textPrimary, null),
+            AppButtonVariant.danger => (AppColors.fill, AppColors.dangerText, null),
           };
 
     final child = loading

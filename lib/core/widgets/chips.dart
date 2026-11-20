@@ -4,14 +4,14 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 
-/// 선택형 칩 (32~34px 풀 라운드). 선택=primary 채움 / 비선택=흰+border
+/// 선택형 칩 (v2: 높이 36 알약). 선택 = 잉크 채움 + 흰 글자 / 비선택 = 채움색
 class AppChip extends StatelessWidget {
   const AppChip({
     super.key,
     required this.label,
     required this.selected,
     this.onTap,
-    this.selectedColor = AppColors.primary,
+    this.selectedColor = AppColors.textPrimary,
     this.trailingCount,
   });
 
@@ -28,18 +28,18 @@ class AppChip extends StatelessWidget {
       selected: selected,
       button: true,
       child: Material(
-        color: selected ? selectedColor : AppColors.surface,
-        shape: StadiumBorder(side: BorderSide(color: selected ? selectedColor : AppColors.border)),
+        color: selected ? selectedColor : AppColors.fill,
+        shape: const StadiumBorder(),
         child: InkWell(
           customBorder: const StadiumBorder(),
           onTap: onTap,
           child: Container(
             constraints: const BoxConstraints(minHeight: AppSpacing.chipHeight),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(label, style: AppTypography.label.copyWith(color: selected ? Colors.white : AppColors.chipText)),
+                Text(label, style: AppTypography.label.copyWith(fontSize: 14, color: selected ? Colors.white : AppColors.textPrimary)),
                 if (trailingCount != null) ...[
                   const SizedBox(width: 6),
                   Text('$trailingCount', style: AppTypography.label.copyWith(color: fg)),

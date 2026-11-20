@@ -4,7 +4,7 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 
-/// 섹션 묶음 (surface + border 1px, radius 20). 제목은 컨테이너 안에 둔다.
+/// 섹션 묶음 (v2: 상자 없이 굵은 제목 18 + 내용). 구역 사이는 [SectionGap] 띠로 나눈다.
 /// [child]는 좌우 여백 없이 받는다 — 가로 스크롤 목록이 컨테이너 끝까지 닿게 하고, 여백은 child가 정한다.
 class SectionCard extends StatelessWidget {
   const SectionCard({super.key, required this.title, required this.child, this.actionLabel, this.onAction, this.trailing, this.titleWidget});
@@ -25,12 +25,6 @@ class SectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: AppRadius.cardAll,
-        border: Border.all(color: AppColors.border),
-      ),
       padding: const EdgeInsets.fromLTRB(0, AppSpacing.xs, 0, AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -45,7 +39,7 @@ class SectionCard extends StatelessWidget {
                     constraints: const BoxConstraints(minHeight: 44),
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: titleWidget ?? Semantics(header: true, child: Text(title, style: AppTypography.cardTitle)),
+                      child: titleWidget ?? Semantics(header: true, child: Text(title, style: AppTypography.section)),
                     ),
                   ),
                 ),
@@ -67,6 +61,15 @@ class SectionCard extends StatelessWidget {
   }
 }
 
+/// 구역 사이 채움 띠 (v2, 높이 10)
+class SectionGap extends StatelessWidget {
+  const SectionGap({super.key});
+
+  @override
+  Widget build(BuildContext context) =>
+      const SizedBox(height: AppSpacing.sectionGap, width: double.infinity, child: ColoredBox(color: AppColors.fill));
+}
+
 /// SectionCard 안의 행 목록. 행 사이에만 구분선을 넣고, 선은 사진 오른쪽(왼쪽 [indent])부터 시작한다.
 class DividedRows extends StatelessWidget {
   const DividedRows({super.key, required this.children, this.indent = 88, this.endIndent = AppSpacing.md});
@@ -82,7 +85,8 @@ class DividedRows extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (var i = 0; i < children.length; i++) ...[
-          if (i > 0) Divider(height: 1, thickness: 1, indent: indent, endIndent: endIndent, color: AppColors.divider),
+          // v2: 행 사이는 선 없이 여백으로만 나눈다 (높이 1은 남겨 행 위치가 흔들리지 않게)
+          if (i > 0) const SizedBox(height: 1),
           children[i],
         ],
       ],
