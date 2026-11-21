@@ -11,7 +11,6 @@ import '../../../../core/widgets/bottom_cta.dart';
 import '../../../../core/widgets/buttons.dart';
 import '../../../../core/widgets/headers.dart';
 import '../../../../core/widgets/inputs.dart';
-import '../../../../core/widgets/surfaces.dart';
 import '../course_draft_controller.dart';
 import '../widgets/course_when_sheet.dart';
 
@@ -126,27 +125,35 @@ class _PickerField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // v2: 입력칸과 같은 회색 채움 칸(52), 값은 왼쪽 · 시계 아이콘은 오른쪽
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTypography.label),
+        Text(label, style: AppTypography.labelLarge.copyWith(color: AppColors.textSecondary)),
         const SizedBox(height: AppSpacing.xs),
-        AppCard(
-          onTap: onTap,
-          radius: AppRadius.input,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 15),
-          child: Row(
-            children: [
-              Icon(icon, color: AppColors.primary, size: 20),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Text(
-                  value ?? hint,
-                  style: value == null ? AppTypography.bodyStrong.copyWith(color: AppColors.textSecondary) : AppTypography.bodyStrong,
+        Material(
+          color: AppColors.fill,
+          borderRadius: BorderRadius.circular(AppRadius.input),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(AppRadius.input),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: AppSpacing.inputHeight),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        value ?? hint,
+                        style: value == null ? AppTypography.body.copyWith(color: AppColors.textSecondary) : AppTypography.bodyStrong,
+                      ),
+                    ),
+                    Icon(icon, color: AppColors.textSecondary, size: 20),
+                  ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
-            ],
+            ),
           ),
         ),
       ],

@@ -436,7 +436,7 @@ class HomeRegionGroups extends StatelessWidget {
   Widget build(BuildContext context) {
     final list = groups(places).take(3).toList();
     return DividedRows(
-      indent: SectionCard.innerPadding + 44 + AppSpacing.sm,
+      indent: SectionCard.innerPadding + 48 + AppSpacing.sm,
       children: [
         for (final (name, items) in list)
           InkWell(
@@ -445,15 +445,8 @@ class HomeRegionGroups extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(SectionCard.innerPadding, 10, AppSpacing.sm, 10),
               child: Row(
                 children: [
-                  CourseThumb(
-                    course: CourseSummary(
-                      id: name,
-                      title: name,
-                      placeCount: items.length,
-                      stopCategoryKeys: [for (final p in items) p.categoryKey],
-                    ),
-                    size: 44,
-                  ),
+                  // v2: 그 지역 첫 장소 사진 하나(없으면 업종 색 칸)
+                  PlaceImage(place: items.first, width: 48, height: 48, radius: 12),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
@@ -461,8 +454,8 @@ class HomeRegionGroups extends StatelessWidget {
                       children: [
                         Text('$name ${items.length}곳', style: AppTypography.bodyStrong),
                         Text(
-                          items.take(3).map((p) => p.name).join(', '),
-                          style: AppTypography.caption,
+                          items.take(3).map((p) => p.name).join(' · '),
+                          style: AppTypography.meta,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -470,7 +463,7 @@ class HomeRegionGroups extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
-                  // 작은 알약 버튼 (보이는 높이 32, 누르는 영역 44)
+                  // v2: 회색 작은 버튼 (보이는 높이 36, 누르는 영역 44)
                   Semantics(
                     button: true,
                     label: '$name에서 코스 만들기',
@@ -482,11 +475,11 @@ class HomeRegionGroups extends StatelessWidget {
                         height: 44,
                         child: Center(
                           child: Container(
-                            height: 32,
+                            height: 36,
                             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                             alignment: Alignment.center,
-                            decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: AppRadius.pillAll),
-                            child: Text('코스 만들기', style: AppTypography.label.copyWith(color: AppColors.primary)),
+                            decoration: BoxDecoration(color: AppColors.fill, borderRadius: BorderRadius.circular(AppRadius.small)),
+                            child: Text('코스 만들기', style: AppTypography.labelLarge),
                           ),
                         ),
                       ),
@@ -576,26 +569,41 @@ class RecentSavedStrip extends StatelessWidget {
   const RecentSavedStrip({super.key, required this.items});
   final List<RecentExtraction> items;
 
-  static const _tileWidth = 96.0;
-  static const _tileHeight = 128.0;
+  static const _tile = 104.0;
 
   @override
   Widget build(BuildContext context) {
+    // v2: 정사각 사진(없으면 업종 색 칸) 아래에 이름 · 저장한 때
+    final textH = MediaQuery.textScalerOf(context).scale(40);
     return SizedBox(
-      height: _tileHeight,
+      height: _tile + 6 + textH,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
         itemCount: items.length,
-        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs + 2),
         itemBuilder: (_, i) {
           final item = items[i];
-          return _PhotoTile(
-            place: item.place,
-            width: _tileWidth,
-            height: _tileHeight,
-            caption: formatRecentDate(item.extractedAt),
-            onTap: () => context.push(AppRoutes.place(item.place.id)),
+          final when = formatRecentDate(item.extractedAt);
+          return Semantics(
+            button: true,
+            label: '${item.place.name}, $when',
+            excludeSemantics: true,
+            child: GestureDetector(
+              onTap: () => context.push(AppRoutes.place(item.place.id)),
+              child: SizedBox(
+                width: _tile,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    PlaceImage(place: item.place, width: _tile, height: _tile, radius: AppRadius.medium, iconSize: 28),
+                    const SizedBox(height: 6),
+                    Text(item.place.name, style: AppTypography.label, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(when, style: AppTypography.caption, maxLines: 1),
+                  ],
+                ),
+              ),
+            ),
           );
         },
       ),

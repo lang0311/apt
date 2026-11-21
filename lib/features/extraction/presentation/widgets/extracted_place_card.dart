@@ -175,7 +175,7 @@ class ExtractedPlaceRow extends StatelessWidget {
                 child: SizedBox(
                   width: 40,
                   height: 44,
-                  child: Center(child: CheckMark(checked: selected)),
+                  child: Center(child: CheckCircle(checked: selected)),
                 ),
               ),
             ),

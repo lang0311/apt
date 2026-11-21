@@ -44,9 +44,7 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
     if (picked == null || picked.isEmpty || !mounted) return;
     final container = ProviderScope.containerOf(context, listen: false);
     try {
-      await ref
-          .read(savedRepositoryProvider)
-          .addPlacesToCollection(collectionId: widget.collectionId, placeIds: picked.map((p) => p.id).toList());
+      await ref.read(savedRepositoryProvider).addPlacesToCollection(collectionId: widget.collectionId, placeIds: picked.map((p) => p.id).toList());
       // 추가하는 중에 화면을 나갔어도 목록은 맞춰 둔다
       invalidateSavedDataIn(container);
       if (mounted) showAppSnackBar(context, '${picked.length}곳을 보관함에 추가했어요.');
@@ -131,10 +129,7 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
         ],
         Text(collection.name, style: AppTypography.display),
         const SizedBox(height: 4),
-        Text(
-          ['${collection.placeCount}곳', if (empty) '방금 만듦' else if (updated != null) '$updated 수정'].join(' · '),
-          style: AppTypography.meta,
-        ),
+        Text(['${collection.placeCount}곳', if (empty) '방금 만듦' else if (updated != null) '$updated 수정'].join(' · '), style: AppTypography.meta),
         const SizedBox(height: 14),
         Wrap(
           spacing: AppSpacing.xs,
@@ -206,9 +201,7 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
                     child: _emptyCard(),
                   ),
                   data: (list) => Column(
-                    children: [
-                      for (final item in list) SavedPlaceRow(place: item.place, onTap: () => context.push(AppRoutes.place(item.place.id))),
-                    ],
+                    children: [for (final item in list) SavedPlaceRow(place: item.place, onTap: () => context.push(AppRoutes.place(item.place.id)))],
                   ),
                 ),
               ),

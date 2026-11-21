@@ -244,6 +244,7 @@ class _PartyPicker extends ConsumerWidget {
                       for (final p in shown)
                         _PartyRow(
                           selected: !newParty && p.id == selectedId,
+                          members: p.members,
                           label: p.members.crewNames,
                           count: '${p.members.length}명',
                           onTap: () => onPick(p.id),
@@ -266,13 +267,14 @@ class _PartyPicker extends ConsumerWidget {
   }
 }
 
-/// 파티 한 줄(높이 48): 라디오 · 파티원 이름(넘치면 말줄임) · 인원
+/// 파티 한 줄 (v2): 얼굴 묶음 · 파티원 이름(넘치면 말줄임) · 인원 · 오른쪽 체크 원. 새 파티 만들기는 + 아이콘 · 파란 글자
 class _PartyRow extends StatelessWidget {
-  const _PartyRow({required this.selected, required this.label, required this.onTap, this.count, this.accent = false, this.leadingIcon});
+  const _PartyRow({required this.selected, required this.label, required this.onTap, this.count, this.accent = false, this.leadingIcon, this.members});
   final bool selected;
 
-  /// 고르는 줄이 아니라 행동 줄(새 파티 만들기)이면 체크 대신 이 아이콘
+  /// 고르는 줄이 아니라 행동 줄(새 파티 만들기)이면 얼굴 대신 이 아이콘
   final IconData? leadingIcon;
+  final List<PartyMember>? members;
   final String label;
   final String? count;
   final VoidCallback onTap;
@@ -289,16 +291,21 @@ class _PartyRow extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 52),
+          constraints: const BoxConstraints(minHeight: 56),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
             child: Row(
               children: [
-                if (leadingIcon != null && !selected)
-                  SizedBox.square(dimension: 24, child: Icon(leadingIcon, size: 22, color: AppColors.primary))
-                else
-                  CheckMark(checked: selected),
-                const SizedBox(width: AppSpacing.sm),
+                SizedBox(
+                  width: 48,
+                  child: leadingIcon != null
+                      ? Icon(leadingIcon, size: 22, color: AppColors.primary)
+                      : Align(
+                          alignment: Alignment.centerLeft,
+                          child: PartyAvatarStack(members: members ?? const [], size: 26, max: 3, overlap: true),
+                        ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
                     label,
@@ -308,6 +315,7 @@ class _PartyRow extends StatelessWidget {
                   ),
                 ),
                 if (count != null) ...[const SizedBox(width: AppSpacing.xs), Text(count!, style: AppTypography.meta)],
+                if (leadingIcon == null) ...[const SizedBox(width: AppSpacing.sm), CheckCircle(checked: selected)],
               ],
             ),
           ),

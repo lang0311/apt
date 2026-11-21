@@ -77,6 +77,9 @@ abstract final class AppColors {
   /// 안 고른 체크 표시(연한 회색, 07 · 사용자 결정으로 이 모양 유지)
   static const checkOff = Color(0xFFC3CBD7);
 
+  /// 안 고른 체크 원 바탕 (v2 시안 #E6E8EB)
+  static const checkCircleOff = Color(0xFFE6E8EB);
+
   /// 체크박스·라디오 미선택 테두리. `border`는 1.21:1이라 선택 컨트롤에는 이 색을 쓴다(약 3:1).
   static const controlBorder = Color(0xFF8B97AB);
   static const divider = Color(0xFFE9EEF5);

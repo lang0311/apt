@@ -69,7 +69,7 @@ void main() {
 
     await tester.tap(find.text('망원동 8곳'));
     await tester.pumpAndSettle();
-    expect(find.text('8곳'), findsWidgets);
+    // v2: 제목 줄 'n곳'은 없고, 고른 동네 칩만 남는다
     expect(find.text('장소m0'), findsOneWidget);
     expect(find.text('장소y0'), findsNothing);
     expect(find.bySemanticsLabel('마포구 망원동 필터 해제'), findsOneWidget);

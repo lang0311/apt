@@ -29,6 +29,23 @@ class CheckMark extends StatelessWidget {
   }
 }
 
+/// 체크 원 (v2 시안 `.chk`): 24 원 + 흰 체크. 안 고르면 회색, 고르면 파랑. 행 오른쪽 하나로 고르기를 표시한다
+class CheckCircle extends StatelessWidget {
+  const CheckCircle({super.key, required this.checked});
+  final bool checked;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(color: checked ? AppColors.primary : AppColors.checkCircleOff, shape: BoxShape.circle),
+      child: const Icon(Icons.check_rounded, size: 15, color: Colors.white, weight: 700),
+    );
+  }
+}
+
 /// 번호 원 (선택 순서, 코스 순번)
 class NumberBadge extends StatelessWidget {
   const NumberBadge(this.number, {super.key, this.size = 24, this.color = AppColors.primary});

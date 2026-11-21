@@ -158,6 +158,9 @@ class StepHeader extends StatelessWidget {
       children: [
         PlainHeader(
           title: '코스 만들기',
+          // v2: 첫 단계는 닫기(X), 그 뒤는 뒤로
+          leadingIcon: step == 1 ? Icons.close_rounded : Icons.chevron_left_rounded,
+          leadingTooltip: step == 1 ? '닫기' : '뒤로',
           onLeading: onBack,
           trailing: Text(
             '$step / 4',

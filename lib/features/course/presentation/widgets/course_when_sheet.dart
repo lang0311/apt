@@ -144,12 +144,10 @@ class _DayChip extends StatelessWidget {
       selected: selected,
       label: formatMonthDayWeekday(date),
       excludeSemantics: true,
+      // v2: 회색 채움 칸, 고른 날은 잉크 채움 (테두리 없음)
       child: Material(
-        color: selected ? AppColors.primary : AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.input),
-          side: BorderSide(color: selected ? AppColors.primary : AppColors.border),
-        ),
+        color: selected ? AppColors.ink : AppColors.fill,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.input)),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(AppRadius.input),
@@ -175,26 +173,20 @@ class _CalendarChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.input),
-        side: const BorderSide(color: AppColors.border),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.input),
-        child: SizedBox(
-          width: 56,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.calendar_month_outlined, size: 18, color: AppColors.primary),
-              Text(
-                '달력',
-                style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700),
-              ),
-            ],
+    // v2: 날짜 칩과 같은 회색 칸에 달력 아이콘만
+    return Semantics(
+      button: true,
+      label: '달력에서 날짜 고르기',
+      excludeSemantics: true,
+      child: Material(
+        color: AppColors.fill,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.input)),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.input),
+          child: const SizedBox(
+            width: 56,
+            child: Center(child: Icon(Icons.calendar_month_outlined, size: 22, color: AppColors.textPrimary)),
           ),
         ),
       ),

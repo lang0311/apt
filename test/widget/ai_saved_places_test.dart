@@ -119,7 +119,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('2곳 보기'));
     await tester.pumpAndSettle();
-    expect(find.text('2곳'), findsOneWidget);
+    // v2: 제목 줄의 'n곳' 대신 고른 값 칩 하나만 (시안 13 저장됨 · 전체)
+    expect(find.bySemanticsLabel('한식 필터 해제'), findsOneWidget);
     expect(find.text('경복궁'), findsNothing);
 
     // 다시 열어 하나 더 고르면 칩이 두 개
@@ -137,7 +138,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('고궁 필터 해제'));
     await tester.pumpAndSettle();
-    expect(find.text('전체 3곳'), findsOneWidget);
+    // 다 풀면 고른 값 칩이 없다 (v2: 전체 탭은 'n곳' 제목 줄 없이 칩 줄만)
+    expect(find.bySemanticsLabel('한식 필터 해제'), findsNothing);
+    expect(find.bySemanticsLabel('고궁 필터 해제'), findsNothing);
   });
 
   group('저장 지도 (07 D48)', () {
