@@ -257,7 +257,7 @@ class _ReelsGuide extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('릴스에서 바로 저장하는 게 가장 빨라요', style: AppTypography.bodyStrong.copyWith(fontSize: 17)),
+          Text('릴스에서 바로 저장하는 게 가장 빨라요', style: AppTypography.lead),
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [

@@ -50,7 +50,7 @@ class StationSteps extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(steps[i].$1, style: AppTypography.bodyStrong.copyWith(fontSize: 16)),
+                        Text(steps[i].$1, style: AppTypography.cardTitle),
                         if (steps[i].$2 != null) ...[const SizedBox(height: 2), Text(steps[i].$2!, style: AppTypography.meta)],
                       ],
                     ),

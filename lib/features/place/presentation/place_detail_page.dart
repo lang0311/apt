@@ -287,7 +287,7 @@ class _TitleCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Row(
             children: [
-              const Text('✦', style: TextStyle(color: AppColors.ai, fontSize: 13)),
+              Text('✦', style: AppTypography.meta.copyWith(color: AppColors.ai)),
               const SizedBox(width: 4),
               Flexible(
                 child: Text(

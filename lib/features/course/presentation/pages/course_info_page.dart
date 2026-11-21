@@ -76,7 +76,7 @@ class _CourseInfoPageState extends ConsumerState<CourseInfoPage> {
                           onChanged: (v) => _draft.update((d) => d.copyWith(name: v)),
                         ),
                         const SizedBox(height: AppSpacing.md),
-                        Text('언제 떠나요', style: AppTypography.label.copyWith(fontSize: 14, color: AppColors.textSecondary)),
+                        Text('언제 떠나요', style: AppTypography.labelLarge.copyWith(color: AppColors.textSecondary)),
                         const SizedBox(height: AppSpacing.xs),
                       ],
                     ),

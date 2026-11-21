@@ -30,7 +30,7 @@ class HomeStartGuide extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('릴스에서 본 곳,\n바로 저장해 보세요', style: AppTypography.section.copyWith(fontSize: 20)),
+          Text('릴스에서 본 곳,\n바로 저장해 보세요', style: AppTypography.cardHero),
           const SizedBox(height: 18),
           const StationSteps(gap: 14, steps: [('릴스에서 ⋯ 누르기', null), ('공유 → APT 고르기', null), ('찾은 장소 저장', null)]),
           const SizedBox(height: AppSpacing.lg),
@@ -132,12 +132,7 @@ class HomeCourseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final date = course.date;
     final hasStops = course.stopNames.length == course.stopCategoryKeys.length && course.stopNames.isNotEmpty;
-    final dday = AppTypography.display.copyWith(
-      fontSize: 34,
-      height: 1,
-      color: AppColors.primary,
-      fontFeatures: const [FontFeature.tabularFigures()],
-    );
+    final dday = AppTypography.ddayLarge;
 
     final Widget headline;
     if (isToday) {
@@ -194,7 +189,7 @@ class HomeCourseCard extends StatelessWidget {
                     ),
                   ],
                   const SizedBox(height: 4),
-                  Text(course.title, style: AppTypography.section.copyWith(fontSize: 20), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(course.title, style: AppTypography.cardHero, maxLines: 1, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 18),
                   if (hasStops)
                     _StopStrip(keys: course.stopCategoryKeys, names: course.stopNames, isAi: course.stopIsAi)
@@ -363,7 +358,7 @@ class _StripCell extends StatelessWidget {
               if (ai)
                 Transform.translate(
                   offset: const Offset(10, -9),
-                  child: Text('✦', style: AppTypography.caption.copyWith(color: AppColors.aiText, fontSize: 10, height: 1)),
+                  child: Text('✦', style: AppTypography.sparkBadge),
                 ),
             ],
           ),

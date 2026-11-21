@@ -92,7 +92,7 @@ class _TermsList extends StatelessWidget {
           decoration: BoxDecoration(color: AppColors.fill, borderRadius: BorderRadius.circular(16)),
           child: _TermsRow(
             checked: all,
-            title: Text('전체 동의', style: AppTypography.cardTitle.copyWith(fontSize: 17)),
+            title: Text('전체 동의', style: AppTypography.lead),
             subtitle: '선택 항목까지 모두 동의해요',
             onTap: () => onChanged(all ? {} : items.map((t) => t.id).toSet()),
           ),

@@ -154,7 +154,7 @@ class _SocialLoginPageState extends ConsumerState<SocialLoginPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('처음이에요?', style: AppTypography.bodyMuted.copyWith(fontSize: 14)),
+                              Text('처음이에요?', style: AppTypography.bodySmall),
                               AppTextLink(
                                 label: '회원가입',
                                 color: AppColors.primary,

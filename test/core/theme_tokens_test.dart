@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:apt/app/theme/app_colors.dart';
 import 'package:apt/app/theme/app_spacing.dart';
 import 'package:apt/app/theme/app_typography.dart';
@@ -36,5 +38,24 @@ void main() {
     expect(AppSpacing.smallButtonHeight, 40);
     expect(AppSpacing.chipHeight, 36);
     expect(AppSpacing.sectionGap, 10);
+  });
+
+  test('화면 코드는 글자 크기를 숫자로 덮어쓰지 않는다 (07 D63, 토큰만 · 위젯 크기 비례는 예외)', () {
+    final literal = RegExp(r'fontSize:\s*\d');
+    final offenders = [
+      for (final f in Directory('lib').listSync(recursive: true).whereType<File>())
+        if (f.path.endsWith('.dart') && !f.path.replaceAll(r'\', '/').contains('lib/app/theme/'))
+          for (final (i, line) in f.readAsLinesSync().indexed)
+            if (literal.hasMatch(line)) '${f.path}:${i + 1}',
+    ];
+    expect(offenders, isEmpty);
+  });
+
+  testWidgets('v2 보조 크기 토큰: 14 · 17 · 20 · 34', (tester) async {
+    expect(AppTypography.labelLarge.fontSize, 14);
+    expect(AppTypography.bodySmall.fontSize, 14);
+    expect(AppTypography.lead.fontSize, 17);
+    expect(AppTypography.cardHero.fontSize, 20);
+    expect(AppTypography.ddayLarge.fontSize, 34);
   });
 }

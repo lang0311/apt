@@ -131,7 +131,7 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
         // 저장한 곳이 없어도 지도는 열 수 있다 (07 D32)
         ActionChip(
           avatar: const Icon(Icons.map_outlined, size: 16, color: AppColors.textPrimary),
-          label: Text('지도로 보기', style: AppTypography.label.copyWith(fontSize: 14)),
+          label: Text('지도로 보기', style: AppTypography.labelLarge),
           backgroundColor: AppColors.fill,
           side: BorderSide.none,
           shape: const StadiumBorder(),

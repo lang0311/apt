@@ -135,7 +135,7 @@ class _AppTextFieldState extends State<AppTextField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.label!, style: AppTypography.label.copyWith(fontSize: 14, color: AppColors.textSecondary)),
+        Text(widget.label!, style: AppTypography.labelLarge.copyWith(color: AppColors.textSecondary)),
         const SizedBox(height: AppSpacing.xs),
         field,
       ],
