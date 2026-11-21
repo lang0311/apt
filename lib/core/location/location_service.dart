@@ -90,6 +90,8 @@ class MyLocationNotifier extends Notifier<LocationResult?> {
 
   Future<LocationResult> locate({bool request = true}) async {
     final result = await ref.read(locationServiceProvider).current(request: request);
+    // 위치를 기다리는 사이 앱(ProviderScope)이 닫혔으면 상태를 건드리지 않는다
+    if (!ref.mounted) return result;
     // 일시적으로 못 얻었으면(시간 초과 등) 직전 위치를 유지한다. 권한이 없어지면 지운다.
     final keepPrevious = result.status == LocationStatus.unavailable && state?.point != null;
     if (!keepPrevious) state = result;
