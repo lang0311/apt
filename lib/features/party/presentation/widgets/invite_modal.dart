@@ -6,7 +6,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/error/app_failure.dart';
-import '../../../../core/widgets/kakao_symbol.dart';
+import '../../../../core/widgets/brand_marks.dart';
 import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/surfaces.dart';
 import '../party_providers.dart';

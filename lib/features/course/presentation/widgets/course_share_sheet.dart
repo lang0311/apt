@@ -10,7 +10,7 @@ import '../../../../core/error/app_failure.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/surfaces.dart';
-import '../../../../core/widgets/kakao_symbol.dart';
+import '../../../../core/widgets/brand_marks.dart';
 import '../../../party/domain/party_models.dart';
 import '../../../party/presentation/widgets/invite_modal.dart';
 import '../../domain/course_models.dart';
