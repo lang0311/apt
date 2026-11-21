@@ -29,7 +29,8 @@
 키워드: `Clean` `Modern` `iOS-like` `Content first` `Map friendly` `Bottom-sheet oriented` `Minimal`
 - 한 화면에 정보를 과하게 넣지 않고 **단계로 나눈다.**
 - 지도는 기능이지 홈의 중심이 아니다.
-- 소비자 서비스 톤: 밝은 배경 + 파랑 주조색 + 둥근 카드.
+- 소비자 서비스 톤: 흰 바탕 + 파랑 주조색 + 굵은 제목과 띠로 나눈 구역(상자 최소화). 코스는 어디서나 번호 점 + 선(노선)으로 보여 주고, 다가오는 코스 연파랑 카드가 화면의 주인공이다 (2026-11-21 리디자인 v2, 07 D64)
+- 화면 모양 기준: 리디자인 v2 확정 시안 https://claude.ai/artifact/QXMdV98JKrHNUjpzPrbyTh (36화면), 구현 확인 https://claude.ai/artifact/B9krM6Jca1jrU5MajdEhJ7
 
 ## 3. 토큰 (정본은 코드 `lib/app/theme/`, 이 표는 2026-11-21 리디자인 v2 코드 기준, 07 D64)
 
@@ -58,7 +59,8 @@
 | `dangerText` | `#C8463C` | 차단·삭제 같은 위험 동작의 **글자** (흰 배경 약 5:1, 2026-10-21). 시트에서는 구분선 아래 따로 떼어 두고 아이콘과 함께 쓴다 |
 | `success` | `#16A07D` | 완료 |
 | `extract` | `#8A63E6` | 추출 계열 보조(보라) |
-| `kakao` | `#FEE500` | 카카오 버튼 (아이콘은 공식 말풍선 심볼 `KakaoSymbol`, 검정. 로그인 · 공유 모두) |
+| `kakao` | `#FEE500` | 카카오 버튼 (아이콘은 카카오 로그인 버튼 리소스의 공식 말풍선 심볼 `KakaoSymbol`, 검정 `#000000`. 로그인 · 공유 모두) |
+| (Google) | 흰 원 + `border` 1px | Google 간편 로그인 동그라미. 아이콘은 Google 로그인 버튼 리소스의 공식 4색 G `GoogleMark`(빨 `#EA4335` · 파 `#4285F4` · 노 `#FBBC05` · 초 `#34A853`, 색 · 모양 변경 금지) |
 
 > `ai` 색은 **AI가 추천한 것에만** 쓴다 (선택 장소와의 시각적 구분이 핵심).
 
@@ -106,15 +108,16 @@
 
 ## 4. 공통 컴포넌트
 
-2026-10-30 코드(`lib/core/widgets/`, 각 기능의 `presentation/widgets/`) 기준 이름이다. 2026-11-14 UI 리뷰 후속(07 D50~D55)에서 바뀐 것을 더했다.
+2026-11-21 코드(`lib/core/widgets/`, 각 기능의 `presentation/widgets/`) 기준 이름이다. 리디자인 v2(07 D64)에서 바뀐 것을 반영했다.
 
-**기본 (`core/widgets`)**: `AppButton`(`primary`·`dark`·`soft`·`white`·`danger`) `AppTextLink` `AppIconBox` `AppTextField` `AppFieldError` `AppSearchField` `AppChip` `AppTextChip` `ChipScroller` `AppTag` `TagWrap` `CheckMark`(체크 아이콘만, 07 D26) `NumberBadge` `SegmentedTabs`(track / pills / underline) `KakaoSymbol` `AppLogo`
+**기본 (`core/widgets`)**: `AppButton`(`primary`·`dark`·`soft`·`white`·`danger`) `AppTextLink` `AppIconBox` `AppTextField`(채움 바탕, 칸 안 이름표 `innerLabel`, 오류 2px) `AppFieldError` `AppSearchField` `AppChip` `AppTextChip` `ChipScroller` `AppTag` `TagWrap` `CheckMark`(체크 아이콘만, 07 D26) `NumberBadge` `SegmentedTabs`(track / pills / underline) `AppLogo` `StationSteps`(번호 정거장을 선으로 이은 세로 단계 — 가입 완료 · 장소 추가 안내, v2)
+**브랜드 로고 (`core/widgets/brand_marks.dart`)**: `KakaoSymbol`(카카오 공식 말풍선, 18×18 패스) `GoogleMark`(Google 공식 4색 G, 48×48 패스). 각 사 로그인 버튼 리소스의 패스를 `CustomPaint`로 그대로 옮겼다(패키지 없음). 색 · 비율을 바꾸지 않는다
 **헤더**: `PageTitleHeader`(탭 화면 큰 제목) `PlainHeader`(배경 없는 뒤로 + 제목) `AuthHeader`(가입 화면) `StepHeader`(위저드 뒤로 + 제목 + n/4) `StepProgressBar`(막대 아래 단계 이름 `정보 · 동행 · 장소 · 추천`, 지금 단계만 파랑 · 굵게) `SectionHeader`
-**표면 · 하단**: `SectionCard`(섹션 컨테이너, 제목 줄 오른쪽 `trailing`) `DividedRows`(컨테이너 안 구분선 행, 구분선은 왼쪽 `indent` + 오른쪽 `endIndent` 기본 16 — 카드 오른쪽 끝까지 뻗지 않음) `AppCard` `IconCircle` `BottomCta`(하단 고정 버튼 영역)
+**표면 · 하단**: `SectionCard`(v2: 상자 없이 굵은 제목 18 + 내용, 제목 줄 오른쪽 `trailing`. 일정 카드만 `boxed: true` — 흰 바탕 + 1px 선 모서리 20) `SectionGap`(구역 사이 채움 띠 10) `DividedRows`(행 목록, v2에서는 선 없이 여백만) `AppCard` `IconCircle` `BottomCta`(하단 고정 버튼 영역)
 **오버레이**: `showAppSnackBar`(하단 고정 버튼이 있으면 그 위 8에 뜸, 07 D36) `showAppBottomSheet` `showAppModal` `showConfirmDialog` `showActionSheet`
 **상태**: `AsyncValueView`(로딩 · 빈 · 오류를 한 번에) `AppLoading` `SkeletonBox` `SkeletonList` `AppEmptyState` `AppErrorState`
-**사진 · 장소**: `PlaceImage`(사진 없으면 카테고리 색 칸 + 아이콘, 같은 크기 유지. 아이콘 색은 `CategoryStyle.ink` — 음식점 · 전시는 바탕과 3:1이 되게 진한 값, 07 D56) `AppNetworkImage` `PlaceListTile` `SavedPlaceRow` `CollectionRow`(2×2 `MiniCollage`) `ExtractedPlaceRow` `RatingText` `AppliedFilterChip`(걸린 필터, 남색 — 건 값만 하나씩) `showCategoryFilterSheet`(여러 개 고르는 카테고리 시트. `sources`를 주면 제목 `필터` + `보여 줄 장소`(직접 저장 · 추천받은 곳), `autoSearch`를 주면 `지도 이동 시 자동 검색` 스위치, 이때 버튼은 `적용`) `HeaderTextButton`
-**홈**: `HomeCourseCard`(D-day + 옆에 날짜 · 출발 · 이름 + 오른쪽 거리 · 인원 · 장소 순서 줄 — 선으로 이은 28 업종 동그라미 + 이름 두 줄, 5곳까지 모두, 6곳부터 앞 셋 · `+n` · 마지막, AI 동그라미에 작은 ✦) `HomeRegionGroups`(지역별로 시작하기 — 구 · 시 묶음 세 개, 모자이크 + `코스 만들기`) `HomeQuickActions` `HomeStartGuide` `NewSavesNudge` `RecentSavedStrip` `SuggestedCourseStrip` `TrendingPlaceGrid`
+**사진 · 장소**: `PlaceImage`(사진 없으면 카테고리 색 칸 + 아이콘, 같은 크기 유지. 아이콘 색은 `CategoryStyle.ink` — 음식점 · 전시는 바탕과 3:1이 되게 진한 값, 07 D56) `AppNetworkImage` `PlaceListTile` `SavedPlaceRow` `CollectionRow`(2×2 `MiniCollage`, 시트용) `CollectionGrid` · `CollectionGridCard`(보관함 탭 2열 정사각 표지, v2) `AllPlacesLink` `ExtractedPlaceRow` `RatingText` `AppliedFilterChip`(걸린 필터, 남색 — 건 값만 하나씩) `showCategoryFilterSheet`(여러 개 고르는 카테고리 시트. `sources`를 주면 제목 `필터` + `보여 줄 장소`(직접 저장 · 추천받은 곳), `autoSearch`를 주면 `지도 이동 시 자동 검색` 스위치, 이때 버튼은 `적용`) `HeaderTextButton`
+**홈**: `HomeCourseCard`(v2 연파랑 판, D-day · 노선 점만 파랑. D-day + 옆에 날짜 · 출발 · 이름 + 오른쪽 거리 · 인원 · 장소 순서 줄 — 선으로 이은 28 업종 동그라미 + 이름 두 줄, 5곳까지 모두, 6곳부터 앞 셋 · `+n` · 마지막, AI 동그라미에 작은 ✦) `HomeRegionGroups`(지역별로 시작하기 — 구 · 시 묶음 세 개, 모자이크 + `코스 만들기`) `HomeQuickActions` `HomeStartGuide` `NewSavesNudge` `RecentSavedStrip` `SuggestedCourseStrip` `TrendingPlaceGrid`
 **지도**: `AptMap`(네이버 · 웹 타일 · 미리보기 지도를 감쌈) `MapPin`(번호/선택/AI/내 위치/`picked` 파란 체크 — 3단계에서 고른 곳, 순서 번호 없음) `MapPlacePicker`(지도 위 장소 고르기, 3단계 · 장소 추가 공용. 카드 · 목록은 지금 지도 영역 안의 장소만, 목록은 아래에서 올라오는 시트) `CourseRouteMap`
 **코스**: `CourseHero`(이름 + 한 줄 정보, 요약 칸을 쓰는 화면은 정보 줄 없음) `CourseStats`(날짜 · 출발 · 직선 거리, 있는 칸만) `CourseStopLegend`(`내가 고른 곳 n · AI 추천 n`) `CourseThumb`(사진 없으면 업종 모자이크: 1곳 한 칸 · 2곳 반반 · 3곳 큰 칸 + 둘 · 4곳 2×2 · 5곳부터 셋 + `+n`) `CourseDayChips`(오늘부터 2주 날짜 칩 + 달력) `showCourseTimeSheet`(출발 시간 휠) `CourseTimeline`(보기, 마커 사이를 한 줄로 이음) `CourseEditList`(편집) `CourseEditButton` `StopMarker`(번호, AI 추천은 주황 번호 + 작은 ✦ — 번호는 AI 곳까지 이어짐, 07 D62) `CourseSummaryRow` `PickedChips`(고른 장소 칩 줄, ×로 빼기) `RecommendingBanner`(추천 진행 · 취소) 장소 시트(`StopSheetAction`, 차단은 빨간 글자로 떼어 둠)
 **파티 · 공유 · 인증**: `PartyAvatarStack` `ShareOption`(초대 · 코스 알리기 시트 공통) `SocialLoginButton` `SocialIconButton`
@@ -127,6 +130,7 @@
 - 이동 수단(도보/버스/대중교통)도 아이콘 위젯 + 텍스트.
 - SVG 속 사진/지도는 더미 → 실제 이미지 위젯/네이버 지도로 대체.
 - 이미지 모서리는 `ClipRRect`.
+- 브랜드 로고(카카오 · Google)는 비슷하게 그리지 않고 각 사 공식 리소스의 모양 · 색 그대로 쓴다(`brand_marks.dart`).
 
 ## 6. 반드시 구현할 UI 상태
 
@@ -136,15 +140,15 @@
 
 ## 7. 새 화면을 디자인할 때의 원칙 (디자인 언어 유지)
 
-처음엔 추가 화면 3개(07, 08, 34)의 규칙이었고, 5개 탭(10-22)과 탭 밖 화면(10-30, 07 D37) 리디자인으로 아래처럼 정리됐다. 모든 화면이 이 언어를 따른다.
+처음엔 추가 화면 3개(07, 08, 34)의 규칙이었고, 5개 탭(10-22) · 탭 밖 화면(10-30, 07 D37) 리디자인을 거쳐 2026-11-21 리디자인 v2(07 D64)로 아래처럼 정리됐다. 모든 화면이 이 언어를 따른다.
 
 1. 바탕은 흰색, 구역은 굵은 제목 + `fill` 띠로 나눈다. 상자 · 그림자를 쓰지 않고, 묶어야 할 때만 회색 판 또는 1px 선 카드 (2026-11-21 v2, 07 D64)
 2. 서브 화면 헤더 = **배경 없는 뒤로 아이콘 + 제목**(`PlainHeader`, 위저드는 `StepHeader` 우측 `n/4`). 흰 사각 뒤로 버튼(`SubPageHeader`)은 없앴다 (07 D37)
-3. 인증/설정류 첫 화면은 **큰 제목(`display` 26/800) + 설명 + 입력들**, 주 버튼은 **`BottomCta`로 하단 고정**(키보드가 올라와도 가리지 않게)
+3. 인증/설정류 첫 화면은 **큰 제목(`display` 26/700) + 설명 + 입력들**, 주 버튼은 **`BottomCta`로 하단 고정**(키보드가 올라와도 가리지 않게)
 4. 관련 항목은 `SectionCard` 제목 아래 화면 끝까지 가는 행(좌우 20, 선 없음)으로 둔다. 선택형 항목은 높이 36 알약 칩, 라디오 · 체크는 `CheckMark`
 5. 오류는 **빨강 테두리 + 아이콘 + 한 줄 메시지** (큰 별도 화면은 정말 필요한 때만). 상황 설명은 제목으로 올리고 장식용 `!` 원 카드는 쓰지 않는다 (07 D37)
 6. 꾸미는 아이콘 원 · 일러스트를 넣지 않는다. 안내는 문장과 행동 버튼으로 (07 D37)
 7. ✦ · 주황(`ai`)은 **AI가 추천한 장소 표시로만** 쓴다(주황 번호 원 · 작은 ✦ · `AI 추천` 태그 · 시트의 추천 이유 줄 아이콘 · 저장됨의 `코스에서 추천`). 제목 · 배경 · 버튼 장식 금지 (07 D17)
-8. 하단 탭 화면(홈·저장됨·코스·추출·마이) 헤더는 **큰 제목 + 오른쪽 버튼만** 둔다. 정보 없는 분위기 부제는 쓰지 않는다 (2026-10-20, 07 D16)
+8. 하단 탭 화면(홈·저장됨·코스·장소 추가·마이) 헤더는 **큰 제목 + 오른쪽 버튼만** 둔다. 정보 없는 분위기 부제는 쓰지 않는다 (2026-10-20, 07 D16)
 9. 강조는 카드마다 한 곳만(예: 코스 카드는 D-day만 크게). 숫자 통계 타일은 쓰지 않는다 (2026-10-20, 07 D20)
 10. 문구는 해요체, 짧고 행동 중심 ("~해주세요", "~할 수 있어요")

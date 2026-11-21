@@ -16,8 +16,9 @@
 5. 기능 범위가 애매하면 구현 전에 사용자에게 **한 번에 모아서** 묻는다. `docs/07_DECISIONS_AND_OPEN_ITEMS.md`에 이미 정해진 건 다시 묻지 않는다.
 
 ## 확정된 결정 (요약)
-- UI 기준: `design/ui/canonical_user_flow_ui_svgs`(31화면) + `design/ui/ui_additions`(3화면) = **34화면**. 흐름도 `PREVIEWS/canonical_user_flow.jpg`, `canonical_ui_31_screens.jpg`를 **먼저 보고** 해당 SVG를 연다.
-- 로그인: **소셜(카카오/Google/Apple)이 기본**. 이메일 로그인은 **틀만** (`FeatureFlags.emailAuthEnabled=false`, 화면에 진입점 노출 금지, 예외는 간단히).
+- UI 기준: **리디자인 v2 확정 시안**(2026-11-21, 07 D64) https://claude.ai/artifact/QXMdV98JKrHNUjpzPrbyTh (36화면, 로컬 `_workspace/redesign-v2/index.html`) + 05 화면별 명세. 처음 기준이던 SVG(`design/ui/canonical_user_flow_ui_svgs` 31 + `ui_additions` 3 = 34화면, 흐름도 `PREVIEWS/canonical_user_flow.jpg`)는 화면 번호 · 흐름 출처로만 본다.
+- 로그인: 첫 화면은 **아이디 · 비밀번호 + 간편 로그인(카카오 · Google 동그라미)** (v2, 팀 서버 Credentials). Apple은 숨김(`FeatureFlags.appleAuthEnabled=false`, 07 D11). 카카오 · Google 아이콘은 각 사 공식 로고 패스(`core/widgets/brand_marks.dart`), 비슷하게 다시 그리지 않는다. 이메일 로그인은 **틀만** (`FeatureFlags.emailAuthEnabled=false`, 화면에 진입점 노출 금지, 예외는 간단히).
+- 취향: **직접 고르지 않고 저장한 장소로 읽는다**(팀 서버 계산). 고르는 칩 화면은 `FeatureFlags.manualTasteEnabled=false`로 Mock에서도 끔 (07 D54 · D64).
 - 지도: **네이버 지도** (`© NAVER` 표기 유지).
 - 주 진입 경로는 **릴스 → 공유 → 우리 앱**(Android `ACTION_SEND`, iOS Share Extension). 앱 내 링크 입력 화면은 URL을 알 때 쓰는 **폴백**.
 - 코스 만들기: 정보 → 동행 → 장소 → AI 추천 → (장소 수정 ↔ AI 재추천 **반복 가능**). 위저드는 하나의 `CourseDraft`를 공유, 진행 바는 4/4 유지(새 단계 만들지 않음). (2026-10-21 동행·장소 순서 변경, 07 D22)
@@ -38,7 +39,7 @@
 | 코드 작성 전, 구조·인증·공유 수신·지도·코스 루프 | `docs/02_APP_DEVELOPMENT.md` |
 | UI 구현, 토큰, 컴포넌트, 새 화면 디자인 | `docs/03_DESIGN_SYSTEM.md` |
 | 화면 연결, 네비게이션, 사용자 흐름 | `docs/04_UX_FLOWS.md` |
-| **특정 화면 구현** (라우트·UI·데이터·상태) | `docs/05_SCREEN_SPEC.md` + 해당 SVG |
+| **특정 화면 구현** (라우트·UI·데이터·상태) | `docs/05_SCREEN_SPEC.md` + 리디자인 v2 시안의 해당 화면 |
 | API 연동, Mock, 백엔드에 요청할 것 | `docs/06_API_INTEGRATION.md` |
 | **백엔드 API 기준** | 팀 레포 GitHub 최신(`origin/main`)의 서버 코드(`api.py`·`src/`, 로컬 clone은 `apt` 옆 `team/`). **API 작업 전 `git fetch`로 새 커밋 확인**, 바뀐 API가 있으면 보고. 기능별 기준 출처는 06 §0 |
 | 서버에 없는 기능의 방향 참고 | `docs/API/` (엑셀) — **참고만**. 서버와 다르면 서버를 따른다 (07 D12) |
@@ -63,7 +64,7 @@
 
 ## 디자인 구현 규칙
 - **디자인 작업(시안·화면·레이아웃·색·문구·컴포넌트)은 사용자가 말하지 않아도 항상 디자인 플러그인/스킬을 먼저 호출한다** (`ui-ux-pro-max:ui-ux-pro-max`, `frontend-design:frontend-design`, 필요 시 `design:design-critique`·`design:ux-copy` 등). 시안은 게시 전에 직접 렌더링(캡처)해 보고 다듬는다.
-- SVG는 **참고 시안**. 화면 전체를 SVG로 넣지 않고 **Flutter Widget으로 재구현**한다. 지도/사진은 더미 → 실제 지도/이미지로 대체.
+- 시안(v2 HTML · 예전 SVG)은 **참고 시안**. 화면 전체를 이미지로 넣지 않고 **Flutter Widget으로 재구현**한다. 지도/사진은 더미 → 실제 지도/이미지로 대체.
 - 시안에 글자 기호로 그려진 아이콘(`↝ ⌂ ⌗ ▱ ○ ✓ ! ✦ ≡ ⋮`)은 **실제 아이콘**으로 교체.
 - 프레임 390×844는 **참고 기준일 뿐**. **폭을 하드코딩하지 않는다**(390/350/342 금지). 좌우 여백 20(일부 24) + 콘텐츠는 늘어나게. 세로는 스크롤 + 하단 고정 CTA. 360×640 / 390×844 / 430×932에서 확인.
 - 가짜 상태바(9:41)·홈 인디케이터는 구현하지 않는다 → `SafeArea`/`MediaQuery.padding`. 키보드 올라올 때 CTA 가려지지 않게 `viewInsets` 처리.
