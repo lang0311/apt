@@ -1786,6 +1786,7 @@ module.exports = [
       '취향: 직접 고르는 칩 화면은 FeatureFlags.manualTasteEnabled(기본 false) 뒤로 숨기고 저장한 장소로 읽는 화면만 사용. 마이 요약에 많이 저장한 업종 셋(서버 요약 값)',
       '문서: 07 D64, 03 토큰 · 형태 · 원칙, 05 맨 앞 "리디자인 v2" 표, CLAUDE.md 디자인 요약',
       '간편 로그인 아이콘: Google은 원호 네 개로 흉내 낸 G를 공식 48×48 4색 G 패스로, 카카오는 직접 그린 말풍선을 공식 심볼 패스로 바꿈(패키지 없이 CustomPaint, core/widgets/brand_marks.dart)',
+      '보관함 상세: 장소 목록을 테두리 카드에서 화면 끝까지 가는 선 없는 행(SavedPlaceRow)으로, 머리 "저장된 장소" 대신 "장소 담기" 칩(시안 v2 그대로)',
       '문서 최신화: 05 화면별 명세를 v2 모양으로 다시 씀(2-1 아이디 가입 추가, 34 내 취향), 04 인증 · 취향 흐름, 03 컴포넌트, 01 · 02 · README · CLAUDE.md의 UI 기준을 v2 시안으로',
       '확인: flutter analyze 0 · flutter test 263 통과, Pixel_6_Pro 통합 테스트 A~L 12개 통과(문구 고친 뒤), 흐름도 장면으로 Mock 54 + 서버 모드 27화면 캡처(팀 서버, 시연 계정) → 확정 시안과 나란히 비교 https://claude.ai/artifact/B9krM6Jca1jrU5MajdEhJ7 (36화면 중 같음 27 · 일부 다름 4 · 캡처 없음 5)',
     ],
@@ -1805,8 +1806,8 @@ module.exports = [
       {
         problem: 'v2 크기를 맞추려 화면에서 글자 크기를 덮어쓴 곳이 남음(D63 위반)',
         cause: '시안의 14 · 16 · 17 · 20 크기가 네 단계 토큰에 없어 2~9단계에서 copyWith(fontSize:)로 맞춤',
-        solution: '10단계에서 넣은 6곳은 토큰으로 되돌림. 칩 · 입력 이름표 · 홈 카드 제목 등 12곳은 토큰을 늘릴지 결정 필요',
-        status: '부분 해결',
+        solution: '10단계 6곳은 기존 토큰으로, 나머지 12곳은 사용자 결정으로 v2 보조 토큰(labelLarge · bodySmall · lead · cardHero · ddayLarge · sparkBadge)을 만들어 바꿈. 숫자로 덮어쓰면 실패하는 테스트 추가',
+        status: '해결',
       },
     ],
     decisions: [

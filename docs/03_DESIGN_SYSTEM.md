@@ -83,7 +83,9 @@
 
 숫자 칸(마이 숫자 · D-day · n곳)은 `FontFeature.tabularFigures()`로 자릿수 폭을 맞춘다.
 
-화면에서 `copyWith(fontSize:)`로 크기를 바꾸지 않는다. 색 · 굵기만 바꾼다(07 D63).
+시안 v2의 보조 크기는 토큰으로 둔다: `labelLarge` 14/600(칩 · 입력 이름표 · 작은 칩 버튼) · `bodySmall` 14/400 · `lead` 17/700(판 제목 · 전체 동의) · `cardHero` 20/700(홈 코스 카드 이름) · `ddayLarge` 34/700(홈 큰 D-day) · `sparkBadge` 10(번호 원 위 ✦ 표시).
+
+화면에서 `copyWith(fontSize:)`로 크기를 바꾸지 않는다. 색 · 굵기만 바꾼다(07 D63). 숫자로 덮어쓰면 `test/core/theme_tokens_test.dart`가 실패한다. 위젯 크기에 비례하는 글자(번호 원 · `+n` · 얼굴 이니셜)만 예외
 
 지도 · 사진 위에 얹는 색도 토큰으로 쓴다(07 D63): 지도 위 흐린 바탕 `mapGlass`(흰색 85%) + 테두리 `mapGlassBorder`(90%), 지도 위 알약 `mapPill`(94%), 사진 위 둘째 줄 글자 `onPhotoMuted`(88%), 안 고른 칩 글자 `chipText`, 파티원 얼굴 · 이름 색 `avatar…`.
 
