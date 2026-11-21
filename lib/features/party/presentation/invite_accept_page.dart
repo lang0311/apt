@@ -160,7 +160,7 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(inv.courseTitle, style: AppTypography.cardTitle.copyWith(fontSize: 17)),
+              Text(inv.courseTitle, style: AppTypography.cardTitle),
               const SizedBox(height: 2),
               Text(
                 [if (inv.courseDate != null) formatMonthDayWeekday(inv.courseDate!), '${inv.memberCount}명 참여 중'].join(' · '),
@@ -179,10 +179,10 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
                           height: 22,
                           alignment: Alignment.center,
                           decoration: const BoxDecoration(color: AppColors.ink, shape: BoxShape.circle),
-                          child: Text('${i + 1}', style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 11)),
+                          child: Text('${i + 1}', style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
                         ),
                         const SizedBox(width: 10),
-                        Expanded(child: Text(place, style: AppTypography.body.copyWith(fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                        Expanded(child: Text(place, style: AppTypography.body, maxLines: 1, overflow: TextOverflow.ellipsis)),
                       ],
                     ),
                   ),

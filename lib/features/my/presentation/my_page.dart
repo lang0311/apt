@@ -193,7 +193,7 @@ class _Stats extends StatelessWidget {
                     children: [
                       Text(
                         _short(count),
-                        style: AppTypography.hero.copyWith(fontSize: 24, fontFeatures: const [FontFeature.tabularFigures()]),
+                        style: AppTypography.hero.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
                       ),
                       Text(label, style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],
@@ -233,7 +233,7 @@ class _PreferenceSummary extends ConsumerWidget {
             ],
           ],
         ),
-        style: AppTypography.body.copyWith(fontSize: 14, color: AppColors.textSecondary),
+        style: AppTypography.bodyMuted,
       );
     }
     if (!labels.hasValue) {

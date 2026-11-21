@@ -228,7 +228,7 @@ class _AutoTaste extends ConsumerWidget {
         const SectionGap(),
         Padding(
           padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.lg, AppSpacing.screenH, AppSpacing.xxs),
-          child: Semantics(header: true, child: Text('추천에서 빼고 싶다면', style: AppTypography.section.copyWith(fontSize: 16))),
+          child: Semantics(header: true, child: Text('추천에서 빼고 싶다면', style: AppTypography.cardTitle)),
         ),
         Semantics(
           button: true,
