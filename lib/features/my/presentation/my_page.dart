@@ -225,7 +225,8 @@ class _PreferenceSummary extends ConsumerWidget {
           text: '저장한 장소를 보고 내 취향에 맞춰 추천해요.',
           children: [
             if (top.isNotEmpty) ...[
-              const TextSpan(text: ' 많이 저장한 곳: '),
+              // 업종 이름이 줄 끝에서 글자 단위로 잘리지 않게 새 줄에서 시작한다
+              const TextSpan(text: '\n많이 저장한 곳: '),
               TextSpan(
                 text: top.take(3).map((c) => c.label).join(' · '),
                 style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
