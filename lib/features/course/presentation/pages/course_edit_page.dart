@@ -158,7 +158,7 @@ class _CourseEditPageState extends ConsumerState<CourseEditPage> {
         body: SafeArea(
           child: Column(
             children: [
-              PlainHeader(leadingIcon: Icons.close_rounded, leadingTooltip: '닫기', onLeading: _close),
+              PlainHeader(title: '코스 편집', leadingIcon: Icons.close_rounded, leadingTooltip: '닫기', onLeading: _close),
               Expanded(child: body),
               if (course != null)
                 BottomCta(
@@ -168,6 +168,7 @@ class _CourseEditPageState extends ConsumerState<CourseEditPage> {
                         flex: 2,
                         child: AppButton(
                           label: '다시 추천',
+                          icon: Icons.refresh_rounded,
                           variant: AppButtonVariant.white,
                           loading: state.loading,
                           onPressed: busy ? null : () => recommendAgainWithUndo(context, ref),

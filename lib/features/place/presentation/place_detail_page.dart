@@ -43,8 +43,8 @@ class PlaceDetailPage extends ConsumerWidget {
         child: Column(
           children: [
             // 일반 헤더 (불러오는 중 · 오류에도 뒤로 갈 수 있다)
+            // v2: 머리에 제목 없이 뒤로 · 공유만 (이름은 본문에 크게)
             PlainHeader(
-              title: '장소 상세',
               onLeading: () => popOrGoHome(context),
               actions: [
                 IconButton(
@@ -150,6 +150,12 @@ class _Body extends ConsumerWidget {
           label: '키워드',
           child: TagWrap(place.keywords, tone: AppTagTone.primary),
         ),
+      if (place.mapUrl != null)
+        _InfoRow(
+          label: '지도',
+          onTap: () => openExternalLink(context, place.mapUrl!),
+          child: Text('카카오맵에서 보기', style: AppTypography.bodyStrong),
+        ),
       if (place.sourceUrl != null)
         _InfoRow(
           label: '원본',
@@ -231,6 +237,7 @@ class _Body extends ConsumerWidget {
         BottomCta(
           child: AppButton(
             label: '이 장소로 코스 만들기',
+            icon: Icons.route_rounded,
             // 해당 장소를 사전 선택해 코스 만들기 1/4로 (docs/04 §D)
             onPressed: () => startCourseWizard(context, ref, places: [place]),
           ),

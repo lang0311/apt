@@ -34,8 +34,9 @@ class MapPin extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pin = switch (kind) {
+      // v2: 내가 고른 곳 번호 원은 잉크 (일정 번호와 같은 색, 07 D64)
       MapPinKind.numbered => _circle(
-        color ?? AppColors.primary,
+        color ?? AppColors.ink,
         Text(
           '${number ?? ''}',
           style: AppTypography.bodyStrong.copyWith(color: Colors.white, fontWeight: FontWeight.w800),

@@ -211,6 +211,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                         flex: 2,
                         child: AppButton(
                           label: state.loading ? '다시 추천 중…' : '다시 추천',
+                          icon: state.loading ? null : Icons.refresh_rounded,
                           variant: AppButtonVariant.white,
                           onPressed: busy ? null : () => recommendAgainWithUndo(context, ref),
                         ),

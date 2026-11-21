@@ -188,7 +188,7 @@ void main() {
       await shot(tester, 'd02_extract_searching', settleSec: 0);
       await waitFor(tester, find.text('2곳을 찾았어요'));
       await shot(tester, 'd03_extract_result');
-      await tapText(tester, '보관함');
+      await tapText(tester, '보관함 고르기 ›');
       await waitFor(tester, find.text('새 보관함'));
       await shot(tester, 'd04_collection_select', settleSec: 1);
       await tapText(tester, '확인');

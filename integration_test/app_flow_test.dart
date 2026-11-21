@@ -107,7 +107,7 @@ void main() {
 
     await waitFor(tester, find.text('2곳을 찾았어요'));
     // reel → 라쿠치나(저장됨)·한강 노을 포인트(미저장) → 저장 가능한 1곳 기본 선택
-    await tapText(tester, '보관함');
+    await tapText(tester, '보관함 고르기 ›');
     await waitFor(tester, find.text('새 보관함'));
     await tapText(tester, '확인');
     await tapText(tester, '1곳 저장');

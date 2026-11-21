@@ -73,7 +73,7 @@ class _CollectionSelectState extends ConsumerState<_CollectionSelect> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('보관함', style: AppTypography.title),
+          Text('어느 보관함에 담을까요?', style: AppTypography.section),
           const SizedBox(height: 2),
           Text(widget.placeName, style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
           const SizedBox(height: AppSpacing.sm),
@@ -97,7 +97,7 @@ class _CollectionSelectState extends ConsumerState<_CollectionSelect> {
                     onTap: _create,
                   ),
                   for (final collection in list) ...[
-                    const Divider(height: 1, thickness: 1, color: AppColors.divider),
+                    // v2: 행 사이 선 없음
                     _Row(
                       leading: MiniCollage(urls: collection.thumbnailUrls, size: 44),
                       title: collection.name,
@@ -110,29 +110,33 @@ class _CollectionSelectState extends ConsumerState<_CollectionSelect> {
               ),
             ),
           ),
-          if (widget.applyAllCount > 1)
-            Semantics(
-              checked: _applyAll,
-              child: InkWell(
-                onTap: () => setState(() => _applyAll = !_applyAll),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 48),
-                  child: Row(
-                    children: [
-                      CheckMark(checked: _applyAll),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text('${widget.applyAllCount}곳 모두 적용', style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w500)),
-                    ],
+          const SizedBox(height: AppSpacing.sm),
+          // v2: 'n곳 모두 적용'(회색, 켜면 연파랑 + 체크)과 '확인'을 나란히
+          Row(
+            children: [
+              if (widget.applyAllCount > 1) ...[
+                Expanded(
+                  child: Semantics(
+                    toggled: _applyAll,
+                    child: AppButton(
+                      label: '${widget.applyAllCount}곳 모두 적용',
+                      icon: _applyAll ? Icons.check_rounded : null,
+                      variant: _applyAll ? AppButtonVariant.soft : AppButtonVariant.secondary,
+                      onPressed: () => setState(() => _applyAll = !_applyAll),
+                    ),
                   ),
                 ),
+                const SizedBox(width: AppSpacing.xs),
+              ],
+              Expanded(
+                child: AppButton(
+                  label: '확인',
+                  onPressed: collections.hasValue
+                      ? () => Navigator.of(context).pop(CollectionSelection(collectionIds: {..._selected}, applyToAll: _applyAll))
+                      : null,
+                ),
               ),
-            ),
-          const SizedBox(height: AppSpacing.xs),
-          AppButton(
-            label: '확인',
-            onPressed: collections.hasValue
-                ? () => Navigator.of(context).pop(CollectionSelection(collectionIds: {..._selected}, applyToAll: _applyAll))
-                : null,
+            ],
           ),
         ],
       ),
@@ -172,7 +176,7 @@ class _Row extends StatelessWidget {
                   ],
                 ),
               ),
-              if (checked != null) CheckMark(checked: checked!),
+              if (checked != null) CheckCircle(checked: checked!),
             ],
           ),
         ),

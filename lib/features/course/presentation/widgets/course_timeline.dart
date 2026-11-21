@@ -93,7 +93,7 @@ class AppliedTasteLine extends StatelessWidget {
 
   Widget _text(List<TextSpan> spans, {int maxLines = 1}) => Text.rich(
     TextSpan(children: spans),
-    style: AppTypography.meta,
+    style: AppTypography.meta.copyWith(color: AppColors.textSecondary),
     maxLines: maxLines,
     overflow: TextOverflow.ellipsis,
   );
@@ -104,8 +104,11 @@ class AppliedTasteLine extends StatelessWidget {
     final m = members;
     final rows = m == null || !taste.hasDetail ? const <Widget>[] : _detailRows(m);
     final line = Semantics(label: spans.map((s) => s.text).join(), excludeSemantics: true, child: _text(spans));
-    return Padding(
-      padding: EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, rows.isEmpty ? AppSpacing.xs : 0),
+    // v2: 연파랑 판 안에 한 줄 + (파티) '누구 취향인지 보기'
+    return Container(
+      margin: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.sm),
+      padding: EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.xs + 2, AppSpacing.sm, rows.isEmpty ? AppSpacing.xs + 2 : 0),
+      decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(AppRadius.medium)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

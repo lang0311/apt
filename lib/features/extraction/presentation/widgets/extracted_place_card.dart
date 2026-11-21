@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
-import '../../../../core/widgets/chips.dart';
 import '../../../../core/widgets/selection.dart';
 import '../../../saved/presentation/widgets/place_image.dart';
 import '../../../saved/presentation/widgets/saved_rows.dart';
@@ -145,26 +144,40 @@ class ExtractedPlaceRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                if (collectionLabel != null && !saved) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    collectionLabel!,
-                    style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                // v2: 보관함은 이름 아래 파란 글자 한 줄 (고른 게 없으면 '보관함 고르기 ›', 고르면 '○○에 담아요')
+                if (!saved)
+                  Semantics(
+                    button: true,
+                    label: '${place.name} 보관함 고르기',
+                    excludeSemantics: true,
+                    child: InkWell(
+                      onTap: onPickCollection,
+                      borderRadius: BorderRadius.circular(AppRadius.small),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 28),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          widthFactor: 1,
+                          child: Text(
+                            collectionLabel == null ? '보관함 고르기 ›' : '$collectionLabel에 담아요',
+                            style: AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ],
               ],
             ),
           ),
           const SizedBox(width: AppSpacing.xs),
           if (saved)
-            const Padding(
-              padding: EdgeInsets.only(right: AppSpacing.xs),
-              child: AppTag('저장됨'),
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.sm),
+              child: Text('저장됨', style: AppTypography.meta),
             )
           else ...[
-            _CollectionButton(active: collectionLabel != null, onTap: onPickCollection, placeName: place.name),
             Semantics(
               selected: selected,
               label: '${place.name} 저장',
@@ -188,50 +201,3 @@ class ExtractedPlaceRow extends StatelessWidget {
   }
 }
 
-/// '보관함' 글자 버튼: 투명 바탕 + 얇은 테두리, 고르면 파란 테두리 · 글자 (07 D26)
-class _CollectionButton extends StatelessWidget {
-  const _CollectionButton({required this.active, required this.onTap, required this.placeName});
-  final bool active;
-  final VoidCallback onTap;
-  final String placeName;
-
-  static const _line = AppColors.borderStrong;
-  static const _activeLine = AppColors.primaryBorder;
-
-  @override
-  Widget build(BuildContext context) {
-    final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(AppRadius.xs),
-      side: BorderSide(color: active ? _activeLine : _line),
-    );
-    return Semantics(
-      button: true,
-      label: '$placeName 보관함 고르기',
-      excludeSemantics: true,
-      // 보이는 버튼은 30 높이, 누르는 영역은 44
-      child: SizedBox(
-        height: 44,
-        child: Center(
-          child: Material(
-            color: Colors.transparent,
-            shape: shape,
-            child: InkWell(
-              customBorder: shape,
-              onTap: onTap,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                child: Text(
-                  '보관함',
-                  style: AppTypography.meta.copyWith(
-                    color: active ? AppColors.primary : AppColors.textPrimary,
-                    fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

@@ -166,12 +166,10 @@ class _CrewStrip extends ConsumerWidget {
     final party = partyId == null ? null : ref.watch(partyProvider(partyId)).value;
     final members = party?.members;
     final names = members == null ? '파티 ${course.memberCount}명' : members.crewNames;
+    // v2: 회색 판 한 줄 (테두리 없음)
     return Material(
-      color: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.medium),
-        side: const BorderSide(color: AppColors.border),
-      ),
+      color: AppColors.fill,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.medium)),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppRadius.medium),
         onTap: members == null ? null : () => _showMembers(context, members, partyId!, canInvite: party!.isOwner),
@@ -186,9 +184,9 @@ class _CrewStrip extends ConsumerWidget {
                   const SizedBox(width: AppSpacing.xs),
                 ],
                 Expanded(
-                  child: Text(names, style: AppTypography.label, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  child: Text(names, style: AppTypography.labelLarge, maxLines: 1, overflow: TextOverflow.ellipsis),
                 ),
-                if (members != null) const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+                if (members != null) const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
               ],
             ),
           ),
