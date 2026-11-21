@@ -297,12 +297,12 @@ class _PartyRow extends StatelessWidget {
             child: Row(
               children: [
                 SizedBox(
-                  width: 48,
+                  width: 60,
                   child: leadingIcon != null
                       ? Icon(leadingIcon, size: 22, color: AppColors.primary)
                       : Align(
                           alignment: Alignment.centerLeft,
-                          child: PartyAvatarStack(members: members ?? const [], size: 26, max: 3, overlap: true),
+                          child: PartyAvatarStack(members: members ?? const [], size: 24, max: 3, overlap: true),
                         ),
                 ),
                 const SizedBox(width: AppSpacing.xs),

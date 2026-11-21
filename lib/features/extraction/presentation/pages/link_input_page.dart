@@ -161,23 +161,27 @@ class _RecentAdded extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: 8),
                   child: Row(
                     children: [
-                      PlaceImage(place: r.place, width: 44, height: 44, radius: 12, iconSize: 20),
+                      PlaceImage(place: r.place, width: 48, height: 48, radius: 12, iconSize: 22),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(r.place.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
+                            // v2: 저장한 때도 둘째 줄에 (카테고리 · 동네 · 4일 전)
                             Text(
-                              [r.place.categoryLabel, if (r.place.shortArea.isNotEmpty) r.place.shortArea].join(' · '),
-                              style: AppTypography.caption,
+                              [
+                                r.place.categoryLabel,
+                                if (r.place.shortArea.isNotEmpty) r.place.shortArea,
+                                formatRecentDate(r.extractedAt),
+                              ].join(' · '),
+                              style: AppTypography.meta,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
                       ),
-                      Text(formatRecentDate(r.extractedAt), style: AppTypography.caption),
                     ],
                   ),
                 ),
