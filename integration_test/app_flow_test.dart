@@ -18,16 +18,16 @@ void main() {
     await launchApp(tester);
     await tapFinder(tester, find.byTooltip('카카오로 로그인'), scroll: false);
 
-    await waitFor(tester, find.text('약관 동의'));
+    await waitFor(tester, find.text('서비스 이용에 동의해 주세요'));
     final cta = find.widgetWithText(InkWell, '동의하고 계속하기');
     await tapText(tester, '전체 동의');
     await tapFinder(tester, cta);
 
-    await waitFor(tester, find.text('프로필 설정'));
+    await waitFor(tester, find.text('어떻게 불러\n드릴까요?'));
     expect(find.text('여행하는 지상'), findsOneWidget); // 제안 닉네임
-    await tapText(tester, '가입 완료하기');
+    await tapText(tester, '가입 완료');
 
-    await waitFor(tester, find.text('가입이 완료됐어요'));
+    await waitFor(tester, find.text('가입이 끝났어요'));
     await tapText(tester, '시작하기');
     await waitFor(tester, find.byType(HomePage));
     expectNoErrors(tester);
@@ -100,12 +100,12 @@ void main() {
   testWidgets('E. 추출: 링크 입력 → 찾은 장소 → 보관함 고르기 → 저장(결과에 남음) → 보기 → 장소 상세', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '장소 추가');
-    await waitFor(tester, find.text('릴스에서 바로 저장하기'));
+    await waitFor(tester, find.text('릴스에서 바로 저장하는 게 가장 빨라요'));
     await typeInto(tester, find.byType(TextField).first, 'https://www.instagram.com/reel/DA7mNpQrStU/');
     await tester.pump(const Duration(milliseconds: 300));
     await tapText(tester, '찾기');
 
-    await waitFor(tester, find.text('찾은 장소 2'));
+    await waitFor(tester, find.text('2곳을 찾았어요'));
     // reel → 라쿠치나(저장됨)·한강 노을 포인트(미저장) → 저장 가능한 1곳 기본 선택
     await tapText(tester, '보관함');
     await waitFor(tester, find.text('새 보관함'));
@@ -128,7 +128,7 @@ void main() {
     await tapText(tester, '찾기');
     await waitFor(tester, find.text('비공개 게시물이에요'));
     await tapText(tester, '다른 링크 넣기');
-    await waitFor(tester, find.text('릴스에서 바로 저장하기'));
+    await waitFor(tester, find.text('릴스에서 바로 저장하는 게 가장 빨라요'));
     expectNoErrors(tester);
   });
 
@@ -144,7 +144,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     await tapText(tester, '내일'); // 날짜 칩. 출발 시간은 오전 11:00으로 채워진다
     expect(find.text('오전 11:00'), findsOneWidget);
-    await tapText(tester, '산책');
     await tapText(tester, '다음');
 
     // 2/4
@@ -233,16 +232,16 @@ void main() {
     expectNoErrors(tester);
   });
 
-  testWidgets('I. 마이: 취향 설정 변경 → 저장 → 로그아웃', (tester) async {
+  testWidgets('I. 마이: 내 취향 보기(저장한 장소 기준) → 뒤로 → 로그아웃', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '마이');
     await waitFor(tester, find.text('저장한 곳'));
-    await tapText(tester, '수정');
-    await waitFor(tester, find.text('어떤 곳을 좋아하세요?'));
-    await tapText(tester, '쇼핑');
-    await waitFor(tester, find.text('8개 선택'));
-    await tapText(tester, '취향 저장하기');
-    await expectSnack(tester, '취향을 저장했어요.');
+    // v2(07 D64): 취향은 직접 고르지 않고 저장한 장소로 읽는다 — '수정' 대신 '보기'
+    await tapText(tester, '보기');
+    await waitFor(tester, find.text('저장한 장소로 취향을 읽어요'));
+    expect(find.text('취향 저장하기'), findsNothing);
+    await tapFinder(tester, find.byTooltip('뒤로'), scroll: false);
+    await waitFor(tester, find.text('저장한 곳'));
 
     await tapText(tester, '로그아웃');
     await tapText(tester, '로그아웃', index: 1, scroll: false);
@@ -257,7 +256,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     // 미로그인 → 토큰 보관 후 로그인 화면으로
     await tapFinder(tester, find.byTooltip('Google로 로그인'), scroll: false);
-    await waitFor(tester, find.text('민지님이 코스에 초대했어요'));
+    await waitFor(tester, find.text('민지님이 코스에\n초대했어요'));
     await tapText(tester, '코스에 참여하기');
     await waitFor(tester, find.textContaining('함께하는 코스', findRichText: true));
     expectNoErrors(tester);
@@ -267,11 +266,11 @@ void main() {
     await launchApp(tester);
     await tapText(tester, '회원가입');
 
-    await waitFor(tester, find.text('약관 동의'));
+    await waitFor(tester, find.text('서비스 이용에 동의해 주세요'));
     await tapText(tester, '전체 동의');
     await tapFinder(tester, find.widgetWithText(InkWell, '동의하고 계속하기'));
 
-    await waitFor(tester, find.text('로그인에 쓸 아이디와 비밀번호를 정해주세요.'));
+    await waitFor(tester, find.text('계정을 만들어 주세요'));
     final fields = find.byType(TextField);
     await typeInto(tester, fields.at(0), 'taken'); // Mock: 이미 사용 중
     await typeInto(tester, fields.at(1), 'password1');
@@ -281,7 +280,7 @@ void main() {
 
     await typeInto(tester, fields.at(0), 'trip_jin');
     await tapText(tester, '가입하기');
-    await waitFor(tester, find.text('가입이 완료됐어요'));
+    await waitFor(tester, find.text('가입이 끝났어요'));
     await tapText(tester, '시작하기');
     await waitFor(tester, find.byType(HomePage));
     expectNoErrors(tester);
@@ -293,7 +292,7 @@ void main() {
     await typeInto(tester, fields.at(0), 'demo_user1');
     await typeInto(tester, fields.at(1), 'wrongpass');
     await tapText(tester, '로그인');
-    await waitFor(tester, find.text('아이디 또는 비밀번호를 확인해주세요.'));
+    await waitFor(tester, find.text('아이디 또는 비밀번호가 맞지 않아요.'));
 
     await typeInto(tester, fields.at(1), 'password1'); // Mock: password1만 성공
     await tapText(tester, '로그인');

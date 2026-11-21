@@ -55,10 +55,10 @@ void main() {
     });
     await step('a07', () async {
       await tapText(tester, '회원가입');
-      await waitFor(tester, find.text('약관 동의'));
+      await waitFor(tester, find.text('서비스 이용에 동의해 주세요'));
       await tapText(tester, '전체 동의');
       await tapFinder(tester, find.widgetWithText(InkWell, '동의하고 계속하기'));
-      await waitFor(tester, find.text('로그인에 쓸 아이디와 비밀번호를 정해주세요.'));
+      await waitFor(tester, find.text('계정을 만들어 주세요'));
       final fields = find.byType(TextField);
       await typeInto(tester, fields.at(0), _user); // 이미 있는 아이디 → 서버가 거절 (계정은 만들어지지 않는다)
       await typeInto(tester, fields.at(1), 'password1');
@@ -104,10 +104,10 @@ void main() {
     await prepareCapture(sc.binding, tester);
     await loginTest(tester);
     await tapTab(tester, '장소 추가');
-    await waitFor(tester, find.text('릴스에서 바로 저장하기'));
+    await waitFor(tester, find.text('릴스에서 바로 저장하는 게 가장 빨라요'));
     await shot(tester, 'd01_extract');
     await step('d07', () async {
-      await tapText(tester, '지도에서 검색하기');
+      await tapText(tester, '지도에서 찾기');
       await tester.pump(const Duration(seconds: 1));
       await shot(tester, 'd07_place_search', settleSec: 5);
     });

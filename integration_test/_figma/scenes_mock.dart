@@ -58,15 +58,15 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
     await step('a03', () async {
       await tapFinder(tester, find.byTooltip('카카오로 로그인'), scroll: false);
-      await waitFor(tester, find.text('약관 동의'));
+      await waitFor(tester, find.text('서비스 이용에 동의해 주세요'));
       await shot(tester, 'a03_terms');
       await tapText(tester, '전체 동의');
       await shot(tester, 'a04_terms_checked');
       await tapFinder(tester, find.widgetWithText(InkWell, '동의하고 계속하기'));
-      await waitFor(tester, find.text('프로필 설정'));
+      await waitFor(tester, find.text('어떻게 불러\n드릴까요?'));
       await shot(tester, 'a05_profile');
-      await tapText(tester, '가입 완료하기');
-      await waitFor(tester, find.text('가입이 완료됐어요'));
+      await tapText(tester, '가입 완료');
+      await waitFor(tester, find.text('가입이 끝났어요'));
       await shot(tester, 'a06_signup_done');
     });
   });
@@ -76,10 +76,10 @@ void main() {
     await launchApp(tester);
     await step('a07', () async {
       await tapText(tester, '회원가입');
-      await waitFor(tester, find.text('약관 동의'));
+      await waitFor(tester, find.text('서비스 이용에 동의해 주세요'));
       await tapText(tester, '전체 동의');
       await tapFinder(tester, find.widgetWithText(InkWell, '동의하고 계속하기'));
-      await waitFor(tester, find.text('로그인에 쓸 아이디와 비밀번호를 정해주세요.'));
+      await waitFor(tester, find.text('계정을 만들어 주세요'));
       final fields = find.byType(TextField);
       await typeInto(tester, fields.at(0), 'taken');
       await typeInto(tester, fields.at(1), 'password1');
@@ -98,7 +98,7 @@ void main() {
       await typeInto(tester, fields.at(0), 'demo_user1');
       await typeInto(tester, fields.at(1), 'wrongpass');
       await tapText(tester, '로그인');
-      await waitFor(tester, find.text('아이디 또는 비밀번호를 확인해주세요.'));
+      await waitFor(tester, find.text('아이디 또는 비밀번호가 맞지 않아요.'));
       await shot(tester, 'a09_login_failed');
     });
     await step('a08', () async {
@@ -180,13 +180,13 @@ void main() {
     await prepareCapture(binding, tester);
     await signInExisting(tester);
     await tapTab(tester, '장소 추가');
-    await waitFor(tester, find.text('릴스에서 바로 저장하기'));
+    await waitFor(tester, find.text('릴스에서 바로 저장하는 게 가장 빨라요'));
     await shot(tester, 'd01_extract');
     await step('d02', () async {
       await typeInto(tester, find.byType(TextField).first, 'https://www.instagram.com/reel/DA7mNpQrStU/');
       await tapText(tester, '찾기');
       await shot(tester, 'd02_extract_searching', settleSec: 0);
-      await waitFor(tester, find.text('찾은 장소 2'));
+      await waitFor(tester, find.text('2곳을 찾았어요'));
       await shot(tester, 'd03_extract_result');
       await tapText(tester, '보관함');
       await waitFor(tester, find.text('새 보관함'));
@@ -210,7 +210,7 @@ void main() {
       await tapText(tester, '다른 링크 넣기');
     });
     await step('d07', () async {
-      await tapText(tester, '지도에서 검색하기');
+      await tapText(tester, '지도에서 찾기');
       await tester.pump(const Duration(seconds: 1));
       await shot(tester, 'd07_place_search', settleSec: 5);
     });
@@ -235,7 +235,6 @@ void main() {
     await step('e04', () async {
       await typeInto(tester, find.byType(TextField).first, '가을 서울 카페 산책');
       await tapText(tester, '내일');
-      await tapText(tester, '산책');
       await shot(tester, 'e04_info_filled', settleSec: 1);
       await tapText(tester, '다음');
       await waitFor(tester, find.text('누구와 함께 가나요?'));
@@ -308,7 +307,7 @@ void main() {
     await signInExisting(tester);
     await step('f01', () async {
       routerOf(tester).go('/invites/demo');
-      await waitFor(tester, find.text('민지님이 코스에 초대했어요'));
+      await waitFor(tester, find.text('민지님이 코스에\n초대했어요'));
       await shot(tester, 'f01_invite_accept');
     });
     await step('f02', () async {
@@ -325,8 +324,8 @@ void main() {
     await waitFor(tester, find.text('저장한 곳'));
     await shot(tester, 'g01_my');
     await step('g02', () async {
-      await tapText(tester, '수정');
-      await waitFor(tester, find.text('어떤 곳을 좋아하세요?'));
+      await tapText(tester, '보기');
+      await waitFor(tester, find.text('저장한 장소로 취향을 읽어요'));
       await shot(tester, 'g02_preferences');
       routerOf(tester).pop();
       await tester.pump(const Duration(milliseconds: 600));
