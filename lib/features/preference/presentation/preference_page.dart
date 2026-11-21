@@ -7,6 +7,7 @@ import '../../../app/routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/app_typography.dart';
+import '../../../core/config/feature_flags.dart';
 import '../../../core/error/app_failure.dart';
 import '../../../core/widgets/bottom_cta.dart';
 import '../../../core/widgets/buttons.dart';
@@ -15,7 +16,9 @@ import '../../../core/widgets/headers.dart';
 import '../../../core/widgets/overlays.dart';
 import '../../../core/widgets/states.dart';
 import '../../../core/widgets/surfaces.dart';
+import '../../saved/domain/saved_models.dart';
 import '../../saved/presentation/saved_providers.dart';
+import '../../saved/presentation/widgets/category_style.dart';
 import '../domain/preference_models.dart';
 import 'preference_providers.dart';
 
@@ -90,7 +93,8 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
     final mine = ref.watch(myPreferencesProvider);
     if (mine.hasValue) _init(mine.value!);
     // 서버에 직접 고르는 취향 항목이 없으면(팀 서버, NEEDS BACKEND) 고르는 화면 대신 설명 화면
-    final manual = !(groups.hasValue && groups.value!.isEmpty);
+    // v2: 직접 고르는 취향은 플래그가 켜졌을 때만 (지금은 꺼 둠, 2026-11-21)
+    final manual = FeatureFlags.manualTasteEnabled && !(groups.hasValue && groups.value!.isEmpty);
 
     return PopScope(
       canPop: !_dirty,
@@ -102,7 +106,8 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
           child: Column(
             children: [
               PlainHeader(
-                title: manual ? '취향 설정' : '취향',
+                // v2: 저장한 장소로 읽는 화면은 큰 제목이 본문에 있다
+                title: manual ? '취향 설정' : null,
                 onLeading: () => _dirty ? _confirmLeave() : _leave(),
                 trailing: _selected == null || !manual
                     ? null
@@ -178,8 +183,8 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
   }
 }
 
-/// 직접 고르는 취향이 없을 때: 추천이 무엇을 보고 만들어지는지 설명하고, 저장한 곳의 업종별 수와
-/// 추천하지 않는 장소로 가는 길을 둔다. 서버에 취향 항목이 생기면 고르는 화면으로 돌아간다.
+/// 직접 고르는 취향이 없을 때(v2 "34 내 취향"): 추천이 무엇을 보고 만들어지는지 설명하고, 저장한 곳의 업종별 수와
+/// 추천하지 않는 장소로 가는 길을 둔다. 직접 고르는 취향은 [FeatureFlags.manualTasteEnabled]가 켜질 때만.
 class _AutoTaste extends ConsumerWidget {
   const _AutoTaste();
 
@@ -188,66 +193,98 @@ class _AutoTaste extends ConsumerWidget {
     final summary = ref.watch(savedSummaryProvider);
     final top = [...?summary.value?.categories.where((c) => c.count > 0)]..sort((a, b) => b.count.compareTo(a.count));
     return ListView(
-      padding: const EdgeInsets.only(top: AppSpacing.xs, bottom: AppSpacing.lg),
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       children: [
         Padding(
           padding: AppSpacing.screenPadding,
-          child: AppCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('저장한 장소로 취향을 읽어요', style: AppTypography.cardTitle),
-                const SizedBox(height: 6),
-                Text('지금은 취향을 직접 고르지 않아도 돼요. 저장한 장소가 늘수록 추천이 더 잘 맞아요.', style: AppTypography.bodyMuted),
-              ],
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Semantics(header: true, child: Text('내 취향', style: AppTypography.display)),
+              const SizedBox(height: 6),
+              Text('저장한 장소로 취향을 읽어요', style: AppTypography.bodyStrong),
+              const SizedBox(height: 2),
+              Text('따로 고르지 않아도 많이 저장할수록 추천이 잘 맞아요.', style: AppTypography.bodyMuted),
+            ],
           ),
         ),
         if (top.isNotEmpty) ...[
-          SectionHeader(
-            title: '직접 저장한 곳',
-            trailingText: '${summary.value!.totalCount}곳',
-            padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.lg, AppSpacing.screenH, AppSpacing.xs),
-          ),
+          const SizedBox(height: AppSpacing.md),
           Padding(
-            padding: AppSpacing.screenPadding,
-            child: AppCard(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
-              child: DividedRows(
-                indent: SectionCard.innerPadding,
-                children: [
-                  for (final c in top.take(5))
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: AppSpacing.sm),
-                      child: Row(
-                        children: [
-                          Expanded(child: Text(c.label, style: AppTypography.bodyStrong)),
-                          Text('${c.count}곳', style: AppTypography.meta),
-                        ],
-                      ),
-                    ),
-                ],
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
+            child: SectionCard(
+              title: '직접 저장한 곳',
+              trailing: Padding(
+                padding: const EdgeInsets.only(right: AppSpacing.sm),
+                child: Text('${summary.value!.totalCount}곳', style: AppTypography.meta),
+              ),
+              child: Column(
+                children: [for (final c in top.take(5)) _CategoryRow(category: c)],
               ),
             ),
           ),
         ],
-        const SectionHeader(
-          title: '추천에서 빼고 싶다면',
-          padding: EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.lg, AppSpacing.screenH, AppSpacing.xs),
-        ),
+        const SizedBox(height: AppSpacing.xs),
+        const SectionGap(),
         Padding(
-          padding: AppSpacing.screenPadding,
-          child: AppCard(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.lg, AppSpacing.screenH, AppSpacing.xxs),
+          child: Semantics(header: true, child: Text('추천에서 빼고 싶다면', style: AppTypography.section.copyWith(fontSize: 16))),
+        ),
+        Semantics(
+          button: true,
+          label: '추천하지 않는 장소',
+          excludeSemantics: true,
+          child: InkWell(
             onTap: () => context.push(AppRoutes.blockedPlaces),
-            child: Row(
-              children: [
-                Expanded(child: Text('추천하지 않는 장소', style: AppTypography.bodyStrong)),
-                const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
-              ],
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 52),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.xs, AppSpacing.md, AppSpacing.xs),
+                child: Row(
+                  children: [
+                    Expanded(child: Text('추천하지 않는 장소', style: AppTypography.body)),
+                    const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// 업종 한 줄: 업종 색 칸 36 · 이름 · n곳 (서버 요약 값)
+class _CategoryRow extends StatelessWidget {
+  const _CategoryRow({required this.category});
+  final PlaceCategory category;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = CategoryStyle.of(category.key);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 50),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: AppSpacing.xxs),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.small)),
+              child: Icon(style.icon, size: 20, color: style.ink),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(child: Text(category.label, style: AppTypography.body, maxLines: 1, overflow: TextOverflow.ellipsis)),
+            Text(
+              '${category.count}곳',
+              style: AppTypography.bodyStrong.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

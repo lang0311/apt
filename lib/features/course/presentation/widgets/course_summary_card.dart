@@ -10,7 +10,7 @@ import '../../../party/presentation/widgets/party_avatar_stack.dart';
 import '../../domain/course_models.dart';
 import 'course_thumb.dart';
 
-/// 코스 목록 행 (SectionCard 안 구분선 행): 사진 · 이름 · (파티원 한 줄) · 지역 · n곳 · 오른쪽 날짜
+/// 코스 목록 행 (v2): 사진 · 이름 · (파티원 한 줄) · 지역 · n곳 (지난 코스는 · 날짜) · 오른쪽 D-day(다가오는 코스만)
 class CourseSummaryRow extends StatelessWidget {
   const CourseSummaryRow({super.key, required this.course, required this.onTap});
   final CourseSummary course;
@@ -18,7 +18,8 @@ class CourseSummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final where = [?course.regionLabel, '${course.placeCount}곳'].join(' · ');
+    final past = course.date != null && daysUntil(course.date!) < 0;
+    final where = [?course.regionLabel, '${course.placeCount}곳', if (past) '${course.date!.month}월 ${course.date!.day}일'].join(' · ');
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -39,8 +40,7 @@ class CourseSummaryRow extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: AppSpacing.xs),
-            if (course.date != null) _When(date: course.date!),
+            if (!past) ...[const SizedBox(width: AppSpacing.xs), _When(date: course.date)],
           ],
         ),
       ),
@@ -84,23 +84,12 @@ class _People extends StatelessWidget {
 /// 날짜 표기는 앱 전체에서 "11월 13일 (금)" 한 가지로 맞춘다 (UI 리뷰 10)
 class _When extends StatelessWidget {
   const _When({required this.date});
-  final DateTime date;
+  final DateTime? date;
 
   @override
   Widget build(BuildContext context) {
-    final upcoming = daysUntil(date) >= 0;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        if (upcoming) ...[
-          Text(
-            ddayLabel(date),
-            style: AppTypography.label.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 2),
-        ],
-        Text(formatMonthDayWeekday(date), style: AppTypography.caption.copyWith(color: upcoming ? null : AppColors.textSecondary)),
-      ],
-    );
+    final style = AppTypography.bodyStrong.copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
+    if (date == null) return Text('날짜 미정', style: style.copyWith(color: AppColors.textTertiary));
+    return Text(ddayLabel(date!), style: style.copyWith(color: AppColors.primary));
   }
 }

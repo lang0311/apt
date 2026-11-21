@@ -15,7 +15,6 @@ import '../../../core/widgets/buttons.dart';
 import '../../../core/widgets/headers.dart';
 import '../../../core/widgets/overlays.dart';
 import '../../../core/widgets/states.dart';
-import '../../../core/widgets/surfaces.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../course/presentation/course_providers.dart';
 import '../domain/party_models.dart';
@@ -123,72 +122,101 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
     );
   }
 
+  /// v2 "28 초대 수락": 보낸 사람 얼굴 · 큰 제목 → 채움 판(코스 이름 · 인원 · 고른 장소 번호 목록) → 취향 반영 스위치 행
   Widget _content(Invitation inv) {
+    final name = inv.inviterName;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.sm, 0, AppSpacing.sm, AppSpacing.lg),
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.xxs, AppSpacing.sm, AppSpacing.lg),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.xxs, AppSpacing.screenH, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('${inv.inviterName}님이 코스에 초대했어요', style: AppTypography.display),
+              ExcludeSemantics(
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
+                  child: Text(
+                    name.isEmpty ? '?' : name.characters.first,
+                    style: AppTypography.bodyStrong.copyWith(color: AppColors.primary),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text('$name님이 코스에\n초대했어요', style: AppTypography.display),
               const SizedBox(height: 6),
               // 초대된 파티원도 장소를 추가·편집할 수 있다 (07 D23)
               Text('참여하면 같이 장소를 고르고 코스를 고칠 수 있어요.', style: AppTypography.bodyMuted),
             ],
           ),
         ),
-        AppCard(
+        Container(
+          margin: const EdgeInsets.fromLTRB(AppSpacing.screenH, 22, AppSpacing.screenH, 0),
           padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(color: AppColors.fill, borderRadius: BorderRadius.circular(18)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(inv.courseTitle, style: AppTypography.cardTitle),
-              const SizedBox(height: 4),
+              Text(inv.courseTitle, style: AppTypography.cardTitle.copyWith(fontSize: 17)),
+              const SizedBox(height: 2),
               Text(
                 [if (inv.courseDate != null) formatMonthDayWeekday(inv.courseDate!), '${inv.memberCount}명 참여 중'].join(' · '),
                 style: AppTypography.meta,
               ),
+              // 서버는 장소 이름 목록만 준다(장소별 사진 없음)
+              if (inv.previewPlaceNames.isNotEmpty) ...[
+                const SizedBox(height: 14),
+                for (final (i, place) in inv.previewPlaceNames.indexed)
+                  Padding(
+                    padding: EdgeInsets.only(top: i == 0 ? 0 : 10),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 22,
+                          height: 22,
+                          alignment: Alignment.center,
+                          decoration: const BoxDecoration(color: AppColors.ink, shape: BoxShape.circle),
+                          child: Text('${i + 1}', style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 11)),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(child: Text(place, style: AppTypography.body.copyWith(fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                      ],
+                    ),
+                  ),
+                if (inv.selectedPlaceCount > inv.previewPlaceNames.length) ...[
+                  const SizedBox(height: 10),
+                  Text('외 ${inv.selectedPlaceCount - inv.previewPlaceNames.length}곳', style: AppTypography.meta),
+                ],
+              ],
             ],
           ),
         ),
-        if (inv.previewPlaceNames.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.sm),
-          SectionCard(
-            title: '고른 장소 ${inv.selectedPlaceCount}',
-            // 서버는 장소 이름 목록만 준다(장소별 사진 없음)
-            child: DividedRows(
-              indent: SectionCard.innerPadding,
-              children: [
-                for (final name in inv.previewPlaceNames)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: AppSpacing.sm),
-                    child: Text(name, style: AppTypography.bodyMuted),
+        const SizedBox(height: AppSpacing.xs),
+        MergeSemantics(
+          child: InkWell(
+            onTap: () => setState(() => _sharePreferences = !_sharePreferences),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.sm, AppSpacing.sm, AppSpacing.sm),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('내 저장 장소와 취향 반영', style: AppTypography.bodyStrong),
+                        const SizedBox(height: 2),
+                        // 공개 범위는 서버 정책과 일치해야 한다 (docs/06 §4)
+                        Text('파티원에게는 취향 키워드와 고른 장소만 보여요', style: AppTypography.meta),
+                      ],
+                    ),
                   ),
-              ],
-            ),
-          ),
-        ],
-        const SizedBox(height: AppSpacing.sm),
-        AppCard(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.xs, AppSpacing.sm),
-          onTap: () => setState(() => _sharePreferences = !_sharePreferences),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('내 저장 장소와 취향 반영', style: AppTypography.bodyStrong),
-                    const SizedBox(height: 2),
-                    // 공개 범위는 서버 정책과 일치해야 한다 (docs/06 §4)
-                    Text('파티원에게는 취향 키워드와 고른 장소만 보여요', style: AppTypography.meta),
-                  ],
-                ),
+                  Switch(value: _sharePreferences, onChanged: (v) => setState(() => _sharePreferences = v)),
+                ],
               ),
-              Switch(value: _sharePreferences, onChanged: (v) => setState(() => _sharePreferences = v)),
-            ],
+            ),
           ),
         ),
       ],
