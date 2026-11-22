@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -237,7 +238,7 @@ class _Avatar extends StatelessWidget {
   final String name;
   final String? imageUrl;
 
-  static const _size = 56.0;
+  static const _size = 64.0;
 
   @override
   Widget build(BuildContext context) {
@@ -248,10 +249,11 @@ class _Avatar extends StatelessWidget {
       width: _size,
       height: _size,
       alignment: Alignment.center,
-      decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
+      // v2: 파란 채움 원 + 흰 첫 글자
+      decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
       child: Text(
-        name.isEmpty ? '?' : name.characters.first,
-        style: AppTypography.section.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800),
+        name.isEmpty ? '?' : name.characters.first.toUpperCase(),
+        style: AppTypography.section.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
       ),
     );
   }
@@ -281,7 +283,7 @@ class _MenuRow extends StatelessWidget {
                 Expanded(
                   child: Text(label, style: AppTypography.body.copyWith(color: muted ? AppColors.textTertiary : null)),
                 ),
-                if (!muted) const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+                if (!muted) const Icon(LucideIcons.chevronRight, color: AppColors.textHint),
               ],
             ),
           ),

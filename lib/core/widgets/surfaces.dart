@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
+import 'press_scale.dart';
 
 /// 섹션 묶음 (v2: 상자 없이 굵은 제목 18 + 내용). 구역 사이는 [SectionGap] 띠로 나눈다.
 /// [child]는 좌우 여백 없이 받는다 — 가로 스크롤 목록이 컨테이너 끝까지 닿게 하고, 여백은 child가 정한다.
@@ -68,7 +70,14 @@ class SectionCard extends StatelessWidget {
                   TextButton(
                     onPressed: onAction,
                     style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary, minimumSize: const Size(44, 44)),
-                    child: Text(actionLabel!, style: AppTypography.meta),
+                    // v2: '모두 보기 ›'
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(actionLabel!, style: AppTypography.meta.copyWith(color: AppColors.textSecondary)),
+                        const Icon(LucideIcons.chevronRight, size: 18, color: AppColors.textSecondary),
+                      ],
+                    ),
                   ),
               ],
             ),
@@ -139,7 +148,7 @@ class AppCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(radius),
       side: const BorderSide(color: AppColors.border),
     );
-    return Material(
+    final card = Material(
       color: color,
       shape: shape,
       clipBehavior: Clip.antiAlias,
@@ -148,6 +157,8 @@ class AppCard extends StatelessWidget {
         child: Padding(padding: padding, child: child),
       ),
     );
+    // 누를 수 있는 카드는 토스식으로 살짝 작아짐
+    return onTap == null ? card : PressScale(scale: 0.98, child: card);
   }
 }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -168,7 +169,7 @@ class HomePage extends ConsumerWidget {
               PageTitleHeader(
                 title: '홈',
                 trailing: AppIconBox(
-                  icon: Icons.notifications_none_rounded,
+                  icon: LucideIcons.bell,
                   size: 44,
                   tooltip: '알림',
                   // 알림 화면은 디자인 없음 (docs/07 §3)

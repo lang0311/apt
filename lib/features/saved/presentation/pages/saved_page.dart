@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -170,7 +171,7 @@ class _MapButton extends StatelessWidget {
     return IconButton(
       tooltip: '지도로 보기',
       onPressed: onPressed,
-      icon: const Icon(Icons.map_outlined, size: 24, color: AppColors.textPrimary),
+      icon: const Icon(LucideIcons.map, size: 24, color: AppColors.textPrimary),
     );
   }
 }
@@ -245,11 +246,11 @@ class _CategoryTab extends ConsumerWidget {
                               v.label,
                               style: AppTypography.bodyStrong.copyWith(
                                 color: v == current ? AppColors.primary : AppColors.textPrimary,
-                                fontWeight: v == current ? FontWeight.w800 : FontWeight.w500,
+                                fontWeight: v == current ? FontWeight.w600 : FontWeight.w500,
                               ),
                             ),
                           ),
-                          if (v == current) const Icon(Icons.check_rounded, color: AppColors.primary, size: 20),
+                          if (v == current) const Icon(LucideIcons.check, color: AppColors.primary, size: 20),
                         ],
                       ),
                     ),
@@ -300,7 +301,7 @@ class _CategoryTab extends ConsumerWidget {
         child: _EmptyBody(
           message: '릴스에서 공유 → APT로 보내면 여기에 모여요.\n지도에서 검색해서 저장해도 돼요.',
           actionLabel: '장소 찾기',
-          actionIcon: Icons.search_rounded,
+          actionIcon: LucideIcons.search,
           onAction: () => context.push(AppRoutes.placeSearch),
           secondaryLabel: '링크 붙여넣기',
           onSecondary: () => context.go(AppRoutes.extract),
@@ -340,11 +341,11 @@ class _CategoryTab extends ConsumerWidget {
                 spacing: AppSpacing.xs,
                 runSpacing: AppSpacing.xs,
                 children: [
-                  _ToolChip(label: view.label, dark: true, trailingIcon: Icons.expand_more_rounded, onTap: () => _pickView(context, ref, view)),
+                  _ToolChip(label: view.label, dark: true, trailingIcon: LucideIcons.chevronDown, onTap: () => _pickView(context, ref, view)),
                   if (showFilter)
                     _ToolChip(
                       label: '필터',
-                      leadingIcon: Icons.tune_rounded,
+                      leadingIcon: LucideIcons.listFilter,
                       count: applied.length,
                       semanticLabel: selected ? '${byRegion ? '지역' : '카테고리'} 필터, ${applied.length}개 적용됨' : '${byRegion ? '지역' : '카테고리'} 필터',
                       onTap: openFilter,
@@ -539,7 +540,7 @@ class _DongRow extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+            const Icon(LucideIcons.chevronRight, color: AppColors.textSecondary),
           ],
         ),
       ),
@@ -591,7 +592,7 @@ class _ToolChip extends StatelessWidget {
                       decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(AppRadius.small)),
                       child: Text(
                         '$count',
-                        style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w800, height: 1),
+                        style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w700, height: 1),
                       ),
                     ),
                   ],
@@ -660,7 +661,7 @@ class _AiTab extends ConsumerWidget {
                     if (showFilter)
                       HeaderTextButton(
                         label: '필터',
-                        icon: Icons.tune_rounded,
+                        icon: LucideIcons.listFilter,
                         active: selected,
                         semanticLabel: selected ? '카테고리 필터, $label 적용됨' : '카테고리 필터',
                         onPressed: () => showCategoryFilterSheet(
@@ -800,7 +801,7 @@ class _CollectionsTab extends ConsumerWidget {
 
     return SectionCard(
       title: count == null || count == 0 ? '보관함' : '보관함 $count개',
-      trailing: HeaderTextButton(label: '새 보관함', icon: Icons.add_rounded, primary: true, onPressed: onCreate),
+      trailing: HeaderTextButton(label: '새 보관함', icon: LucideIcons.plus, primary: true, onPressed: onCreate),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -815,7 +816,7 @@ class _CollectionsTab extends ConsumerWidget {
               title: '여행이나 취향별로 묶어 보세요',
               message: '보관함으로 묶어 두면 코스를 만들 때 한 번에 불러올 수 있어요.',
               actionLabel: '첫 보관함 만들기',
-              actionIcon: Icons.add_rounded,
+              actionIcon: LucideIcons.plus,
               onAction: onCreate,
             ),
             // 순서는 서버가 준 그대로 (NEEDS BACKEND: 최근 수정순인지, 페이지로 나눠 주는지)
@@ -848,7 +849,7 @@ class _EmptyBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (title != null) ...[Text(title!, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w800)), const SizedBox(height: 4)],
+          if (title != null) ...[Text(title!, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w600)), const SizedBox(height: 4)],
           Text(message, style: AppTypography.meta.copyWith(height: 1.55)),
           if (actionLabel != null && onAction != null) ...[
             const SizedBox(height: AppSpacing.sm),

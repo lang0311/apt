@@ -32,7 +32,7 @@ abstract final class AppRadius {
   static const small = 10.0;
   static const medium = 14.0;
   static const large = 20.0;
-  static const sheet = 28.0;
+  static const sheet = 24.0; // v2 시안 .sheet 위 모서리 24
   static const pill = 999.0;
 
   // 예전 이름 — 위 네 단계로 모았다
@@ -51,7 +51,13 @@ abstract final class AppRadius {
 
 /// 디자인 토큰 — 그림자 (카드는 거의 없음, 떠 있는 요소만)
 abstract final class AppShadow {
+  /// 떠 있는 요소(지도 위 유리 칸 · 버튼) — v2 시안 .glass: 0 2px 10px 10%
   static const soft = [
-    BoxShadow(color: Color(0x0F14223A), blurRadius: 12, offset: Offset(0, 2)),
+    BoxShadow(color: Color(0x1A14181E), blurRadius: 10, offset: Offset(0, 2)),
+  ];
+
+  /// 아래 시트 위쪽 그림자 — v2 시안 .sheet: 0 -4px 20px 8%
+  static const sheet = [
+    BoxShadow(color: Color(0x1414181E), blurRadius: 20, offset: Offset(0, -4)),
   ];
 }

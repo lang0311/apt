@@ -17,11 +17,12 @@ class PartyAvatarStack extends StatelessWidget {
   /// 얼굴을 겹쳐 그린다(한 줄 요약용). 겹친 경계는 바탕색 테두리로 나눈다.
   final bool overlap;
 
+  // v2: 진한 색 채움 + 흰 첫 글자 (주황은 AI 표시 전용이라 둘째 얼굴은 코랄, 07 D17)
   static const _palette = [
-    (AppColors.primarySoftStrong, AppColors.primary),
-    (AppColors.avatarCoralSoft, AppColors.avatarCoral),
-    (AppColors.avatarGreenSoft, AppColors.success),
-    (AppColors.extractSoft, AppColors.extract),
+    (AppColors.primary, Colors.white),
+    (AppColors.avatarCoral, Colors.white),
+    (AppColors.success, Colors.white),
+    (AppColors.extract, Colors.white),
   ];
 
   /// 흰 바탕에 이름만 글자로 쓸 때의 색. 얼굴 색과 같은 짝이되 작은 글씨도 읽히게(대비 4.5 이상) 진하게 한다.
@@ -38,11 +39,11 @@ class PartyAvatarStack extends StatelessWidget {
       decoration: BoxDecoration(
         color: background,
         shape: BoxShape.circle,
-        border: overlap ? Border.all(color: AppColors.surface, width: 1.5) : null,
+        border: overlap ? Border.all(color: AppColors.surface, width: 2) : null,
       ),
       child: Text(
         member.initial,
-        style: AppTypography.label.copyWith(color: foreground, fontSize: size < 30 ? size * 0.45 : null),
+        style: AppTypography.label.copyWith(color: foreground, fontWeight: FontWeight.w600, fontSize: size < 30 ? size * 0.45 : null),
       ),
     );
   }

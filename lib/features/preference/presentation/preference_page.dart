@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -194,9 +195,8 @@ class _AutoTaste extends ConsumerWidget {
             children: [
               Semantics(header: true, child: Text('내 취향', style: AppTypography.display)),
               const SizedBox(height: 6),
-              Text('저장한 장소로 취향을 읽어요', style: AppTypography.bodyStrong),
-              const SizedBox(height: 2),
-              Text('따로 고르지 않아도 많이 저장할수록 추천이 잘 맞아요.', style: AppTypography.bodyMuted),
+              // v2: 회색 한 문단
+              Text('저장한 장소로 취향을 읽어요. 따로 고르지 않아도 많이 저장할수록 추천이 잘 맞아요.', style: AppTypography.bodyMuted),
             ],
           ),
         ),
@@ -233,7 +233,7 @@ class _AutoTaste extends ConsumerWidget {
                 child: Row(
                   children: [
                     Expanded(child: Text('추천하지 않는 장소', style: AppTypography.body)),
-                    const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+                    const Icon(LucideIcons.chevronRight, color: AppColors.textHint),
                   ],
                 ),
               ),
@@ -254,21 +254,15 @@ class _CategoryRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = CategoryStyle.of(category.key);
     return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 50),
+      constraints: const BoxConstraints(minHeight: 58),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: AppSpacing.xxs),
         child: Row(
           children: [
-            Container(
-              width: 36,
-              height: 36,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.small)),
-              child: Icon(style.icon, size: 20, color: style.ink),
-            ),
+            CategoryColorTile(style: style, width: 36, height: 36, radius: AppRadius.small, iconSize: 20),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
-              child: Text(category.label, style: AppTypography.body, maxLines: 1, overflow: TextOverflow.ellipsis),
+              child: Text(category.label, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
             Text('${category.count}곳', style: AppTypography.bodyStrong.copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
           ],

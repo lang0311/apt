@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -44,7 +45,7 @@ class CourseDetailPage extends ConsumerWidget {
               actions: [
                 IconButton(
                   tooltip: '코스 메뉴',
-                  icon: const Icon(Icons.more_horiz_rounded, color: AppColors.textPrimary),
+                  icon: const Icon(LucideIcons.ellipsis, color: AppColors.textPrimary),
                   // 이름·날짜 수정, 공유, 삭제 — NEEDS BACKEND (docs/07 §3)
                   onPressed: () => showAppSnackBar(context, '코스 관리 메뉴는 준비 중이에요.'),
                 ),
@@ -186,7 +187,7 @@ class _CrewStrip extends ConsumerWidget {
                 Expanded(
                   child: Text(names, style: AppTypography.labelLarge, maxLines: 1, overflow: TextOverflow.ellipsis),
                 ),
-                if (members != null) const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+                if (members != null) const Icon(LucideIcons.chevronRight, color: AppColors.textSecondary),
               ],
             ),
           ),
@@ -226,7 +227,7 @@ class _CrewStrip extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.tiny)),
-                        child: Text(canInvite ? '나, 파티장' : '나', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700)),
+                        child: Text(canInvite ? '나, 파티장' : '나', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w600)),
                       ),
                     ],
                   ],

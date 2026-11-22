@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:apt/core/widgets/spark_icon.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
@@ -44,11 +46,11 @@ class CourseHero extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.check_rounded, size: 14, color: AppColors.success),
+                  const Icon(LucideIcons.check, size: 14, color: AppColors.success),
                   const SizedBox(width: 4),
                   Text(
                     '코스가 저장되었어요',
-                    style: AppTypography.caption.copyWith(color: AppColors.success, fontWeight: FontWeight.w700),
+                    style: AppTypography.caption.copyWith(color: AppColors.success, fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
@@ -124,7 +126,7 @@ class AppliedTasteLine extends StatelessWidget {
                     widthFactor: 1,
                     child: Text(
                       '누구 취향인지 보기',
-                      style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700),
+                      style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
@@ -177,7 +179,7 @@ class AppliedTasteLine extends StatelessWidget {
                 flex: 3,
                 child: Text(
                   stop.place.name,
-                  style: AppTypography.label.copyWith(fontWeight: FontWeight.w700),
+                  style: AppTypography.label.copyWith(fontWeight: FontWeight.w600),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -193,7 +195,7 @@ class AppliedTasteLine extends StatelessWidget {
                       ? [
                           Text(
                             '모두',
-                            style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+                            style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
                           ),
                         ]
                       : [
@@ -337,10 +339,7 @@ class CourseStopLegend extends StatelessWidget {
       children: [
         dot,
         const SizedBox(width: 6),
-        Text(
-          text,
-          style: AppTypography.caption.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w700),
-        ),
+        Text(text, style: AppTypography.meta.copyWith(color: AppColors.textSecondary)),
       ],
     );
     return Padding(
@@ -360,12 +359,8 @@ class CourseStopLegend extends StatelessWidget {
             ),
           if (ai > 0)
             item(
-              Container(
-                width: 12,
-                height: 12,
-                decoration: const BoxDecoration(color: AppColors.ai, shape: BoxShape.circle),
-                child: const Icon(Icons.auto_awesome, size: 8, color: Colors.white),
-              ),
+              // v2: 범례도 주황 ✦ 글리프
+              const SparkIcon(size: 13, color: AppColors.ai),
               'AI 추천 $ai',
             ),
         ],
@@ -383,29 +378,17 @@ class CourseEditButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(right: AppSpacing.xs),
-      child: Material(
-        color: AppColors.surfaceRaised,
-        shape: const StadiumBorder(side: BorderSide(color: AppColors.border)),
-        child: InkWell(
-          customBorder: const StadiumBorder(),
-          onTap: onPressed,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 32, minWidth: 44),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.edit_outlined, size: 14, color: AppColors.textPrimary),
-                  const SizedBox(width: 4),
-                  Text(
-                    '편집',
-                    style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
-                  ),
-                ],
-              ),
-            ),
-          ),
+      // v2: 테두리 없는 파란 글자 '편집'
+      child: TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          minimumSize: const Size(44, 44),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+        ),
+        child: Text(
+          '편집',
+          style: AppTypography.labelLarge.copyWith(color: onPressed == null ? AppColors.textTertiary : AppColors.primary, fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -418,8 +401,11 @@ Widget _marker(CourseStop stop, int? number) => StopMarker(source: stop.source, 
 /// 장소 이름 아래 줄: 카테고리 · 지역. AI 추천 여부는 번호 원(주황 ✦)으로 구분하고,
 /// 추천 이유는 장소를 눌렀을 때 시트의 '추천 이유 보기'에서 보여 준다 (07 D40).
 class _StopText extends StatelessWidget {
-  const _StopText({required this.stop, this.prefix, this.changed = false, this.courseDate});
+  const _StopText({required this.stop, this.prefix, this.changed = false, this.courseDate, this.nameOnly = false});
   final CourseStop stop;
+
+  /// 편집 목록: 이름(과 작은 라벨)만, 카테고리 줄 없이 (v2 #32-1)
+  final bool nameOnly;
   final String? prefix;
   final DateTime? courseDate;
 
@@ -443,7 +429,7 @@ class _StopText extends StatelessWidget {
           TextSpan(text: sub),
         ],
       ),
-      style: AppTypography.caption,
+      style: AppTypography.meta.copyWith(color: AppColors.textSecondary),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
@@ -454,13 +440,13 @@ class _StopText extends StatelessWidget {
         Row(
           children: [
             Flexible(
-              child: Text(place.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
+              child: Text(place.name, style: AppTypography.cardTitle, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
             if (changed) ...[
               const SizedBox(width: 6),
               Text(
                 '바뀜',
-                style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w800),
+                style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w600),
               ),
             ] else if (stop.isAi) ...[
               // 번호가 끊기지 않게 바뀐 뒤로 AI 추천 곳은 주황 번호와 이 작은 표시로 구분한다
@@ -470,15 +456,22 @@ class _StopText extends StatelessWidget {
                 decoration: BoxDecoration(color: AppColors.aiSoft, borderRadius: BorderRadius.circular(AppRadius.tiny)),
                 child: Text(
                   'AI 추천',
-                  style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w700),
+                  style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w600),
                 ),
               ),
             ],
           ],
         ),
-        const SizedBox(height: 1),
+        if (nameOnly && prefix != null)
+          Text(
+            prefix!,
+            style: AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
+          ),
+        if (!nameOnly) const SizedBox(height: 1),
         // 팝업 · 행사 · 신규 오픈은 카테고리 줄 맨 앞에 작은 태그 (서버 API 1번)
-        if (timing == null)
+        if (nameOnly)
+          const SizedBox.shrink()
+        else if (timing == null)
           subLine
         else
           Row(
@@ -594,13 +587,21 @@ class _ViewTile extends StatelessWidget {
                 child: Row(
                   children: [
                     if (showTime) ...[
+                      // v2: 시각은 잉크 굵게, 첫 시각 아래 '예상'
                       Container(
-                        width: 40,
+                        width: 48,
                         alignment: Alignment.centerRight,
-                        child: Text(
-                          stop.arrivalTime == null ? '' : formatClock(stop.arrivalTime!),
-                          textAlign: TextAlign.right,
-                          style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              stop.arrivalTime == null ? '' : formatClock(stop.arrivalTime!),
+                              textAlign: TextAlign.right,
+                              style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w600, fontFeatures: const [FontFeature.tabularFigures()]),
+                            ),
+                            if (number == 1 && stop.arrivalTime != null) Text('예상', style: AppTypography.caption),
+                          ],
                         ),
                       ),
                       const SizedBox(width: AppSpacing.xs),
@@ -627,7 +628,7 @@ class _ViewTile extends StatelessWidget {
                       IconButton(
                         tooltip: '${stop.place.name} 메뉴',
                         onPressed: onMore,
-                        icon: const Icon(Icons.more_horiz_rounded, size: 20, color: AppColors.textSecondary),
+                        icon: const Icon(LucideIcons.ellipsis, size: 20, color: AppColors.textSecondary),
                       ),
                   ],
                 ),
@@ -705,19 +706,30 @@ class _LegRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: leg == null ? 6 : 26,
+      height: leg == null ? 6 : 34,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 시각(40) + 간격(8), 선은 번호 원(26) 가운데 — 글자는 장소 이름과 같은 자리에서 시작
-          SizedBox(width: AppSpacing.xs + (showTime ? 40 + AppSpacing.xs : 0)),
+          // 시각(48) + 간격(8), 선은 번호 원(26) 가운데 — 글자는 장소 이름과 같은 자리에서 시작
+          SizedBox(width: AppSpacing.xs + (showTime ? 48 + AppSpacing.xs : 0)),
           const _Line(visible: true),
           const SizedBox(width: 12),
-          if (leg != null) ...[
-            Icon(leg!.mode.icon, size: 13, color: AppColors.textSecondary),
-            const SizedBox(width: 4),
-            Text(leg!.label, style: AppTypography.caption),
-          ],
+          // v2: 이동은 회색 알약 (아이콘 + 도보 8분)
+          if (leg != null)
+            Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(color: AppColors.fill, borderRadius: BorderRadius.circular(AppRadius.small)),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(leg!.mode.icon, size: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(leg!.label, style: AppTypography.meta.copyWith(color: AppColors.textSecondary)),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -747,8 +759,8 @@ class _SkeletonTile extends StatelessWidget {
         children: [
           if (withTime) ...[
             const SizedBox(
-              width: 40,
-              child: Align(alignment: Alignment.centerRight, child: SkeletonBox(width: 30, height: 10, radius: 5)),
+              width: 48,
+              child: Align(alignment: Alignment.centerRight, child: SkeletonBox(width: 34, height: 10, radius: 5)),
             ),
             const SizedBox(width: AppSpacing.xs),
           ] else
@@ -900,23 +912,19 @@ class _EditTile extends StatelessWidget {
                   child: const SizedBox(
                     width: 40,
                     height: 56,
-                    child: Icon(Icons.drag_handle_rounded, color: AppColors.controlBorder, semanticLabel: '끌어서 순서 변경'),
+                    child: Icon(LucideIcons.gripVertical, color: AppColors.controlBorder, semanticLabel: '끌어서 순서 변경'),
                   ),
                 ),
                 _marker(stop, number),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: _StopText(stop: stop, prefix: added ? '새로 추가' : null, changed: highlighted),
+                  child: _StopText(stop: stop, prefix: added ? '새로 추가' : null, changed: highlighted, nameOnly: true),
                 ),
                 IconButton(
                   tooltip: '${stop.place.name} 빼기',
                   onPressed: enabled ? onRemove : null,
-                  icon: Container(
-                    width: 28,
-                    height: 28,
-                    decoration: const BoxDecoration(color: AppColors.surfaceMuted, shape: BoxShape.circle),
-                    child: const Icon(Icons.close_rounded, size: 16, color: AppColors.textSecondary),
-                  ),
+                  // v2: 원 없는 ×
+                  icon: const Icon(LucideIcons.x, size: 22, color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -942,13 +950,8 @@ class _AddTile extends StatelessWidget {
           height: 52,
           child: Row(
             children: [
-              const SizedBox(width: 40),
-              Container(
-                width: 26,
-                height: 26,
-                decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
-                child: const Icon(Icons.add_rounded, size: 16, color: AppColors.primary),
-              ),
+              // v2: 손잡이 자리에 파란 + 하나
+              const SizedBox(width: 40, child: Icon(LucideIcons.plus, size: 24, color: AppColors.primary)),
               const SizedBox(width: 10),
               Text('장소 추가', style: AppTypography.bodyStrong.copyWith(color: AppColors.primary)),
             ],

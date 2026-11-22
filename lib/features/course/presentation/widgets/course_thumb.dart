@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
@@ -20,22 +21,17 @@ class CourseThumb extends StatelessWidget {
     final url = course.thumbnailUrl;
     final keys = course.stopCategoryKeys;
     if ((url != null && url.isNotEmpty) || keys.isEmpty) {
-      return AppNetworkImage(url: url, width: size, height: size, radius: size >= 60 ? AppRadius.thumb : 12, placeholderIcon: Icons.route_rounded);
+      return AppNetworkImage(url: url, width: size, height: size, radius: size >= 60 ? AppRadius.thumb : 12, placeholderIcon: LucideIcons.route);
     }
     final half = (size - _gap) / 2;
     Widget tile(String key, double w, double h) {
-      final style = CategoryStyle.of(key);
-      return Container(
-        width: w,
-        height: h,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.tiny)),
-        child: Icon(style.icon, size: (w < h ? w : h) * 0.56, color: style.ink),
-      );
+      return CategoryColorTile(style: CategoryStyle.of(key), width: w, height: h, radius: AppRadius.tiny);
     }
 
     // 곳 수에 따라 칸을 나눈다: 1곳 한 칸 · 2곳 반반 · 3곳 큰 칸 + 둘 · 4곳 2×2 · 5곳부터 셋 + 남은 수
     final n = keys.length;
+    // v2: 목록의 작은 칸(60 미만)은 첫 장소 업종 색 칸 하나 (#22 코스 목록)
+    if (size < 60) return CategoryColorTile(style: CategoryStyle.of(keys.first), width: size, height: size, radius: AppRadius.medium);
     final Widget mosaic;
     if (n == 1) {
       mosaic = tile(keys[0], size, size);
@@ -59,7 +55,7 @@ class CourseThumb extends StatelessWidget {
               decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.tiny)),
               child: Text(
                 '+${n - 3}',
-                style: TextStyle(fontSize: half * 0.36, fontWeight: FontWeight.w800, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: half * 0.36, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
               ),
             );
       mosaic = Column(

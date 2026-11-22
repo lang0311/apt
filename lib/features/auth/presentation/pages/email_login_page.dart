@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_colors.dart';
@@ -84,7 +85,7 @@ class _EmailLoginPageState extends ConsumerState<EmailLoginPage> {
                     controller: _email,
                     label: '이메일',
                     hint: 'example@email.com',
-                    prefixIcon: Icons.mail_outline_rounded,
+                    prefixIcon: LucideIcons.mail,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     hasError: error != null,
@@ -95,14 +96,14 @@ class _EmailLoginPageState extends ConsumerState<EmailLoginPage> {
                     controller: _password,
                     label: '비밀번호',
                     hint: '비밀번호 입력',
-                    prefixIcon: Icons.lock_outline_rounded,
+                    prefixIcon: LucideIcons.lock,
                     obscureText: _obscure,
                     hasError: _credentialError != null,
                     onChanged: (_) => _clearErrors(),
                     onSubmitted: (_) => canSubmit ? _submit() : null,
                     suffix: IconButton(
                       tooltip: _obscure ? '비밀번호 보기' : '비밀번호 숨기기',
-                      icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: AppColors.textSecondary),
+                      icon: Icon(_obscure ? LucideIcons.eye : LucideIcons.eyeOff, color: AppColors.textSecondary),
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
                   ),
@@ -113,7 +114,7 @@ class _EmailLoginPageState extends ConsumerState<EmailLoginPage> {
                       AppTextLink(
                         label: '비밀번호 찾기',
                         onPressed: _todo,
-                        style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700),
+                        style: AppTypography.meta.copyWith(fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),

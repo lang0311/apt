@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
@@ -49,7 +50,7 @@ class PlainHeader extends StatelessWidget {
   const PlainHeader({
     super.key,
     this.title,
-    this.leadingIcon = Icons.chevron_left_rounded,
+    this.leadingIcon = LucideIcons.chevronLeft,
     this.leadingTooltip = '뒤로',
     this.onLeading,
     this.actions = const [],
@@ -76,7 +77,7 @@ class PlainHeader extends StatelessWidget {
             IconButton(
               tooltip: leadingTooltip,
               onPressed: onLeading ?? () => popOrGoHome(context),
-              icon: Icon(leadingIcon, size: leadingIcon == Icons.chevron_left_rounded ? 30 : 24, color: AppColors.textPrimary),
+              icon: Icon(leadingIcon, size: leadingIcon == LucideIcons.chevronLeft ? 30 : 24, color: AppColors.textPrimary),
             ),
             Expanded(
               child: title == null
@@ -121,7 +122,7 @@ class AuthHeader extends StatelessWidget {
               children: [
                 IconButton(
                   onPressed: onBack ?? () => popOrGoHome(context),
-                  icon: const Icon(Icons.chevron_left_rounded, size: 32, color: AppColors.textPrimary),
+                  icon: const Icon(LucideIcons.chevronLeft, size: 32, color: AppColors.textPrimary),
                   tooltip: '뒤로',
                 ),
                 const Spacer(),
@@ -159,12 +160,12 @@ class StepHeader extends StatelessWidget {
         PlainHeader(
           title: '코스 만들기',
           // v2: 첫 단계는 닫기(X), 그 뒤는 뒤로
-          leadingIcon: step == 1 ? Icons.close_rounded : Icons.chevron_left_rounded,
+          leadingIcon: step == 1 ? LucideIcons.x : LucideIcons.chevronLeft,
           leadingTooltip: step == 1 ? '닫기' : '뒤로',
           onLeading: onBack,
           trailing: Text(
             '$step / 4',
-            style: AppTypography.label.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w700),
+            style: AppTypography.label.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
           ),
         ),
         Padding(
@@ -202,7 +203,7 @@ class StepProgressBar extends StatelessWidget {
                     height: 4,
                     decoration: BoxDecoration(
                       color: i < step ? AppColors.primary : AppColors.progressInactive,
-                      borderRadius: BorderRadius.circular(2),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
                   const SizedBox(height: 6),

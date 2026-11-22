@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:apt/core/widgets/spark_icon.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/widgets/selection.dart';
@@ -10,7 +11,7 @@ class StopMarker extends StatelessWidget {
   final PlaceSource source;
   final int? number;
 
-  static const double _size = 26;
+  static const double _size = 26; // v2 시안 .num 26
 
   @override
   Widget build(BuildContext context) {
@@ -26,24 +27,12 @@ class StopMarker extends StatelessWidget {
                     width: _size,
                     height: _size,
                     decoration: const BoxDecoration(color: AppColors.ai, shape: BoxShape.circle),
-                    child: const Icon(Icons.auto_awesome, size: _size * 0.5, color: Colors.white),
+                    child: const SparkIcon(size: _size * 0.5, color: Colors.white),
                   )
                 : NumberBadge(number!, size: _size, color: AppColors.ai),
             if (number != null)
-              Positioned(
-                right: -5,
-                top: -5,
-                child: Container(
-                  width: 14,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.ai, width: 1),
-                  ),
-                  child: const Icon(Icons.auto_awesome, size: 8, color: AppColors.ai),
-                ),
-              ),
+              // v2: 오른쪽 위에 작은 ✦ 글리프만 (흰 원 없이)
+              const Positioned(right: -7, top: -7, child: SparkIcon(size: 12, color: AppColors.aiText)),
           ],
         ),
       );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -81,7 +82,7 @@ class _LinkInputPageState extends ConsumerState<LinkInputPage> {
                               _url.clear();
                               _error = null;
                             }),
-                            icon: const Icon(Icons.close_rounded, size: 18, color: AppColors.textTertiary),
+                            icon: const Icon(LucideIcons.x, size: 18, color: AppColors.textTertiary),
                             constraints: const BoxConstraints(minWidth: 40, minHeight: 44),
                           ),
                         SourceRowAction(label: '찾기', onPressed: hasText ? _submit : null),
@@ -145,7 +146,7 @@ class _RecentAdded extends ConsumerWidget {
         actionLabel: '모두 보기',
         onAction: () => context.go(AppRoutes.saved),
         child: DividedRows(
-          indent: SectionCard.innerPadding + 44 + AppSpacing.sm,
+          indent: SectionCard.innerPadding + 52 + AppSpacing.sm,
           children: [
             for (final r in recent.take(5))
               InkWell(
@@ -154,7 +155,7 @@ class _RecentAdded extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: 8),
                   child: Row(
                     children: [
-                      PlaceImage(place: r.place, width: 48, height: 48, radius: 12, iconSize: 22),
+                      PlaceImage(place: r.place, width: 52, height: 52, radius: AppRadius.medium, iconSize: 22),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Column(
@@ -196,7 +197,7 @@ class _SearchRowLabel extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.map_outlined, size: 20, color: AppColors.primary),
+            child: const Icon(LucideIcons.map, size: 20, color: AppColors.primary),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -208,7 +209,7 @@ class _SearchRowLabel extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+          const Icon(LucideIcons.chevronRight, color: AppColors.textHint),
         ],
       ),
     );

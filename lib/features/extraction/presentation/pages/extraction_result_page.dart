@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -78,7 +79,7 @@ class _SourceRow extends StatelessWidget {
     final shortUrl = url.replaceFirst(RegExp(r'^https?://(www\.)?'), '');
     return ExtractSourceRow(
       leading: displayHandle == null ? const LinkTile() : const InstagramTile(),
-      action: SourceRowAction(label: '게시물 보기', onPressed: () => openExternalLink(context, url)),
+      action: SourceRowAction(label: '게시물 보기', external: true, onPressed: () => openExternalLink(context, url)),
       child: displayHandle == null
           ? Text(shortUrl, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis)
           : Text.rich(
@@ -86,9 +87,13 @@ class _SourceRow extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: displayHandle,
-                    style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w700),
+                    style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w600),
                   ),
-                  TextSpan(text: ' · $kind', style: AppTypography.meta),
+                  // v2: '@계정 릴스' 한 덩어리
+                  TextSpan(
+                    text: ' $kind',
+                    style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w600),
+                  ),
                 ],
               ),
               maxLines: 1,
@@ -172,10 +177,10 @@ class _Failure extends StatelessWidget {
                       ),
                       child: Icon(
                         switch (kind) {
-                          ExtractionFailureKind.privatePost => Icons.lock_outline_rounded,
-                          ExtractionFailureKind.noPlaceFound => Icons.location_off_outlined,
-                          ExtractionFailureKind.invalidUrl => Icons.link_off_rounded,
-                          ExtractionFailureKind.failed => Icons.error_outline_rounded,
+                          ExtractionFailureKind.privatePost => LucideIcons.lock,
+                          ExtractionFailureKind.noPlaceFound => LucideIcons.mapPinOff,
+                          ExtractionFailureKind.invalidUrl => LucideIcons.unlink,
+                          ExtractionFailureKind.failed => LucideIcons.circleAlert,
                         },
                         size: 17,
                         color: AppColors.textPrimary,
@@ -186,7 +191,7 @@ class _Failure extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(kind.title, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w700)),
+                          Text(kind.title, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w600)),
                           const SizedBox(height: 3),
                           Text(kind.description, style: AppTypography.meta),
                         ],

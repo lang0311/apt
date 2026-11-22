@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:apt/core/widgets/spark_icon.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -157,12 +159,19 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
     }
   }
 
-  /// 고른 장소는 파란 체크 핀(고른 순서는 추천에 쓰이지 않아 번호를 붙이지 않는다), 아니면 카테고리 아이콘 핀
+  /// 고른 장소는 파란 체크 핀(고른 순서는 추천에 쓰이지 않아 번호를 붙이지 않는다), 아니면 업종 색 동그라미 핀
   MapMarker _marker(Place place) {
     if (widget.selectedIds.contains(place.id)) {
       return MapMarker(id: place.id, point: place.location!, kind: MapPinKind.picked);
     }
-    return MapMarker(id: place.id, point: place.location!, kind: MapPinKind.place, icon: CategoryStyle.of(place.categoryKey).icon, color: AppColors.primary);
+    return MapMarker(
+      id: place.id,
+      point: place.location!,
+      kind: MapPinKind.place,
+      icon: CategoryStyle.of(place.categoryKey).icon,
+      // v2: 안 고른 곳은 업종 색 동그라미
+      color: CategoryStyle.of(place.categoryKey).color,
+    );
   }
 
   Future<void> _openFilter(SavedSummary? summary) async {
@@ -257,7 +266,7 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
           Positioned(
             left: AppSpacing.sm,
             bottom: _cardHeight + AppSpacing.lg,
-            child: _MapPill(icon: Icons.format_list_bulleted_rounded, label: '목록 ${places.length}', onTap: () => setState(() => _listMode = true)),
+            child: _MapPill(icon: LucideIcons.list, label: '목록 ${places.length}', onTap: () => setState(() => _listMode = true)),
           ),
           Positioned(
             left: 0,
@@ -333,7 +342,7 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
             right: 0,
             bottom: AppSpacing.sm,
             child: Center(
-              child: _MapPill(icon: Icons.map_outlined, label: '지도로 보기', dark: true, onTap: () => setState(() => _listMode = false)),
+              child: _MapPill(icon: LucideIcons.map, label: '지도로 보기', dark: true, onTap: () => setState(() => _listMode = false)),
             ),
           ),
         ],
@@ -457,7 +466,7 @@ class _ListSheetState extends State<_ListSheet> {
   }
 }
 
-/// 흰색 80% + 흐림 검색창. 오른쪽 필터 버튼(건 필터 수 배지).
+/// 흰색 80% + 흐림 검색칸, 그 오른쪽에 따로 떨어진 정사각 필터 버튼(건 필터 수 배지) — v2 #24
 class _SearchBar extends StatelessWidget {
   const _SearchBar({required this.height, required this.onChanged, required this.filterCount, this.onFilter});
   final double height;
@@ -465,25 +474,38 @@ class _SearchBar extends StatelessWidget {
   final int filterCount;
   final VoidCallback? onFilter;
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _glass({required Widget child, double? width}) {
     return DecoratedBox(
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(AppRadius.small), boxShadow: AppShadow.soft),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(AppRadius.medium), boxShadow: AppShadow.soft),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.small),
+        borderRadius: BorderRadius.circular(AppRadius.medium),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
           child: Container(
+            width: width,
             height: height,
             decoration: BoxDecoration(
               color: AppColors.mapGlass,
-              borderRadius: BorderRadius.circular(AppRadius.small),
+              borderRadius: BorderRadius.circular(AppRadius.medium),
               border: Border.all(color: AppColors.mapGlassBorder),
             ),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _glass(
             child: Row(
               children: [
-                const SizedBox(width: AppSpacing.sm),
-                const Icon(Icons.search_rounded, size: 20, color: AppColors.textSecondary),
+                const SizedBox(width: AppSpacing.md),
+                const Icon(LucideIcons.search, size: 20, color: AppColors.textSecondary),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: TextField(
@@ -494,41 +516,46 @@ class _SearchBar extends StatelessWidget {
                       isCollapsed: true,
                       border: InputBorder.none,
                       hintText: '저장한 장소 검색',
-                      hintStyle: AppTypography.bodyStrong.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                      hintStyle: AppTypography.body.copyWith(color: AppColors.textSecondary),
                     ),
                   ),
                 ),
-                Container(width: 1, height: 22, color: AppColors.divider),
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    IconButton(
-                      tooltip: filterCount == 0 ? '필터' : '필터 $filterCount개 적용됨',
-                      onPressed: onFilter,
-                      icon: const Icon(Icons.tune_rounded, size: 20, color: AppColors.textPrimary),
-                    ),
-                    if (filterCount > 0)
-                      Positioned(
-                        right: 6,
-                        top: 6,
-                        child: Container(
-                          width: 17,
-                          height: 17,
-                          alignment: Alignment.center,
-                          decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                          child: Text(
-                            '$filterCount',
-                            style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w800, height: 1),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
+                const SizedBox(width: AppSpacing.sm),
               ],
             ),
           ),
         ),
-      ),
+        const SizedBox(width: AppSpacing.xs),
+        _glass(
+          width: height,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                tooltip: filterCount == 0 ? '필터' : '필터 $filterCount개 적용됨',
+                onPressed: onFilter,
+                icon: const Icon(LucideIcons.listFilter, size: 22, color: AppColors.textPrimary),
+              ),
+              if (filterCount > 0)
+                Positioned(
+                  right: 4,
+                  top: 4,
+                  child: Container(
+                    width: 17,
+                    height: 17,
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                    child: Text(
+                      '$filterCount',
+                      style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w700, height: 1),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -624,7 +651,7 @@ class _SelectButton extends StatelessWidget {
                 color: picked ? AppColors.primary : AppColors.surfaceRaised,
                 border: picked ? null : Border.all(color: AppColors.controlBorder, width: 1.6),
               ),
-              child: picked ? const Icon(Icons.check_rounded, size: 16, color: Colors.white) : null,
+              child: picked ? const Icon(LucideIcons.check, size: 16, color: Colors.white) : null,
             ),
           ),
         ),
@@ -642,7 +669,7 @@ class _InCourseTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.tiny)),
-      child: Text(label, style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700)),
+      child: Text(label, style: AppTypography.caption.copyWith(fontWeight: FontWeight.w600)),
     );
   }
 }
@@ -905,12 +932,12 @@ class _RecommendedLine extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.auto_awesome, size: 11, color: AppColors.ai),
+        const SparkIcon(size: 11, color: AppColors.ai),
         const SizedBox(width: 3),
         Flexible(
           child: Text(
             SavedPlaceRow.recommendedLabel(item.recommendedIn),
-            style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w700),
+            style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w600),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -932,7 +959,7 @@ class PickedChips extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('고른 곳 ${places.length}', style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700)),
+        Text('고른 곳 ${places.length}', style: AppTypography.meta.copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(height: 6),
         SizedBox(
           height: 34,
@@ -963,7 +990,7 @@ class PickedChips extends StatelessWidget {
                             child: Text(p.name, style: AppTypography.label, maxLines: 1, overflow: TextOverflow.ellipsis),
                           ),
                           const SizedBox(width: 4),
-                          const Icon(Icons.close_rounded, size: 15, color: AppColors.textTertiary),
+                          const Icon(LucideIcons.x, size: 15, color: AppColors.textTertiary),
                         ],
                       ),
                     ),

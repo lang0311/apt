@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/app_colors.dart';
@@ -87,7 +88,7 @@ class AppEmptyState extends StatelessWidget {
     super.key,
     required this.title,
     this.description,
-    this.icon = Icons.bookmark_border_rounded,
+    this.icon = LucideIcons.bookmark,
     this.actionLabel,
     this.onAction,
     this.secondaryLabel,
@@ -124,7 +125,7 @@ class AppEmptyState extends StatelessWidget {
           ],
           if (secondaryLabel != null) ...[
             const SizedBox(height: AppSpacing.sm),
-            AppButton(variant: AppButtonVariant.white, label: secondaryLabel!, onPressed: onSecondary, icon: Icons.add_rounded),
+            AppButton(variant: AppButtonVariant.white, label: secondaryLabel!, onPressed: onSecondary, icon: LucideIcons.plus),
           ],
         ],
       ),
@@ -147,7 +148,7 @@ class AppErrorState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconCircle(icon: Icons.error_outline_rounded, size: compact ? 44 : 64, color: AppColors.danger, background: AppColors.dangerSoft),
+          IconCircle(icon: LucideIcons.circleAlert, size: compact ? 44 : 64, color: AppColors.danger, background: AppColors.dangerSoft),
           const SizedBox(height: AppSpacing.sm),
           Text(title ?? '불러오지 못했어요', style: AppTypography.cardTitle, textAlign: TextAlign.center),
           const SizedBox(height: 4),
@@ -160,7 +161,7 @@ class AppErrorState extends StatelessWidget {
               variant: AppButtonVariant.soft,
               expand: false,
               height: 44,
-              icon: Icons.refresh_rounded,
+              icon: LucideIcons.refreshCw,
             ),
           ],
         ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,7 +13,6 @@ import '../../../../core/widgets/buttons.dart';
 import '../../../../core/widgets/headers.dart';
 import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/states.dart';
-import '../../../../core/widgets/surfaces.dart';
 import '../../../place/domain/place.dart';
 import '../../domain/course_models.dart';
 import '../course_providers.dart';
@@ -102,8 +102,10 @@ class _CourseEditPageState extends ConsumerState<CourseEditPage> {
         const SizedBox(height: AppSpacing.sm),
         Padding(
           padding: AppSpacing.screenPadding,
-          child: SectionCard(
-            title: '일정 편집',
+          // v2: 제목 상자 없이 바로 편집 목록
+          child: Semantics(
+            container: true,
+            label: '일정 편집',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -155,7 +157,7 @@ class _CourseEditPageState extends ConsumerState<CourseEditPage> {
         body: SafeArea(
           child: Column(
             children: [
-              PlainHeader(title: '코스 편집', leadingIcon: Icons.close_rounded, leadingTooltip: '닫기', onLeading: _close),
+              PlainHeader(title: '코스 편집', leadingIcon: LucideIcons.x, leadingTooltip: '닫기', onLeading: _close),
               Expanded(child: body),
               if (course != null)
                 BottomCta(
@@ -165,7 +167,7 @@ class _CourseEditPageState extends ConsumerState<CourseEditPage> {
                         flex: 2,
                         child: AppButton(
                           label: '다시 추천',
-                          icon: Icons.refresh_rounded,
+                          icon: LucideIcons.refreshCw,
                           variant: AppButtonVariant.white,
                           loading: state.loading,
                           onPressed: busy ? null : () => recommendAgainWithUndo(context, ref),

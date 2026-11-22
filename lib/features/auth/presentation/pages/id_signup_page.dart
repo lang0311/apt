@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_colors.dart';
@@ -95,7 +96,7 @@ class _IdSignupPageState extends ConsumerState<IdSignupPage> {
           suffix: password
               ? IconButton(
                   tooltip: _obscure ? '비밀번호 보기' : '비밀번호 숨기기',
-                  icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: AppColors.textSecondary),
+                  icon: Icon(_obscure ? LucideIcons.eye : LucideIcons.eyeOff, color: AppColors.textSecondary),
                   onPressed: () => setState(() => _obscure = !_obscure),
                 )
               : null,

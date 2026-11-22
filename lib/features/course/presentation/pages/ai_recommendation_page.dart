@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,6 +27,7 @@ import '../recommendation_controller.dart';
 import '../widgets/course_edit_actions.dart';
 import '../widgets/applied_taste_section.dart';
 import '../widgets/course_route_map.dart';
+import '../widgets/course_places_strip.dart';
 import '../widgets/course_timeline.dart';
 import '../widgets/recommending_banner.dart';
 
@@ -151,13 +153,26 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                             draft.partyId,
                             legend: CourseStopLegend(stops: state.visibleStops),
                             banner: state.loading ? RecommendingBanner.of(state, onCancel: () => cancelRecommendationWithNotice(context, ref)) : null,
-                            CourseTimeline(
-                              stops: state.visibleStops,
-                              highlightIds: state.changedIds,
-                              loadingIds: state.loadingIds,
-                              courseDate: draft.date,
-                              onTapStop: busy ? null : (s) => showResultSheet(context, ref, s),
-                              onMore: busy ? null : (s) => showResultSheet(context, ref, s),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                CourseTimeline(
+                                  stops: state.visibleStops,
+                                  highlightIds: state.changedIds,
+                                  loadingIds: state.loadingIds,
+                                  courseDate: draft.date,
+                                  onTapStop: busy ? null : (s) => showResultSheet(context, ref, s),
+                                  onMore: busy ? null : (s) => showResultSheet(context, ref, s),
+                                ),
+                                // v2: 다시 추천 안내는 일정 카드 안 회색 칸
+                                if (state.visibleStops.any((s) => s.isAi))
+                                  Container(
+                                    margin: const EdgeInsets.fromLTRB(SectionCard.innerPadding, AppSpacing.xs, SectionCard.innerPadding, 0),
+                                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+                                    decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.medium)),
+                                    child: Text('다시 추천하면 AI 추천 장소만 바뀌고 내가 고른 곳은 그대로예요.', style: AppTypography.meta.copyWith(color: AppColors.textSecondary)),
+                                  ),
+                              ],
                             ),
                           ),
                   ),
@@ -167,10 +182,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                     child: Text('시간과 이동 정보는 다시 추천하거나 완료하면 다시 계산돼요.', style: AppTypography.caption),
                   )
                 else if (state.visibleStops.any((s) => s.isAi))
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(6, AppSpacing.xs, 0, 0),
-                    child: Text('다시 추천하면 AI 추천 장소만 바뀌고 내가 고른 곳은 그대로예요.', style: AppTypography.caption),
-                  )
+                  const SizedBox.shrink()
                 else
                   Padding(
                     padding: const EdgeInsets.fromLTRB(6, AppSpacing.xs, 0, 0),
@@ -180,6 +192,11 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
               ],
             ),
           ),
+          // v2: 일정 카드 아래 "이 코스에 담긴 곳" 사진 줄
+          if (!_editing && state.visibleStops.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.lg),
+            CoursePlacesStrip(stops: state.visibleStops, onTap: busy ? null : (s) => showResultSheet(context, ref, s)),
+          ],
         ],
       );
     }
@@ -203,7 +220,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                         flex: 2,
                         child: AppButton(
                           label: state.loading ? '다시 추천 중…' : '다시 추천',
-                          icon: state.loading ? null : Icons.refresh_rounded,
+                          icon: state.loading ? null : LucideIcons.refreshCw,
                           variant: AppButtonVariant.white,
                           onPressed: busy ? null : () => recommendAgainWithUndo(context, ref),
                         ),
@@ -319,7 +336,7 @@ class _WaitingState extends State<_Waiting> {
                       ExcludeSemantics(
                         child: Text(
                           _elapsed(_watch.elapsed),
-                          style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+                          style: AppTypography.meta.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -388,7 +405,7 @@ class _Stages extends StatelessWidget {
     if (s.index < stage.index) {
       return Container(
         decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-        child: const Icon(Icons.check_rounded, size: 15, color: Colors.white),
+        child: const Icon(LucideIcons.check, size: 15, color: Colors.white),
       );
     }
     final now = s == stage;

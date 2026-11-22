@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons_500.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -18,11 +20,12 @@ class _Tab {
 
 /// 보이는 순서: 홈 · 저장됨 · 코스 · 추출 · 마이 (07 D31). branch 순서는 바꾸지 않는다.
 const _tabs = [
-  _Tab(0, '홈', Icons.home_outlined, Icons.home_rounded),
-  _Tab(2, '저장됨', Icons.bookmark_border_rounded, Icons.bookmark_rounded),
-  _Tab(1, '코스', Icons.route_outlined, Icons.route_rounded),
-  _Tab(3, '장소 추가', Icons.add_box_outlined, Icons.add_box_rounded),
-  _Tab(4, '마이', Icons.person_outline_rounded, Icons.person_rounded),
+  // v2 B안(Lucide): 활성 탭은 같은 선 아이콘을 한 단계 굵게(500) + 잉크
+  _Tab(0, '홈', LucideIcons.house, LucideIcons500.house),
+  _Tab(2, '저장됨', LucideIcons.bookmark, LucideIcons500.bookmark),
+  _Tab(1, '코스', LucideIcons.route, LucideIcons500.route),
+  _Tab(3, '장소 추가', LucideIcons.squarePlus, LucideIcons500.squarePlus),
+  _Tab(4, '마이', LucideIcons.user, LucideIcons500.user),
 ];
 
 /// 하단 탭 5개. 활성 탭은 현재 라우트가 속한 branch 기준.
@@ -96,10 +99,8 @@ class _NavItem extends StatelessWidget {
     final color = active ? AppColors.textPrimary : AppColors.textHint;
     final label = Text(
       tab.label,
-      style: AppTypography.caption.copyWith(
-        color: active ? AppColors.textPrimary : AppColors.textTertiary,
-        fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-      ),
+      // v2: 이름표는 굵기 500 그대로, 색만 잉크 / 회색(아이콘과 같은 색)
+      style: AppTypography.caption.copyWith(color: color, fontWeight: FontWeight.w500),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
@@ -122,7 +123,7 @@ class _NavItem extends StatelessWidget {
           duration: const Duration(milliseconds: 180),
           width: 50,
           height: 28,
-          child: Icon(active ? tab.activeIcon : tab.icon, color: color, size: 24),
+          child: Icon(active ? tab.activeIcon : tab.icon, color: color, size: 23),
         ),
         const SizedBox(height: 3),
         label,

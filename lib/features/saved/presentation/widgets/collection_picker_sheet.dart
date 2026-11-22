@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/di/repositories.dart';
@@ -147,7 +148,7 @@ class _CollectionPickerState extends ConsumerState<_CollectionPicker> {
                       padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.xs),
                       child: Row(
                         children: [
-                          const Icon(Icons.add_rounded, color: AppColors.primary),
+                          const Icon(LucideIcons.plus, color: AppColors.primary),
                           const SizedBox(width: AppSpacing.sm),
                           Text('새 보관함 만들기', style: AppTypography.label.copyWith(color: AppColors.primary)),
                         ],
@@ -189,7 +190,7 @@ class _Row extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
           child: Row(
             children: [
-              const IconCircle(icon: Icons.folder_outlined),
+              const IconCircle(icon: LucideIcons.folder),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(

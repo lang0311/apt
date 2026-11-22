@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../app/theme/app_colors.dart';
 
@@ -11,7 +12,7 @@ class AppNetworkImage extends StatelessWidget {
     this.width,
     this.height,
     this.radius = 14,
-    this.placeholderIcon = Icons.image_outlined,
+    this.placeholderIcon = LucideIcons.image,
   });
 
   final String? url;

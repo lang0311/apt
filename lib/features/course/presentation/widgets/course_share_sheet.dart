@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -87,7 +88,7 @@ class _ShareBody extends ConsumerWidget {
         const SizedBox(height: AppSpacing.sm),
         ShareOption(
           background: AppColors.bg,
-          leading: const IconCircle(icon: Icons.link_rounded),
+          leading: const IconCircle(icon: LucideIcons.link),
           title: '코스 링크 복사',
           description: '링크를 열면 코스 상세로 가요',
           onTap: copy,

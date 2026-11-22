@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:apt/core/widgets/spark_icon.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
@@ -92,7 +94,7 @@ class SavedPlaceRow extends StatelessWidget {
               child: Row(
                 children: [
                   if (checked != null) ...[SelectCheckbox(value: checked, onChanged: (_) => onTap()), const SizedBox(width: AppSpacing.xs)],
-                  PlaceImage(place: place, width: 56, height: 56),
+                  PlaceImage(place: place, width: 60, height: 60, radius: AppRadius.medium, iconSize: 24),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Column(
@@ -100,7 +102,7 @@ class SavedPlaceRow extends StatelessWidget {
                       children: [
                         Text(
                           place.name,
-                          style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w800),
+                          style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w600),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -115,12 +117,12 @@ class SavedPlaceRow extends StatelessWidget {
                           const SizedBox(height: 3),
                           Row(
                             children: [
-                              const Icon(Icons.auto_awesome, size: 12, color: AppColors.ai),
+                              const SparkIcon(size: 12, color: AppColors.ai),
                               const SizedBox(width: 3),
                               Flexible(
                                 child: Text(
                                   recommendedLabel(recommendedIn),
-                                  style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w700),
+                                  style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w600),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -137,7 +139,7 @@ class SavedPlaceRow extends StatelessWidget {
                                 const SizedBox(width: 2),
                                 Text(
                                   place.rating!.toStringAsFixed(1),
-                                  style: AppTypography.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+                                  style: AppTypography.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
                                 ),
                                 const SizedBox(width: AppSpacing.xs),
                               ],
@@ -217,7 +219,7 @@ class CollectionRow extends StatelessWidget {
                     children: [
                       Text(
                         collection.name,
-                        style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w800),
+                        style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w600),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -230,7 +232,7 @@ class CollectionRow extends StatelessWidget {
               IconButton(
                 onPressed: onMore,
                 tooltip: '${collection.name} 메뉴',
-                icon: const Icon(Icons.more_horiz_rounded, color: AppColors.textSecondary),
+                icon: const Icon(LucideIcons.ellipsis, color: AppColors.textSecondary),
                 constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
               ),
             ],
@@ -328,7 +330,7 @@ class MiniCollage extends StatelessWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(color: AppColors.fill, borderRadius: BorderRadius.circular(radius)),
-        child: Icon(Icons.bookmark_border_rounded, color: AppColors.textTertiary, size: size > 80 ? 28 : 22),
+        child: Icon(LucideIcons.bookmark, color: AppColors.textTertiary, size: size > 80 ? 28 : 22),
       );
     }
     final cell = (size - 1.5) / 2;
@@ -388,7 +390,7 @@ class AllPlacesLink extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+              const Icon(LucideIcons.chevronRight, color: AppColors.textHint),
             ],
           ),
         ),
@@ -469,7 +471,7 @@ class AppliedFilterChip extends StatelessWidget {
               children: [
                 Text(label, style: AppTypography.label.copyWith(color: Colors.white)),
                 const SizedBox(width: 2),
-                const Icon(Icons.close_rounded, size: 15, color: Colors.white70),
+                const Icon(LucideIcons.x, size: 15, color: Colors.white70),
               ],
             ),
           ),
@@ -690,19 +692,14 @@ class _CategoryOption extends StatelessWidget {
               child: Row(
                 children: [
                   if (style != null) ...[
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.small)),
-                      child: Icon(style.icon, size: 19, color: style.ink),
-                    ),
+                    CategoryColorTile(style: style, width: 36, height: 36, radius: AppRadius.small, iconSize: 19),
                     const SizedBox(width: AppSpacing.sm),
                   ],
                   Text(
                     label,
                     style: AppTypography.bodyStrong.copyWith(
                       color: selected ? AppColors.primary : AppColors.textPrimary,
-                      fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                     ),
                   ),
                   const SizedBox(width: 6),

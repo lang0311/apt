@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
@@ -62,12 +63,12 @@ class PlaceListTile extends StatelessWidget {
           children: [
             if (showBookmark)
               Icon(
-                place.isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                place.isSaved ? Icons.bookmark_rounded : LucideIcons.bookmark,
                 color: AppColors.primary,
                 semanticLabel: place.isSaved ? '저장됨' : '저장 안 됨',
               ),
             const SizedBox(height: AppSpacing.xs),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+            const Icon(LucideIcons.chevronRight, color: AppColors.textSecondary),
           ],
         ),
       ],

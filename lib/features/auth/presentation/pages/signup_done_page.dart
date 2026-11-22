@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_colors.dart';
@@ -16,6 +17,8 @@ class SignupDonePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // v2: '랑이님, 가입이 끝났어요' (닉네임이 없으면 이름 없이)
+    final nickname = ref.watch(authControllerProvider).user?.nickname.trim() ?? '';
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -30,10 +33,10 @@ class SignupDonePage extends ConsumerWidget {
                       width: 56,
                       height: 56,
                       decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                      child: const Icon(Icons.check_rounded, color: Colors.white, size: 30),
+                      child: const Icon(LucideIcons.check, color: Colors.white, size: 30),
                     ),
                     const SizedBox(height: 22),
-                    Text('가입이 끝났어요', style: AppTypography.display),
+                    Text(nickname.isEmpty ? '가입이 끝났어요' : '$nickname님, 가입이 끝났어요', style: AppTypography.display),
                     const SizedBox(height: 6),
                     Text('이제 릴스에서 마음에 드는 곳을 보면 이렇게 저장해요.', style: AppTypography.bodyMuted),
                     const SizedBox(height: 30),

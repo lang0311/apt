@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_colors.dart';
@@ -91,7 +92,7 @@ class _CollectionSelectState extends ConsumerState<_CollectionSelect> {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.sm)),
-                      child: const Icon(Icons.add_rounded, color: AppColors.textSecondary),
+                      child: const Icon(LucideIcons.plus, color: AppColors.textSecondary),
                     ),
                     title: '새 보관함',
                     onTap: _create,
@@ -120,7 +121,7 @@ class _CollectionSelectState extends ConsumerState<_CollectionSelect> {
                     toggled: _applyAll,
                     child: AppButton(
                       label: '${widget.applyAllCount}곳 모두 적용',
-                      icon: _applyAll ? Icons.check_rounded : null,
+                      icon: _applyAll ? LucideIcons.check : null,
                       variant: _applyAll ? AppButtonVariant.soft : AppButtonVariant.secondary,
                       onPressed: () => setState(() => _applyAll = !_applyAll),
                     ),

@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:flutter/material.dart';
 
@@ -84,9 +85,10 @@ class SheetHandle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(top: 10, bottom: 6),
-      width: 44,
-      height: 5,
-      decoration: BoxDecoration(color: AppColors.progressInactive, borderRadius: BorderRadius.circular(3)),
+      // v2 시안 .grab: 38 × 4
+      width: 38,
+      height: 4,
+      decoration: BoxDecoration(color: AppColors.grab, borderRadius: BorderRadius.circular(4)),
     );
   }
 }
@@ -110,7 +112,7 @@ Future<T?> showAppModal<T>(BuildContext context, {required String title, require
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(child: Text(title, style: AppTypography.title)),
-                AppIconBox(icon: Icons.close_rounded, background: AppColors.bg, tooltip: '닫기', onPressed: () => Navigator.of(ctx).pop()),
+                AppIconBox(icon: LucideIcons.x, background: AppColors.bg, tooltip: '닫기', onPressed: () => Navigator.of(ctx).pop()),
               ],
             ),
             const SizedBox(height: AppSpacing.lg),

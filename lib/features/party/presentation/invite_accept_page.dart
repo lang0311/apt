@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -81,7 +82,7 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
       body: SafeArea(
         child: Column(
           children: [
-            PlainHeader(leadingIcon: Icons.close_rounded, leadingTooltip: '닫기', onLeading: () => context.go(AppRoutes.home)),
+            PlainHeader(leadingIcon: LucideIcons.x, leadingTooltip: '닫기', onLeading: () => context.go(AppRoutes.home)),
             Expanded(
               child: invitation.when(loading: () => const AppLoading(), error: (e, _) => _error(e), data: _content),
             ),
@@ -109,7 +110,7 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
     final alreadyJoined = error.kind == InviteFailureKind.alreadyJoined;
     return Center(
       child: AppEmptyState(
-        icon: Icons.mail_outline_rounded,
+        icon: LucideIcons.mail,
         title: error.kind.title,
         description: error.kind.description,
         actionLabel: alreadyJoined ? '코스 목록 보기' : '홈으로',
@@ -134,8 +135,12 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
                   width: 44,
                   height: 44,
                   alignment: Alignment.center,
-                  decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
-                  child: Text(name.isEmpty ? '?' : name.characters.first, style: AppTypography.bodyStrong.copyWith(color: AppColors.primary)),
+                  // v2: 파티원 얼굴 색(코랄) 채움 원 + 흰 첫 글자 (초대한 사람)
+                  decoration: const BoxDecoration(color: AppColors.avatarCoral, shape: BoxShape.circle),
+                  child: Text(
+                    name.isEmpty ? '?' : name.characters.first,
+                    style: AppTypography.bodyStrong.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+                  ),
                 ),
               ),
               const SizedBox(height: 14),

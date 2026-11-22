@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:apt/core/widgets/spark_icon.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -310,7 +312,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
                 bottom: height * sheetMin + AppSpacing.xs,
                 child: Visibility(
                   visible: !_expanded,
-                  child: _FrostedIconButton(icon: Icons.my_location_rounded, tooltip: '내 위치', onPressed: _goToMyLocation),
+                  child: _FrostedIconButton(icon: LucideIcons.locateFixed, tooltip: '내 위치', onPressed: _goToMyLocation),
                 ),
               ),
               // '목록으로 보기'는 지도 위 작은 버튼 (코스 만들기 3단계와 같은 자리)
@@ -375,12 +377,12 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
         children: [
           Row(
             children: [
-              _FrostedIconButton(icon: Icons.arrow_back_ios_new_rounded, tooltip: '뒤로', onPressed: () => context.pop()),
+              _FrostedIconButton(icon: LucideIcons.chevronLeft, tooltip: '뒤로', onPressed: () => context.pop()),
               const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: _Frosted(
                   radius: 14,
-                  child: AppSearchField(hint: '저장된 장소 검색', fillColor: Colors.transparent, onChanged: (v) => setState(() => _keyword = v.trim())),
+                  child: AppSearchField(hint: '저장한 장소 검색', fillColor: Colors.transparent, onChanged: (v) => setState(() => _keyword = v.trim())),
                 ),
               ),
             ],
@@ -419,15 +421,12 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
           padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, 0, AppSpacing.sm, 0),
           child: Row(
             children: [
-              Text('이 지역', style: AppTypography.cardTitle),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(shown.hasValue ? '$count곳' : '', style: AppTypography.label.copyWith(color: AppColors.textTertiary)),
-              ),
+              // v2: '이 지역 12곳' 한 덩어리 굵은 제목
+              Expanded(child: Text(shown.hasValue ? '이 지역 $count곳' : '이 지역', style: AppTypography.section)),
               if (_sourceLabel != null)
                 Text(
                   _sourceLabel!,
-                  style: AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700),
+                  style: AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
                 ),
             ],
           ),
@@ -439,7 +438,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
           if (ai.isNotEmpty) _PlaceGroup(title: mine.isEmpty ? null : '추천받은 곳', items: ai, recommended: true),
         ] else ...[
           SizedBox(
-            height: 70 + AppSpacing.sm * 2,
+            height: 76 + AppSpacing.sm * 2,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.sm, AppSpacing.sm, AppSpacing.sm),
@@ -467,14 +466,14 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
     if (!shown.hasValue) return const AppLoading(padding: EdgeInsets.all(AppSpacing.lg));
     if (count > 0) return null;
     if (!_showMine && !_showAi) {
-      return const AppEmptyState(compact: true, icon: Icons.visibility_off_outlined, title: '보여 줄 장소가 없어요', description: '직접 저장이나 추천받은 곳을 켜 보세요.');
+      return const AppEmptyState(compact: true, icon: LucideIcons.eyeOff, title: '보여 줄 장소가 없어요', description: '직접 저장이나 추천받은 곳을 켜 보세요.');
     }
     final anySaved = (ref.read(savedSummaryProvider).value?.totalCount ?? 0) + (ref.read(aiSavedSummaryProvider).value?.totalCount ?? 0) > 0;
     // 저장 0곳: 찾아서 저장하도록 안내 (07 D32)
     if (!anySaved) {
       return AppEmptyState(
         compact: true,
-        icon: Icons.bookmark_border_rounded,
+        icon: LucideIcons.bookmark,
         title: '아직 저장한 곳이 없어요',
         description: '가고 싶은 곳을 찾아 저장하면 지도에 표시돼요.',
         actionLabel: '장소 찾기',
@@ -484,7 +483,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
     if (_markerPoints.isEmpty) {
       return AppEmptyState(
         compact: true,
-        icon: Icons.search_off_rounded,
+        icon: LucideIcons.searchX,
         title: '찾는 장소가 없어요',
         actionLabel: '필터 풀기',
         onAction: () => setState(() {
@@ -496,7 +495,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
     }
     return AppEmptyState(
       compact: true,
-      icon: Icons.location_off_outlined,
+      icon: LucideIcons.mapPinOff,
       title: '이 근처에 저장한 장소가 없어요',
       actionLabel: '저장한 장소 전체 보기',
       onAction: () => _map.fitTo(_markerPoints),
@@ -562,7 +561,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
               Positioned(
                 right: AppSpacing.md,
                 bottom: constraints.maxHeight * sheetMin + AppSpacing.sm,
-                child: AppIconBox(icon: Icons.my_location_rounded, size: 48, tooltip: '내 위치', onPressed: _goToMyLocation),
+                child: AppIconBox(icon: LucideIcons.locateFixed, size: 48, tooltip: '내 위치', onPressed: _goToMyLocation),
               ),
               DraggableScrollableSheet(
                 controller: _sheet,
@@ -598,12 +597,12 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
           padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, 0),
           child: Row(
             children: [
-              AppIconBox(icon: Icons.chevron_left_rounded, size: 48, tooltip: '뒤로', onPressed: () => context.pop()),
+              AppIconBox(icon: LucideIcons.chevronLeft, size: 48, tooltip: '뒤로', onPressed: () => context.pop()),
               const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: DecoratedBox(
                   decoration: BoxDecoration(borderRadius: BorderRadius.circular(AppRadius.medium), boxShadow: AppShadow.soft),
-                  child: AppSearchField(hint: '저장된 장소 검색', onChanged: (v) => setState(() => _keyword = v.trim())),
+                  child: AppSearchField(hint: '저장한 장소 검색', onChanged: (v) => setState(() => _keyword = v.trim())),
                 ),
               ),
             ],
@@ -687,7 +686,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
                   if (sort != SavedSort.nearest || _hasLocation)
                     SheetAction(
                       label: sort.label,
-                      icon: sort == _effectiveSort ? Icons.check_rounded : Icons.sort_rounded,
+                      icon: sort == _effectiveSort ? LucideIcons.check : LucideIcons.arrowUpDown,
                       onTap: () => setState(() => _sort = sort),
                     ),
               ],
@@ -704,7 +703,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
         ),
         _visibleState(visible) ??
             (list.isEmpty
-                ? const AppEmptyState(compact: true, icon: Icons.search_off_rounded, title: '이 영역에 저장한 장소가 없어요')
+                ? const AppEmptyState(compact: true, icon: LucideIcons.searchX, title: '이 영역에 저장한 장소가 없어요')
                 : Column(
                     children: [
                       for (final item in list) ...[
@@ -755,7 +754,7 @@ class _SavedMapPageState extends ConsumerState<SavedMapPage> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(_autoSearch ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded, color: AppColors.primary, size: 20),
+              Icon(_autoSearch ? LucideIcons.circleDot : LucideIcons.circle, color: AppColors.primary, size: 20),
               const SizedBox(width: AppSpacing.xs),
               Text('지도 이동 시 자동 검색', style: AppTypography.label),
             ],
@@ -853,7 +852,7 @@ class _FilterChip extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.tune_rounded, size: 16, color: color),
+                      Icon(LucideIcons.listFilter, size: 18, color: color),
                       const SizedBox(width: 4),
                       Text(label, style: AppTypography.label.copyWith(color: color)),
                     ],
@@ -872,7 +871,7 @@ class _FilterChip extends StatelessWidget {
                 radius: 18,
                 child: const Padding(
                   padding: EdgeInsets.fromLTRB(2, 8, 10, 8),
-                  child: Icon(Icons.close_rounded, size: 16, color: AppColors.primary),
+                  child: Icon(LucideIcons.x, size: 16, color: AppColors.primary),
                 ),
               ),
             ),
@@ -905,7 +904,7 @@ class _ListPill extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.format_list_bulleted_rounded, size: 17, color: AppColors.textPrimary),
+                const Icon(LucideIcons.list, size: 17, color: AppColors.textPrimary),
                 const SizedBox(width: 5),
                 Text('목록 $count', style: AppTypography.label),
               ],
@@ -939,7 +938,7 @@ class _MapFab extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.map_outlined, size: 18, color: Colors.white),
+                const Icon(LucideIcons.map, size: 18, color: Colors.white),
                 const SizedBox(width: 6),
                 Text('지도', style: AppTypography.label.copyWith(color: Colors.white)),
               ],
@@ -965,14 +964,14 @@ class _MapPlaceCard extends StatelessWidget {
     final distance = _distanceLabel(item);
     final radius = BorderRadius.circular(AppRadius.medium);
     return SizedBox(
-      width: 240,
+      width: 250,
       child: Material(
         color: AppColors.surfaceRaised,
         elevation: 2,
         shadowColor: AppColors.shadowFloat,
         shape: RoundedRectangleBorder(
           borderRadius: radius,
-          side: BorderSide(color: selected ? AppColors.primary : Colors.transparent, width: 1.5),
+          side: BorderSide(color: selected ? AppColors.primary : AppColors.divider, width: selected ? 2 : 1),
         ),
         child: InkWell(
           borderRadius: radius,
@@ -981,15 +980,15 @@ class _MapPlaceCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Row(
               children: [
-                PlaceImage(place: place, width: 44, height: 44, radius: 10, iconSize: 20),
-                const SizedBox(width: 10),
+                PlaceImage(place: place, width: 52, height: 52, radius: AppRadius.medium, iconSize: 22),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(place.name, style: AppTypography.label, maxLines: 1, overflow: TextOverflow.ellipsis),
-                      Text([place.categoryLabel, ?distance].join(' · '), style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text(place.name, style: AppTypography.cardTitle, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text([place.categoryLabel, ?distance].join(' · '), style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
                       if (recommended) _RecommendedLine(item),
                     ],
                   ),
@@ -1033,7 +1032,7 @@ class _PlaceGroup extends StatelessWidget {
                         ),
                       ],
                     ),
-                    style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700),
+                    style: AppTypography.meta.copyWith(fontWeight: FontWeight.w600),
                   ),
           ),
           DecoratedBox(
@@ -1079,7 +1078,7 @@ class _PlaceRow extends StatelessWidget {
                     children: [
                       Text(
                         place.name,
-                        style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w800),
+                        style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w600),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1095,7 +1094,7 @@ class _PlaceRow extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 2),
                     child: Text(
                       distance,
-                      style: AppTypography.caption.copyWith(color: AppColors.textTertiary, fontWeight: FontWeight.w700),
+                      style: AppTypography.caption.copyWith(color: AppColors.textTertiary, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],
@@ -1117,12 +1116,12 @@ class _RecommendedLine extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.auto_awesome, size: 11, color: AppColors.ai),
+        const SparkIcon(size: 11, color: AppColors.ai),
         const SizedBox(width: 3),
         Flexible(
           child: Text(
             SavedPlaceRow.recommendedLabel(item.recommendedIn),
-            style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w700),
+            style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w600),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

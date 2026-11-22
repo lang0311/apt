@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
@@ -109,7 +110,8 @@ class _AppTextFieldState extends State<AppTextField> {
                 onSubmitted: widget.onSubmitted,
                 autofillHints: widget.autofillHints,
                 maxLength: widget.maxLength,
-                style: AppTypography.bodyStrong,
+                // v2: 입력한 글자는 보통 굵기
+                style: AppTypography.body,
                 decoration: InputDecoration(
                   isCollapsed: true,
                   border: InputBorder.none,
@@ -163,7 +165,7 @@ class AppFieldError extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.error_outline_rounded, size: 16, color: AppColors.danger),
+        const Icon(LucideIcons.circleAlert, size: 16, color: AppColors.danger),
         const SizedBox(width: 6),
         Expanded(
           child: Text(
@@ -215,7 +217,7 @@ class AppSearchField extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.search_rounded, color: AppColors.textSecondary, size: 22),
+          const Icon(LucideIcons.search, color: AppColors.textSecondary, size: 22),
           const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: TextField(

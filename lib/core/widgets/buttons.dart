@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
+import 'press_scale.dart';
 
 /// 색 규칙(07 D57): primary = 화면마다 하나, 다음 단계로 가는 주 행동 · white = 그 옆 보조 행동 ·
 /// soft = 목록 줄 안 작은 행동 · dark = 이미 켜진 상태(저장됨 등) · danger = 지우기 · 차단(빨간 글자)
@@ -60,7 +61,10 @@ class AppButton extends StatelessWidget {
             ],
           );
 
-    return SizedBox(
+    // 토스식: 누르는 동안 살짝 작아짐
+    return PressScale(
+      enabled: enabled,
+      child: SizedBox(
       height: height,
       width: expand ? double.infinity : null,
       child: Material(
@@ -78,6 +82,7 @@ class AppButton extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }

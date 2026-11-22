@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
@@ -44,7 +45,7 @@ class ExtractSourceRow extends StatelessWidget {
 
 /// 링크 줄 왼쪽 칸: 링크 아이콘 (지도 검색 줄은 돋보기)
 class LinkTile extends StatelessWidget {
-  const LinkTile({super.key, this.icon = Icons.link_rounded});
+  const LinkTile({super.key, this.icon = LucideIcons.link});
   final IconData icon;
 
   @override
@@ -53,18 +54,46 @@ class LinkTile extends StatelessWidget {
   }
 }
 
-/// 링크 줄 왼쪽 칸: 인스타그램 게시물 (계정 이름을 받았을 때)
+/// 링크 줄 왼쪽 칸: 인스타그램 게시물 (계정 이름을 받았을 때). v2: 잉크 선 글리프(둥근 네모 + 원 + 점)
 class InstagramTile extends StatelessWidget {
   const InstagramTile({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 30,
+    return SizedBox(
+      width: 24,
       height: 30,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppRadius.small),
-        gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFFF58529), Color(0xFFDD2A7B), Color(0xFF8134AF)]),
+      child: Center(
+        child: Container(
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: AppColors.textPrimary, width: 1.8),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.textPrimary, width: 1.8),
+                ),
+              ),
+              Positioned(
+                right: 2.5,
+                top: 2.5,
+                child: Container(
+                  width: 2.4,
+                  height: 2.4,
+                  decoration: const BoxDecoration(color: AppColors.textPrimary, shape: BoxShape.circle),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -72,9 +101,12 @@ class InstagramTile extends StatelessWidget {
 
 /// 링크 줄 오른쪽 글자 버튼 ('찾기', '게시물 보기')
 class SourceRowAction extends StatelessWidget {
-  const SourceRowAction({super.key, required this.label, this.onPressed});
+  const SourceRowAction({super.key, required this.label, this.onPressed, this.external = false});
   final String label;
   final VoidCallback? onPressed;
+
+  /// 앱 밖으로 나가는 버튼: 회색 글자 + ↗ (v2 '게시물 보기 ↗')
+  final bool external;
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +119,22 @@ class SourceRowAction extends StatelessWidget {
         minimumSize: const Size(48, 44),
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       ),
-      child: Text(label, style: AppTypography.label.copyWith(color: onPressed == null ? AppColors.textTertiary : AppColors.primary)),
+      child: external
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: AppTypography.label.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(width: 3),
+                const Icon(LucideIcons.arrowUpRight, size: 14, color: AppColors.textSecondary),
+              ],
+            )
+          : Text(
+              label,
+              style: AppTypography.label.copyWith(color: onPressed == null ? AppColors.textTertiary : AppColors.primary, fontWeight: FontWeight.w600),
+            ),
     );
   }
 }
@@ -129,7 +176,7 @@ class ExtractedPlaceRow extends StatelessWidget {
               children: [
                 Text(
                   place.name,
-                  style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w700),
+                  style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w600),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -151,7 +198,10 @@ class ExtractedPlaceRow extends StatelessWidget {
                           widthFactor: 1,
                           child: Text(
                             collectionLabel == null ? '보관함 고르기 ›' : '$collectionLabel에 담아요',
-                            style: AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
+                            // v2: 고르기 전은 회색, 고른 뒤 '○○에 담아요'는 파랑
+                            style: collectionLabel == null
+                                ? AppTypography.meta.copyWith(color: AppColors.textSecondary)
+                                : AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),

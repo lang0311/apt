@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/repositories.dart';
@@ -51,7 +52,7 @@ class PlaceDetailPage extends ConsumerWidget {
                   tooltip: '공유',
                   // 공유 동작은 확정 필요 (docs/05 #20)
                   onPressed: () => showAppSnackBar(context, '장소 공유는 준비 중이에요.'),
-                  icon: const Icon(Icons.ios_share_rounded, color: AppColors.textPrimary, size: 22),
+                  icon: const Icon(LucideIcons.share, color: AppColors.textPrimary, size: 22),
                 ),
               ],
             ),
@@ -137,30 +138,34 @@ class _Body extends ConsumerWidget {
       if (place.address.trim().isNotEmpty)
         _InfoRow(
           label: '주소',
-          child: Text(place.address, style: AppTypography.bodyMuted),
+          child: Text(place.address, style: AppTypography.body),
         ),
       if (place.phone != null)
         _InfoRow(
           label: '전화',
           onTap: () => openDialer(context, place.phone!),
-          child: Text(place.phone!, style: AppTypography.bodyStrong),
+          trailing: false,
+          child: Text(place.phone!, style: AppTypography.body.copyWith(color: AppColors.primary)),
         ),
       if (place.keywords.isNotEmpty)
         _InfoRow(
           label: '키워드',
           child: TagWrap(place.keywords, tone: AppTagTone.primary),
         ),
-      if (place.mapUrl != null)
+      // 위치 지도가 있으면 지도 위 '카카오맵에서 보기 ↗'로 대신한다 (v2)
+      if (place.mapUrl != null && place.location == null)
         _InfoRow(
           label: '지도',
           onTap: () => openExternalLink(context, place.mapUrl!),
-          child: Text('카카오맵에서 보기', style: AppTypography.bodyStrong),
+          external: true,
+          child: Text('카카오맵에서 보기', style: AppTypography.body),
         ),
       if (place.sourceUrl != null)
         _InfoRow(
           label: '원본',
           onTap: () => openExternalLink(context, place.sourceUrl!),
-          child: Text('Instagram 게시물', style: AppTypography.bodyStrong),
+          external: true,
+          child: Text('Instagram 게시물', style: AppTypography.body),
         ),
     ];
 
@@ -226,7 +231,7 @@ class _Body extends ConsumerWidget {
         BottomCta(
           child: AppButton(
             label: '이 장소로 코스 만들기',
-            icon: Icons.route_rounded,
+            icon: LucideIcons.route,
             // 해당 장소를 사전 선택해 코스 만들기 1/4로 (docs/04 §D)
             onPressed: () => startCourseWizard(context, ref, places: [place]),
           ),
@@ -281,7 +286,7 @@ class _TitleCard extends StatelessWidget {
               Flexible(
                 child: Text(
                   '$recommendedIn받은 곳이에요',
-                  style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w700),
+                  style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w600),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -329,7 +334,7 @@ class _LocationMap extends StatelessWidget {
   const _LocationMap({required this.place});
   final Place place;
 
-  static const double _height = 150;
+  static const double _height = 180;
 
   @override
   Widget build(BuildContext context) {
@@ -343,7 +348,7 @@ class _LocationMap extends StatelessWidget {
           children: [
             Positioned.fill(
               child: AptMap(
-                markers: [MapMarker(id: place.id, point: place.location!, kind: MapPinKind.place, icon: style.icon, color: style.color)],
+                markers: [MapMarker(id: place.id, point: place.location!, kind: MapPinKind.drop, icon: style.icon, color: style.color)],
               ),
             ),
             // 작은 지도는 움직이지 않고 누르면 카카오맵으로
@@ -358,6 +363,30 @@ class _LocationMap extends StatelessWidget {
                 ),
               ),
             ),
+            // v2: 오른쪽 아래 '카카오맵에서 보기 ↗' (지도 전체를 눌러도 같다)
+            if (url != null)
+              Positioned(
+                right: AppSpacing.sm,
+                bottom: AppSpacing.sm,
+                child: IgnorePointer(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                      boxShadow: const [BoxShadow(color: AppColors.shadowFloat, blurRadius: 6)],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('카카오맵에서 보기', style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
+                        const SizedBox(width: 4),
+                        const Icon(LucideIcons.arrowUpRight, size: 15, color: AppColors.textPrimary),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -366,10 +395,16 @@ class _LocationMap extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.label, required this.child, this.onTap});
+  const _InfoRow({required this.label, required this.child, this.onTap, this.external = false, this.trailing = true});
   final String label;
   final Widget child;
   final VoidCallback? onTap;
+
+  /// 앱 밖으로 나가는 줄은 끝에 ↗ (v2)
+  final bool external;
+
+  /// 끝 화살표 표시 (전화처럼 값 색으로 눌러짐을 알리면 끔)
+  final bool trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -377,14 +412,12 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding, vertical: AppSpacing.sm),
       child: Row(
         children: [
-          SizedBox(
-            width: 56,
-            child: Text(label, style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700)),
-          ),
+          SizedBox(width: 64, child: Text(label, style: AppTypography.meta)),
           Expanded(
             child: Align(alignment: Alignment.centerLeft, child: child),
           ),
-          if (onTap != null) const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+          if (onTap != null && trailing)
+            Icon(external ? LucideIcons.arrowUpRight : LucideIcons.chevronRight, size: external ? 18 : 24, color: AppColors.textHint),
         ],
       ),
     );

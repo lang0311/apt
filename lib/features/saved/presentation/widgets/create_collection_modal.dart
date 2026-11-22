@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/di/repositories.dart';
@@ -85,7 +86,7 @@ class _CreateCollectionFormState extends ConsumerState<_CreateCollectionForm> {
           color: AppColors.bg,
           child: Row(
             children: [
-              const IconCircle(icon: Icons.folder_outlined),
+              const IconCircle(icon: LucideIcons.folder),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(

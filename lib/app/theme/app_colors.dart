@@ -25,6 +25,15 @@ abstract final class AppColors {
   static const surfaceRaised = Color(0xFFFFFFFF);
   static const surfaceMuted = Color(0xFFEEF2F8);
 
+  /// 토스트(스낵바) 바탕 — v2 시안 .toast
+  static const toast = Color(0xFF23272F);
+
+  /// 시트 손잡이 — v2 시안 .grab
+  static const grab = Color(0xFFD7DBE0);
+
+  /// 누르는 동안 깔리는 옅은 회색 (물결 대신, iOS식)
+  static const pressed = Color(0x0F132238);
+
   /// 채움 — 입력칸 · 보조 버튼 · 칩 · 구역 띠 바탕 (v2)
   static const fill = surfaceMuted;
 
@@ -57,11 +66,11 @@ abstract final class AppColors {
   static const onPhotoMuted = Color(0xE0FFFFFF);
 
   /// 지도 위 흐린 바탕(뒤를 흐리게 한 검색 줄 · 묶음)과 그 테두리 (흰색 85% · 90%)
-  static const mapGlass = Color(0xD9FFFFFF);
+  static const mapGlass = Color(0xEBFFFFFF); // v2 시안 .glass 흰색 92%
   static const mapGlassBorder = Color(0xE6FFFFFF);
 
   /// 지도 위 알약 바탕 (흰색 94%). 예전에 화면마다 92~95%로 적던 값을 하나로 합쳤다
-  static const mapPill = Color(0xF0FFFFFF);
+  static const mapPill = Color(0xEBFFFFFF);
 
   /// 파티원 얼굴 색(바탕 · 글자)과 흰 바탕에 이름만 쓸 때의 진한 색. 파랑 · 보라는 `primary` · `extract` 계열을 쓴다
   static const avatarCoralSoft = Color(0xFFFDE4DD);
@@ -106,6 +115,22 @@ abstract final class AppColors {
   /// 아이콘만 조금 진하게 쓴다(음식점 3.69:1, 전시 · 문화 3.91:1, UI 리뷰 18)
   static const categoryFoodInk = Color(0xFFD14B41);
   static const categoryCultureInk = Color(0xFF128467);
+
+  // 업종 색 (리디자인 v2: 사진이 없을 때 칸 · 지도 핀. 밝은 쪽 → 진한 쪽 그라데이션)
+  static const catFoodLight = Color(0xFFF6B26B);
+  static const catFood = Color(0xFFDE6A3B);
+  static const catCafeLight = Color(0xFFD4B08C);
+  static const catCafe = Color(0xFF8C5D3E);
+  static const catCultureLight = Color(0xFFB9C4F2);
+  static const catCulture = Color(0xFF6474D3);
+  static const catNatureLight = Color(0xFFB4DCA6);
+  static const catNature = Color(0xFF4F9A5C);
+  static const catShopLight = Color(0xFFF4BBCB);
+  static const catShop = Color(0xFFD3668D);
+  static const catStayLight = Color(0xFFA595D6);
+  static const catStay = Color(0xFF41377A);
+  static const catEtcLight = Color(0xFFC3CBD7);
+  static const catEtc = Color(0xFF6B7890);
   static const successSoft = Color(0xFFE6F6F1);
 
   /// 숙박 카테고리 아이콘 색. 주황(`ai`)은 AI 추천 전용이라 카테고리에는 쓰지 않는다 (07 D17).

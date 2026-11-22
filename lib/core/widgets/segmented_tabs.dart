@@ -43,13 +43,14 @@ class SegmentedTabs extends StatelessWidget {
                         if (counts?[i] != null)
                           TextSpan(
                             text: ' ${counts![i]}',
-                            style: const TextStyle(color: AppColors.textTertiary, fontWeight: FontWeight.w700),
+                            style: const TextStyle(color: AppColors.textTertiary, fontWeight: FontWeight.w500),
                           ),
                       ],
                     ),
                     style: AppTypography.bodyStrong.copyWith(
-                      color: i == selectedIndex ? AppColors.ink : AppColors.textSecondary,
-                      fontWeight: i == selectedIndex ? FontWeight.w800 : FontWeight.w500,
+                      // v2 시안 .tabs: 굵기 600 그대로, 고르지 않은 탭은 연한 회색
+                      color: i == selectedIndex ? AppColors.ink : AppColors.textTertiary,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),

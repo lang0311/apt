@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -71,7 +72,7 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
                     : IconButton(
                         tooltip: '코스 만들기',
                         onPressed: () => startCourseWizard(context, ref),
-                        icon: const Icon(Icons.add_rounded, size: 26, color: AppColors.textPrimary),
+                        icon: const Icon(LucideIcons.plus, size: 26, color: AppColors.textPrimary),
                       ),
               ),
               // 새로고침이 실패해도 이전 목록이 있으면 그대로 둔다 (알림은 스낵바)
@@ -220,7 +221,7 @@ class _OtherUpcomingRow extends StatelessWidget {
               children: [
                 Text(
                   ddayLabel(course.date!),
-                  style: AppTypography.label.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800),
+                  style: AppTypography.label.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
@@ -232,7 +233,7 @@ class _OtherUpcomingRow extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+                const Icon(LucideIcons.chevronRight, color: AppColors.textHint),
               ],
             ),
           ),
@@ -265,7 +266,7 @@ class _EmptyLine extends StatelessWidget {
               child: AppTextLink(
                 label: actionLabel!,
                 onPressed: onAction,
-                style: AppTypography.meta.copyWith(fontWeight: FontWeight.w700),
+                style: AppTypography.meta.copyWith(fontWeight: FontWeight.w600),
               ),
             ),
         ],
@@ -284,7 +285,7 @@ class _EmptyCourses extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         AppEmptyState(
-          icon: Icons.map_outlined,
+          icon: LucideIcons.map,
           title: '아직 저장된 코스가 없어요',
           description: '가고 싶은 장소를 모아\n나만의 여행 코스를 만들어보세요.',
           actionLabel: '+ 첫 코스 만들기',

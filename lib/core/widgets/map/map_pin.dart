@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:apt/core/widgets/spark_icon.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_typography.dart';
@@ -14,11 +16,14 @@ enum MapPinKind {
   /// AI 추천 (주황 원. 번호가 있으면 번호 + 작은 ✦, 없으면 ✦)
   ai,
 
-  /// 저장 장소 핀 (카테고리 색 + 아이콘)
+  /// 저장 장소 핀 (업종 색 동그라미 + 흰 테두리 + 아이콘, v2). 고르면 커지고 파란 빛 테두리
   place,
 
   /// 찾은 장소 (흰 원 + 업종 색 테두리·아이콘). 저장하면 [place]로 바뀐다.
   result,
+
+  /// 장소 상세 위치 지도의 물방울 핀 (업종 색 + 아이콘, v2 #20)
+  drop,
 }
 
 class MapPin extends StatelessWidget {
@@ -39,13 +44,15 @@ class MapPin extends StatelessWidget {
         color ?? AppColors.ink,
         Text(
           '${number ?? ''}',
-          style: AppTypography.bodyStrong.copyWith(color: Colors.white, fontWeight: FontWeight.w800),
+          style: AppTypography.bodyStrong.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
         ),
       ),
-      MapPinKind.picked => _circle(color ?? AppColors.primary, const Icon(Icons.check_rounded, color: Colors.white, size: 20)),
-      MapPinKind.ai => number == null ? _circle(AppColors.ai, const Icon(Icons.auto_awesome, color: Colors.white, size: 18)) : _aiNumbered(),
-      MapPinKind.place => _teardrop(),
+      // v2: 고른 곳도 저장 장소 핀과 같은 크기의 파란 동그라미 + 체크
+      MapPinKind.picked => _placeDot(fill: color ?? AppColors.primary, glyph: LucideIcons.check),
+      MapPinKind.ai => number == null ? _circle(AppColors.ai, const SparkIcon(color: Colors.white, size: 18)) : _aiNumbered(),
+      MapPinKind.place => _placeDot(),
       MapPinKind.result => _result(),
+      MapPinKind.drop => _teardrop(),
     };
 
     if (label == null && !selected) return pin;
@@ -63,10 +70,14 @@ class MapPin extends StatelessWidget {
             ),
             child: Text(
               label!,
-              style: AppTypography.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+              style: AppTypography.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
             ),
           ),
-        AnimatedScale(scale: selected ? 1.15 : 1, duration: const Duration(milliseconds: 150), child: pin),
+        // 저장 장소 핀은 고른 모양을 따로 그린다(크기 · 빛 테두리)
+        if (kind == MapPinKind.place || kind == MapPinKind.picked)
+          pin
+        else
+          AnimatedScale(scale: selected ? 1.15 : 1, duration: const Duration(milliseconds: 150), child: pin),
       ],
     );
   }
@@ -98,23 +109,11 @@ class MapPin extends StatelessWidget {
             AppColors.ai,
             Text(
               '$number',
-              style: AppTypography.bodyStrong.copyWith(color: Colors.white, fontWeight: FontWeight.w800),
+              style: AppTypography.bodyStrong.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
             ),
           ),
-          Positioned(
-            right: 0,
-            top: 0,
-            child: Container(
-              width: 18,
-              height: 18,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.ai, width: 1.5),
-              ),
-              child: const Icon(Icons.auto_awesome, size: 11, color: AppColors.ai),
-            ),
-          ),
+          // v2: 오른쪽 위 작은 ✦ 글리프만
+          const Positioned(right: 0, top: 0, child: SparkIcon(size: 14, color: AppColors.aiText)),
         ],
       ),
     );
@@ -132,7 +131,31 @@ class MapPin extends StatelessWidget {
         border: Border.all(color: c, width: 2.5),
         boxShadow: const [BoxShadow(color: AppColors.shadowFloat, blurRadius: 5, offset: Offset(0, 1))],
       ),
-      child: Icon(icon ?? Icons.place, size: 17, color: c),
+      child: Icon(icon ?? LucideIcons.mapPin, size: 17, color: c),
+    );
+  }
+
+  /// v2 시안: 업종 색 동그라미(흰 테두리 · 흰 아이콘). 고르면 38로 커지고 바깥에 파란 빛 테두리
+  Widget _placeDot({Color? fill, IconData? glyph}) {
+    final c = fill ?? color ?? AppColors.textSecondary;
+    final d = selected ? 38.0 : 28.0;
+    final dot = Container(
+      width: d,
+      height: d,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: c,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: selected ? 3 : 2.5),
+        boxShadow: const [BoxShadow(color: AppColors.shadow, blurRadius: 5, offset: Offset(0, 1))],
+      ),
+      child: Icon(glyph ?? icon ?? LucideIcons.mapPin, size: selected ? 19 : 15, color: Colors.white),
+    );
+    if (!selected) return dot;
+    return Container(
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.28), shape: BoxShape.circle),
+      child: dot,
     );
   }
 
@@ -150,7 +173,7 @@ class MapPin extends StatelessWidget {
             color: c,
             shadows: const [Shadow(color: AppColors.shadowStrong, blurRadius: 4)],
           ),
-          Positioned(top: 8, child: Icon(icon ?? Icons.place, size: 15, color: Colors.white)),
+          Positioned(top: 8, child: Icon(icon ?? LucideIcons.mapPin, size: 15, color: Colors.white)),
         ],
       ),
     );

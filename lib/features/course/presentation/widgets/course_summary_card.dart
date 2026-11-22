@@ -70,7 +70,7 @@ class _People extends StatelessWidget {
         Expanded(
           child: Text(
             shown,
-            style: AppTypography.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+            style: AppTypography.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

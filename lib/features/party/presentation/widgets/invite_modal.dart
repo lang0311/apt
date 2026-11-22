@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -71,7 +72,7 @@ class _InviteBody extends ConsumerWidget {
         const SizedBox(height: AppSpacing.sm),
         ShareOption(
           background: AppColors.bg,
-          leading: const IconCircle(icon: Icons.link_rounded),
+          leading: const IconCircle(icon: LucideIcons.link),
           title: '초대 링크 복사',
           description: link.isLoading ? '링크를 만들고 있어요' : '링크로 초대하기',
           onTap: copy,
@@ -110,7 +111,7 @@ class ShareOption extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+          const Icon(LucideIcons.chevronRight, color: AppColors.textSecondary),
         ],
       ),
     );

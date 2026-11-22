@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../place/domain/place.dart';
 
@@ -9,11 +10,11 @@ enum Companion { solo, party }
 
 /// 이동 수단 (표시용). 서버 값과의 매핑은 NEEDS BACKEND.
 enum TransportMode {
-  walk('도보', Icons.directions_walk_rounded),
-  bus('버스', Icons.directions_bus_rounded),
-  subway('지하철', Icons.subway_rounded),
-  car('차량', Icons.directions_car_rounded),
-  unknown('이동', Icons.route_rounded);
+  walk('도보', LucideIcons.footprints),
+  bus('버스', LucideIcons.bus),
+  subway('지하철', LucideIcons.trainFront),
+  car('차량', LucideIcons.car),
+  unknown('이동', LucideIcons.route);
 
   const TransportMode(this.label, this.icon);
   final String label;

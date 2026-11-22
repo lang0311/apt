@@ -13,7 +13,8 @@ abstract final class AppTypography {
         fontWeight: weight,
         color: color,
         height: height,
-        letterSpacing: -0.2,
+        // v2 시안: 큰 제목(24 이상) -0.02em, 나머지 -0.01em (글자 크기에 비례)
+        letterSpacing: size * (size >= 24 ? -0.02 : -0.01),
       );
 
   /// 화면 대제목 (탭 루트 · 질문형 제목 · 인증 첫 화면)
@@ -32,7 +33,7 @@ abstract final class AppTypography {
   static final section = _s(18, FontWeight.w700, height: 1.3);
 
   /// 카드 · 묶음 제목
-  static final cardTitle = _s(16, FontWeight.w700, height: 1.35);
+  static final cardTitle = _s(16, FontWeight.w600, height: 1.35);
 
   /// 행 이름 · 강조 본문
   static final bodyStrong = _s(15, FontWeight.w600);

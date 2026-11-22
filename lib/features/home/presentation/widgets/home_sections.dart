@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/routes.dart';
@@ -15,6 +16,7 @@ import '../../../course/presentation/widgets/course_thumb.dart';
 import '../../../extraction/domain/extraction_models.dart';
 import '../../../place/domain/place.dart';
 import '../../../saved/presentation/widgets/place_image.dart';
+import '../../../../core/widgets/press_scale.dart';
 
 /// ① 처음 써요 — 공유로 저장하는 3단계 + 링크 붙여넣기
 class HomeStartGuide extends StatelessWidget {
@@ -89,7 +91,7 @@ class NewSavesNudge extends StatelessWidget {
                     Text('최근 ${items.length}곳을 저장했어요', style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
                     Text(
                       '코스로 만들어 볼까요? ›',
-                      style: AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700),
+                      style: AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -99,7 +101,7 @@ class NewSavesNudge extends StatelessWidget {
               IconButton(
                 onPressed: onClose,
                 tooltip: '제안 닫기',
-                icon: const Icon(Icons.close_rounded, size: 20, color: AppColors.textSecondary),
+                icon: const Icon(LucideIcons.x, size: 20, color: AppColors.textSecondary),
                 constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
               ),
             ],
@@ -207,7 +209,7 @@ class HomeCourseCard extends StatelessWidget {
                         child: Text(foot, style: AppTypography.meta.copyWith(color: AppColors.textSecondary)),
                       ),
                       Text('코스 보기', style: AppTypography.label.copyWith(color: AppColors.primary)),
-                      const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.primary),
+                      const Icon(LucideIcons.chevronRight, size: 18, color: AppColors.primary),
                     ],
                   ),
                 ],
@@ -226,7 +228,7 @@ class HomeCourseCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text('다가오는 코스 $moreCount개 더', style: AppTypography.meta),
-                    const Icon(Icons.chevron_right_rounded, size: 16, color: AppColors.textTertiary),
+                    const Icon(LucideIcons.chevronRight, size: 16, color: AppColors.textTertiary),
                   ],
                 ),
               ),
@@ -259,7 +261,7 @@ class _StopStrip extends StatelessWidget {
           lineAfter: !last,
           color: AppColors.surfaceMuted,
           label: '',
-          child: Text('+${n - 4}', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700)),
+          child: Text('+${n - 4}', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w600)),
         );
       }
       final ai = i < isAi.length && isAi[i];
@@ -396,7 +398,7 @@ class HomeUndatedCourses extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.small)),
-            child: const Icon(Icons.event_outlined, size: 20, color: AppColors.textSecondary),
+            child: const Icon(LucideIcons.calendar, size: 20, color: AppColors.textSecondary),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -408,7 +410,7 @@ class HomeUndatedCourses extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+          const Icon(LucideIcons.chevronRight, color: AppColors.textSecondary),
         ],
       ),
     );
@@ -506,7 +508,7 @@ class HomeQuickActions extends StatelessWidget {
       children: [
         Expanded(
           child: _QuickAction(
-            icon: Icons.link_rounded,
+            icon: LucideIcons.link,
             label: '장소 저장',
             iconColor: AppColors.textPrimary,
             iconBackground: AppColors.primarySoft,
@@ -516,7 +518,7 @@ class HomeQuickActions extends StatelessWidget {
         const SizedBox(width: AppSpacing.xs),
         Expanded(
           child: _QuickAction(
-            icon: Icons.route_rounded,
+            icon: LucideIcons.route,
             label: '코스 만들기',
             iconColor: AppColors.primary,
             iconBackground: AppColors.primary,
@@ -542,7 +544,10 @@ class _QuickAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // v2: 채움 칸, 위 아이콘 · 아래 굵은 이름
-    return Material(
+    // 토스식: 누르는 동안 살짝 작아짐
+    return PressScale(
+      scale: 0.97,
+      child: Material(
       color: AppColors.fill,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       clipBehavior: Clip.antiAlias,
@@ -560,6 +565,7 @@ class _QuickAction extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }
@@ -642,7 +648,7 @@ class SuggestedCourseStrip extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppNetworkImage(url: course.imageUrl, width: 200, height: 96, radius: 0, placeholderIcon: Icons.route_rounded),
+                    AppNetworkImage(url: course.imageUrl, width: 200, height: 96, radius: 0, placeholderIcon: LucideIcons.route),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(10, AppSpacing.xs, 10, 0),
                       child: Column(
@@ -758,7 +764,7 @@ class _PhotoTile extends StatelessWidget {
                       width: 26,
                       height: 26,
                       decoration: BoxDecoration(color: AppColors.photoBadge, borderRadius: BorderRadius.circular(AppRadius.small)),
-                      child: Icon(saved! ? Icons.bookmark_rounded : Icons.bookmark_border_rounded, size: 15, color: Colors.white),
+                      child: Icon(saved! ? Icons.bookmark_rounded : LucideIcons.bookmark, size: 15, color: Colors.white),
                     ),
                   ),
                 Positioned(

@@ -20,6 +20,8 @@ class AptApp extends ConsumerWidget {
       title: 'APT',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
+      // iOS · 토스 느낌: 끝에서 튕기는 스크롤, 늘어나는 효과 없음 (2026-11-23)
+      scrollBehavior: const _BounceScrollBehavior(),
       routerConfig: router,
       scaffoldMessengerKey: scaffoldMessengerKey,
       locale: const Locale('ko', 'KR'),
@@ -74,4 +76,15 @@ class AptRoot extends StatelessWidget {
       child: const AptApp(),
     );
   }
+}
+
+/// 모든 스크롤을 iOS처럼 끝에서 튕기게 하고, 안드로이드의 늘어나는 효과는 쓰지 않는다
+class _BounceScrollBehavior extends MaterialScrollBehavior {
+  const _BounceScrollBehavior();
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) => const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
+
+  @override
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) => child;
 }

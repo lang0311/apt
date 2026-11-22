@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_colors.dart';
@@ -101,7 +102,7 @@ class _TimeSheetState extends State<_TimeSheet> {
               IconButton(
                 tooltip: '닫기',
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
+                icon: const Icon(LucideIcons.x, color: AppColors.textSecondary),
               ),
             ],
           ),
@@ -186,7 +187,7 @@ class _CalendarChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.input),
           child: const SizedBox(
             width: 56,
-            child: Center(child: Icon(Icons.calendar_month_outlined, size: 22, color: AppColors.textPrimary)),
+            child: Center(child: Icon(LucideIcons.calendar, size: 22, color: AppColors.textPrimary)),
           ),
         ),
       ),
@@ -339,13 +340,13 @@ class _CalendarDialogState extends State<_CalendarDialog> {
             Row(
               children: [
                 Expanded(child: Text('${_month.year}년 ${_month.month}월', style: AppTypography.section)),
-                _RoundIconButton(icon: Icons.chevron_left_rounded, tooltip: '이전 달', onPressed: _canGoBack ? () => _shift(-1) : null),
+                _RoundIconButton(icon: LucideIcons.chevronLeft, tooltip: '이전 달', onPressed: _canGoBack ? () => _shift(-1) : null),
                 const SizedBox(width: AppSpacing.xxs),
-                _RoundIconButton(icon: Icons.chevron_right_rounded, tooltip: '다음 달', onPressed: () => _shift(1)),
+                _RoundIconButton(icon: LucideIcons.chevronRight, tooltip: '다음 달', onPressed: () => _shift(1)),
                 IconButton(
                   tooltip: '닫기',
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
+                  icon: const Icon(LucideIcons.x, color: AppColors.textSecondary),
                 ),
               ],
             ),

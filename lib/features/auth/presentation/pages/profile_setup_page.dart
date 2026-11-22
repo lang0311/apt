@@ -79,6 +79,7 @@ class _ProfileSetupPageState extends ConsumerState<ProfileSetupPage> {
                     hint: '닉네임을 입력해 주세요',
                     hasError: _error != null,
                     maxLength: 20,
+                    showCounter: true,
                     onChanged: (_) => setState(() => _error = null),
                   ),
                   const SizedBox(height: AppSpacing.xs),

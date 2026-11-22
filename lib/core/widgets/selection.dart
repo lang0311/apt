@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_typography.dart';
@@ -23,7 +24,7 @@ class CheckMark extends StatelessWidget {
       child: TweenAnimationBuilder<Color?>(
         duration: const Duration(milliseconds: 150),
         tween: ColorTween(end: _color),
-        builder: (_, color, _) => Icon(Icons.check_rounded, size: _size, color: color, weight: 700),
+        builder: (_, color, _) => Icon(LucideIcons.check, size: _size, color: color, weight: 700),
       ),
     );
   }
@@ -41,7 +42,7 @@ class CheckCircle extends StatelessWidget {
       width: 24,
       height: 24,
       decoration: BoxDecoration(color: checked ? AppColors.primary : AppColors.checkCircleOff, shape: BoxShape.circle),
-      child: const Icon(Icons.check_rounded, size: 15, color: Colors.white, weight: 700),
+      child: const Icon(LucideIcons.check, size: 15, color: Colors.white, weight: 700),
     );
   }
 }

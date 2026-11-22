@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:apt/core/widgets/spark_icon.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
@@ -137,12 +139,12 @@ class _ReasonRowState extends State<_ReasonRow> {
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH, vertical: 8),
                 child: Row(
                   children: [
-                    const SizedBox(width: 28, child: Icon(Icons.auto_awesome, size: 20, color: AppColors.ai)),
+                    const SizedBox(width: 28, child: SparkIcon( size: 20, color: AppColors.ai)),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text('추천 이유 보기', style: AppTypography.bodyStrong.copyWith(color: AppColors.aiText)),
                     ),
-                    Icon(_open ? Icons.expand_less_rounded : Icons.expand_more_rounded, color: AppColors.textSecondary),
+                    Icon(_open ? LucideIcons.chevronUp : LucideIcons.chevronDown, color: AppColors.textSecondary),
                   ],
                 ),
               ),
@@ -202,7 +204,7 @@ class _ActionRow extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                             decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.tiny)),
-                            child: Text('이번만', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w800)),
+                            child: Text('이번만', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w600)),
                           ),
                         ],
                       ],
@@ -211,7 +213,7 @@ class _ActionRow extends StatelessWidget {
                   ],
                 ),
               ),
-              if (action.chevron) const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+              if (action.chevron) const Icon(LucideIcons.chevronRight, color: AppColors.textHint),
             ],
           ),
         ),
@@ -232,7 +234,7 @@ Future<void> showResultStopSheet(
   VoidCallback? onSwap,
   VoidCallback? onBlock,
 }) {
-  final info = StopSheetAction(label: '장소 정보 보기', icon: Icons.place_outlined, onTap: onInfo, tone: StopSheetTone.link, chevron: true);
+  final info = StopSheetAction(label: '장소 정보 보기', icon: LucideIcons.mapPin, onTap: onInfo, tone: StopSheetTone.link, chevron: true);
   if (!stop.isAi) {
     return showStopSheet(
       context,
@@ -252,7 +254,7 @@ Future<void> showResultStopSheet(
           StopSheetAction(
             label: '다른 곳으로 바꾸기',
             description: '이 자리에 다른 장소를 추천해요',
-            icon: Icons.swap_horiz_rounded,
+            icon: LucideIcons.arrowLeftRight,
             tone: StopSheetTone.ai,
             onceScope: true,
             onTap: onSwap,
@@ -279,8 +281,8 @@ Future<void> showEditStopSheet(
     stop: stop,
     groups: [
       [
-        if (onUp != null) StopSheetAction(label: '앞으로', icon: Icons.arrow_upward_rounded, onTap: onUp),
-        if (onDown != null) StopSheetAction(label: '뒤로', icon: Icons.arrow_downward_rounded, onTap: onDown),
+        if (onUp != null) StopSheetAction(label: '앞으로', icon: LucideIcons.arrowUp, onTap: onUp),
+        if (onDown != null) StopSheetAction(label: '뒤로', icon: LucideIcons.arrowDown, onTap: onDown),
         if (stop.isAi) _removeAi(onRemove) else _removeOwn(onRemove),
       ],
       if (stop.isAi && onBlock != null) [_block(onBlock)],
@@ -289,15 +291,15 @@ Future<void> showEditStopSheet(
 }
 
 StopSheetAction _removeAi(VoidCallback onTap) =>
-    StopSheetAction(label: '이 코스에서 빼기', description: '자리는 비우고 시간만 다시 계산해요', icon: Icons.remove_rounded, onceScope: true, onTap: onTap);
+    StopSheetAction(label: '이 코스에서 빼기', description: '자리는 비우고 시간만 다시 계산해요', icon: LucideIcons.minus, onceScope: true, onTap: onTap);
 
 StopSheetAction _removeOwn(VoidCallback onTap) =>
-    StopSheetAction(label: '이 코스에서 빼기', description: '저장한 장소는 그대로 있어요', icon: Icons.remove_rounded, onTap: onTap);
+    StopSheetAction(label: '이 코스에서 빼기', description: '저장한 장소는 그대로 있어요', icon: LucideIcons.minus, onTap: onTap);
 
 StopSheetAction _block(VoidCallback onTap) => StopSheetAction(
   label: '앞으로 추천하지 않기',
   description: '모든 코스 추천에서 이 장소를 빼요',
-  icon: Icons.block_rounded,
+  icon: LucideIcons.ban,
   tone: StopSheetTone.danger,
   onTap: onTap,
 );

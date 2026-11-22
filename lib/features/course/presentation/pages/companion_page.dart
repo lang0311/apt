@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -108,7 +109,7 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
                       children: [
                         Expanded(
                           child: _CompanionTile(
-                            icon: Icons.person_outline_rounded,
+                            icon: LucideIcons.user,
                             title: '혼자 가요',
                             description: '내 취향으로 추천해요',
                             selected: !isParty,
@@ -118,7 +119,7 @@ class _CompanionPageState extends ConsumerState<CompanionPage> {
                         const SizedBox(width: AppSpacing.xs),
                         Expanded(
                           child: _CompanionTile(
-                            icon: Icons.group_outlined,
+                            icon: LucideIcons.users,
                             title: '함께 가요',
                             description: '파티원 취향도 반영해요',
                             selected: isParty,
@@ -227,31 +228,33 @@ class _PartyPicker extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SectionCard(
-              title: '어느 파티와 갈까요?',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  DividedRows(
-                    indent: SectionCard.innerPadding,
-                    children: [
-                      for (final p in shown)
-                        _PartyRow(
-                          selected: !newParty && p.id == selectedId,
-                          members: p.members,
-                          label: p.members.crewNames,
-                          count: '${p.members.length}명',
-                          onTap: () => onPick(p.id),
-                        ),
-                      _PartyRow(selected: newParty, label: '새 파티 만들기', onTap: onPickNew, accent: true, leadingIcon: Icons.add_rounded),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(SectionCard.innerPadding, AppSpacing.xs, SectionCard.innerPadding, AppSpacing.xxs),
-                    child: Text('고른 파티원이 저장한 장소와 취향을 추천에 반영해요. 초대 수락을 기다리지 않고 다음으로 갈 수 있어요.', style: AppTypography.caption),
-                  ),
-                ],
-              ),
+            // v2: 상자 · 들여쓰기 없이 회색 작은 제목 + 화면 여백에 맞춘 행
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.xs, bottom: AppSpacing.xxs),
+              child: Text('어느 파티와 갈까요?', style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600)),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                DividedRows(
+                  indent: 0,
+                  children: [
+                    for (final p in shown)
+                      _PartyRow(
+                        selected: !newParty && p.id == selectedId,
+                        members: p.members,
+                        label: p.members.crewNames,
+                        count: '${p.members.length}명',
+                        onTap: () => onPick(p.id),
+                      ),
+                    _PartyRow(selected: newParty, label: '새 파티 만들기', onTap: onPickNew, accent: true, leadingIcon: LucideIcons.plus),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, AppSpacing.xs, 0, AppSpacing.xxs),
+                  child: Text('고른 파티원이 저장한 장소와 취향을 추천에 반영해요. 초대 수락을 기다리지 않고 다음으로 갈 수 있어요.', style: AppTypography.meta.copyWith(color: AppColors.textSecondary)),
+                ),
+              ],
             ),
             if (newParty) ...[const SizedBox(height: AppSpacing.sm), newCard],
           ],
@@ -287,16 +290,22 @@ class _PartyRow extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 56),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
+            padding: EdgeInsets.zero,
             child: Row(
               children: [
                 SizedBox(
-                  width: 60,
+                  width: 72,
                   child: leadingIcon != null
-                      ? Icon(leadingIcon, size: 22, color: AppColors.primary)
+                      ? Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 6),
+                            child: Icon(leadingIcon, size: 24, color: AppColors.primary),
+                          ),
+                        )
                       : Align(
                           alignment: Alignment.centerLeft,
-                          child: PartyAvatarStack(members: members ?? const [], size: 24, max: 3, overlap: true),
+                          child: PartyAvatarStack(members: members ?? const [], size: 30, max: 3, overlap: true),
                         ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
@@ -362,7 +371,7 @@ class _NewPartyCard extends ConsumerWidget {
                     width: 36,
                     height: 36,
                     decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
-                    child: const Icon(Icons.add_rounded, color: AppColors.primary, size: 20),
+                    child: const Icon(LucideIcons.plus, color: AppColors.primary, size: 20),
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Text('초대하기', style: AppTypography.bodyStrong.copyWith(color: AppColors.primary)),
@@ -392,7 +401,7 @@ class _SoloCard extends ConsumerWidget {
         style: TextButton.styleFrom(foregroundColor: AppColors.primary, minimumSize: const Size(44, 44)),
         child: Text(
           manual ? '취향 수정' : '취향 보기',
-          style: AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700),
+          style: AppTypography.meta.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
         ),
       ),
       child: Padding(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -93,7 +94,7 @@ class _CourseInfoPageState extends ConsumerState<CourseInfoPage> {
                       children: [
                         _PickerField(
                           label: '출발 시간',
-                          icon: Icons.schedule_rounded,
+                          icon: LucideIcons.clock,
                           value: draft.startTime == null ? null : formatTimeOfDay(draft.startTime!),
                           hint: '출발 시간을 골라 주세요',
                           onTap: _pickTime,

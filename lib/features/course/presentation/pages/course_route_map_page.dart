@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_colors.dart';
@@ -96,7 +97,7 @@ class _CourseRouteMapPageState extends State<CourseRouteMapPage> {
             top: inset.top + AppSpacing.xs,
             child: Row(
               children: [
-                _RoundButton(icon: Icons.arrow_back_rounded, tooltip: '뒤로', onPressed: () => context.pop()),
+                _RoundButton(icon: LucideIcons.arrowLeft, tooltip: '뒤로', onPressed: () => context.pop()),
                 const SizedBox(width: AppSpacing.xs),
                 Flexible(
                   child: _TitlePill(title: widget.args.title, count: _stops.length),
@@ -107,7 +108,7 @@ class _CourseRouteMapPageState extends State<CourseRouteMapPage> {
           Positioned(
             right: AppSpacing.sm,
             top: inset.top + AppSpacing.xs + _topBar + AppSpacing.xs,
-            child: _RoundButton(icon: Icons.center_focus_strong_outlined, tooltip: '전체 보기', size: 44, onPressed: _fitAll),
+            child: _RoundButton(icon: LucideIcons.scan, tooltip: '전체 보기', size: 44, onPressed: _fitAll),
           ),
           Positioned(left: AppSpacing.sm, bottom: cardsBottom + _cardHeight + AppSpacing.xs, child: const _LineNote()),
           Positioned(
@@ -188,7 +189,7 @@ class _TitlePill extends StatelessWidget {
             ),
           ],
         ),
-        style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w700),
+        style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w600),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
@@ -297,7 +298,7 @@ class _Badge extends StatelessWidget {
       ),
       child: Text(
         '$number',
-        style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w800, height: 1),
+        style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w700, height: 1),
       ),
     );
   }

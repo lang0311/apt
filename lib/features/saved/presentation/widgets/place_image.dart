@@ -29,13 +29,14 @@ class PlaceImage extends StatelessWidget {
     if (place.imageUrl != null && place.imageUrl!.isNotEmpty) {
       return AppNetworkImage(url: place.imageUrl, width: width, height: height, radius: radius);
     }
-    final style = CategoryStyle.of(place.categoryKey);
-    return Container(
+    // v2: 사진이 없으면 업종 색 칸
+    return CategoryColorTile(
+      style: CategoryStyle.of(place.categoryKey),
       width: width,
       height: height,
-      alignment: iconAlignment,
-      decoration: BoxDecoration(color: style.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(radius)),
-      child: Icon(style.icon, size: iconSize, color: style.ink),
+      radius: radius,
+      iconSize: iconSize,
+      iconAlignment: iconAlignment,
     );
   }
 }

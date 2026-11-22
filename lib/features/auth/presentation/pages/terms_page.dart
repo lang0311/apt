@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -164,7 +165,7 @@ class _TermsRow extends StatelessWidget {
               if (onOpen != null)
                 IconButton(
                   tooltip: '약관 보기',
-                  icon: const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+                  icon: const Icon(LucideIcons.chevronRight, color: AppColors.textHint),
                   onPressed: onOpen,
                 )
               else

@@ -74,7 +74,7 @@ class _ExpandPill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 36,
-      padding: const EdgeInsets.only(left: 10, right: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppRadius.large),
@@ -83,8 +83,7 @@ class _ExpandPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.open_in_full_rounded, size: 17, color: AppColors.textPrimary),
-          const SizedBox(width: 6),
+          // v2: 아이콘 없이 글자만
           Text('크게 보기', style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
         ],
       ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
+import 'press_scale.dart';
 
 /// 선택형 칩 (v2: 높이 36 알약). 선택 = 잉크 채움 + 흰 글자 / 비선택 = 채움색
 class AppChip extends StatelessWidget {
@@ -27,7 +28,9 @@ class AppChip extends StatelessWidget {
     return Semantics(
       selected: selected,
       button: true,
-      child: Material(
+      child: PressScale(
+        enabled: onTap != null,
+        child: Material(
         color: selected ? selectedColor : AppColors.fill,
         shape: const StadiumBorder(),
         child: InkWell(
@@ -48,6 +51,7 @@ class AppChip extends StatelessWidget {
             ),
           ),
         ),
+      ),
       ),
     );
   }
@@ -85,7 +89,7 @@ class AppTextChip extends StatelessWidget {
                   label,
                   style: AppTypography.label.copyWith(
                     color: selected ? AppColors.primary : AppColors.textSecondary,
-                    fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                   ),
                 ),
               ],
@@ -139,7 +143,7 @@ class AppTag extends StatelessWidget {
         children: [
           Text(
             label,
-            style: AppTypography.caption.copyWith(color: fg, fontWeight: FontWeight.w700),
+            style: AppTypography.caption.copyWith(color: fg, fontWeight: FontWeight.w600),
           ),
         ],
       ),

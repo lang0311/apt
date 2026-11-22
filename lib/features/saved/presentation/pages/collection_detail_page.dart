@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -70,7 +71,7 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
                 actions: [
                   IconButton(
                     tooltip: '보관함 메뉴',
-                    icon: const Icon(Icons.more_horiz_rounded, color: AppColors.textPrimary),
+                    icon: const Icon(LucideIcons.ellipsis, color: AppColors.textPrimary),
                     // 보관함 ⋯ 메뉴(이름 변경·삭제)는 디자인/정책 확정 필요 (docs/07 §3)
                     onPressed: () => showAppSnackBar(context, '보관함 관리 메뉴는 준비 중이에요.'),
                   ),
@@ -136,8 +137,8 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
           runSpacing: AppSpacing.xs,
           children: [
             // 저장한 곳이 없어도 지도는 열 수 있다 (07 D32)
-            chip(Icons.map_outlined, '지도로 보기', () => context.push(AppRoutes.collectionMap(collectionId: collection.id))),
-            chip(Icons.add_rounded, '장소 담기', onAdd),
+            chip(LucideIcons.map, '지도로 보기', () => context.push(AppRoutes.collectionMap(collectionId: collection.id))),
+            chip(LucideIcons.plus, '장소 담기', onAdd),
           ],
         ),
       ],
@@ -211,7 +212,7 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
         BottomCta(
           child: AppButton(
             label: '이 보관함으로 코스 만들기',
-            icon: Icons.route_rounded,
+            icon: LucideIcons.route,
             // 보관함 장소를 일괄로 불러와 코스 만들기 1/4로 (docs/04 §D)
             onPressed: places.hasValue ? () => startCourseWizard(context, ref, places: places.value!.map((i) => i.place).toList()) : null,
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -324,7 +325,7 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
           : IconButton(
               tooltip: '지우기',
               onPressed: _clear,
-              icon: const Icon(Icons.cancel_rounded, size: 20, color: AppColors.textHint),
+              icon: const Icon(LucideIcons.circleX, size: 20, color: AppColors.textHint),
               constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
             ),
     );
@@ -334,7 +335,7 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
           padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, 0),
           child: Row(
             children: [
-              AppIconBox(icon: Icons.chevron_left_rounded, size: 48, tooltip: '뒤로', onPressed: () => context.pop()),
+              AppIconBox(icon: LucideIcons.chevronLeft, size: 48, tooltip: '뒤로', onPressed: () => context.pop()),
               const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: onMap
@@ -357,7 +358,7 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
             padding: const EdgeInsets.only(top: AppSpacing.sm),
             child: _AreaSearchButton(
               label: '목록 보기',
-              icon: Icons.format_list_bulleted_rounded,
+              icon: LucideIcons.list,
               onPressed: () => setState(() => _single = false),
             ),
           ),
@@ -392,7 +393,7 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
           isEmpty: (list) => list.isEmpty,
           empty: AppEmptyState(
             compact: true,
-            icon: Icons.search_off_rounded,
+            icon: LucideIcons.searchX,
             title: '\'${query.text}\'로 찾은 곳이 없어요',
             description: '이름을 줄이거나 동네 이름을 같이 넣어 보세요.',
           ),
@@ -461,7 +462,7 @@ class PlaceSearchCard extends StatelessWidget {
                   children: [
                     Text(
                       place.name,
-                      style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w800),
+                      style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w600),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -478,7 +479,7 @@ class PlaceSearchCard extends StatelessWidget {
                       spacing: AppSpacing.xs,
                       children: [
                         _CardButton(
-                          icon: saved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                          icon: saved ? Icons.bookmark_rounded : LucideIcons.bookmark,
                           label: saved ? '저장됨' : '저장',
                           active: saved,
                           busy: busy && !saved,
@@ -486,7 +487,7 @@ class PlaceSearchCard extends StatelessWidget {
                           onPressed: saved || busy ? null : onSave,
                         ),
                         _CardButton(
-                          icon: Icons.create_new_folder_outlined,
+                          icon: LucideIcons.folderPlus,
                           label: collectionLabel ?? '보관함',
                           active: collectionLabel != null,
                           semanticLabel: '${place.name} 보관함에 담기',
@@ -559,7 +560,7 @@ class _CardButton extends StatelessWidget {
                       constraints: const BoxConstraints(maxWidth: 120),
                       child: Text(
                         label,
-                        style: AppTypography.meta.copyWith(color: fg, fontWeight: FontWeight.w700),
+                        style: AppTypography.meta.copyWith(color: fg, fontWeight: FontWeight.w600),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -577,7 +578,7 @@ class _CardButton extends StatelessWidget {
 
 /// 검색칸 아래 흰 알약 버튼 ('현재 지도에서 검색하기', '목록 보기')
 class _AreaSearchButton extends StatelessWidget {
-  const _AreaSearchButton({required this.onPressed, this.label = '현재 지도에서 검색하기', this.icon = Icons.refresh_rounded});
+  const _AreaSearchButton({required this.onPressed, this.label = '현재 지도에서 검색하기', this.icon = LucideIcons.refreshCw});
 
   final VoidCallback onPressed;
   final String label;

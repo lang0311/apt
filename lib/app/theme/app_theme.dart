@@ -42,8 +42,8 @@ abstract final class AppTheme {
       dividerTheme: const DividerThemeData(color: AppColors.divider, space: 1, thickness: 1),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.ink,
-        contentTextStyle: AppTypography.bodyStrong.copyWith(color: Colors.white),
+        backgroundColor: AppColors.toast,
+        contentTextStyle: AppTypography.labelLarge.copyWith(color: Colors.white, fontWeight: FontWeight.w500),
         shape: RoundedRectangleBorder(borderRadius: AppRadius.inputAll),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
@@ -89,7 +89,18 @@ abstract final class AppTheme {
         dialHandColor: AppColors.primary,
       ),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: AppColors.primary),
-      splashFactory: InkSparkle.splashFactory,
+      // iOS · 토스 느낌: 퍼지는 물결 없이 누르는 동안 옅은 회색, 화면은 옆으로 밀리고 밀어서 뒤로 가기 (2026-11-23)
+      // 머티리얼 그림자(elevation)를 시안처럼 옅고 넓게 보이도록 기본 그림자 색을 연하게
+      shadowColor: const Color(0x3314181E),
+      splashFactory: NoSplash.splashFactory,
+      highlightColor: AppColors.pressed,
+      splashColor: Colors.transparent,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
     );
   }
 }
