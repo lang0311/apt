@@ -121,6 +121,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.courseNewAi, builder: (_, _) => const AiRecommendationPage()),
       GoRoute(path: AppRoutes.blockedPlaces, builder: (_, _) => const BlockedPlacesPage()),
       GoRoute(path: AppRoutes.placeSearch, builder: (_, _) => const PlaceSearchPage()),
+      // 장소 상세는 탭바 없는 화면(v2 시안 #20). 셸 안에 두면 4/4 결과처럼 셸 밖 화면에서 push할 때
+      // go_router가 셸을 한 번 더 쌓아 Navigator 페이지 키가 겹친다(`!keyReservation.contains(key)`)
+      GoRoute(path: '/places/:id', builder: (_, s) => PlaceDetailPage(placeId: s.pathParameters['id']!)),
       GoRoute(path: '/course-edit/:id', builder: (_, s) => CourseEditPage(courseId: s.pathParameters['id']!)),
       GoRoute(path: '/invites/:token', builder: (_, s) => InviteAcceptPage(token: s.pathParameters['token']!)),
       GoRoute(
@@ -176,7 +179,6 @@ final routerProvider = Provider<GoRouter>((ref) {
                 ),
               ],
             ),
-            GoRoute(path: '/places/:id', builder: (_, s) => PlaceDetailPage(placeId: s.pathParameters['id']!)),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(
