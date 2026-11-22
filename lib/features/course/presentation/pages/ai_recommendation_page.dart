@@ -55,10 +55,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
   }
 
   Future<void> _addPlaces() async {
-    final picked = await context.push<List<Place>>(
-      AppRoutes.pickPlaces,
-      extra: courseAddPlacesArgs(ref.read(recommendationProvider).stops),
-    );
+    final picked = await context.push<List<Place>>(AppRoutes.pickPlaces, extra: courseAddPlacesArgs(ref.read(recommendationProvider).stops));
     if (picked == null || picked.isEmpty) return;
     _rec.addPlaces(picked);
     if (mounted) showAppSnackBar(context, '${picked.length}곳을 추가했어요');
@@ -118,10 +115,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                 // 코스 상세와 같은 요약 칸 (거리는 편집하면 다시 센다)
                 CourseStats(date: draft.date, start: draft.startTime, stops: state.stops),
                 const SizedBox(height: AppSpacing.xs),
-                if (!_editing) ...[
-                  CourseRouteMap(title: draft.name, stops: state.stops, height: 160),
-                  const SizedBox(height: AppSpacing.sm),
-                ],
+                if (!_editing) ...[CourseRouteMap(title: draft.name, stops: state.stops, height: 160), const SizedBox(height: AppSpacing.sm)],
                 if (_editing)
                   SectionCard(
                     title: '일정 편집',
@@ -156,9 +150,7 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                             state.stops,
                             draft.partyId,
                             legend: CourseStopLegend(stops: state.visibleStops),
-                            banner: state.loading
-                                ? RecommendingBanner.of(state, onCancel: () => cancelRecommendationWithNotice(context, ref))
-                                : null,
+                            banner: state.loading ? RecommendingBanner.of(state, onCancel: () => cancelRecommendationWithNotice(context, ref)) : null,
                             CourseTimeline(
                               stops: state.visibleStops,
                               highlightIds: state.changedIds,
@@ -351,11 +343,7 @@ class _WaitingState extends State<_Waiting> {
                               const SkeletonBox(width: 26, height: 26, radius: 13),
                               const SizedBox(width: 10),
                               Expanded(
-                                child: FractionallySizedBox(
-                                  alignment: Alignment.centerLeft,
-                                  widthFactor: w,
-                                  child: const SkeletonBox(height: 11, radius: 5),
-                                ),
+                                child: FractionallySizedBox(alignment: Alignment.centerLeft, widthFactor: w, child: const SkeletonBox(height: 11, radius: 5)),
                               ),
                             ],
                           ),
@@ -456,10 +444,7 @@ class _Stages extends StatelessWidget {
                       children: [
                         Text(
                           _labels[s]!,
-                          style: AppTypography.bodyStrong.copyWith(
-                            color: _textColor(s),
-                            fontWeight: s == stage ? FontWeight.w700 : FontWeight.w500,
-                          ),
+                          style: AppTypography.bodyStrong.copyWith(color: _textColor(s), fontWeight: s == stage ? FontWeight.w700 : FontWeight.w500),
                         ),
                         if (s == stage) Text(_doing[s]!, style: AppTypography.meta),
                         if (i < stages.length - 1) const SizedBox(height: 20),
@@ -526,14 +511,13 @@ class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
 
 /// 일정 위에 반영한 취향 한 줄 (07 D46)
 /// 일정 카드 안: 범례 → 반영한 취향 → 타임라인 (코스 상세와 같은 순서)
-Widget _withTaste(AppliedTaste? taste, List<CourseStop> stops, String? partyId, Widget timeline, {Widget? legend, Widget? banner}) =>
-    Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ?legend,
-        if (taste != null) AppliedTasteSection(taste: taste, stops: stops, partyId: partyId),
-        // 다시 추천하는 동안의 한 줄 (07 D60)
-        ?banner,
-        timeline,
-      ],
-    );
+Widget _withTaste(AppliedTaste? taste, List<CourseStop> stops, String? partyId, Widget timeline, {Widget? legend, Widget? banner}) => Column(
+  crossAxisAlignment: CrossAxisAlignment.stretch,
+  children: [
+    ?legend,
+    if (taste != null) AppliedTasteSection(taste: taste, stops: stops, partyId: partyId),
+    // 다시 추천하는 동안의 한 줄 (07 D60)
+    ?banner,
+    timeline,
+  ],
+);

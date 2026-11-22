@@ -85,10 +85,7 @@ class _CourseEditPageState extends ConsumerState<CourseEditPage> {
   }
 
   Future<void> _addPlaces() async {
-    final picked = await context.push<List<Place>>(
-      AppRoutes.pickPlaces,
-      extra: courseAddPlacesArgs(ref.read(recommendationProvider).stops),
-    );
+    final picked = await context.push<List<Place>>(AppRoutes.pickPlaces, extra: courseAddPlacesArgs(ref.read(recommendationProvider).stops));
     if (picked == null || picked.isEmpty) return;
     _rec.addPlaces(picked);
     if (mounted) showAppSnackBar(context, '${picked.length}곳을 추가했어요');

@@ -15,8 +15,10 @@ void main() {
   Widget app(Widget home, {double scale = 1}) => ProviderScope(
     child: MaterialApp(
       theme: AppTheme.light(),
-      builder: (context, child) =>
-          MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)), child: child!),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)),
+        child: child!,
+      ),
       home: home,
     ),
   );
@@ -46,7 +48,11 @@ void main() {
   });
 
   group('코스 목록 행', () {
-    Widget row(CourseSummary c) => app(Scaffold(body: CourseSummaryRow(course: c, onTap: () {})));
+    Widget row(CourseSummary c) => app(
+      Scaffold(
+        body: CourseSummaryRow(course: c, onTap: () {}),
+      ),
+    );
 
     testWidgets('다가오는 코스는 오른쪽에 D-day만', (tester) async {
       final d = DateTime.now().add(const Duration(days: 9));

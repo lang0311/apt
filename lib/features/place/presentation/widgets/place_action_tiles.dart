@@ -20,12 +20,7 @@ class PlaceActionTiles extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tiles = <Widget>[
-      _Tile(
-        icon: saved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-        label: saved ? '저장됨' : '저장하기',
-        dark: saved,
-        onTap: onSave,
-      ),
+      _Tile(icon: saved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded, label: saved ? '저장됨' : '저장하기', dark: saved, onTap: onSave),
       if (onMap != null) _Tile(icon: Icons.map_outlined, label: '카카오맵', onTap: onMap!),
       if (onCall != null) _Tile(icon: Icons.call_outlined, label: '전화', onTap: onCall!),
     ];

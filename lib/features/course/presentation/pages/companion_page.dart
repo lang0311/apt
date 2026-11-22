@@ -201,13 +201,7 @@ class _CompanionTile extends StatelessWidget {
 
 /// 함께 가요: 내 파티 목록(한 줄씩) + 새 파티 만들기. 파티가 없으면 새 파티 카드만.
 class _PartyPicker extends ConsumerWidget {
-  const _PartyPicker({
-    required this.selectedId,
-    required this.newParty,
-    required this.onPick,
-    required this.onPickNew,
-    required this.onInvite,
-  });
+  const _PartyPicker({required this.selectedId, required this.newParty, required this.onPick, required this.onPickNew, required this.onInvite});
   final String? selectedId;
   final bool newParty;
   final ValueChanged<String> onPick;

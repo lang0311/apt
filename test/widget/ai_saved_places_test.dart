@@ -17,25 +17,17 @@ Place _place(String id, String name, String category) =>
 
 /// 서버 모드처럼 직접 저장 3곳 + 코스를 저장할 때 추천받아 들어온 2곳
 class _FakeSavedRepository implements SavedRepository {
-  final mine = [
-    _place('a', '탕반가', '음식점 > 한식'),
-    _place('b', '성미옥', '음식점 > 한식'),
-    _place('c', '경복궁', '여행 > 관광,명소 > 고궁,궁'),
-  ];
-  final ai = [
-    _place('x', '고드니 마곡본점', '음식점 > 카페 > 디저트카페'),
-    _place('y', '우장근린공원', '여행 > 공원 > 도시근린공원'),
-  ];
+  final mine = [_place('a', '탕반가', '음식점 > 한식'), _place('b', '성미옥', '음식점 > 한식'), _place('c', '경복궁', '여행 > 관광,명소 > 고궁,궁')];
+  final ai = [_place('x', '고드니 마곡본점', '음식점 > 카페 > 디저트카페'), _place('y', '우장근린공원', '여행 > 공원 > 도시근린공원')];
 
   @override
   Future<SavedSummary> fetchSummary() async => summarizeByCategory(mine);
 
   @override
   Future<List<SavedPlaceItem>> fetchSavedPlaces(SavedPlaceQuery query) async => [
-        for (final p in mine)
-          if (query.keyword == null || p.name.contains(query.keyword!))
-            SavedPlaceItem(place: p),
-      ];
+    for (final p in mine)
+      if (query.keyword == null || p.name.contains(query.keyword!)) SavedPlaceItem(place: p),
+  ];
 
   @override
   Future<List<SavedPlaceItem>> fetchAiSavedPlaces() async => [for (final p in ai) SavedPlaceItem(place: p, recommendedIn: 'test3')];
@@ -53,26 +45,21 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final container = ProviderContainer(
-      overrides: [
-        savedRepositoryProvider.overrideWithValue(_FakeSavedRepository()),
-        collectionsSupportedProvider.overrideWithValue(false),
-      ],
+      overrides: [savedRepositoryProvider.overrideWithValue(_FakeSavedRepository()), collectionsSupportedProvider.overrideWithValue(false)],
       retry: (_, _) => null,
     );
     addTearDown(container.dispose);
-    await tester.pumpWidget(UncontrolledProviderScope(
-      container: container,
-      child: MaterialApp(theme: AppTheme.light(), home: home),
-    ));
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(theme: AppTheme.light(), home: home),
+      ),
+    );
     await tester.pumpAndSettle();
   }
 
   test('카테고리별로 세고, 두 요약은 같은 카테고리끼리 더한다', () {
-    final a = summarizeByCategory([
-      _place('1', 'A', '음식점 > 한식'),
-      _place('2', 'B', '음식점 > 한식'),
-      _place('3', 'C', ''),
-    ]);
+    final a = summarizeByCategory([_place('1', 'A', '음식점 > 한식'), _place('2', 'B', '음식점 > 한식'), _place('3', 'C', '')]);
     expect(a.totalCount, 3);
     expect([for (final c in a.categories) (c.key, c.label, c.count)], [('음식점 > 한식', '한식', 2), ('기타', '기타', 1)]);
     final merged = mergeSummaries(a, summarizeByCategory([_place('4', 'D', '음식점 > 한식'), _place('5', 'E', '여행 > 공원')]));
@@ -206,7 +193,9 @@ void main() {
   });
 
   group('코스 장소 고르기', () {
-    Widget picker() => Scaffold(body: MapPlacePicker(selectedIds: const [], onToggle: (_) {}));
+    Widget picker() => Scaffold(
+      body: MapPlacePicker(selectedIds: const [], onToggle: (_) {}),
+    );
 
     Future<void> toggleSource(WidgetTester tester, String label) async {
       await tester.tap(find.byTooltip(RegExp('^필터')));

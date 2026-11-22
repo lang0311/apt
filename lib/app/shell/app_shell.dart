@@ -53,6 +53,7 @@ class AppShell extends ConsumerWidget {
 
 class AppBottomNav extends StatelessWidget {
   const AppBottomNav({super.key, required this.currentIndex, required this.onTap});
+
   /// 지금 branch 번호
   final int currentIndex;
 
@@ -90,13 +91,15 @@ class _NavItem extends StatelessWidget {
   final bool active;
   final VoidCallback onTap;
 
-
   @override
   Widget build(BuildContext context) {
     final color = active ? AppColors.textPrimary : AppColors.textHint;
     final label = Text(
       tab.label,
-      style: AppTypography.caption.copyWith(color: active ? AppColors.textPrimary : AppColors.textTertiary, fontWeight: active ? FontWeight.w700 : FontWeight.w500),
+      style: AppTypography.caption.copyWith(
+        color: active ? AppColors.textPrimary : AppColors.textTertiary,
+        fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+      ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
@@ -107,10 +110,7 @@ class _NavItem extends StatelessWidget {
       // 글자가 이름을 겹쳐 읽지 않게 아래 의미는 빼고, 누르기 동작은 여기서 직접 준다
       excludeSemantics: true,
       onTap: onTap,
-      child: InkWell(
-        onTap: onTap,
-        child: _plain(color, label),
-      ),
+      child: InkWell(onTap: onTap, child: _plain(color, label)),
     );
   }
 

@@ -43,8 +43,7 @@ class MapPin extends StatelessWidget {
         ),
       ),
       MapPinKind.picked => _circle(color ?? AppColors.primary, const Icon(Icons.check_rounded, color: Colors.white, size: 20)),
-      MapPinKind.ai =>
-        number == null ? _circle(AppColors.ai, const Icon(Icons.auto_awesome, color: Colors.white, size: 18)) : _aiNumbered(),
+      MapPinKind.ai => number == null ? _circle(AppColors.ai, const Icon(Icons.auto_awesome, color: Colors.white, size: 18)) : _aiNumbered(),
       MapPinKind.place => _teardrop(),
       MapPinKind.result => _result(),
     };

@@ -64,11 +64,7 @@ class InstagramTile extends StatelessWidget {
       height: 30,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppRadius.small),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFF58529), Color(0xFFDD2A7B), Color(0xFF8134AF)],
-        ),
+        gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFFF58529), Color(0xFFDD2A7B), Color(0xFF8134AF)]),
       ),
     );
   }
@@ -138,12 +134,7 @@ class ExtractedPlaceRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  [place.categoryLabel, if (area.isNotEmpty) area].join(' · '),
-                  style: AppTypography.meta,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                Text([place.categoryLabel, if (area.isNotEmpty) area].join(' · '), style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
                 // v2: 보관함은 이름 아래 파란 글자 한 줄 (고른 게 없으면 '보관함 고르기 ›', 고르면 '○○에 담아요')
                 if (!saved)
                   Semantics(
@@ -200,4 +191,3 @@ class ExtractedPlaceRow extends StatelessWidget {
     return InkWell(onTap: onToggle, child: row);
   }
 }
-

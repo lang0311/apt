@@ -112,19 +112,12 @@ class _Profile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(profile.nickname, style: AppTypography.section, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    if (profile.handle != null)
-                      Text(profile.handle!, style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    if (profile.handle != null) Text(profile.handle!, style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
                   ],
                 ),
               ),
               const SizedBox(width: AppSpacing.xs),
-              AppButton(
-                label: '프로필 편집',
-                variant: AppButtonVariant.secondary,
-                expand: false,
-                height: AppSpacing.smallButtonHeight,
-                onPressed: onEdit,
-              ),
+              AppButton(label: '프로필 편집', variant: AppButtonVariant.secondary, expand: false, height: AppSpacing.smallButtonHeight, onPressed: onEdit),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
@@ -168,11 +161,7 @@ class _Stats extends StatelessWidget {
         ),
       );
     }
-    final cells = [
-      ('저장한 곳', counts[0], AppRoutes.saved),
-      ('내 코스', counts[1], AppRoutes.courses),
-      ('함께하는 코스', counts[2], AppRoutes.coursesParty),
-    ];
+    final cells = [('저장한 곳', counts[0], AppRoutes.saved), ('내 코스', counts[1], AppRoutes.courses), ('함께하는 코스', counts[2], AppRoutes.coursesParty)];
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -191,10 +180,7 @@ class _Stats extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        _short(count),
-                        style: AppTypography.hero.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
-                      ),
+                      Text(_short(count), style: AppTypography.hero.copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
                       Text(label, style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],
                   ),
@@ -218,8 +204,7 @@ class _PreferenceSummary extends ConsumerWidget {
     // 직접 고르는 취향이 없는 서버(팀 서버)는 저장한 장소로 추천한다
     if (!FeatureFlags.manualTasteEnabled || (ref.watch(preferenceGroupsProvider).value?.isEmpty ?? false)) {
       // 많이 저장한 업종 셋은 서버 요약(카테고리별 수)에서 — 앱이 목록을 세지 않는다
-      final top = [...?ref.watch(savedSummaryProvider).value?.categories.where((c) => c.count > 0)]
-        ..sort((a, b) => b.count.compareTo(a.count));
+      final top = [...?ref.watch(savedSummaryProvider).value?.categories.where((c) => c.count > 0)]..sort((a, b) => b.count.compareTo(a.count));
       return Text.rich(
         TextSpan(
           text: '저장한 장소를 보고 내 취향에 맞춰 추천해요.',
@@ -293,7 +278,9 @@ class _MenuRow extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.xs, AppSpacing.md, AppSpacing.xs),
             child: Row(
               children: [
-                Expanded(child: Text(label, style: AppTypography.body.copyWith(color: muted ? AppColors.textTertiary : null))),
+                Expanded(
+                  child: Text(label, style: AppTypography.body.copyWith(color: muted ? AppColors.textTertiary : null)),
+                ),
                 if (!muted) const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
               ],
             ),

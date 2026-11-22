@@ -37,13 +37,7 @@ class SignupDonePage extends ConsumerWidget {
                     const SizedBox(height: 6),
                     Text('이제 릴스에서 마음에 드는 곳을 보면 이렇게 저장해요.', style: AppTypography.bodyMuted),
                     const SizedBox(height: 30),
-                    const StationSteps(
-                      steps: [
-                        ('릴스에서 ⋯ 누르기', '게시물 오른쪽 아래 메뉴'),
-                        ('공유 → APT 고르기', '앱 목록에 없으면 ‘더 보기’'),
-                        ('찾은 장소 확인하고 저장', '게시물 속 장소를 AI가 찾아요'),
-                      ],
-                    ),
+                    const StationSteps(steps: [('릴스에서 ⋯ 누르기', '게시물 오른쪽 아래 메뉴'), ('공유 → APT 고르기', '앱 목록에 없으면 ‘더 보기’'), ('찾은 장소 확인하고 저장', '게시물 속 장소를 AI가 찾아요')]),
                   ],
                 ),
               ),

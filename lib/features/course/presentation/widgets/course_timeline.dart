@@ -84,11 +84,7 @@ class AppliedTasteLine extends StatelessWidget {
     final words = taste.words.join(' · ');
     return taste.words.isEmpty
         ? [TextSpan(text: '파티원 ${taste.memberCount}명', style: strong), const TextSpan(text: '의 취향을 반영했어요')]
-        : [
-            if (taste.memberCount > 1) TextSpan(text: '파티원 ${taste.memberCount}명의 '),
-            TextSpan(text: words, style: strong),
-            const TextSpan(text: ' 취향을 반영했어요'),
-          ];
+        : [if (taste.memberCount > 1) TextSpan(text: '파티원 ${taste.memberCount}명의 '), TextSpan(text: words, style: strong), const TextSpan(text: ' 취향을 반영했어요')];
   }
 
   Widget _text(List<TextSpan> spans, {int maxLines = 1}) => Text.rich(
@@ -204,10 +200,7 @@ class AppliedTasteLine extends StatelessWidget {
                           for (final m in who)
                             Text(
                               name(m),
-                              style: AppTypography.meta.copyWith(
-                                color: PartyAvatarStack.nameColor(index[m.id]!),
-                                fontWeight: FontWeight.w700,
-                              ),
+                              style: AppTypography.meta.copyWith(color: PartyAvatarStack.nameColor(index[m.id]!), fontWeight: FontWeight.w700),
                             ),
                         ],
                 ),

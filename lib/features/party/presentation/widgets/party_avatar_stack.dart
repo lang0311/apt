@@ -26,12 +26,8 @@ class PartyAvatarStack extends StatelessWidget {
 
   /// 흰 바탕에 이름만 글자로 쓸 때의 색. 얼굴 색과 같은 짝이되 작은 글씨도 읽히게(대비 4.5 이상) 진하게 한다.
   /// [index]는 얼굴을 그릴 때와 같은 순서(서버 파티원 순서)
-  static Color nameColor(int index) => const [
-        AppColors.primary,
-        AppColors.avatarCoralText,
-        AppColors.avatarGreenText,
-        AppColors.avatarPurpleText,
-      ][index % _palette.length];
+  static Color nameColor(int index) =>
+      const [AppColors.primary, AppColors.avatarCoralText, AppColors.avatarGreenText, AppColors.avatarPurpleText][index % _palette.length];
 
   Widget _face(int index, PartyMember member) {
     final (background, foreground) = _palette[(index + colorOffset) % _palette.length];
@@ -46,10 +42,7 @@ class PartyAvatarStack extends StatelessWidget {
       ),
       child: Text(
         member.initial,
-        style: AppTypography.label.copyWith(
-          color: foreground,
-          fontSize: size < 30 ? size * 0.45 : null,
-        ),
+        style: AppTypography.label.copyWith(color: foreground, fontSize: size < 30 ? size * 0.45 : null),
       ),
     );
   }
@@ -65,9 +58,7 @@ class PartyAvatarStack extends StatelessWidget {
               width: shown.isEmpty ? 0 : size + (shown.length - 1) * step,
               height: size,
               child: Stack(
-                children: [
-                  for (var i = 0; i < shown.length; i++) Positioned(left: i * step, child: _face(i, shown[i])),
-                ],
+                children: [for (var i = 0; i < shown.length; i++) Positioned(left: i * step, child: _face(i, shown[i]))],
               ),
             )
           : Row(

@@ -153,13 +153,7 @@ class AppCard extends StatelessWidget {
 
 /// 아이콘 원 (안내 카드, 통계 타일, 보관함 행)
 class IconCircle extends StatelessWidget {
-  const IconCircle({
-    super.key,
-    required this.icon,
-    this.size = 44,
-    this.color = AppColors.primary,
-    this.background = AppColors.primarySoft,
-  });
+  const IconCircle({super.key, required this.icon, this.size = 44, this.color = AppColors.primary, this.background = AppColors.primarySoft});
 
   final IconData icon;
   final double size;

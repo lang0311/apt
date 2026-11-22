@@ -47,8 +47,7 @@ class ExtractionResultPage extends ConsumerWidget {
               child: result.when(
                 loading: () => const _Searching(),
                 error: (e, _) => _Failure(kind: e is ExtractionFailure ? e.kind : ExtractionFailureKind.failed, onRetry: retry),
-                data: (data) =>
-                    data.places.isEmpty ? _Failure(kind: ExtractionFailureKind.noPlaceFound, onRetry: retry) : _Review(result: data),
+                data: (data) => data.places.isEmpty ? _Failure(kind: ExtractionFailureKind.noPlaceFound, onRetry: retry) : _Review(result: data),
               ),
             ),
           ],
@@ -323,12 +322,7 @@ class _ReviewState extends ConsumerState<_Review> {
         }
       }
 
-      showAppSnackBar(
-        context,
-        oneCollection == null ? '$count곳을 저장했어요' : '$count곳을 ${names[oneCollection]}에 저장했어요',
-        actionLabel: '보기',
-        onAction: openSaved,
-      );
+      showAppSnackBar(context, oneCollection == null ? '$count곳을 저장했어요' : '$count곳을 ${names[oneCollection]}에 저장했어요', actionLabel: '보기', onAction: openSaved);
     } catch (e) {
       invalidateSavedDataIn(container);
       if (mounted) showAppSnackBar(context, failureMessage(e));

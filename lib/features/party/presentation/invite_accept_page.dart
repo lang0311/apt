@@ -83,11 +83,7 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
           children: [
             PlainHeader(leadingIcon: Icons.close_rounded, leadingTooltip: '닫기', onLeading: () => context.go(AppRoutes.home)),
             Expanded(
-              child: invitation.when(
-                loading: () => const AppLoading(),
-                error: (e, _) => _error(e),
-                data: _content,
-              ),
+              child: invitation.when(loading: () => const AppLoading(), error: (e, _) => _error(e), data: _content),
             ),
             if (invitation.hasValue)
               BottomCta(
@@ -139,10 +135,7 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
                   height: 44,
                   alignment: Alignment.center,
                   decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
-                  child: Text(
-                    name.isEmpty ? '?' : name.characters.first,
-                    style: AppTypography.bodyStrong.copyWith(color: AppColors.primary),
-                  ),
+                  child: Text(name.isEmpty ? '?' : name.characters.first, style: AppTypography.bodyStrong.copyWith(color: AppColors.primary)),
                 ),
               ),
               const SizedBox(height: 14),
@@ -162,10 +155,7 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
             children: [
               Text(inv.courseTitle, style: AppTypography.cardTitle),
               const SizedBox(height: 2),
-              Text(
-                [if (inv.courseDate != null) formatMonthDayWeekday(inv.courseDate!), '${inv.memberCount}명 참여 중'].join(' · '),
-                style: AppTypography.meta,
-              ),
+              Text([if (inv.courseDate != null) formatMonthDayWeekday(inv.courseDate!), '${inv.memberCount}명 참여 중'].join(' · '), style: AppTypography.meta),
               // 서버는 장소 이름 목록만 준다(장소별 사진 없음)
               if (inv.previewPlaceNames.isNotEmpty) ...[
                 const SizedBox(height: 14),
@@ -179,10 +169,15 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
                           height: 22,
                           alignment: Alignment.center,
                           decoration: const BoxDecoration(color: AppColors.ink, shape: BoxShape.circle),
-                          child: Text('${i + 1}', style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
+                          child: Text(
+                            '${i + 1}',
+                            style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+                          ),
                         ),
                         const SizedBox(width: 10),
-                        Expanded(child: Text(place, style: AppTypography.body, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                        Expanded(
+                          child: Text(place, style: AppTypography.body, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ),
                       ],
                     ),
                   ),

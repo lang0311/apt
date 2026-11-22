@@ -94,10 +94,7 @@ class _AppTextFieldState extends State<AppTextField> {
       ),
       child: Row(
         children: [
-          if (widget.prefixIcon != null) ...[
-            Icon(widget.prefixIcon, size: 20, color: AppColors.textSecondary),
-            const SizedBox(width: AppSpacing.sm),
-          ],
+          if (widget.prefixIcon != null) ...[Icon(widget.prefixIcon, size: 20, color: AppColors.textSecondary), const SizedBox(width: AppSpacing.sm)],
           Expanded(
             child: _withInnerLabel(
               TextField(
@@ -124,8 +121,7 @@ class _AppTextFieldState extends State<AppTextField> {
               ),
             ),
           ),
-          if (widget.showCounter && widget.maxLength != null)
-            Text('${_controller.text.characters.length} / ${widget.maxLength}', style: AppTypography.caption),
+          if (widget.showCounter && widget.maxLength != null) Text('${_controller.text.characters.length} / ${widget.maxLength}', style: AppTypography.caption),
           if (widget.suffix != null) widget.suffix!,
         ],
       ),

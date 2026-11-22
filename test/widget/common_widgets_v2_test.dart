@@ -14,13 +14,15 @@ import 'package:google_fonts/google_fonts.dart';
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  Future<void> pump(WidgetTester tester, Widget child, {double scale = 1}) => tester.pumpWidget(MaterialApp(
-        theme: AppTheme.light(),
-        home: MediaQuery(
-          data: MediaQueryData(size: const Size(390, 844), textScaler: TextScaler.linear(scale)),
-          child: Scaffold(body: child),
-        ),
-      ));
+  Future<void> pump(WidgetTester tester, Widget child, {double scale = 1}) => tester.pumpWidget(
+    MaterialApp(
+      theme: AppTheme.light(),
+      home: MediaQuery(
+        data: MediaQueryData(size: const Size(390, 844), textScaler: TextScaler.linear(scale)),
+        child: Scaffold(body: child),
+      ),
+    ),
+  );
 
   testWidgets('SectionCard는 테두리 · 바탕 상자 없이 제목 + 내용만', (tester) async {
     await pump(tester, const SectionCard(title: '지역별로 시작하기', child: Text('내용')));
@@ -47,10 +49,15 @@ void main() {
   });
 
   testWidgets('고른 칩은 잉크 채움, 안 고른 칩은 채움색, 높이 36', (tester) async {
-    await pump(tester, Row(children: [
-      AppChip(label: '카페', selected: true, onTap: () {}),
-      AppChip(label: '맛집', selected: false, onTap: () {}),
-    ]));
+    await pump(
+      tester,
+      Row(
+        children: [
+          AppChip(label: '카페', selected: true, onTap: () {}),
+          AppChip(label: '맛집', selected: false, onTap: () {}),
+        ],
+      ),
+    );
     final ms = tester.widgetList<Material>(find.descendant(of: find.byType(AppChip), matching: find.byType(Material))).toList();
     expect(ms[0].color, AppColors.textPrimary);
     expect(ms[1].color, AppColors.fill);
@@ -58,7 +65,15 @@ void main() {
   });
 
   testWidgets('입력칸은 채움 바탕 · 테두리 없음, 오류면 빨간 2px', (tester) async {
-    await pump(tester, const Column(children: [AppTextField(hint: '아이디'), AppTextField(hint: '비밀번호', hasError: true)]));
+    await pump(
+      tester,
+      const Column(
+        children: [
+          AppTextField(hint: '아이디'),
+          AppTextField(hint: '비밀번호', hasError: true),
+        ],
+      ),
+    );
     final boxes = tester.widgetList<AnimatedContainer>(find.byType(AnimatedContainer)).toList();
     final normal = boxes[0].decoration as BoxDecoration;
     final error = boxes[1].decoration as BoxDecoration;
@@ -76,17 +91,33 @@ void main() {
   });
 
   testWidgets('하단 탭 다섯 칸은 아이콘 높이가 같고(가운데 띄운 버튼 없음) 활성 색은 잉크', (tester) async {
-    await pump(tester, Align(alignment: Alignment.bottomCenter, child: AppBottomNav(currentIndex: 1, onTap: (_) {})));
+    await pump(
+      tester,
+      Align(
+        alignment: Alignment.bottomCenter,
+        child: AppBottomNav(currentIndex: 1, onTap: (_) {}),
+      ),
+    );
     final icons = tester.widgetList<Icon>(find.descendant(of: find.byType(AppBottomNav), matching: find.byType(Icon))).toList();
     expect(icons.length, 5);
-    final ys = {for (final i in find.descendant(of: find.byType(AppBottomNav), matching: find.byType(Icon)).evaluate()) tester.getCenter(find.byWidget(i.widget)).dy.round()};
+    final ys = {
+      for (final i in find.descendant(of: find.byType(AppBottomNav), matching: find.byType(Icon)).evaluate())
+        tester.getCenter(find.byWidget(i.widget)).dy.round(),
+    };
     expect(ys.length, 1);
     final active = icons.firstWhere((i) => i.icon == Icons.route_rounded);
     expect(active.color, AppColors.textPrimary);
   });
 
   testWidgets('글자 크기 1.3배에서도 하단 탭이 넘치지 않는다', (tester) async {
-    await pump(tester, Align(alignment: Alignment.bottomCenter, child: AppBottomNav(currentIndex: 0, onTap: (_) {})), scale: 1.3);
+    await pump(
+      tester,
+      Align(
+        alignment: Alignment.bottomCenter,
+        child: AppBottomNav(currentIndex: 0, onTap: (_) {}),
+      ),
+      scale: 1.3,
+    );
     expect(tester.takeException(), isNull);
   });
 }

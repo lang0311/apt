@@ -178,12 +178,7 @@ class _Body extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.xxs),
               Padding(
                 padding: AppSpacing.screenPadding,
-                child: _TitleCard(
-                  detail: detail,
-                  recommendedIn: recommendedIn,
-                  hasPhoto: hasPhoto,
-                  onSave: () => _onSaveButton(context, ref),
-                ),
+                child: _TitleCard(detail: detail, recommendedIn: recommendedIn, hasPhoto: hasPhoto, onSave: () => _onSaveButton(context, ref)),
               ),
               if (period != null) ...[
                 const SizedBox(height: 14),
@@ -200,10 +195,7 @@ class _Body extends ConsumerWidget {
                 ),
               ],
               if (infoRows.isNotEmpty) ...[
-                const SectionHeader(
-                  title: '장소 정보',
-                  padding: EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.lg, AppSpacing.screenH, AppSpacing.xs),
-                ),
+                const SectionHeader(title: '장소 정보', padding: EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.lg, AppSpacing.screenH, AppSpacing.xs)),
                 // v2: 상자 없이 왼쪽 회색 이름표 + 값
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
@@ -223,10 +215,7 @@ class _Body extends ConsumerWidget {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: SectionCard.innerPadding),
-                      child: Text(
-                        names.isEmpty ? '아직 담은 보관함이 없어요' : names.join(' · '),
-                        style: names.isEmpty ? AppTypography.meta : AppTypography.bodyMuted,
-                      ),
+                      child: Text(names.isEmpty ? '아직 담은 보관함이 없어요' : names.join(' · '), style: names.isEmpty ? AppTypography.meta : AppTypography.bodyMuted),
                     ),
                   ),
                 ),
@@ -260,11 +249,7 @@ class _TitleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final place = detail.place;
-    final status = [
-      if (place.rating != null) '★ ${place.rating!.toStringAsFixed(1)}',
-      ?detail.openStatusLabel,
-      ?detail.closingLabel,
-    ].join(' · ');
+    final status = [if (place.rating != null) '★ ${place.rating!.toStringAsFixed(1)}', ?detail.openStatusLabel, ?detail.closingLabel].join(' · ');
     final kind = [place.categoryLabel, if (place.shortArea.isNotEmpty) place.shortArea].join(' · ');
     final names = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,10 +271,7 @@ class _TitleCard extends StatelessWidget {
               Expanded(child: names),
             ],
           ),
-        if (status.isNotEmpty) ...[
-          const SizedBox(height: 4),
-          Text(status, style: AppTypography.meta.copyWith(color: AppColors.textSecondary)),
-        ],
+        if (status.isNotEmpty) ...[const SizedBox(height: 4), Text(status, style: AppTypography.meta.copyWith(color: AppColors.textSecondary))],
         if (recommendedIn != null) ...[
           const SizedBox(height: AppSpacing.xs),
           Row(
@@ -333,10 +315,7 @@ class _PeriodPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '${period.label} ${period.value}',
-            style: AppTypography.bodyStrong.copyWith(color: ended ? AppColors.textSecondary : AppColors.primary),
-          ),
+          Text('${period.label} ${period.value}', style: AppTypography.bodyStrong.copyWith(color: ended ? AppColors.textSecondary : AppColors.primary)),
           const SizedBox(height: 4),
           Text([period.note, ?period.tip].join(' '), style: AppTypography.meta.copyWith(color: AppColors.textSecondary)),
         ],

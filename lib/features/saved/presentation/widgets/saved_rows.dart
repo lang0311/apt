@@ -91,17 +91,19 @@ class SavedPlaceRow extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(checked == null ? AppSpacing.md : AppSpacing.sm, 10, AppSpacing.md, 10),
               child: Row(
                 children: [
-                  if (checked != null) ...[
-                    SelectCheckbox(value: checked, onChanged: (_) => onTap()),
-                    const SizedBox(width: AppSpacing.xs),
-                  ],
+                  if (checked != null) ...[SelectCheckbox(value: checked, onChanged: (_) => onTap()), const SizedBox(width: AppSpacing.xs)],
                   PlaceImage(place: place, width: 56, height: 56),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(place.name, style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text(
+                          place.name,
+                          style: AppTypography.bodyStrong.copyWith(fontWeight: FontWeight.w800),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         const SizedBox(height: 2),
                         Text(
                           failed ? '삭제하지 못했어요' : [place.categoryLabel, if (area.isNotEmpty) area].join(' · '),
@@ -133,11 +135,16 @@ class SavedPlaceRow extends StatelessWidget {
                               if (place.rating != null) ...[
                                 const Icon(Icons.star_rounded, size: 13, color: AppColors.rating),
                                 const SizedBox(width: 2),
-                                Text(place.rating!.toStringAsFixed(1), style: AppTypography.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+                                Text(
+                                  place.rating!.toStringAsFixed(1),
+                                  style: AppTypography.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+                                ),
                                 const SizedBox(width: AppSpacing.xs),
                               ],
                               if (handle != null)
-                                Flexible(child: Text(handle, style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                                Flexible(
+                                  child: Text(handle, style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
+                                ),
                             ],
                           ),
                         ],
@@ -189,10 +196,7 @@ class CollectionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final meta = [
-      '${collection.placeCount}곳',
-      if (collection.updatedAt != null) '${formatRecentDate(collection.updatedAt!)} 수정',
-    ].join(' · ');
+    final meta = ['${collection.placeCount}곳', if (collection.updatedAt != null) '${formatRecentDate(collection.updatedAt!)} 수정'].join(' · ');
     return InkWell(
       onTap: onTap,
       child: ConstrainedBox(
@@ -247,18 +251,22 @@ class CollectionGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final rows = <Widget>[];
     for (var i = 0; i < collections.length; i += 2) {
-      rows.add(Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(child: CollectionGridCard(collection: collections[i], onTap: () => onOpen(collections[i]))),
-          const SizedBox(width: 10),
-          Expanded(
-            child: i + 1 < collections.length
-                ? CollectionGridCard(collection: collections[i + 1], onTap: () => onOpen(collections[i + 1]))
-                : const SizedBox.shrink(),
-          ),
-        ],
-      ));
+      rows.add(
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: CollectionGridCard(collection: collections[i], onTap: () => onOpen(collections[i])),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: i + 1 < collections.length
+                  ? CollectionGridCard(collection: collections[i + 1], onTap: () => onOpen(collections[i + 1]))
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      );
     }
     return Padding(
       padding: const EdgeInsets.fromLTRB(AppSpacing.screenH - AppSpacing.xxs, AppSpacing.xxs, AppSpacing.screenH - AppSpacing.xxs, 0),
@@ -282,10 +290,7 @@ class CollectionGridCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final meta = collection.placeCount == 0
         ? '비어 있어요'
-        : [
-            '${collection.placeCount}곳',
-            if (collection.updatedAt != null) formatRecentDate(collection.updatedAt!),
-          ].join(' · ');
+        : ['${collection.placeCount}곳', if (collection.updatedAt != null) formatRecentDate(collection.updatedAt!)].join(' · ');
     return Semantics(
       button: true,
       label: '${collection.name}, $meta',
@@ -296,7 +301,9 @@ class CollectionGridCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LayoutBuilder(builder: (context, c) => MiniCollage(urls: collection.thumbnailUrls, size: c.maxWidth, radius: 16)),
+            LayoutBuilder(
+              builder: (context, c) => MiniCollage(urls: collection.thumbnailUrls, size: c.maxWidth, radius: 16),
+            ),
             const SizedBox(height: 8),
             Text(collection.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
             Text(meta, style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -329,6 +336,7 @@ class MiniCollage extends StatelessWidget {
       if (index < urls.length) return AppNetworkImage(url: urls[index], width: cell, height: cell, radius: 0);
       return Container(width: cell, height: cell, color: AppColors.surfaceMuted);
     }
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: SizedBox(
@@ -391,15 +399,7 @@ class AllPlacesLink extends StatelessWidget {
 
 /// 제목 줄 오른쪽 글자 버튼 ('필터', '+ 새 보관함'). [active]면 파란 글자 + 연파랑 바탕.
 class HeaderTextButton extends StatelessWidget {
-  const HeaderTextButton({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    this.icon,
-    this.active = false,
-    this.primary = false,
-    this.semanticLabel,
-  });
+  const HeaderTextButton({super.key, required this.label, required this.onPressed, this.icon, this.active = false, this.primary = false, this.semanticLabel});
 
   final String label;
 
@@ -432,10 +432,7 @@ class HeaderTextButton extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: 17, color: fg),
-                    const SizedBox(width: 4),
-                  ],
+                  if (icon != null) ...[Icon(icon, size: 17, color: fg), const SizedBox(width: 4)],
                   Text(label, style: AppTypography.label.copyWith(color: fg)),
                 ],
               ),
@@ -554,9 +551,8 @@ class _CategoryFilterSheetState extends State<_CategoryFilterSheet> {
   late bool _ai = widget.sources?.ai ?? true;
   late bool _auto = widget.autoSearch ?? true;
 
-  int get _count => _picked.isEmpty
-      ? widget.summary.totalCount
-      : widget.summary.categories.where((c) => _picked.contains(c.key)).fold(0, (n, c) => n + c.count);
+  int get _count =>
+      _picked.isEmpty ? widget.summary.totalCount : widget.summary.categories.where((c) => _picked.contains(c.key)).fold(0, (n, c) => n + c.count);
 
   @override
   Widget build(BuildContext context) {
@@ -635,10 +631,10 @@ class _CategoryFilterSheetState extends State<_CategoryFilterSheet> {
                     onPressed: _picked.isEmpty && _mine && _ai
                         ? null
                         : () => setState(() {
-                              _picked.clear();
-                              _mine = true;
-                              _ai = true;
-                            }),
+                            _picked.clear();
+                            _mine = true;
+                            _ai = true;
+                          }),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
@@ -712,7 +708,9 @@ class _CategoryOption extends StatelessWidget {
                   const SizedBox(width: 6),
                   Text('$count', style: AppTypography.meta),
                   const Spacer(),
-                  IgnorePointer(child: SelectCheckbox(value: selected, onChanged: (_) {})),
+                  IgnorePointer(
+                    child: SelectCheckbox(value: selected, onChanged: (_) {}),
+                  ),
                 ],
               ),
             ),

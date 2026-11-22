@@ -162,13 +162,7 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
     if (widget.selectedIds.contains(place.id)) {
       return MapMarker(id: place.id, point: place.location!, kind: MapPinKind.picked);
     }
-    return MapMarker(
-      id: place.id,
-      point: place.location!,
-      kind: MapPinKind.place,
-      icon: CategoryStyle.of(place.categoryKey).icon,
-      color: AppColors.primary,
-    );
+    return MapMarker(id: place.id, point: place.location!, kind: MapPinKind.place, icon: CategoryStyle.of(place.categoryKey).icon, color: AppColors.primary);
   }
 
   Future<void> _openFilter(SavedSummary? summary) async {
@@ -263,11 +257,7 @@ class _MapPlacePickerState extends ConsumerState<MapPlacePicker> {
           Positioned(
             left: AppSpacing.sm,
             bottom: _cardHeight + AppSpacing.lg,
-            child: _MapPill(
-              icon: Icons.format_list_bulleted_rounded,
-              label: '목록 ${places.length}',
-              onTap: () => setState(() => _listMode = true),
-            ),
+            child: _MapPill(icon: Icons.format_list_bulleted_rounded, label: '목록 ${places.length}', onTap: () => setState(() => _listMode = true)),
           ),
           Positioned(
             left: 0,

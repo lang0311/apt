@@ -39,11 +39,7 @@ void main() {
     expect(find.byTooltip('Apple로 로그인'), findsNothing);
     GoRouter.of(tester.element(find.byTooltip('Google로 로그인'))).push(
       AppRoutes.loginConflict,
-      extra: const AccountConflict(
-        maskedEmail: 'jis***@gmail.com',
-        existingMethodLabel: '이메일로 가입한 계정',
-        provider: SocialProvider.google,
-      ),
+      extra: const AccountConflict(maskedEmail: 'jis***@gmail.com', existingMethodLabel: '이메일로 가입한 계정', provider: SocialProvider.google),
     );
     await waitFor(tester, find.text('이미 가입된 이메일이에요'));
     await tapText(tester, '기존 계정과 연결하기');

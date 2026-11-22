@@ -108,21 +108,14 @@ class _LinkInputPageState extends ConsumerState<LinkInputPage> {
                     ),
                   ),
                   if (_error != null)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(AppSpacing.xs, AppSpacing.xs, AppSpacing.xs, 0),
-                      child: AppFieldError(_error!),
-                    ),
+                    Padding(padding: const EdgeInsets.fromLTRB(AppSpacing.xs, AppSpacing.xs, AppSpacing.xs, 0), child: AppFieldError(_error!)),
                   // 링크를 모를 때: 가게 이름으로 지도에서 찾기 (07 D32)
                   Semantics(
                     button: true,
                     label: '지도에서 검색하기',
                     excludeSemantics: true,
                     onTap: () => context.push(AppRoutes.placeSearch),
-                    child: InkWell(
-                      borderRadius: AppRadius.cardAll,
-                      onTap: () => context.push(AppRoutes.placeSearch),
-                      child: const _SearchRowLabel(),
-                    ),
+                    child: InkWell(borderRadius: AppRadius.cardAll, onTap: () => context.push(AppRoutes.placeSearch), child: const _SearchRowLabel()),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   const _ReelsGuide(),
@@ -170,11 +163,7 @@ class _RecentAdded extends ConsumerWidget {
                             Text(r.place.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
                             // v2: 저장한 때도 둘째 줄에 (카테고리 · 동네 · 4일 전)
                             Text(
-                              [
-                                r.place.categoryLabel,
-                                if (r.place.shortArea.isNotEmpty) r.place.shortArea,
-                                formatRecentDate(r.extractedAt),
-                              ].join(' · '),
+                              [r.place.categoryLabel, if (r.place.shortArea.isNotEmpty) r.place.shortArea, formatRecentDate(r.extractedAt)].join(' · '),
                               style: AppTypography.meta,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

@@ -39,9 +39,7 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
   MyPreferences? _initial;
   bool _saving = false;
 
-  bool get _dirty =>
-      _initial != null &&
-      (_selected!.length != _initial!.selectedKeys.length || !_selected!.containsAll(_initial!.selectedKeys));
+  bool get _dirty => _initial != null && (_selected!.length != _initial!.selectedKeys.length || !_selected!.containsAll(_initial!.selectedKeys));
 
   void _init(MyPreferences mine) {
     if (_initial != null) return;
@@ -77,13 +75,7 @@ class _PreferencePageState extends ConsumerState<PreferencePage> {
   }
 
   Future<void> _confirmLeave() async {
-    final leave = await showConfirmDialog(
-      context,
-      title: '변경 사항을 저장하지 않을까요?',
-      message: '선택한 취향이 저장되지 않아요.',
-      confirmLabel: '나가기',
-      cancelLabel: '계속 편집',
-    );
+    final leave = await showConfirmDialog(context, title: '변경 사항을 저장하지 않을까요?', message: '선택한 취향이 저장되지 않아요.', confirmLabel: '나가기', cancelLabel: '계속 편집');
     if (leave && mounted) _leave();
   }
 
@@ -218,9 +210,7 @@ class _AutoTaste extends ConsumerWidget {
                 padding: const EdgeInsets.only(right: AppSpacing.sm),
                 child: Text('${summary.value!.totalCount}곳', style: AppTypography.meta),
               ),
-              child: Column(
-                children: [for (final c in top.take(5)) _CategoryRow(category: c)],
-              ),
+              child: Column(children: [for (final c in top.take(5)) _CategoryRow(category: c)]),
             ),
           ),
         ],
@@ -277,11 +267,10 @@ class _CategoryRow extends StatelessWidget {
               child: Icon(style.icon, size: 20, color: style.ink),
             ),
             const SizedBox(width: AppSpacing.sm),
-            Expanded(child: Text(category.label, style: AppTypography.body, maxLines: 1, overflow: TextOverflow.ellipsis)),
-            Text(
-              '${category.count}곳',
-              style: AppTypography.bodyStrong.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+            Expanded(
+              child: Text(category.label, style: AppTypography.body, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
+            Text('${category.count}곳', style: AppTypography.bodyStrong.copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
           ],
         ),
       ),
