@@ -148,31 +148,31 @@ void main() {
 
     testWidgets('직접 저장 + 추천받은 곳이 함께, 필터 시트에서 켜고 끈다', (tester) async {
       await pump(tester, map());
-      expect(find.text('5곳'), findsOneWidget); // 이 지역 5곳
+      expect(find.text('이 지역 5곳'), findsOneWidget);
       await filter(tester, ['직접 저장']);
-      expect(find.text('2곳'), findsOneWidget);
+      expect(find.text('이 지역 2곳'), findsOneWidget);
       expect(find.text('추천받은 곳만'), findsWidgets);
       expect(find.text('test3 코스에서 추천'), findsWidgets); // 추천받은 곳 카드
       await filter(tester, ['직접 저장', '추천받은 곳']);
-      expect(find.text('3곳'), findsOneWidget);
+      expect(find.text('이 지역 3곳'), findsOneWidget);
       await filter(tester, ['직접 저장']);
       expect(find.text('보여 줄 장소가 없어요'), findsOneWidget);
     });
 
     testWidgets('AI 추천 탭에서 들어오면 추천받은 곳만', (tester) async {
       await pump(tester, map(aiOnly: true));
-      expect(find.text('2곳'), findsOneWidget);
+      expect(find.text('이 지역 2곳'), findsOneWidget);
       expect(find.text('추천받은 곳만'), findsWidgets);
     });
 
     testWidgets('필터: 카테고리를 여러 개 고르면 "첫째 외 n", ×로 풀기', (tester) async {
       await pump(tester, map());
       await filter(tester, ['한식', '디저트카페']);
-      expect(find.text('3곳'), findsOneWidget);
+      expect(find.text('이 지역 3곳'), findsOneWidget);
       expect(find.bySemanticsLabel('카테고리 필터, 한식 외 1 적용됨'), findsOneWidget);
       await tester.tap(find.bySemanticsLabel('카테고리 필터 해제'));
       await tester.pumpAndSettle();
-      expect(find.text('5곳'), findsOneWidget);
+      expect(find.text('이 지역 5곳'), findsOneWidget);
     });
 
     testWidgets('지도 위 목록 버튼: 가로 카드 대신 묶음 목록, 지도로 돌아가기', (tester) async {

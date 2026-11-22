@@ -27,7 +27,7 @@ void main() {
     await tester.pumpWidget(app(const PreferencePage()));
     await tester.pump(const Duration(seconds: 2));
     expect(find.text('내 취향'), findsOneWidget);
-    expect(find.text('저장한 장소로 취향을 읽어요'), findsOneWidget);
+    expect(find.textContaining('저장한 장소로 취향을 읽어요'), findsOneWidget);
     expect(find.text('취향 저장하기'), findsNothing);
     await tester.pump(const Duration(seconds: 2));
   });

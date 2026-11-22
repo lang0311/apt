@@ -76,7 +76,8 @@ void main() {
     await sc.scrollDown(tester, dy: -900);
     await shot(tester, 'b02_home_bottom', settleSec: 2);
     await tapTab(tester, '저장됨');
-    await waitFor(tester, find.textContaining('전체 '));
+    await waitFor(tester, find.text('보관함'));
+    await settle(tester, seconds: 2);
     await shot(tester, 'c01_saved_places');
     await step('c02', () async {
       await tapText(tester, '지역별', scroll: false);
@@ -165,7 +166,7 @@ void main() {
     await loginTest(tester);
     await tapTab(tester, '코스');
     await step('e16', () async {
-      await tapText(tester, 'seongsu 7');
+      await tapText(tester, 'bugcheck');
       await waitFor(tester, find.textContaining(RegExp(r'^일정 \d+곳$')));
       await shot(tester, 'e16_course_detail_saved');
     });

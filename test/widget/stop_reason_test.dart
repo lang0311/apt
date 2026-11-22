@@ -1,4 +1,5 @@
 import 'package:apt/features/course/domain/course_models.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:apt/features/course/presentation/widgets/course_stop_sheets.dart';
 import 'package:apt/features/course/presentation/widgets/course_timeline.dart';
 import 'package:apt/features/place/domain/place.dart';
@@ -15,7 +16,7 @@ Widget _sheetOpener(CourseStop stop) => MaterialApp(
         body: Builder(
           builder: (context) => TextButton(
             onPressed: () => showStopSheet(context, stop: stop, groups: [
-              [StopSheetAction(label: '장소 정보 보기', icon: Icons.place_outlined, onTap: () {})],
+              [StopSheetAction(label: '장소 정보 보기', icon: LucideIcons.mapPin, onTap: () {})],
             ]),
             child: const Text('열기'),
           ),

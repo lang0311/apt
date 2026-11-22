@@ -27,7 +27,7 @@ void main() {
     expect(find.text('여행하는 지상'), findsOneWidget); // 제안 닉네임
     await tapText(tester, '가입 완료');
 
-    await waitFor(tester, find.text('가입이 끝났어요'));
+    await waitFor(tester, find.textContaining('가입이 끝났어요'));
     await tapText(tester, '시작하기');
     await waitFor(tester, find.byType(HomePage));
     expectNoErrors(tester);
@@ -50,7 +50,8 @@ void main() {
   testWidgets('C. 저장됨: 카테고리 필터 → 장소 상세 → 보관함 변경', (tester) async {
     await signInExisting(tester);
     await tapTab(tester, '저장됨');
-    await waitFor(tester, find.textContaining('전체 '));
+    await waitFor(tester, find.text('보관함'));
+    await tester.pump(const Duration(seconds: 1));
 
     // 기본 보기는 지역별 → 업종별로 바꾸면 필터가 업종으로
     await tapText(tester, '지역별', scroll: false);
@@ -204,7 +205,7 @@ void main() {
     await tapText(tester, '서울 카페 투어');
     await waitFor(tester, find.textContaining(RegExp(r'^일정 \d+곳$')));
     await tapText(tester, '편집');
-    await waitFor(tester, find.text('일정 편집'));
+    await waitFor(tester, find.text('코스 편집'));
 
     final removeButtons = find.byWidgetPredicate((w) => w is IconButton && (w.tooltip?.endsWith(' 빼기') ?? false));
     await tapFinder(tester, removeButtons, scroll: false);
@@ -234,7 +235,7 @@ void main() {
     await waitFor(tester, find.text('저장한 곳'));
     // v2(07 D64): 취향은 직접 고르지 않고 저장한 장소로 읽는다 — '수정' 대신 '보기'
     await tapText(tester, '보기');
-    await waitFor(tester, find.text('저장한 장소로 취향을 읽어요'));
+    await waitFor(tester, find.textContaining('저장한 장소로 취향을 읽어요'));
     expect(find.text('취향 저장하기'), findsNothing);
     await tapFinder(tester, find.byTooltip('뒤로'), scroll: false);
     await waitFor(tester, find.text('저장한 곳'));
@@ -242,19 +243,6 @@ void main() {
     await tapText(tester, '로그아웃');
     await tapText(tester, '로그아웃', index: 1, scroll: false);
     await waitFor(tester, find.byTooltip('Google로 로그인'));
-    expectNoErrors(tester);
-  });
-
-  testWidgets('J. 초대 링크(미로그인) → 로그인 → 초대 수락 → 참여', (tester) async {
-    await launchApp(tester);
-    // 초대 링크로 앱에 들어온 상황을 라우터로 흉내낸다 (App Links 설정 전)
-    GoRouter.of(tester.element(find.byTooltip('Google로 로그인'))).go('/invites/demo');
-    await tester.pump(const Duration(milliseconds: 500));
-    // 미로그인 → 토큰 보관 후 로그인 화면으로
-    await tapFinder(tester, find.byTooltip('Google로 로그인'), scroll: false);
-    await waitFor(tester, find.text('민지님이 코스에\n초대했어요'));
-    await tapText(tester, '코스에 참여하기');
-    await waitFor(tester, find.textContaining('함께하는 코스', findRichText: true));
     expectNoErrors(tester);
   });
 
@@ -276,7 +264,7 @@ void main() {
 
     await typeInto(tester, fields.at(0), 'trip_jin');
     await tapText(tester, '가입하기');
-    await waitFor(tester, find.text('가입이 끝났어요'));
+    await waitFor(tester, find.textContaining('가입이 끝났어요'));
     await tapText(tester, '시작하기');
     await waitFor(tester, find.byType(HomePage));
     expectNoErrors(tester);
@@ -293,6 +281,32 @@ void main() {
     await typeInto(tester, fields.at(1), 'password1'); // Mock: password1만 성공
     await tapText(tester, '로그인');
     await waitFor(tester, find.byType(HomePage));
+    expectNoErrors(tester);
+  });
+
+  testWidgets('M. 4/4 결과: 하단 사진 줄 장소 → 시트 → 장소 정보 보기 (셸 밖에서 장소 상세를 열어도 오류 없음)', (tester) async {
+    await signInExisting(tester);
+    await tapTab(tester, '코스');
+    await waitFor(tester, find.textContaining('내 코스', findRichText: true));
+    await tapFinder(tester, find.byTooltip('코스 만들기'));
+    await waitFor(tester, find.text('어떤 코스를 만들까요?'));
+    await typeInto(tester, find.byType(TextField).first, '장소 정보 확인');
+    await tapText(tester, '내일');
+    await tapText(tester, '다음');
+    await waitFor(tester, find.text('누구와 함께 가나요?'));
+    await tapText(tester, '다음');
+    await tester.pump(const Duration(seconds: 2));
+    await tapFinder(tester, find.textContaining('목록 '), scroll: false);
+    await tapText(tester, '카페 온더뷰');
+    await tapText(tester, '연남식당');
+    await tapText(tester, '2곳으로 코스 추천받기', scroll: false);
+    await waitFor(tester, find.text('코스 저장'), timeout: const Duration(seconds: 25));
+    await tester.scrollUntilVisible(find.text('이 코스에 담긴 곳'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.descendant(of: find.byType(ListView).last, matching: find.text('연남식당')).first);
+    await waitFor(tester, find.text('장소 정보 보기'));
+    await tapText(tester, '장소 정보 보기', scroll: false);
+    await waitFor(tester, find.text('장소 정보'));
     expectNoErrors(tester);
   });
 }

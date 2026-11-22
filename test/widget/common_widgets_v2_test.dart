@@ -1,4 +1,5 @@
 import 'package:apt/app/shell/app_shell.dart';
+import 'package:lucide_icons_flutter/lucide_icons_500.dart';
 import 'package:apt/app/theme/app_colors.dart';
 import 'package:apt/app/theme/app_spacing.dart';
 import 'package:apt/app/theme/app_theme.dart';
@@ -105,7 +106,7 @@ void main() {
         tester.getCenter(find.byWidget(i.widget)).dy.round(),
     };
     expect(ys.length, 1);
-    final active = icons.firstWhere((i) => i.icon == Icons.route_rounded);
+    final active = icons.firstWhere((i) => i.icon == LucideIcons500.route);
     expect(active.color, AppColors.textPrimary);
   });
 

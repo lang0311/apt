@@ -66,7 +66,7 @@ void main() {
       await waitFor(tester, find.text('어떻게 불러\n드릴까요?'));
       await shot(tester, 'a05_profile');
       await tapText(tester, '가입 완료');
-      await waitFor(tester, find.text('가입이 끝났어요'));
+      await waitFor(tester, find.textContaining('가입이 끝났어요'));
       await shot(tester, 'a06_signup_done');
     });
   });
@@ -123,7 +123,8 @@ void main() {
     await prepareCapture(binding, tester);
     await signInExisting(tester);
     await tapTab(tester, '저장됨');
-    await waitFor(tester, find.textContaining('전체 '));
+    await waitFor(tester, find.text('보관함'));
+    await tester.pump(const Duration(seconds: 2));
     await shot(tester, 'c01_saved_places');
     await step('c02', () async {
       await tapText(tester, '지역별', scroll: false);
@@ -288,7 +289,7 @@ void main() {
     await shot(tester, 'e16_course_detail_saved');
     await step('e17', () async {
       await tapText(tester, '편집');
-      await waitFor(tester, find.text('일정 편집'));
+      await waitFor(tester, find.text('코스 편집'));
       await shot(tester, 'e17_course_edit');
       final removeButtons = find.byWidgetPredicate((w) => w is IconButton && (w.tooltip?.endsWith(' 빼기') ?? false));
       await tapFinder(tester, removeButtons, scroll: false);
@@ -325,7 +326,7 @@ void main() {
     await shot(tester, 'g01_my');
     await step('g02', () async {
       await tapText(tester, '보기');
-      await waitFor(tester, find.text('저장한 장소로 취향을 읽어요'));
+      await waitFor(tester, find.textContaining('저장한 장소로 취향을 읽어요'));
       await shot(tester, 'g02_preferences');
       routerOf(tester).pop();
       await tester.pump(const Duration(milliseconds: 600));
