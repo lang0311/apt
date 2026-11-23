@@ -20,6 +20,7 @@
 | 저장됨 AI 추천 탭 | **서버** | `GET /me`의 `places[].action_type`, `GET /courses`(+ 파티별 `?party_id=`)의 확정 코스 `itinerary[].saved` | ✅ 코스 확정 때 서버가 넣은 `course_confirmed` 장소 중 일정에서 AI 추천(`saved`가 아님)인 곳을 AI 추천 탭으로 나눈다. 저장됨의 개수 · 카테고리는 `/mobile/summary`가 이 장소까지 세서 서버 모드는 앱이 직접 저장한 곳만 센다(`NEEDS BACKEND`: 요약을 `action_type`별로, 07 D44). AI 추천 탭의 필터 개수도 앱이 센다. 이 장소들은 코스 장소 고르기에도 함께 나오고 고정 장소로 보낼 수 있다(선택 토큰 있음, 07 D47) |
 | 코스 목록·상세 | **서버** | `GET /courses`, `/courses/{course}`, `POST /mobile/courses/{course}` | ✅ |
 | 반영한 취향 한 줄 · 파티원별 펼치기 | **서버** | 코스 응답의 `taste_profile`(`keywords[].category` · `dimension` · `shared_by`, `group_size`, 파티면 `group_blend.per_user[id]`의 `strong_match_places` · `represented` · `status`) + 파티원 이름은 `GET /parties/{party}` | ✅ 관심 주제 · 업종 단어만(파티 코스는 `shared_by` ≥ 2만), 넓은 지도 분류 이름은 빼고 앱이 해요체로 조합(`summary`는 안 씀, 07 D46) |
+| 일정의 예상 도착 시각 | **서버** | 코스 응답의 `taste_profile.route_optimization`(`start_time` · `used_default_start` · `estimated_schedule[].name` · `estimated_arrival`, 팀 c29137a) | ✅ 순서 · 출발 시간이 같을 때만 서버 값, 다르면 서버 `day_course.py`와 같은 규칙으로 앱이 계산, 12:00 가정이면 숨김. 장소 사이 이동 줄은 앱이 좌표로 계산한 직선거리(07 D66) |
 | AI 추천 (job) | **서버** | `POST /jobs`, `GET /jobs/{job}`(status · stage → 화면 단계, 07 D33), `POST /jobs/{job}/cancel`, `GET /jobs`(진행 중 job, 취소 중이면 끝나길 기다림), `POST /recommend` | ✅ job 폴링 · 단계 · 취소(`/recommend`는 안 씀) |
 | 코스 장소 바꾸기·빼기·확정 | **서버** | `POST /courses/{course}/replace`, `DELETE /courses/{course}/places`, `GET .../places/{key}/selection`, `POST .../confirm` | ✅ (`.../selection`은 안 씀). 확정(`confirm`)한 코스는 수정 · 다시 추천이 모두 409라 서버 모드 저장 코스는 편집을 숨김 — 서버 수정 요청 중(§7, 07 §3) |
 | 추천하지 않는 장소(차단) | **서버** | `GET /me/blocks`, `DELETE /me/blocks/{key}` | ✅ |
@@ -74,7 +75,7 @@
 | 3 | 제외 목록 | 코스에 `excluded_places`가 서버에 쌓인다(빼기 · 바꾸기 때). 차단(`block_future`)은 계정 단위로 `/me/blocks`에 저장되고 추천 때 서버가 자동으로 뺀다. **파티 추천은 파티원 모두의 차단 목록을 뺀다**(`store.blocks(ids)`) | 이번만 = 서버 코스의 제외 목록, 차단 = `/me/blocks` |
 | 4 | 세션 · 상태 | 추천이 끝나면 결과가 **초안 코스로 서버에 남고**(`id`가 코스 id) `GET /courses/{id}`로 다시 읽을 수 있다 | 앱을 껐다 켜면 초안을 이어 보지 않음 |
 | 5 | 응답 방식 | 비동기: `POST /jobs` → `job_id`, `GET /jobs/{job}` 폴링(`status` · `stage`), `POST /jobs/{job}/cancel` | 단계 표시 · 취소(07 D33) |
-| 6 | 응답 내용 | 장소별 `description`(추천 이유, 빈 문자열일 수 있음) · `temporal` · `novelty_score` · `web_evidence`, 코스 `recommendation_reason` · `warnings` · `distance_km`(직선) · `taste_profile`. **이동 시간 · 취향 반영 비율은 없다** | 이유는 장소 시트에서만(D40), 비율 대신 취향 단어 한 줄(D46). `recommendation_reason` · `warnings`는 내부 표현이 섞여 쓰지 않음 |
+| 6 | 응답 내용 | 장소별 `description`(추천 이유, 빈 문자열일 수 있음) · `temporal` · `novelty_score` · `web_evidence`, 코스 `recommendation_reason` · `warnings` · `distance_km`(직선) · `taste_profile`(11-21부터 `route_optimization.estimated_schedule` 예상 도착 시각 — 머묾 시간 가정 + 직선 4km/h). **실제 길 기준 이동 시간 · 취향 반영 비율은 없다** | 이유는 장소 시트에서만(D40), 비율 대신 취향 단어 한 줄(D46), 예상 시각 · 직선거리 이동 줄(D66). `recommendation_reason` · `warnings`는 내부 표현이 섞여 쓰지 않음 |
 | 7 | 한도 | 하루 24회 · 10달러(`GET /me/usage`, 서버 환경변수 `APT_DAILY_CALL_LIMIT` · `APT_DAILY_USD_LIMIT`로 조정). 넘으면 추천 job이 `failed`로 끝나고 오류 문장에 `한도`가 들어 있다 | 한도 안내 화면은 아직 없음 |
 | 8 | 트렌디함 | `temporal`(팝업 · 행사 · 신규 개업 기간) · `novelty_score` · `web_evidence`. **실제 응답에는 아직 값이 온 적이 없다**(11-13 연남동 3명 파티 추천도 비어 있었음) | 표시하지 않음 |
 
@@ -134,7 +135,7 @@ FeatureRepository (interface)
 - [ ] `taste_profile.group_blend`에 장소 `key` — 지금은 이름으로만 와서 같은 이름의 장소를 구분하지 못한다. 편집 뒤에도 추천 당시 값이 남는 것도 공유한다(07 D46).
 - [ ] `/mobile/summary`를 `action_type`(직접 저장 · 코스 확정)별로 — 지금 요약은 코스 확정으로 들어온 AI 추천 장소까지 세어, 저장됨은 앱이 `/me` 목록으로 직접 센다(07 D44).
 - [ ] 장소 상세의 평점 · 영업 상태 · 사진, 지도 검색 결과의 대표 사진 · 짧은 소개 — 지금은 이름 · 주소 · 업종 · 위치만 와서 카드 이미지를 업종 아이콘으로 대신한다(07 D32).
-- [ ] 장소 사이 이동 시간과 도로를 따르는 경로선 — 지금은 직선거리(`route_type: straight_line`)뿐
+- [ ] 장소 사이 이동 시간과 도로를 따르는 경로선 — 지금은 직선거리(`route_type: straight_line`)뿐. 앱은 그 사이 직선거리 `약 500m`를 보여 주고(07 D66), 서버 값이 오면 `RouteLeg(mode:, minutes:)`로 바꾼다
 - [ ] 코스 목록 summary에 파티원 이름 — 지금은 파티 API를 따로 부른다
 - [ ] 저장 목록의 정렬 · 페이지와 근처 저장 장소 API(`/places/nearby` 초안) — 지금은 `/me` 전체를 받아 앱이 거리 · 필터를 처리한다
 - [ ] 추천 한도 초과를 구분하는 오류 코드 — 지금은 job 오류 문장에 `한도`가 들어 있을 뿐이다

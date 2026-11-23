@@ -1856,4 +1856,35 @@ module.exports = [
       '팀 레포 mobile/에는 반영하지 않음(지시받을 때만)',
     ],
   },
+  {
+    id: 53,
+    title: '일정에 예상 도착 시각 · 장소 사이 직선거리',
+    date: '2026-11-23',
+    status: '완료',
+    commits: ['344abdc'],
+    goal: '팀 서버가 추천 때 계산해 두는 예상 일정(estimated_schedule)을 앱에 붙여, 추천 결과 · 코스 상세 일정에 도착 시각과 장소 사이 이동 정보를 보여 준다.',
+    work: [
+      '진행 전 설명 → 이동 줄 A(직선거리) / B(약 도보 n분) 시안 비교(https://claude.ai/artifact/QqAVfWYc6NwXd9a49TP3vx) → 사용자가 A 선택, 순서가 바뀌면 앱이 같은 규칙으로 다시 계산하는 ②안 선택(D66)',
+      'course_schedule.dart: withEstimatedTimes(서버 값을 쓸지 · 다시 계산할지 · 숨길지), stayMinutes(서버 day_course.py의 식당 · 카페 · 술집 판별과 머묾 시간을 그대로), EstimatedSchedule',
+      'RouteLeg.straight(직선거리 `약 500m`, 아이콘 ↔). 서버가 실제 이동 시간을 주면 기존 RouteLeg(mode, minutes)로 바꾸면 됨',
+      'PlatformClient.estimatedSchedule로 taste_profile.route_optimization을 읽어 Course · Recommendation에 담고, 결과 · 상세 화면에서 CourseTimeline에 넘기기 전에 붙임',
+      '확인: flutter analyze 0 · flutter test 251(새 15개) · 통합 테스트 A~L 12 통과. 서버 모드 에뮬레이터에서 데모 계정 코스 3개(서버 값 · 앱 계산 · 출발 시간 없음)를 열어 손 계산과 대조',
+    ],
+    problems: [
+      {
+        problem: '서버 예상 시각은 추천 당시 순서 기준이라 편집 · 다시 추천 · 출발 시간 변경 뒤에는 맞지 않음',
+        cause: '서버는 일정을 저장할 때 estimated_schedule을 다시 계산하지 않음(taste_profile을 그대로 둠)',
+        solution: '장소 이름 순서 · 출발 시간이 서버 일정과 같을 때만 서버 값을 쓰고, 다르면 앱이 같은 규칙으로 계산',
+        status: '해결',
+      },
+    ],
+    decisions: [
+      'D66 일정의 예상 도착 시각 · 장소 사이 직선거리(A안 · ②안)',
+    ],
+    pending: [
+      '확인 안 함: 4/4 추천 결과 화면(새 추천은 과금), 에뮬레이터에서 순서를 편집한 뒤 다시 계산되는 모습(단위 테스트로만 확인)',
+      '서버 규칙(머묾 시간 · 15분/km)이 바뀌면 앱도 같이 고쳐야 함',
+      '팀 레포 mobile/에는 반영하지 않음(지시받을 때만)',
+    ],
+  },
 ];
