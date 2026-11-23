@@ -23,18 +23,20 @@ void main() {
     stopIsAi: const [false, false, true, false, true],
   );
 
-  Future<void> pump(WidgetTester tester, {double scale = 1, int more = 2}) => tester.pumpWidget(MaterialApp(
-        theme: AppTheme.light(),
-        home: MediaQuery(
-          data: MediaQueryData(size: const Size(360, 640), textScaler: TextScaler.linear(scale)),
-          child: Scaffold(
-            body: Padding(
-              padding: const EdgeInsets.all(20),
-              child: HomeCourseCard(course: course, isToday: false, moreCount: more, onOpen: () {}, onMore: () {}),
-            ),
+  Future<void> pump(WidgetTester tester, {double scale = 1, int more = 2}) => tester.pumpWidget(
+    MaterialApp(
+      theme: AppTheme.light(),
+      home: MediaQuery(
+        data: MediaQueryData(size: const Size(360, 640), textScaler: TextScaler.linear(scale)),
+        child: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(20),
+            child: HomeCourseCard(course: course, isToday: false, moreCount: more, onOpen: () {}, onMore: () {}),
           ),
         ),
-      ));
+      ),
+    ),
+  );
 
   testWidgets('카드는 연파랑 바탕, 정거장 번호 1~5, "함께 3명", 아래 "5곳 · 직선 2.4km"와 "코스 보기"', (tester) async {
     await pump(tester);

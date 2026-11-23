@@ -7,26 +7,23 @@ import 'package:apt/features/platform/data/platform_repositories.dart';
 import 'package:apt/features/saved/domain/saved_models.dart';
 
 void main() {
-  test(
-    'Map coordinates and canonical keys are preserved without inventing ratings',
-    () {
-      final c = PlatformClient(ApiClient(Dio()));
-      final p = c.place({
-        'id': 'provider-id',
-        'key': 'canonical',
-        'name': '장소',
-        'address': '서울 마포구',
-        'lat': 37.55,
-        'lon': 126.92,
-        'category': '음식점 > 카페',
-        'selection_token': 'signed',
-      });
-      expect(p.id, 'canonical');
-      expect(p.location!.lng, 126.92);
-      expect(p.rating, isNull);
-      expect(c.places['canonical']!['selection_token'], 'signed');
-    },
-  );
+  test('Map coordinates and canonical keys are preserved without inventing ratings', () {
+    final c = PlatformClient(ApiClient(Dio()));
+    final p = c.place({
+      'id': 'provider-id',
+      'key': 'canonical',
+      'name': '장소',
+      'address': '서울 마포구',
+      'lat': 37.55,
+      'lon': 126.92,
+      'category': '음식점 > 카페',
+      'selection_token': 'signed',
+    });
+    expect(p.id, 'canonical');
+    expect(p.location!.lng, 126.92);
+    expect(p.rating, isNull);
+    expect(c.places['canonical']!['selection_token'], 'signed');
+  });
   test('Course stop source is mapped and confirmed courses are read-only', () {
     final c = PlatformClient(ApiClient(Dio()));
     final course = c.course({
@@ -35,13 +32,7 @@ void main() {
       'party_id': null,
       'itinerary': [
         {'key': 'a', 'name': '필수', 'address': '서울', 'saved': true},
-        {
-          'key': 'b',
-          'name': '추천',
-          'address': '서울',
-          'saved': false,
-          'description': '선정 이유',
-        },
+        {'key': 'b', 'name': '추천', 'address': '서울', 'saved': false, 'description': '선정 이유'},
       ],
     });
     expect(course.stops.first.isAi, isFalse);
@@ -85,7 +76,12 @@ void main() {
     expect(popup.timing?.end, DateTime(2026, 11, 29));
     expect(c.place({'key': 'k3', 'name': '무신사 스페이스 서울숲', 'address': '서울 성동구 성수동1가'}).timing?.end, DateTime(2026, 11, 29));
 
-    final plain = c.place({'key': 'k4', 'name': 'KT&G상상마당 홍대', 'address': '서울', 'temporal': {'kind': 'place', 'start_date': '', 'end_date': ''}});
+    final plain = c.place({
+      'key': 'k4',
+      'name': 'KT&G상상마당 홍대',
+      'address': '서울',
+      'temporal': {'kind': 'place', 'start_date': '', 'end_date': ''},
+    });
     expect(plain.timing, isNull);
   });
 
@@ -108,12 +104,7 @@ void main() {
   });
   test('Selected place tokens are sent unchanged', () async {
     final c = PlatformClient(ApiClient(Dio()));
-    c.place({
-      'id': 'a',
-      'name': '장소',
-      'address': '서울',
-      'selection_token': 'signed',
-    });
+    c.place({'id': 'a', 'name': '장소', 'address': '서울', 'selection_token': 'signed'});
     expect(await c.token('a'), 'signed');
   });
   test('Social login is never simulated in actual backend mode', () async {
@@ -192,7 +183,14 @@ void main() {
     })!;
     expect(taste.words, ['미식', '자연', '카페', '한식']);
     expect(taste.memberCount, 1);
-    expect(PlatformClient.appliedTaste({'keywords': [{'category': '여행'}]}), isNull);
+    expect(
+      PlatformClient.appliedTaste({
+        'keywords': [
+          {'category': '여행'},
+        ],
+      }),
+      isNull,
+    );
     expect(PlatformClient.appliedTaste(null), isNull);
   });
   test('파티 코스: 2명 이상이 공유한 단어만, 없으면 단어 없이 인원만, 취향이 아예 없으면 줄 없음 (07 D46)', () {
@@ -236,9 +234,21 @@ void main() {
       ],
       'group_blend': {
         'per_user': {
-          'jimin': {'status': 'evaluated', 'represented': true, 'strong_match_places': ['카페공명 연남점', '잊힐리야 연남']},
-          'test': {'status': 'evaluated', 'represented': true, 'strong_match_places': ['진청유점']},
-          'youngseo': {'status': 'evaluated', 'represented': true, 'strong_match_places': ['카페공명 연남점']},
+          'jimin': {
+            'status': 'evaluated',
+            'represented': true,
+            'strong_match_places': ['카페공명 연남점', '잊힐리야 연남'],
+          },
+          'test': {
+            'status': 'evaluated',
+            'represented': true,
+            'strong_match_places': ['진청유점'],
+          },
+          'youngseo': {
+            'status': 'evaluated',
+            'represented': true,
+            'strong_match_places': ['카페공명 연남점'],
+          },
         },
       },
     }, itinerary: itinerary)!;
@@ -250,30 +260,39 @@ void main() {
     expect(taste.gaps, isEmpty);
     expect(taste.hasDetail, isTrue);
 
-    final gapped = PlatformClient.appliedTaste({
-      'group_size': 3,
-      'keywords': [
-        {'category': '미식', 'dimension': 'interest_theme', 'shared_by': 2},
-      ],
-      'group_blend': {
-        'per_user': {
-          'a': {'status': 'evaluated', 'represented': false, 'strong_match_places': []},
-          'b': {'status': 'insufficient_history', 'represented': null},
-          // 같은 이름이 일정에 두 번 있으면 어느 쪽인지 몰라 뺀다 · 일정에 없는 이름도 뺀다
-          'c': {'status': 'evaluated', 'represented': true, 'strong_match_places': ['스타벅스', '없는 곳']},
+    final gapped = PlatformClient.appliedTaste(
+      {
+        'group_size': 3,
+        'keywords': [
+          {'category': '미식', 'dimension': 'interest_theme', 'shared_by': 2},
+        ],
+        'group_blend': {
+          'per_user': {
+            'a': {'status': 'evaluated', 'represented': false, 'strong_match_places': []},
+            'b': {'status': 'insufficient_history', 'represented': null},
+            // 같은 이름이 일정에 두 번 있으면 어느 쪽인지 몰라 뺀다 · 일정에 없는 이름도 뺀다
+            'c': {
+              'status': 'evaluated',
+              'represented': true,
+              'strong_match_places': ['스타벅스', '없는 곳'],
+            },
+          },
         },
       },
-    }, itinerary: [
-      {'key': 's1', 'name': '스타벅스'},
-      {'key': 's2', 'name': '스타벅스'},
-    ])!;
+      itinerary: [
+        {'key': 's1', 'name': '스타벅스'},
+        {'key': 's2', 'name': '스타벅스'},
+      ],
+    )!;
     expect(gapped.matches, isEmpty);
     expect([for (final g in gapped.gaps) (g.memberId, g.noHistory)], [('a', false), ('b', true)]);
 
     // 혼자 코스는 group_blend를 보지 않는다
     final solo = PlatformClient.appliedTaste({
       'group_size': 1,
-      'keywords': [{'category': '자연', 'dimension': 'interest_theme'}],
+      'keywords': [
+        {'category': '자연', 'dimension': 'interest_theme'},
+      ],
       'group_blend': null,
     }, itinerary: itinerary)!;
     expect(solo.hasDetail, isFalse);

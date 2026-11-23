@@ -20,11 +20,7 @@ import 'package:google_fonts/google_fonts.dart';
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  const sizes = {
-    '360x640': Size(360, 640),
-    '390x844': Size(390, 844),
-    '430x932': Size(430, 932),
-  };
+  const sizes = {'360x640': Size(360, 640), '390x844': Size(390, 844), '430x932': Size(430, 932)};
 
   final screens = <String, Widget Function()>{
     '소셜 로그인': () => const SocialLoginPage(),
@@ -48,10 +44,12 @@ void main() {
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);
 
-        await tester.pumpWidget(ProviderScope(
-          retry: (_, _) => null,
-          child: MaterialApp(theme: AppTheme.light(), home: screen.value()),
-        ));
+        await tester.pumpWidget(
+          ProviderScope(
+            retry: (_, _) => null,
+            child: MaterialApp(theme: AppTheme.light(), home: screen.value()),
+          ),
+        );
         // Mock 지연(기본 600ms)을 지나 데이터 상태까지 렌더링
         await tester.pump(const Duration(seconds: 1));
         await tester.pump(const Duration(seconds: 1));

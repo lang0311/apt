@@ -9,8 +9,14 @@ import 'package:google_fonts/google_fonts.dart';
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  Future<void> pump(WidgetTester tester, PlaceActionTiles tiles) =>
-      tester.pumpWidget(MaterialApp(theme: AppTheme.light(), home: Scaffold(body: Padding(padding: const EdgeInsets.all(20), child: tiles))));
+  Future<void> pump(WidgetTester tester, PlaceActionTiles tiles) => tester.pumpWidget(
+    MaterialApp(
+      theme: AppTheme.light(),
+      home: Scaffold(
+        body: Padding(padding: const EdgeInsets.all(20), child: tiles),
+      ),
+    ),
+  );
 
   testWidgets('지도 · 전화가 다 있으면 세 칸, 저장됨 칸은 잉크 바탕', (tester) async {
     await pump(tester, PlaceActionTiles(saved: true, onSave: () {}, onMap: () {}, onCall: () {}));

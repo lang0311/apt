@@ -10,13 +10,17 @@ import 'package:google_fonts/google_fonts.dart';
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  Future<void> pump(WidgetTester tester, Widget child, {double scale = 1}) => tester.pumpWidget(MaterialApp(
-        theme: AppTheme.light(),
-        home: MediaQuery(
-          data: MediaQueryData(size: const Size(360, 640), textScaler: TextScaler.linear(scale)),
-          child: Scaffold(body: Padding(padding: const EdgeInsets.all(20), child: child)),
+  Future<void> pump(WidgetTester tester, Widget child, {double scale = 1}) => tester.pumpWidget(
+    MaterialApp(
+      theme: AppTheme.light(),
+      home: MediaQuery(
+        data: MediaQueryData(size: const Size(360, 640), textScaler: TextScaler.linear(scale)),
+        child: Scaffold(
+          body: Padding(padding: const EdgeInsets.all(20), child: child),
         ),
-      ));
+      ),
+    ),
+  );
 
   testWidgets('일정 카드(boxed)는 흰 바탕 + 1px 선, 모서리 20', (tester) async {
     await pump(tester, const SectionCard(title: '일정 5곳', boxed: true, child: Text('일정')));

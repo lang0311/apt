@@ -16,7 +16,12 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      ProviderScope(child: MaterialApp(theme: AppTheme.light(), home: const CollectionDetailPage(collectionId: 'c1'))),
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const CollectionDetailPage(collectionId: 'c1'),
+        ),
+      ),
     );
     // 보관함 → 장소 목록 순서로 불러온다 (Mock 지연 두 번)
     for (var i = 0; i < 6; i++) {

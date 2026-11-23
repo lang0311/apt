@@ -63,10 +63,12 @@ void main() {
         await tester.runAsync(() => container.read(authControllerProvider.notifier).signInWithSocial(SocialProvider.google));
         expect(container.read(authControllerProvider).status, AuthStatus.authenticated);
 
-        await tester.pumpWidget(UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp(theme: AppTheme.light(), home: screen.value()),
-        ));
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(theme: AppTheme.light(), home: screen.value()),
+          ),
+        );
         // Mock 지연(추출/추천 최대 2.6초)을 지나 결과 상태까지
         for (var i = 0; i < 4; i++) {
           await tester.pump(const Duration(seconds: 1));

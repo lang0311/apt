@@ -11,9 +11,11 @@ import 'package:google_fonts/google_fonts.dart';
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  Future<void> pump(WidgetTester tester, Widget page) => tester.pumpWidget(ProviderScope(
-        child: MaterialApp(theme: AppTheme.light(), home: page),
-      ));
+  Future<void> pump(WidgetTester tester, Widget page) => tester.pumpWidget(
+    ProviderScope(
+      child: MaterialApp(theme: AppTheme.light(), home: page),
+    ),
+  );
 
   testWidgets('회원가입: 제목 "계정을 만들어 주세요" + 2 / 2, 비밀번호가 짧으면 지금 글자 수', (tester) async {
     await pump(tester, const IdSignupPage());
