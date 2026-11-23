@@ -181,6 +181,14 @@ class PlatformSavedRepository extends ApiSavedRepository {
     );
   }
 
+  @visibleForTesting
+  static int bySavedAtDesc(Json a, Json b) {
+    final at = DateTime.tryParse((a['saved_at'] ?? '').toString());
+    final bt = DateTime.tryParse((b['saved_at'] ?? '').toString());
+    if (at == null || bt == null) return (at == null ? 1 : 0) - (bt == null ? 1 : 0);
+    return bt.compareTo(at);
+  }
+
   /// 서버 요약과 같은 카테고리 키: 카카오 업종 전체 경로, 없으면 대분류 이름, 그것도 없으면 '기타'
   static String categoryKeyOf(Json place) {
     for (final field in ['category', 'category_group_name']) {
@@ -212,7 +220,8 @@ class PlatformSavedRepository extends ApiSavedRepository {
   /// (코스 목록은 최근 30개만 옴) AI 추천으로 본다 (07 D44).
   Future<({List<Json> mine, List<(Json, String?)> ai})> _split() async {
     final me = await _platform.me();
-    final places = [for (final p in me['places'] as List) Map<String, dynamic>.from(p as Map)];
+    // 저장됨 '최근 저장한 순'은 서버 순서가 아니라 저장한 시각(saved_at) 최신순 (14번). 시각이 없으면 맨 뒤
+    final places = [for (final p in me['places'] as List) Map<String, dynamic>.from(p as Map)]..sort(bySavedAtDesc);
     final fromCourses = [for (final p in places) if (p['action_type'] == 'course_confirmed') p['key'].toString()];
     if (fromCourses.isEmpty) return (mine: places, ai: <(Json, String?)>[]);
     final stops = await _courseStops(me, fromCourses);
