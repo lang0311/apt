@@ -321,7 +321,10 @@ class PlatformClient {
         }
         if (data['status'] == 'cancelled' || cancelRequested) throw const CancelledFailure();
         if (data['status'] == 'failed') {
-          throw ValidationFailure((data['error'] ?? '추천을 받지 못했어요.').toString());
+          final error = (data['error'] ?? '추천을 받지 못했어요.').toString();
+          // 팀 서버 platform_store.reserve의 429 문장 (12번). 초기화 시각은 화면에서 /me/usage로 다시 읽는다
+          if (error.contains('한도에 도달')) throw const QuotaExceededFailure();
+          throw ValidationFailure(error);
         }
         if (data['stage'] != null) onStage?.call(data['stage'].toString());
         await Future<void>.delayed(const Duration(seconds: 1));

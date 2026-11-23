@@ -153,6 +153,34 @@ class BlockedPlace {
   final DateTime? blockedAt;
 }
 
+/// 저장하지 않은 추천 결과 (13번, 홈 맨 위 안내)
+class UnsavedRecommendation {
+  const UnsavedRecommendation({required this.course, required this.receivedAt, this.regionLabel});
+
+  final Course course;
+
+  /// 이 기기에서 추천을 받은 시각 (서버는 코스를 만든 시각을 주지 않는다)
+  final DateTime receivedAt;
+
+  /// 첫 장소 주소의 구 · 시 ('성동구'). 서버 초안에는 코스 이름이 없어 이름 대신 쓴다
+  final String? regionLabel;
+
+  /// 초안에는 이름이 없다 — 지역 이름으로 대신한다 ('성동구 코스')
+  String get title => regionLabel == null ? '추천 코스' : '$regionLabel 코스';
+}
+
+/// 오늘 추천 사용량 (서버 `GET /me/usage`, 12번). 서버 한도는 추천 횟수가 아니라 AI 호출 수 · 비용이라
+/// 남은 추천 횟수는 알 수 없다 — 다 썼는지와 초기화 시각만 쓴다.
+class RecommendationQuota {
+  const RecommendationQuota({required this.exhausted, required this.resetAt});
+
+  /// 오늘 호출 수나 비용 한도를 다 썼는지
+  final bool exhausted;
+
+  /// 다시 쓸 수 있는 시각 (서버는 UTC 0시 = 한국 오전 9시에 초기화)
+  final DateTime resetAt;
+}
+
 /// 코스 목록 카드
 class CourseSummary {
   const CourseSummary({

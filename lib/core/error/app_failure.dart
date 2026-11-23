@@ -53,6 +53,13 @@ class NotImplementedFailure extends AppFailure {
   const NotImplementedFailure(String feature) : super('$feature 기능은 아직 준비 중이에요.');
 }
 
+/// 오늘 추천 한도를 다 썼을 때 (팀 서버 job 실패 '오늘의 추천 호출·예산 한도에 도달했습니다.', 12번).
+/// [resetAt]: 다시 쓸 수 있는 시각을 알면 넣는다.
+class QuotaExceededFailure extends AppFailure {
+  const QuotaExceededFailure({this.resetAt}) : super('오늘 받을 수 있는 추천을 다 썼어요.');
+  final DateTime? resetAt;
+}
+
 class UnknownFailure extends AppFailure {
   const UnknownFailure([super.message = '알 수 없는 오류가 발생했어요.']);
 }

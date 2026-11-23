@@ -118,7 +118,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.courseNewInfo, builder: (_, _) => const CourseInfoPage()),
       GoRoute(path: AppRoutes.courseNewPlaces, builder: (_, _) => const PlaceSelectionPage()),
       GoRoute(path: AppRoutes.courseNewCompanion, builder: (_, _) => const CompanionPage()),
-      GoRoute(path: AppRoutes.courseNewAi, builder: (_, _) => const AiRecommendationPage()),
+      GoRoute(
+        path: AppRoutes.courseNewAi,
+        builder: (_, state) => AiRecommendationPage(resumed: state.uri.queryParameters['resumed'] == '1'),
+      ),
       GoRoute(path: AppRoutes.blockedPlaces, builder: (_, _) => const BlockedPlacesPage()),
       GoRoute(path: AppRoutes.placeSearch, builder: (_, _) => const PlaceSearchPage()),
       // 장소 상세는 탭바 없는 화면(v2 시안 #20). 셸 안에 두면 4/4 결과처럼 셸 밖 화면에서 push할 때

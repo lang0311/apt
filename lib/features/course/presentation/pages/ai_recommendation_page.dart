@@ -30,13 +30,17 @@ import '../widgets/course_route_map.dart';
 import '../widgets/course_places_strip.dart';
 import '../widgets/course_timeline.dart';
 import '../widgets/recommending_banner.dart';
+import '../widgets/recommendation_quota.dart';
 import '../../domain/course_schedule.dart';
 
 /// #30 AI 추천 (4/4) — 결과는 코스 상세와 같은 화면(머리 · 지도 · 일정 카드 "편집").
 /// 장소를 누르면 시트(바꾸기 · 이번만 빼기 · 앞으로 추천하지 않기), "편집"은 상세 편집과 같은 목록.
 /// 다시 추천은 내가 고른 장소를 두고 AI 자리만 바꾸고, 바뀐 자리를 주황으로 보여 준다. 진행 바는 4/4 유지.
 class AiRecommendationPage extends ConsumerStatefulWidget {
-  const AiRecommendationPage({super.key});
+  const AiRecommendationPage({super.key, this.resumed = false});
+
+  /// 홈에서 저장하지 않은 추천을 이어 볼 때 (13번)
+  final bool resumed;
 
   @override
   ConsumerState<AiRecommendationPage> createState() => _AiRecommendationPageState();
@@ -100,7 +104,9 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
     final busy = state.loading || _saving;
 
     final Widget body;
-    if (!state.hasResult && state.error != null) {
+    if (!state.hasResult && state.error is QuotaExceededFailure) {
+      body = QuotaExceededView(onConfirm: () => context.canPop() ? context.pop() : context.go(AppRoutes.courses));
+    } else if (!state.hasResult && state.error != null) {
       body = AppErrorState(error: state.error!, title: '추천을 받지 못했어요', onRetry: () => _rec.syncWithDraft());
     } else if (!state.hasResult) {
       body = _Waiting(title: draft.name, date: draft.date, stage: state.stage, isParty: draft.companion == Companion.party);
@@ -115,6 +121,22 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (widget.resumed) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+                    decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.medium)),
+                    child: Row(
+                      children: [
+                        const Icon(LucideIcons.info, size: 16, color: AppColors.textSecondary),
+                        const SizedBox(width: AppSpacing.xs),
+                        Expanded(
+                          child: Text('저장하지 않은 추천이에요. 저장해야 코스 목록에 남아요.', style: AppTypography.meta.copyWith(color: AppColors.textSecondary)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                ],
                 // 코스 상세와 같은 요약 칸 (거리는 편집하면 다시 센다)
                 CourseStats(date: draft.date, start: draft.startTime, stops: state.stops),
                 const SizedBox(height: AppSpacing.xs),

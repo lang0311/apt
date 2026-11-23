@@ -31,6 +31,19 @@ abstract interface class CourseRepository {
   /// 진행 중인 추천을 멈춘다. 진행 중인 추천이 없으면 아무것도 하지 않는다.
   Future<void> cancelRecommendation();
 
+  /// 저장하지 않은 마지막 추천 결과 (13번). 서버는 추천마다 결과를 초안(draft)으로 남긴다.
+  /// 이 기기에서 받은 마지막 추천이 아직 초안이고 날짜가 지나지 않았으면 돌려준다. 없으면 null.
+  Future<UnsavedRecommendation?> fetchUnsavedRecommendation();
+
+  /// 저장하지 않은 추천을 이어서 본다 — 그 초안을 다시 받아 4/4의 저장 · 다시 추천 대상으로 삼는다.
+  Future<Course> resumeUnsavedRecommendation(String courseId);
+
+  /// 홈 안내를 닫는다(이 초안은 다시 띄우지 않음, 기기에만 기억)
+  Future<void> dismissUnsavedRecommendation(String courseId);
+
+  /// 오늘 추천 사용량 (12번). 서버 값이 없으면(Mock) null
+  Future<RecommendationQuota?> fetchRecommendationQuota();
+
   Future<Course> createCourse({required CourseDraft draft, required List<CourseStop> stops});
 
   /// 파티원에게 보낼 코스 링크 (열면 코스 상세)

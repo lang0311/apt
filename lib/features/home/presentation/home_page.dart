@@ -3,7 +3,9 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/di/repositories.dart';
 import '../../../app/routes.dart';
+import '../../../core/error/app_failure.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../core/widgets/buttons.dart';
 import '../../../core/widgets/headers.dart';
@@ -37,6 +39,7 @@ class HomePage extends ConsumerWidget {
     ref.invalidate(suggestedCoursesProvider);
     ref.invalidate(activeCoursesProvider);
     ref.invalidate(savedPlacesProvider);
+    ref.invalidate(unsavedRecommendationProvider);
     return awaitRefresh(context, [
       ref.read(activeCoursesProvider.future),
       ref.read(homeStatsProvider.future),
@@ -57,8 +60,24 @@ class HomePage extends ConsumerWidget {
     );
   }
 
+  Future<void> _resume(BuildContext context, WidgetRef ref, UnsavedRecommendation unsaved) async {
+    try {
+      await resumeUnsavedRecommendation(context, ref, unsaved);
+    } catch (e) {
+      // 그사이 다른 기기에서 저장했거나 서버에서 사라졌으면 안내를 내린다
+      ref.invalidate(unsavedRecommendationProvider);
+      if (context.mounted) showAppSnackBar(context, failureMessage(e));
+    }
+  }
+
+  Future<void> _closeUnsaved(WidgetRef ref, UnsavedRecommendation unsaved) async {
+    await ref.read(courseRepositoryProvider).dismissUnsavedRecommendation(unsaved.course.id);
+    ref.invalidate(unsavedRecommendationProvider);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final unsaved = ref.watch(unsavedRecommendationProvider).value;
     final courses = ref.watch(activeCoursesProvider);
     final stats = ref.watch(homeStatsProvider);
     final recent = ref.watch(recentExtractionsProvider);
@@ -109,6 +128,12 @@ class HomePage extends ConsumerWidget {
     final undated = top is HomeTopCourse ? const <CourseSummary>[] : undatedCourses(courses.value ?? const []);
     // v2: 맨 위 카드 · 바로가기는 좌우 20 여백, 그 아래 섹션은 상자 없이 채움 띠로 나눈다
     final heads = <Widget>[
+      if (unsaved != null)
+        UnsavedRecommendationCard(
+          unsaved: unsaved,
+          onResume: () => _resume(context, ref, unsaved),
+          onClose: () => _closeUnsaved(ref, unsaved),
+        ),
       ?topWidget,
       // 바로가기는 처음 쓰는 사람(시작 안내)만 빼고 늘 둔다 — 맨 위 카드가 없어도 첫 줄이 비지 않게
       if (top != null && !isFirstUse)

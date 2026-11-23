@@ -82,6 +82,14 @@ class MockMembersCourseRepository implements CourseRepository {
   @override
   Future<void> cancelRecommendation() => server.cancelRecommendation();
   @override
+  Future<UnsavedRecommendation?> fetchUnsavedRecommendation() => server.fetchUnsavedRecommendation();
+  @override
+  Future<Course> resumeUnsavedRecommendation(String courseId) async => _course(await server.resumeUnsavedRecommendation(courseId));
+  @override
+  Future<void> dismissUnsavedRecommendation(String courseId) => server.dismissUnsavedRecommendation(courseId);
+  @override
+  Future<RecommendationQuota?> fetchRecommendationQuota() => server.fetchRecommendationQuota();
+  @override
   Future<Course> createCourse({required CourseDraft draft, required List<CourseStop> stops}) async =>
       _course(await server.createCourse(draft: draft, stops: stops));
   @override

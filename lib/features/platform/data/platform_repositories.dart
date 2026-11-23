@@ -19,6 +19,7 @@ import '../../place/domain/place_search_repository.dart';
 import '../../course/domain/course_models.dart';
 import '../../course/domain/course_draft.dart';
 import '../../course/domain/course_repository.dart';
+import '../../course/data/unsaved_recommendation_storage.dart';
 import '../../extraction/domain/extraction_models.dart';
 import '../../extraction/domain/extraction_repository.dart';
 import '../../home/domain/home_models.dart';
@@ -336,8 +337,10 @@ class PlatformPlaceSearchRepository implements PlaceSearchRepository {
 }
 
 class PlatformCourseRepository implements CourseRepository {
-  PlatformCourseRepository(this._platform);
+  PlatformCourseRepository(this._platform, [UnsavedRecommendationStorage? unsaved])
+    : _unsaved = unsaved ?? UnsavedRecommendationStorage();
   final PlatformClient _platform;
+  final UnsavedRecommendationStorage _unsaved;
   CourseSummary _summary(Json course) => CourseSummary(
     id: course['id'] as String,
     title: (course['title'] ?? '추천 코스').toString(),
@@ -443,7 +446,7 @@ class PlatformCourseRepository implements CourseRepository {
     }
     final running = jobs.where((job) => job['status'] != 'cancelling');
     if (running.isNotEmpty) {
-      return _recommendation(await _platform.poll(running.first['id'] as String, onStage: onServerStage));
+      return _received(await _platform.poll(running.first['id'] as String, onStage: onServerStage));
     }
     final previous = _platform.lastCourseId;
     final exclusionTokens = <String>[];
@@ -477,7 +480,7 @@ class PlatformCourseRepository implements CourseRepository {
           'revision': old['revision'],
           'place_key': removed.first['key'],
         });
-        return _recommendation(await _platform.poll(started['job_id'] as String, onStage: onServerStage));
+        return _received(await _platform.poll(started['job_id'] as String, onStage: onServerStage));
       }
       // 다시 추천하기 전에 앱에서 뺀 장소를 서버 코스에서도 빼 둔다 — 그래야 서버가 제외 목록을 유지한다.
       for (final stop in List<dynamic>.from(old['itinerary'] as List)) {
@@ -513,11 +516,72 @@ class PlatformCourseRepository implements CourseRepository {
         'start_time': _hhmm(draft.startTime),
       });
     }
-    return _recommendation(await _platform.poll(started['job_id'] as String, onStage: onServerStage));
+    return _received(await _platform.poll(started['job_id'] as String, onStage: onServerStage));
   }
 
   @override
   Future<void> cancelRecommendation() => _platform.cancelRecommendation();
+
+  /// 이 기기에 남긴 마지막 추천을 서버에서 다시 읽는다. 저장했거나(confirmed) 다른 사람 것이거나
+  /// 날짜가 지났거나 서버에서 못 찾으면 안내하지 않는다 (13번)
+  @override
+  Future<UnsavedRecommendation?> fetchUnsavedRecommendation() async {
+    final me = _platform.currentUserId ?? (await _platform.me())['user']['id'] as String;
+    final stored = await _unsaved.read(me);
+    if (stored == null) return null;
+    final Json json;
+    try {
+      json = Map<String, dynamic>.from(await _platform.get('/courses/${stored.courseId}') as Map);
+    } on NotFoundFailure {
+      await _unsaved.clear(me);
+      return null;
+    } on ForbiddenFailure {
+      await _unsaved.clear(me);
+      return null;
+    }
+    if (json['status'] != 'draft' || json['owner'] != me) {
+      await _unsaved.clear(me);
+      return null;
+    }
+    final date = DateTime.tryParse((json['date'] ?? '').toString());
+    if (date != null && DateUtils.dateOnly(date).isBefore(DateUtils.dateOnly(DateTime.now()))) return null;
+    return UnsavedRecommendation(
+      course: _platform.course(json),
+      receivedAt: stored.receivedAt,
+      regionLabel: _region(json['itinerary'] as List),
+    );
+  }
+
+  /// 이어 보기: 그 초안을 4/4의 저장 · 다시 추천 대상으로 삼는다
+  @override
+  Future<Course> resumeUnsavedRecommendation(String courseId) async {
+    final json = Map<String, dynamic>.from(await _platform.get('/courses/$courseId') as Map);
+    final course = _platform.course(json);
+    _platform.lastCourseId = courseId;
+    return course;
+  }
+
+  @override
+  Future<void> dismissUnsavedRecommendation(String courseId) async {
+    if (_platform.currentUserId case final String me) await _unsaved.dismiss(me, courseId);
+  }
+
+  /// 서버 한도는 하루 AI 호출 수 · 비용이다 (UTC 0시 초기화). 추천 한 번에 몇 번 · 얼마를 쓸지는 미리 알 수 없어
+  /// 확실히 다 쓴 경우만 막고, 추천 중에 한도에 걸리면 [QuotaExceededFailure]로 따로 안내한다 (12번)
+  @override
+  Future<RecommendationQuota?> fetchRecommendationQuota() async {
+    final usage = Map<String, dynamic>.from(await _platform.get('/me/usage') as Map);
+    final spent = (usage['cost_usd'] as num? ?? 0) + (usage['reserved_usd'] as num? ?? 0);
+    final exhausted = (usage['call_count'] as num? ?? 0) >= (usage['daily_call_limit'] as num? ?? 1 << 30) ||
+        spent + _minReserveUsd > (usage['daily_usd_limit'] as num? ?? double.infinity);
+    return RecommendationQuota(
+      exhausted: exhausted,
+      resetAt: DateTime.fromMillisecondsSinceEpoch(((usage['reset_at'] as num?) ?? 0).toInt() * 1000),
+    );
+  }
+
+  /// 서버가 AI 호출 한 번에 미리 잡아 두는 가장 작은 금액 (platform_store.reserve의 검색 0.1달러)
+  static const _minReserveUsd = 0.1;
 
   @override
   Future<String> courseLink(String courseId) async => webAppLink('/courses/$courseId');
@@ -532,6 +596,14 @@ class PlatformCourseRepository implements CourseRepository {
     'reviewing' || 'saving' => RecommendationStage.organize,
     _ => null,
   };
+
+  /// 추천을 받으면 이 기기에 그 초안 id와 받은 시각을 남긴다 — 저장하지 않고 나가면 홈에서 이어 본다 (13번)
+  Future<Recommendation> _received(Json course) async {
+    if (_platform.currentUserId case final String me) {
+      await _unsaved.remember(me, course['id'] as String, DateTime.now());
+    }
+    return _recommendation(course);
+  }
 
   Recommendation _recommendation(Json course) => Recommendation(
     stops: _platform.stops(course),
@@ -564,6 +636,7 @@ class PlatformCourseRepository implements CourseRepository {
     final confirmed = await _platform.post('/courses/$id/confirm', {
       'revision': changed['revision'],
     });
+    if (_platform.currentUserId case final String me) await _unsaved.clear(me);
     return _platform.course(Map<String, dynamic>.from(confirmed as Map));
   }
 

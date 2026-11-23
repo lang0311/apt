@@ -9,6 +9,7 @@ import '../../place/domain/place.dart';
 import '../domain/course_draft.dart';
 import '../domain/course_models.dart';
 import 'course_draft_controller.dart';
+import 'course_providers.dart';
 
 /// 기다리는 동안 무엇을 다시 고르는지 (문구와 뼈대 자리가 달라진다)
 enum RerollKind {
@@ -174,6 +175,12 @@ class RecommendationController extends Notifier<RecommendationState> {
     );
   }
 
+  /// 저장하지 않은 추천 이어 보기 (13번, 홈 → 4/4). 서버 초안에는 이름이 없어 [title](지역 이름)로 채운다
+  void resume(Course course, {required String title}) {
+    startEditing(course);
+    _draft.update((d) => d.copyWith(name: title));
+  }
+
   void _remember({String? blockedPlaceId}) => _undo = _Snapshot(state, ref.read(courseDraftProvider), blockedPlaceId: blockedPlaceId);
 
   /// 다시 추천 — 내가 고른 장소는 두고 AI 장소 자리만 다시 채운다.
@@ -227,11 +234,15 @@ class RecommendationController extends Notifier<RecommendationState> {
       if (seq != _requestSeq) return false;
       _beforeRequest = null;
       state = RecommendationState(stops: rec.stops, recommendation: rec, basedOnPlaceIds: draft.placeIds, addedIds: previous.addedIds);
+      // 저장하지 않고 나가면 홈 맨 위에 이어 보기 안내가 뜨게 (13번)
+      ref.invalidate(unsavedRecommendationProvider);
       return true;
     } catch (e) {
       // 취소한 요청이면 cancel()이 이미 화면을 되돌렸다
       if (seq != _requestSeq || e is CancelledFailure) return false;
       _beforeRequest = null;
+      // 한도에 걸렸으면 3/4 버튼도 막히게 사용량을 다시 읽는다 (12번)
+      if (e is QuotaExceededFailure) ref.invalidate(recommendationQuotaProvider);
       // 실패하면 이전 결과로 복구 + 재시도 가능
       state = previous.copyWith(loading: false, error: e, clearStage: true, clearReplacing: true);
       return false;

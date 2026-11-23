@@ -44,6 +44,61 @@ class HomeStartGuide extends StatelessWidget {
 }
 
 /// ② 새로 저장한 곳이 있을 때만 뜨는 한 줄 제안. 카드를 누르면 그 장소들로 코스 만들기, X로 닫는다.
+/// 맨 위: 저장하지 않은 추천 (13번). 받은 추천을 저장하지 않고 나갔을 때 이어서 보게 한다
+class UnsavedRecommendationCard extends StatelessWidget {
+  const UnsavedRecommendationCard({super.key, required this.unsaved, required this.onResume, required this.onClose});
+  final UnsavedRecommendation unsaved;
+  final VoidCallback onResume;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final meta = [
+      ?unsaved.regionLabel,
+      '${unsaved.course.stops.length}곳',
+      formatRelative(unsaved.receivedAt),
+    ].join(' · ');
+    return Material(
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.cardAll, side: const BorderSide(color: AppColors.border)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onResume,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.sm, AppSpacing.xxs, AppSpacing.sm),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.small)),
+                child: const Icon(LucideIcons.route, size: 18, color: AppColors.textPrimary),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('저장 안 한 추천이 있어요', style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(meta, style: AppTypography.meta, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ],
+                ),
+              ),
+              AppButton(label: '이어 보기', onPressed: onResume, variant: AppButtonVariant.soft, expand: false, height: 36),
+              IconButton(
+                onPressed: onClose,
+                tooltip: '안내 닫기',
+                icon: const Icon(LucideIcons.x, size: 20, color: AppColors.textSecondary),
+                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class NewSavesNudge extends StatelessWidget {
   const NewSavesNudge({super.key, required this.items, required this.onTap, required this.onClose});
   final List<RecentExtraction> items;

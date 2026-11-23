@@ -117,6 +117,16 @@ class MockCourseRepository implements CourseRepository {
     if (cancel != null && !cancel.isCompleted) cancel.complete();
   }
 
+  /// Mock은 추천 결과를 서버에 남기지 않는다 — 이어 보기 · 사용량은 서버 모드만 (13 · 12번)
+  @override
+  Future<UnsavedRecommendation?> fetchUnsavedRecommendation() async => null;
+  @override
+  Future<Course> resumeUnsavedRecommendation(String courseId) async => throw const NotImplementedFailure('추천 이어 보기');
+  @override
+  Future<void> dismissUnsavedRecommendation(String courseId) async {}
+  @override
+  Future<RecommendationQuota?> fetchRecommendationQuota() async => null;
+
   @override
   Future<String> courseLink(String courseId) async => 'https://apt.example.com/courses/$courseId';
 
@@ -230,6 +240,14 @@ class ApiCourseRepository implements CourseRepository {
   }) async => throw _notImplemented;
   @override
   Future<void> cancelRecommendation() async {}
+  @override
+  Future<UnsavedRecommendation?> fetchUnsavedRecommendation() async => null;
+  @override
+  Future<Course> resumeUnsavedRecommendation(String courseId) async => throw _notImplemented;
+  @override
+  Future<void> dismissUnsavedRecommendation(String courseId) async {}
+  @override
+  Future<RecommendationQuota?> fetchRecommendationQuota() async => null;
   @override
   Future<String> courseLink(String courseId) async => throw _notImplemented;
   @override
