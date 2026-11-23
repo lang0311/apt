@@ -169,6 +169,8 @@ class _CrewStrip extends ConsumerWidget {
     final party = partyId == null ? null : ref.watch(partyProvider(partyId)).value;
     final members = party?.members;
     final names = members == null ? '파티 ${course.memberCount}명' : members.crewNames;
+    // 19번: 다른 파티원이 만든 코스면 둘째 줄에 "지민님이 만든 코스"
+    final creator = members?.creatorLine(course.ownerId);
     // v2: 회색 판 한 줄 (테두리 없음)
     return Material(
       color: AppColors.fill,
@@ -187,7 +189,17 @@ class _CrewStrip extends ConsumerWidget {
                   const SizedBox(width: AppSpacing.xs),
                 ],
                 Expanded(
-                  child: Text(names, style: AppTypography.labelLarge, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: creator == null ? 0 : AppSpacing.xs),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(names, style: AppTypography.labelLarge, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        if (creator != null)
+                          Text(creator, style: AppTypography.caption.copyWith(color: AppColors.textTertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ],
+                    ),
+                  ),
                 ),
                 if (members != null) const Icon(LucideIcons.chevronRight, color: AppColors.textSecondary),
               ],

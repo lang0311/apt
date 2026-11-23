@@ -219,6 +219,7 @@ class Course {
     this.canEdit = true,
     this.taste,
     this.schedule,
+    this.ownerId,
   });
 
   final String id;
@@ -240,6 +241,9 @@ class Course {
   /// 서버 예상 일정 (21번). 없으면 null — 화면은 [withEstimatedTimes]로 시각 · 이동 줄을 붙인다
   final EstimatedSchedule? schedule;
 
+  /// 코스를 만든 사람 id (서버 `owner`, 19번). 파티 코스 상세에서 파티원 이름으로 바꿔 보여 준다
+  final String? ownerId;
+
   Course copyWith({required int memberCount}) => Course(
     id: id,
     title: title,
@@ -253,5 +257,6 @@ class Course {
     canEdit: canEdit,
     taste: taste,
     schedule: schedule,
+    ownerId: ownerId,
   );
 }

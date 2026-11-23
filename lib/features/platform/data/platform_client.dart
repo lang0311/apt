@@ -167,6 +167,7 @@ class PlatformClient {
       stops: stops(json),
       taste: appliedTaste(json['taste_profile'], itinerary: json['itinerary'] as List?),
       schedule: estimatedSchedule(json['taste_profile']),
+      ownerId: json['owner'] as String?,
     );
   }
 

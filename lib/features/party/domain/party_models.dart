@@ -34,6 +34,12 @@ extension PartyMemberNames on List<PartyMember> {
     return length > 3 ? '${shown.take(2).join(', ')} 외 ${length - 2}명' : shown.join(', ');
   }
 
+  /// 파티 코스를 만든 사람 줄 ("지민님이 만든 코스", 19번). 내가 만들었거나 파티원 중에 없으면 null
+  String? creatorLine(String? ownerId) {
+    final owner = where((m) => m.id == ownerId).firstOrNull;
+    return owner == null || owner.isMe ? null : '${owner.nickname}님이 만든 코스';
+  }
+
   /// 나를 뺀 이름들 ("민지, 랑이"), 넘치면 "외 n명"
   String get otherNames {
     final names = [for (final m in this) if (!m.isMe) m.nickname];

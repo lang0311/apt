@@ -115,6 +115,7 @@ class MockStore {
         isParty: true,
         memberCount: 3,
         partyId: 'party1',
+        ownerId: 'u3', // 민지가 만든 파티 코스 (19번 "민지님이 만든 코스")
         stops: MockFixtures.stopsFor([
           ('p1', PlaceSource.user, null),
           ('p6', PlaceSource.ai, '남는 50분 활용'),
