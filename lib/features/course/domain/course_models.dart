@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../place/domain/place.dart';
+import 'course_schedule.dart';
 
 /// 코스 안 장소의 출처. UI에서 항상 구분한다 (AI = 주황 ✦ + 이유 라벨).
 enum PlaceSource { user, ai }
@@ -21,13 +22,28 @@ enum TransportMode {
   final IconData icon;
 }
 
-/// 다음 장소까지 이동 (서버 제공)
+/// 다음 장소까지 이동. 서버가 실제 길로 잰 이동 시간을 주면 [RouteLeg.new](20번, 서버 요청 대기),
+/// 그 전에는 앱이 좌표로 계산한 직선거리 [RouteLeg.straight]를 `약 500m`로 보여 준다 (21번 A안)
 class RouteLeg {
-  const RouteLeg({required this.mode, required this.minutes});
-  final TransportMode mode;
-  final int minutes;
+  const RouteLeg({required TransportMode this.mode, required int this.minutes}) : meters = null;
+  const RouteLeg.straight(double this.meters) : mode = null, minutes = null;
 
-  String get label => '${mode.label} $minutes분';
+  final TransportMode? mode;
+  final int? minutes;
+
+  /// 직선거리(m)
+  final double? meters;
+
+  IconData get icon => mode?.icon ?? LucideIcons.moveHorizontal;
+
+  String get label => meters == null ? '${mode!.label} $minutes분' : '약 ${_roughDistance(meters!)}';
+
+  /// 100m 미만은 10m, 1km 미만은 100m, 그 위는 0.1km 단위로 반올림
+  static String _roughDistance(double meters) {
+    final step = meters < 100 ? 10 : 100;
+    final rounded = ((meters / step).round() * step).clamp(10, double.infinity).toInt();
+    return rounded < 1000 ? '${rounded}m' : '${(meters / 1000).toStringAsFixed(1)}km';
+  }
 }
 
 /// 코스의 한 장소
@@ -54,13 +70,16 @@ class MoodOption {
 
 /// AI 추천 결과
 class Recommendation {
-  const Recommendation({required this.stops, this.description, this.taste});
+  const Recommendation({required this.stops, this.description, this.taste, this.schedule});
 
   final List<CourseStop> stops;
   final String? description;
 
   /// 이 추천에 반영한 취향 (없으면 일정 카드에 한 줄을 띄우지 않는다)
   final AppliedTaste? taste;
+
+  /// 서버 예상 일정 (21번). 없으면 null
+  final EstimatedSchedule? schedule;
 }
 
 /// 추천할 때 반영한 취향 (서버 `taste_profile`, 07 D46). 일정 카드에 "○○ · ○○ 취향을 반영했어요" 한 줄로 보여 준다.
@@ -199,6 +218,7 @@ class Course {
     this.partyId,
     this.canEdit = true,
     this.taste,
+    this.schedule,
   });
 
   final String id;
@@ -217,6 +237,9 @@ class Course {
   /// 이 코스를 추천할 때 반영한 취향 (07 D46)
   final AppliedTaste? taste;
 
+  /// 서버 예상 일정 (21번). 없으면 null — 화면은 [withEstimatedTimes]로 시각 · 이동 줄을 붙인다
+  final EstimatedSchedule? schedule;
+
   Course copyWith({required int memberCount}) => Course(
     id: id,
     title: title,
@@ -229,5 +252,6 @@ class Course {
     partyId: partyId,
     canEdit: canEdit,
     taste: taste,
+    schedule: schedule,
   );
 }

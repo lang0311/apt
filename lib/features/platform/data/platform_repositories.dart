@@ -510,6 +510,7 @@ class PlatformCourseRepository implements CourseRepository {
   Recommendation _recommendation(Json course) => Recommendation(
     stops: _platform.stops(course),
     taste: PlatformClient.appliedTaste(course['taste_profile'], itinerary: course['itinerary'] as List?),
+    schedule: PlatformClient.estimatedSchedule(course['taste_profile']),
     description: [
       course['recommendation_reason'],
       ...(course['warnings'] as List? ?? []),

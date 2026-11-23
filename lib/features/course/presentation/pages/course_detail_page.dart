@@ -23,6 +23,7 @@ import '../widgets/applied_taste_section.dart';
 import '../widgets/course_route_map.dart';
 import '../widgets/course_share_sheet.dart';
 import '../widgets/course_timeline.dart';
+import '../../domain/course_schedule.dart';
 
 /// #32 코스 상세 (보는 상태). 고치기는 일정 카드의 "편집" 하나로 들어간다(코스 편집 화면).
 class CourseDetailPage extends ConsumerWidget {
@@ -108,7 +109,8 @@ class _Body extends StatelessWidget {
                     CourseStopLegend(stops: course.stops),
                     if (course.taste != null) AppliedTasteSection(taste: course.taste!, stops: course.stops, partyId: course.partyId),
                     CourseTimeline(
-                      stops: course.stops,
+                      // 21번: 예상 도착 시각(서버 값, 순서가 바뀌면 앱이 다시 계산) + 장소 사이 직선거리
+                      stops: withEstimatedTimes(course.stops, start: course.startTime, server: course.schedule),
                       courseDate: course.date,
                       onTapStop: (s) => context.push(AppRoutes.place(s.place.id)),
                     ),

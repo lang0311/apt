@@ -30,6 +30,7 @@ import '../widgets/course_route_map.dart';
 import '../widgets/course_places_strip.dart';
 import '../widgets/course_timeline.dart';
 import '../widgets/recommending_banner.dart';
+import '../../domain/course_schedule.dart';
 
 /// #30 AI 추천 (4/4) — 결과는 코스 상세와 같은 화면(머리 · 지도 · 일정 카드 "편집").
 /// 장소를 누르면 시트(바꾸기 · 이번만 빼기 · 앞으로 추천하지 않기), "편집"은 상세 편집과 같은 목록.
@@ -157,7 +158,8 @@ class _AiRecommendationPageState extends ConsumerState<AiRecommendationPage> {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 CourseTimeline(
-                                  stops: state.visibleStops,
+                                  // 21번: 예상 도착 시각(서버 값, 순서가 바뀌면 앱이 다시 계산) + 장소 사이 직선거리
+                                  stops: withEstimatedTimes(state.visibleStops, start: draft.startTime, server: state.recommendation?.schedule),
                                   highlightIds: state.changedIds,
                                   loadingIds: state.loadingIds,
                                   courseDate: draft.date,

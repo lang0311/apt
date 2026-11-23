@@ -723,7 +723,7 @@ class _LegRow extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(leg!.mode.icon, size: 14, color: AppColors.textSecondary),
+                    Icon(leg!.icon, size: 14, color: AppColors.textSecondary),
                     const SizedBox(width: 4),
                     Text(leg!.label, style: AppTypography.meta.copyWith(color: AppColors.textSecondary)),
                   ],

@@ -169,7 +169,7 @@ class RecommendationController extends Notifier<RecommendationState> {
     _initialIds = [for (final s in course.stops) s.place.id];
     state = RecommendationState(
       stops: course.stops,
-      recommendation: Recommendation(stops: course.stops, taste: course.taste),
+      recommendation: Recommendation(stops: course.stops, taste: course.taste, schedule: course.schedule),
       basedOnPlaceIds: ref.read(courseDraftProvider).placeIds,
     );
   }

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart' show TimeOfDay;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:apt/core/network/api_client.dart';
 import 'package:apt/features/course/domain/course_models.dart';
@@ -356,6 +357,51 @@ void main() {
     expect({for (final cat in summary.categories) cat.label: cat.count}, {'한식': 1, '카페': 1});
     // 코스 목록은 같은 장소 목록이면 한 번만 받는다
     expect(c.calls.where((path) => path == '/courses'), hasLength(1));
+  });
+
+  test('서버 예상 일정(route_optimization.estimated_schedule)을 출발 시간 · 12:00 가정 여부와 함께 읽는다 (21번)', () {
+    final c = PlatformClient(ApiClient(Dio()));
+    final course = c.course({
+      'id': 'course',
+      'status': 'draft',
+      'party_id': null,
+      'start_time': '12:00',
+      'itinerary': [
+        {'key': 'a', 'name': '카페', 'address': '서울', 'saved': true},
+        {'key': 'b', 'name': '식당', 'address': '서울', 'saved': false},
+      ],
+      'taste_profile': {
+        'route_optimization': {
+          'start_time': '12:00',
+          'used_default_start': false,
+          'estimated_schedule': [
+            {'name': '카페', 'estimated_arrival': '12:00', 'assumed_stay_minutes': 45},
+            {'name': '식당', 'estimated_arrival': '13:07', 'assumed_stay_minutes': 60},
+          ],
+        },
+      },
+    });
+    final schedule = course.schedule!;
+    expect(schedule.start, const TimeOfDay(hour: 12, minute: 0));
+    expect(schedule.usedDefaultStart, isFalse);
+    expect(schedule.stops.map((s) => (s.name, s.arrival)), [
+      ('카페', const TimeOfDay(hour: 12, minute: 0)),
+      ('식당', const TimeOfDay(hour: 13, minute: 7)),
+    ]);
+  });
+
+  test('예상 일정이 없는 예전 코스는 schedule이 null', () {
+    final c = PlatformClient(ApiClient(Dio()));
+    final course = c.course({
+      'id': 'old',
+      'status': 'draft',
+      'party_id': null,
+      'itinerary': [
+        {'key': 'a', 'name': '카페', 'address': '서울', 'saved': true},
+      ],
+      'taste_profile': {'route_optimization': {'method': 'unchanged'}},
+    });
+    expect(course.schedule, isNull);
   });
 }
 

@@ -7,6 +7,7 @@ import '../../../core/models/geo_point.dart';
 import '../../place/domain/place.dart';
 import '../../place/domain/place_timing.dart';
 import '../../course/domain/course_models.dart';
+import '../../course/domain/course_schedule.dart';
 
 typedef Json = Map<String, dynamic>;
 final platformClientProvider = Provider(
@@ -165,7 +166,33 @@ class PlatformClient {
       canEdit: json['status'] != 'confirmed',
       stops: stops(json),
       taste: appliedTaste(json['taste_profile'], itinerary: json['itinerary'] as List?),
+      schedule: estimatedSchedule(json['taste_profile']),
     );
+  }
+
+  /// 서버 예상 일정 (`taste_profile.route_optimization`, 팀 c29137a, 21번).
+  /// 순서 최적화를 건너뛴 코스(`method: unchanged`)와 예전 코스는 일정이 없어 null
+  static EstimatedSchedule? estimatedSchedule(Object? tasteProfile) {
+    final audit = tasteProfile is Map ? tasteProfile['route_optimization'] : null;
+    if (audit is! Map) return null;
+    final start = _clock(audit['start_time']);
+    final rows = audit['estimated_schedule'];
+    if (start == null || rows is! List || rows.isEmpty) return null;
+    final stops = <({String name, TimeOfDay arrival})>[];
+    for (final row in rows) {
+      final arrival = row is Map ? _clock(row['estimated_arrival']) : null;
+      if (arrival == null) return null;
+      stops.add((name: (row as Map)['name'].toString(), arrival: arrival));
+    }
+    return EstimatedSchedule(start: start, stops: stops, usedDefaultStart: audit['used_default_start'] == true);
+  }
+
+  /// 'HH:mm' → TimeOfDay
+  static TimeOfDay? _clock(Object? value) {
+    final parts = (value ?? '').toString().split(':');
+    if (parts.length < 2) return null;
+    final h = int.tryParse(parts[0]), m = int.tryParse(parts[1]);
+    return h == null || m == null ? null : TimeOfDay(hour: h, minute: m);
   }
 
   /// 반영한 취향 한 줄에 쓸 단어 (07 D46). 서버 `taste_profile.keywords`를 서버 순서대로 쓰되,
