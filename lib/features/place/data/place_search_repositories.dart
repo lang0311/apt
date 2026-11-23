@@ -12,11 +12,14 @@ class MockPlaceSearchRepository implements PlaceSearchRepository {
   final MockStore _store;
 
   @override
-  Future<List<Place>> search(String query, {GeoPoint? near}) => _store.behavior.query(() {
+  Future<List<Place>> search(String query, {GeoPoint? near, PlaceSearchCategory? category}) => _store.behavior.query(() {
     final text = query.trim().toLowerCase();
     final found = [
       for (final p in MockFixtures.places)
-        if ([p.name, p.categoryLabel, p.address].any((field) => field.toLowerCase().contains(text))) _store.placeWithSaved(p.id),
+        if (text.isEmpty
+            ? category != null && p.categoryKey == category.styleKey
+            : [p.name, p.categoryLabel, p.address].any((field) => field.toLowerCase().contains(text)))
+          _store.placeWithSaved(p.id),
     ];
     if (near != null) {
       double distanceOf(Place p) => p.location == null ? double.infinity : near.distanceTo(p.location!);
@@ -33,5 +36,5 @@ class ApiPlaceSearchRepository implements PlaceSearchRepository {
   final ApiClient _client;
 
   @override
-  Future<List<Place>> search(String query, {GeoPoint? near}) async => throw const NotImplementedFailure('지도에서 검색하기');
+  Future<List<Place>> search(String query, {GeoPoint? near, PlaceSearchCategory? category}) async => throw const NotImplementedFailure('지도에서 검색하기');
 }

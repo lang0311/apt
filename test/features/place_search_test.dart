@@ -51,7 +51,9 @@ void main() {
       child: MaterialApp(theme: AppTheme.light(), home: const PlaceSearchPage()),
     ));
 
-    expect(find.textContaining('가게 이름으로 찾아요'), findsOneWidget);
+    // 10번 B안: 처음부터 지도 + 안내 시트 + 업종 칩
+    expect(find.text('어떤 곳을 찾을까요?'), findsOneWidget);
+    expect(find.bySemanticsLabel('이 주변 카페 찾기'), findsOneWidget);
     await tester.enterText(find.byType(TextField), '한강');
     await tester.testTextInput.receiveAction(TextInputAction.search);
     // 한 번 그려서 검색을 시작한 뒤 Mock 지연(0.6초)을 지난다
@@ -70,6 +72,34 @@ void main() {
 
     expect(find.bySemanticsLabel('한강 노을 포인트 저장됨'), findsOneWidget);
     expect(find.text('저장됨에 추가했어요.'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('업종 칩을 누르면 지도 가운데 주변을 그 업종으로 찾고, 다시 누르면 푼다 (10번)', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final container = ProviderContainer(retry: (_, _) => null);
+    addTearDown(container.dispose);
+    await tester.pumpWidget(UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(theme: AppTheme.light(), home: const PlaceSearchPage()),
+    ));
+
+    await tester.tap(find.bySemanticsLabel('이 주변 카페 찾기'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('이 주변 카페'), findsOneWidget);
+    expect(find.text('어떤 곳을 찾을까요?'), findsNothing);
+
+    await tester.tap(find.bySemanticsLabel('이 주변 카페 찾기'));
+    await tester.pump();
+    expect(find.text('어떤 곳을 찾을까요?'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(seconds: 5));

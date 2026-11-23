@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +10,7 @@ import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../core/error/app_failure.dart';
+import '../../../core/location/location_service.dart';
 import '../../../core/models/geo_point.dart';
 import '../../../core/widgets/buttons.dart';
 import '../../../core/widgets/inputs.dart';
@@ -20,10 +23,13 @@ import '../../saved/presentation/widgets/category_style.dart';
 import '../../saved/presentation/widgets/collection_select_sheet.dart';
 import '../../saved/presentation/widgets/place_image.dart';
 import '../domain/place.dart';
+import '../domain/place_search_repository.dart';
 import 'place_search_providers.dart';
 
 /// 지도에서 검색하기 (추출 탭, 07 D32). 찾은 곳을 지도 핀과 카드 목록으로 보여 주고,
 /// 카드에서 바로 저장하거나 보관함에 담는다. 카드 모양은 이름·설명·주소·버튼 + 오른쪽 이미지.
+/// 처음부터 지도(내 위치, 모르면 서울시청)를 보여 주고, 검색칸 아래 업종 칩(카페 · 음식점 · 문화시설 · 관광명소)으로
+/// 지도 가운데 1.5km 안을 찾는다 (10번 B안). 이름 검색은 전국에서 찾는다.
 class PlaceSearchPage extends ConsumerStatefulWidget {
   const PlaceSearchPage({super.key});
 
@@ -39,6 +45,12 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
 
   PlaceSearchQuery? _query;
   String? _selectedId;
+
+  /// 고른 업종 칩. 검색어를 치면 풀린다
+  PlaceSearchCategory? _category;
+
+  /// 지도 처음 자리(네이버 지도 기본값과 같은 서울시청). 아직 지도가 멈춘 적이 없을 때 칩 검색 기준
+  static const _cityHall = GeoPoint(37.5666, 126.979);
 
   /// 카드 한 장만 보기 (핀이나 카드를 눌렀을 때)
   bool _single = false;
@@ -56,6 +68,24 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
   static const _moveThresholdMeters = 300.0;
 
   ScaffoldMessengerState? _messenger;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(_locateOnEnter);
+  }
+
+  /// 들어오면 위치를 묻고 내 위치로 지도를 옮긴다. 거부해도 서울시청 주변에서 그대로 쓸 수 있다
+  Future<void> _locateOnEnter() async {
+    await ref.read(myLocationProvider.notifier).locate();
+    if (!mounted) return;
+    final me = ref.read(myLocationProvider)?.point;
+    _map.showLocationDot(me);
+    if (me != null && _query == null) {
+      _fittedCenter = null;
+      _map.moveTo(me, zoom: 15);
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -78,6 +108,7 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
     if (text.isEmpty) return;
     _focus.unfocus();
     setState(() {
+      _category = null;
       _query = PlaceSearchQuery(text, near: near);
       _selectedId = null;
       _single = false;
@@ -89,10 +120,47 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
     _text.clear();
     setState(() {
       _query = null;
+      _category = null;
       _selectedId = null;
       _single = false;
     });
     _focus.requestFocus();
+  }
+
+  /// 업종 칩: 지금 보는 지도 가운데 주변을 찾는다. 고른 칩을 다시 누르면 풀고 결과를 지운다
+  void _pickCategory(PlaceSearchCategory category) {
+    _focus.unfocus();
+    if (_category == category) {
+      setState(() {
+        _category = null;
+        _query = null;
+        _selectedId = null;
+        _single = false;
+      });
+      return;
+    }
+    _text.clear();
+    setState(() {
+      _category = category;
+      _query = PlaceSearchQuery.category(category, near: _center ?? _cityHall);
+      _selectedId = null;
+      _single = false;
+      _fittedCenter = null;
+    });
+  }
+
+  /// '현재 지도에서 검색하기': 같은 검색(칩이면 같은 업종)을 지금 지도 가운데에서 다시
+  void _searchHere() {
+    final category = _query?.category;
+    if (category != null) {
+      setState(() {
+        _query = PlaceSearchQuery.category(category, near: _center ?? _cityHall);
+        _selectedId = null;
+        _fittedCenter = null;
+      });
+    } else {
+      _search(near: _center);
+    }
   }
 
   /// 새 결과가 오면 결과가 모두 보이게 맞춘다 (지도는 이후 이동을 사용자에게 맡긴다).
@@ -100,22 +168,39 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
     final points = [for (final p in places) ?p.location];
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || points.isEmpty) return;
-      // 맞춘 뒤 처음 멈춘 자리를 기준으로 삼는다 (맞추는 이동은 '지도를 움직였다'로 보지 않는다)
-      _fittedCenter = null;
+      // 맞출 영역의 가운데를 기준으로 삼는다 (맞추는 이동은 '지도를 움직였다'로 보지 않는다).
+      // 지도는 이동이 끝나기 전에도 멈춤을 알리고, 먼 거리는 이동이 길어 첫 멈춤 자리를 기준으로 쓰면 틀린다
+      final target = focusBounds(points)?.center;
+      setState(() {
+        _fittedCenter = target;
+        _center = target;
+      });
       _map.fitTo(points);
     });
   }
 
   void _onCameraIdle(GeoBounds bounds) {
     final center = bounds.center;
+    _viewRadius = bounds.radiusMeters;
+    // 결과에 맞추기 전(처음 · 칩을 누른 직후)에는 지금 자리를 기준으로 삼는다
     if (_fittedCenter == null) {
-      _fittedCenter = center;
+      setState(() {
+        _fittedCenter = center;
+        _center = center;
+      });
       return;
     }
     setState(() => _center = center);
   }
 
-  bool get _mapMoved => _center != null && _fittedCenter != null && _center!.distanceTo(_fittedCenter!) > _moveThresholdMeters;
+  /// 지금 보이는 영역의 반지름(m). 옮겼는지는 보이는 넓이에 비례해 본다 — 전국을 맞춘 지도는
+  /// 여백 때문에 맞춘 가운데에서 몇 km 어긋나 멈추므로 고정 거리로 보면 옮기지 않아도 버튼이 뜬다
+  double _viewRadius = 0;
+
+  bool get _mapMoved =>
+      _center != null &&
+      _fittedCenter != null &&
+      _center!.distanceTo(_fittedCenter!) > math.max(_moveThresholdMeters, _viewRadius * 0.25);
 
   void _select(Place p) {
     setState(() {
@@ -213,13 +298,13 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
   @override
   Widget build(BuildContext context) {
     final query = _query;
-    if (query == null) return _beforeSearch();
-
-    final results = ref.watch(placeSearchProvider(query));
-    ref.listen(placeSearchProvider(query), (_, next) {
-      if (next.hasValue) _fitTo(next.value!);
-    });
-    final places = results.value ?? const <Place>[];
+    final AsyncValue<List<Place>>? results = query == null ? null : ref.watch(placeSearchProvider(query));
+    if (query != null) {
+      ref.listen(placeSearchProvider(query), (_, next) {
+        if (next.hasValue) _fitTo(next.value!);
+      });
+    }
+    final places = results?.value ?? const <Place>[];
     final selected = places.where((p) => p.id == _selectedId).firstOrNull;
 
     final markers = [
@@ -245,8 +330,8 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
                 child: AptMap(
                   markers: markers,
                   selectedId: _selectedId,
-                  bottomPadding: _single ? 200 : constraints.maxHeight * _sheetInitial,
-                  topPadding: top + 120,
+                  bottomPadding: query == null ? 120 : (_single ? 200 : constraints.maxHeight * _sheetInitial),
+                  topPadding: top + 160,
                   onCameraIdle: _onCameraIdle,
                   onMarkerTap: (marker) {
                     final place = places.where((p) => p.id == marker.id).firstOrNull;
@@ -255,8 +340,10 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
                   controller: _map,
                 ),
               ),
-              SafeArea(child: _topBar(onMap: true)),
-              if (_single && selected != null)
+              SafeArea(child: _topBar()),
+              if (query == null || results == null)
+                Positioned(left: 0, right: 0, bottom: 0, child: _beforeSearch())
+              else if (_single && selected != null)
                 Positioned(
                   left: AppSpacing.md,
                   right: AppSpacing.md,
@@ -293,32 +380,41 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
     );
   }
 
-  /// 검색 전: 검색칸과 안내 한 줄
+  /// 검색 전: 지도 아래 작은 시트에 안내 한 줄 (끌어올릴 목록이 없어 고정)
   Widget _beforeSearch() {
-    return Scaffold(
-      body: SafeArea(
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
+        boxShadow: AppShadow.soft,
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(AppSpacing.screenH, 0, AppSpacing.screenH, MediaQuery.paddingOf(context).bottom + AppSpacing.lg),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _topBar(onMap: false),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.md, AppSpacing.screenH, 0),
-              child: Text('가게 이름으로 찾아요. 지점이 여러 곳이면 동네 이름을 같이 넣어 보세요.', style: AppTypography.meta),
-            ),
+            const Center(child: SheetHandle()),
+            const SizedBox(height: AppSpacing.xs),
+            Text('어떤 곳을 찾을까요?', style: AppTypography.title),
+            const SizedBox(height: AppSpacing.xxs),
+            Text('이름을 검색하거나, 지도를 옮긴 뒤 위 칩을 눌러 보세요.', style: AppTypography.bodyMuted),
           ],
         ),
       ),
     );
   }
 
-  Widget _topBar({required bool onMap}) {
+  Widget _topBar() {
     final field = AppSearchField(
       hint: '가게 이름이나 지점명',
       controller: _text,
       focusNode: _focus,
-      autofocus: !onMap,
-      bordered: !onMap,
-      onChanged: (_) => setState(() {}),
+      bordered: false,
+      onChanged: (text) => setState(() {
+        // 검색어를 치기 시작하면 칩을 푼다 (결과는 검색할 때 바뀐다)
+        if (text.trim().isNotEmpty) _category = null;
+      }),
       onSubmitted: (_) => _search(),
       trailing: _text.text.isEmpty
           ? null
@@ -338,22 +434,30 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
               AppIconBox(icon: LucideIcons.chevronLeft, size: 48, tooltip: '뒤로', onPressed: () => context.pop()),
               const SizedBox(width: AppSpacing.xs),
               Expanded(
-                child: onMap
-                    ? DecoratedBox(
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(AppRadius.medium), boxShadow: AppShadow.soft),
-                        child: field,
-                      )
-                    : field,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(AppRadius.medium), boxShadow: AppShadow.soft),
+                  child: field,
+                ),
               ),
             ],
           ),
         ),
-        if (onMap && _mapMoved && !_single)
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.sm),
-            child: _AreaSearchButton(onPressed: () => _search(near: _center)),
+        if (!_single)
+          SizedBox(
+            height: AppSpacing.chipHeight + AppSpacing.sm * 2,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+              children: [
+                for (final c in PlaceSearchCategory.values) ...[
+                  if (c.index > 0) const SizedBox(width: AppSpacing.xs),
+                  _CategoryChip(category: c, selected: _category == c, onTap: () => _pickCategory(c)),
+                ],
+              ],
+            ),
           ),
-        if (onMap && _single)
+        if (_query != null && _mapMoved && !_single) _AreaSearchButton(onPressed: _searchHere),
+        if (_single)
           Padding(
             padding: const EdgeInsets.only(top: AppSpacing.sm),
             child: _AreaSearchButton(
@@ -368,6 +472,13 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
 
   Widget _resultList(ScrollController scroll, AsyncValue<List<Place>> results, PlaceSearchQuery query) {
     final count = results.value?.length;
+    final category = query.category;
+    final String title;
+    if (category != null) {
+      title = '이 주변 ${category.label}';
+    } else {
+      title = query.near == null ? '찾은 곳' : '이 지역에서 찾은 곳';
+    }
     return ListView(
       controller: scroll,
       padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.xl),
@@ -379,7 +490,7 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(query.near == null ? '찾은 곳' : '이 지역에서 찾은 곳', style: AppTypography.title),
+              Text(title, style: AppTypography.title),
               const SizedBox(width: AppSpacing.xs),
               if (count != null) Text('$count곳', style: AppTypography.meta),
             ],
@@ -391,12 +502,19 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
           loading: const SkeletonList(count: 3),
           onRetry: () => ref.invalidate(placeSearchProvider(query)),
           isEmpty: (list) => list.isEmpty,
-          empty: AppEmptyState(
-            compact: true,
-            icon: LucideIcons.searchX,
-            title: '\'${query.text}\'로 찾은 곳이 없어요',
-            description: '이름을 줄이거나 동네 이름을 같이 넣어 보세요.',
-          ),
+          empty: category != null
+              ? AppEmptyState(
+                  compact: true,
+                  icon: LucideIcons.searchX,
+                  title: '이 주변 1.5km 안에 ${category.label}${_subjectParticle(category.label)} 없어요',
+                  description: '지도를 옮긴 뒤 \'현재 지도에서 검색하기\'를 눌러 보세요.',
+                )
+              : AppEmptyState(
+                  compact: true,
+                  icon: LucideIcons.searchX,
+                  title: '\'${query.text}\'로 찾은 곳이 없어요',
+                  description: '이름을 줄이거나 동네 이름을 같이 넣어 보세요.',
+                ),
           data: (list) => Column(
             children: [
               for (final p in list) ...[const Divider(height: 1, thickness: 1, color: AppColors.divider), _card(p)],
@@ -568,6 +686,55 @@ class _CardButton extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 받침이 있으면 '이', 없으면 '가' ('음식점이', '카페가')
+String _subjectParticle(String word) {
+  final last = word.isEmpty ? 0 : word.codeUnitAt(word.length - 1);
+  final hangul = last >= 0xAC00 && last <= 0xD7A3;
+  return hangul && (last - 0xAC00) % 28 != 0 ? '이' : '가';
+}
+
+/// 지도 위 업종 칩 (10번). 흰 알약 + 업종 아이콘, 고르면 잉크 채움 (칩은 하나만)
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({required this.category, required this.selected, required this.onTap});
+  final PlaceSearchCategory category;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = CategoryStyle.of(category.styleKey);
+    final fg = selected ? Colors.white : AppColors.textPrimary;
+    return Semantics(
+      selected: selected,
+      button: true,
+      label: '이 주변 ${category.label} 찾기',
+      excludeSemantics: true,
+      child: Material(
+        color: selected ? AppColors.ink : AppColors.surface,
+        shape: const StadiumBorder(),
+        elevation: 2,
+        shadowColor: AppColors.shadow,
+        child: InkWell(
+          customBorder: const StadiumBorder(),
+          onTap: onTap,
+          child: Container(
+            constraints: const BoxConstraints(minHeight: AppSpacing.chipHeight),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(style.icon, size: 16, color: selected ? Colors.white : style.color),
+                const SizedBox(width: 5),
+                Text(category.label, style: AppTypography.label.copyWith(color: fg)),
+              ],
             ),
           ),
         ),

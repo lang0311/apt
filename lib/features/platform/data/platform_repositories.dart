@@ -312,10 +312,27 @@ class PlatformPlaceSearchRepository implements PlaceSearchRepository {
   PlatformPlaceSearchRepository(this._platform);
   final PlatformClient _platform;
   @override
-  Future<List<Place>> search(String query, {GeoPoint? near}) async {
+  Future<List<Place>> search(String query, {GeoPoint? near, PlaceSearchCategory? category}) async {
     await _platform.me();
-    return _platform.search(query, near: near);
+    final found = await _platform.search(query, near: near, category: category == null ? null : categoryCode(category));
+    if (category == null || near == null) return found;
+    // 카카오는 지도 가운데가 국내가 아니면(에뮬레이터 기본 위치 등) 반경을 무시하고 아무 곳이나 준다.
+    // 칩 결과는 '이 주변'이라 반경(1.5km)에 여유를 둔 거리 밖은 뺀다 (10번)
+    return [
+      for (final place in found)
+        if (place.location != null && place.location!.distanceTo(near) <= _categoryRadiusMeters) place,
+    ];
   }
+
+  static const _categoryRadiusMeters = 2000.0;
+
+  /// 칩 → 서버(카카오) 업종 코드. 검색어가 비었을 때만 서버가 쓴다 (10번)
+  static String categoryCode(PlaceSearchCategory category) => switch (category) {
+    PlaceSearchCategory.cafe => 'CE7',
+    PlaceSearchCategory.restaurant => 'FD6',
+    PlaceSearchCategory.culture => 'CT1',
+    PlaceSearchCategory.tour => 'AT4',
+  };
 }
 
 class PlatformCourseRepository implements CourseRepository {
