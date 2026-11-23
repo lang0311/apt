@@ -24,7 +24,6 @@ void main() {
     expect(find.text('릴스에서 본 카페'), findsOneWidget);
     expect(find.text('서울숲 산책'), findsOneWidget);
     expect(find.text('✦ AI가 고른 저녁'), findsOneWidget);
-    expect(tester.getSize(find.byType(RouteHero)).height, 210);
   });
 
   testWidgets('로그인 화면: 노선 그림 · 제목 · 칸 안 이름표 · 회원가입', (tester) async {

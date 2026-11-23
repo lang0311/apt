@@ -185,11 +185,6 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('목록 5'), findsOneWidget);
     });
-
-    testWidgets('360 폭에서 넘치지 않는다', (tester) async {
-      await pump(tester, map(), width: 360);
-      expect(tester.takeException(), isNull);
-    });
   });
 
   group('코스 장소 고르기', () {

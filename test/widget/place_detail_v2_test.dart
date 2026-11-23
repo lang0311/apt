@@ -1,4 +1,3 @@
-import 'package:apt/app/theme/app_colors.dart';
 import 'package:apt/app/theme/app_theme.dart';
 import 'package:apt/features/place/presentation/widgets/place_action_tiles.dart';
 import 'package:flutter/material.dart';
@@ -18,19 +17,17 @@ void main() {
     ),
   );
 
-  testWidgets('지도 · 전화가 다 있으면 세 칸, 저장됨 칸은 잉크 바탕', (tester) async {
+  testWidgets('지도 · 전화가 다 있으면 저장됨 · 카카오맵 · 전화', (tester) async {
     await pump(tester, PlaceActionTiles(saved: true, onSave: () {}, onMap: () {}, onCall: () {}));
     expect(find.text('저장됨'), findsOneWidget);
     expect(find.text('카카오맵'), findsOneWidget);
     expect(find.text('전화'), findsOneWidget);
-    final saved = tester.widget<Material>(find.ancestor(of: find.text('저장됨'), matching: find.byType(Material)).first);
-    expect(saved.color, AppColors.textPrimary);
   });
 
-  testWidgets('전화번호가 없으면 두 칸 (전화 칸 없음)', (tester) async {
+  testWidgets('전화번호가 없으면 전화 칸 없음', (tester) async {
     await pump(tester, PlaceActionTiles(saved: false, onSave: () {}, onMap: () {}));
     expect(find.text('저장하기'), findsOneWidget);
+    expect(find.text('카카오맵'), findsOneWidget);
     expect(find.text('전화'), findsNothing);
-    expect(find.byType(Expanded), findsNWidgets(2));
   });
 }

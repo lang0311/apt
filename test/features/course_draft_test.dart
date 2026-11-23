@@ -15,11 +15,6 @@ void main() {
       expect(filled.copyWith(name: '  ').infoComplete, isFalse);
     });
 
-    test('분위기 토글', () {
-      final d = const CourseDraft().toggleMood('walk').toggleMood('photo').toggleMood('walk');
-      expect(d.moodKeys, {'photo'});
-    });
-
     test('장소 추가는 중복 없이 뒤에 붙는다', () {
       final d = const CourseDraft().addPlaces([_p('a'), _p('b')]).addPlaces([_p('b'), _p('c')]);
       expect(d.places.map((p) => p.id), ['a', 'b', 'c']);

@@ -2,48 +2,29 @@ import 'package:apt/app/theme/app_theme.dart';
 import 'package:apt/features/course/domain/course_models.dart';
 import 'package:apt/features/course/presentation/widgets/course_summary_card.dart';
 import 'package:apt/features/my/presentation/my_page.dart';
-import 'package:apt/features/preference/presentation/preference_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// 시안 v2 "22 코스 목록 · 33 마이 · 34 내 취향" (2026-11-21 사용자 결정)
+/// 시안 v2 "22 코스 목록 · 33 마이" (2026-11-21 사용자 결정)
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  Widget app(Widget home, {double scale = 1}) => ProviderScope(
-    child: MaterialApp(
-      theme: AppTheme.light(),
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)),
-        child: child!,
-      ),
-      home: home,
-    ),
+  Widget app(Widget home) => ProviderScope(
+    child: MaterialApp(theme: AppTheme.light(), home: home),
   );
 
-  testWidgets('취향: Mock이 취향 항목을 줘도 고르는 칩 대신 "저장한 장소로 취향을 읽어요"', (tester) async {
-    await tester.pumpWidget(app(const PreferencePage()));
-    await tester.pump(const Duration(seconds: 2));
-    expect(find.text('내 취향'), findsOneWidget);
-    expect(find.textContaining('저장한 장소로 취향을 읽어요'), findsOneWidget);
-    expect(find.text('취향 저장하기'), findsNothing);
-    await tester.pump(const Duration(seconds: 2));
-  });
-
-  testWidgets('마이: 내 취향은 "보기", 설정 제목 · 추천하지 않는 장소 개수 없음, 글자 1.3배에도 넘치지 않음', (tester) async {
+  testWidgets('마이: 내 취향은 "보기", 추천하지 않는 장소 · 로그아웃', (tester) async {
     tester.view.physicalSize = const Size(360, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(app(const MyPage(), scale: 1.3));
+    await tester.pumpWidget(app(const MyPage()));
     await tester.pump(const Duration(seconds: 2));
     expect(find.text('내 취향'), findsOneWidget);
     expect(find.text('보기'), findsOneWidget);
-    expect(find.text('설정'), findsNothing);
     expect(find.text('추천하지 않는 장소'), findsOneWidget);
     expect(find.text('로그아웃'), findsOneWidget);
-    expect(tester.takeException(), isNull);
     await tester.pump(const Duration(seconds: 2));
   });
 

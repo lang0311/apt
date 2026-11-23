@@ -20,11 +20,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// 위저드·추출·지도·초대 화면을 작은 기기(360x640)와 큰 기기(430x932)에서 렌더링한다.
+/// 위저드·추출·지도·초대 화면을 작은 기기(360x640, 글자 1.3배)와 큰 기기(430x932)에서 렌더링한다.
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  const sizes = {'360x640': Size(360, 640), '430x932': Size(430, 932)};
+  const sizes = {'360x640 · 1.3배': (Size(360, 640), 1.3), '430x932': (Size(430, 932), 1.0)};
 
   final screens = <String, Widget Function()>{
     '1/4 기본 정보': () => const CourseInfoPage(),
@@ -46,9 +46,12 @@ void main() {
   for (final size in sizes.entries) {
     for (final screen in screens.entries) {
       testWidgets('${screen.key} @ ${size.key}', (tester) async {
-        tester.view.physicalSize = size.value;
+        final (viewSize, scale) = size.value;
+        tester.view.physicalSize = viewSize;
         tester.view.devicePixelRatio = 1;
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
         addTearDown(tester.view.reset);
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
 
         final container = ProviderContainer(retry: (_, _) => null);
         addTearDown(container.dispose);

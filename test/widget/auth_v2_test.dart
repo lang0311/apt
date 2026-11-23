@@ -1,13 +1,12 @@
 import 'package:apt/app/theme/app_theme.dart';
 import 'package:apt/features/auth/presentation/pages/id_signup_page.dart';
-import 'package:apt/features/auth/presentation/pages/profile_setup_page.dart';
 import 'package:apt/features/auth/presentation/pages/signup_done_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// 시안 v2 "2-1 회원가입 · 계정 정보", "3 프로필 설정", "4 가입 완료"
+/// 시안 v2 "2-1 회원가입 · 계정 정보", "4 가입 완료"
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
@@ -29,13 +28,6 @@ void main() {
     await tester.enterText(find.byType(TextField).at(1), 'sky20260');
     await tester.pump();
     expect(find.textContaining('지금 '), findsNothing);
-  });
-
-  testWidgets('프로필 설정은 닉네임만 (취향 칸 없음)', (tester) async {
-    await pump(tester, const ProfileSetupPage());
-    expect(find.text('어떻게 불러\n드릴까요?'), findsOneWidget);
-    expect(find.text('추천에 쓸 취향'), findsNothing);
-    expect(find.text('닉네임'), findsOneWidget);
   });
 
   testWidgets('가입 완료: 첫 저장 방법을 정거장 세 개로', (tester) async {

@@ -24,7 +24,7 @@ void main() {
     expect(p.rating, isNull);
     expect(c.places['canonical']!['selection_token'], 'signed');
   });
-  test('Course stop source is mapped and confirmed courses are read-only', () {
+  test('일정 장소의 출처(직접 고름 · AI)와 추천 이유를 읽고, 확정한 코스는 편집할 수 없다', () {
     final c = PlatformClient(ApiClient(Dio()));
     final course = c.course({
       'id': 'course',
@@ -102,12 +102,12 @@ void main() {
       expect(stop.aiReason, isNull);
     }
   });
-  test('Selected place tokens are sent unchanged', () async {
+  test('장소의 선택 토큰은 받은 그대로 보낸다', () async {
     final c = PlatformClient(ApiClient(Dio()));
     c.place({'id': 'a', 'name': '장소', 'address': '서울', 'selection_token': 'signed'});
     expect(await c.token('a'), 'signed');
   });
-  test('Social login is never simulated in actual backend mode', () async {
+  test('서버 모드 보관함 목록은 빈 목록 (서버에 보관함 API 없음)', () async {
     final c = PlatformClient(ApiClient(Dio()));
     expect(PlatformSavedRepository(c).fetchCollections(), completion(isEmpty));
   });
@@ -134,7 +134,7 @@ void main() {
     expect(recent.map((r) => r.place.id), ['b', 'd']);
     expect(recent.every((r) => r.place.isSaved), isTrue);
   });
-  test('Server job stages collapse into the four screen stages', () {
+  test('서버 추천 작업 단계를 화면의 네 단계로 묶는다', () {
     RecommendationStage? m(String s) => PlatformCourseRepository.recommendationStage(s);
     expect(m('preparing'), RecommendationStage.findCandidates);
     expect(m('refilling'), RecommendationStage.findCandidates);

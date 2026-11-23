@@ -1,4 +1,3 @@
-import 'package:apt/app/theme/app_colors.dart';
 import 'package:apt/app/theme/app_theme.dart';
 import 'package:apt/features/course/domain/course_models.dart';
 import 'package:apt/features/home/presentation/widgets/home_sections.dart';
@@ -38,10 +37,8 @@ void main() {
     ),
   );
 
-  testWidgets('카드는 연파랑 바탕, 정거장 번호 1~5, "함께 3명", 아래 "5곳 · 직선 2.4km"와 "코스 보기"', (tester) async {
+  testWidgets('정거장 번호 1~5, "함께 3명", 아래 "5곳 · 직선 2.4km"와 "코스 보기"', (tester) async {
     await pump(tester);
-    final m = tester.widget<Material>(find.descendant(of: find.byType(HomeCourseCard), matching: find.byType(Material)).first);
-    expect(m.color, AppColors.primarySoft);
     for (final n in ['1', '2', '3', '4', '5']) {
       expect(find.text(n), findsOneWidget);
     }

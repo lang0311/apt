@@ -15,12 +15,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// 주요 화면을 3가지 기기 크기에서 렌더링해 레이아웃 overflow가 없는지 확인한다 (docs/03 §1).
-/// Mock Repository를 그대로 사용한다.
+/// 주요 화면을 작은 기기(360x640, 글자 1.3배)와 큰 기기(430x932)에서 렌더링해 레이아웃 overflow가 없는지 확인한다 (docs/03 §1).
+/// 작은 기기에서 글자를 키워 가장 빡빡한 경우를 본다. Mock Repository를 그대로 사용한다.
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  const sizes = {'360x640': Size(360, 640), '390x844': Size(390, 844), '430x932': Size(430, 932)};
+  const sizes = {'360x640 · 1.3배': (Size(360, 640), 1.3), '430x932': (Size(430, 932), 1.0)};
 
   final screens = <String, Widget Function()>{
     '소셜 로그인': () => const SocialLoginPage(),
@@ -40,9 +40,12 @@ void main() {
   for (final size in sizes.entries) {
     for (final screen in screens.entries) {
       testWidgets('${screen.key} @ ${size.key}', (tester) async {
-        tester.view.physicalSize = size.value;
+        final (viewSize, scale) = size.value;
+        tester.view.physicalSize = viewSize;
         tester.view.devicePixelRatio = 1;
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
         addTearDown(tester.view.reset);
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
 
         await tester.pumpWidget(
           ProviderScope(

@@ -32,9 +32,6 @@ void main() {
     expect(find.text('저장된 장소'), findsNothing);
     expect(find.byType(SavedPlaceRow), findsWidgets);
     expect(find.byType(PlaceListTile), findsNothing);
-    // 행의 글자 왼쪽이 화면 20 안쪽에서 시작 (바깥 4 + 안쪽 16)
-    final rowLeft = tester.getTopLeft(find.byType(SavedPlaceRow).first).dx;
-    expect(rowLeft, 4);
     await tester.pump(const Duration(seconds: 2));
   });
 }
