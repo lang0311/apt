@@ -710,6 +710,7 @@ class PlatformPartyRepository implements PartyRepository {
           id: member['id'] as String,
           nickname: member['name'] as String,
           isMe: member['id'] == _platform.currentUserId,
+          savedPlaceCount: member['saved_place_count'] as int?,
         ),
     ],
   );

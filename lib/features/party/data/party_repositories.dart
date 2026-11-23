@@ -9,8 +9,9 @@ class MockPartyRepository implements PartyRepository {
   MockPartyRepository(this._store);
   final MockStore _store;
 
-  static const _me = PartyMember(id: 'u1', nickname: '나', isMe: true);
-  static const _members = [_me, PartyMember(id: 'u3', nickname: '민지'), PartyMember(id: 'u4', nickname: '랑이')];
+  static const _me = PartyMember(id: 'u1', nickname: '나', isMe: true, savedPlaceCount: 8);
+  // 저장 수: 랑이는 0곳(추천에 안 들어간다는 줄 확인용, 16번)
+  static const _members = [_me, PartyMember(id: 'u3', nickname: '민지', savedPlaceCount: 12), PartyMember(id: 'u4', nickname: '랑이', savedPlaceCount: 0)];
 
   /// 이미 있는 파티(party1은 Mock 파티 코스의 파티). 새로 만든 파티는 나 혼자로 시작한다.
   final Map<String, List<PartyMember>> _parties = {

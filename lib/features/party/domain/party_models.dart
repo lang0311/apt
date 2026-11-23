@@ -1,9 +1,13 @@
 class PartyMember {
-  const PartyMember({required this.id, required this.nickname, this.avatarUrl, this.isMe = false});
+  const PartyMember({required this.id, required this.nickname, this.avatarUrl, this.isMe = false, this.savedPlaceCount});
   final String id;
   final String nickname;
   final String? avatarUrl;
   final bool isMe;
+
+  /// 저장한 장소 수 (서버 `GET /parties/{id}`의 `saved_place_count` — 코스를 저장할 때 들어온 AI 추천 곳 포함,
+  /// 저장됨 탭의 전체 + AI 추천과 같은 범위). 파티 목록(`/me`)에는 없어서 null
+  final int? savedPlaceCount;
 
   String get initial => isMe ? '나' : (nickname.isEmpty ? '?' : String.fromCharCode(nickname.runes.first));
 }

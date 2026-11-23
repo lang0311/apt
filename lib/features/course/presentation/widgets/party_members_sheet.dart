@@ -41,17 +41,34 @@ class PartyMembersSheet extends StatelessWidget {
                   // 얼굴 색은 서버 순서 그대로 (상세의 얼굴 묶음과 같은 색)
                   PartyAvatarStack(members: [m], size: 36, max: 1, colorOffset: members.indexOf(m)),
                   const SizedBox(width: AppSpacing.sm),
-                  Flexible(
-                    child: Text(m.nickname, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
-                  ),
-                  if (m.isMe) ...[
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.tiny)),
-                      child: Text(party.isOwner ? '나, 파티장' : '나', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w600)),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(m.nickname, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
+                            ),
+                            if (m.isMe) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.tiny)),
+                                child: Text(party.isOwner ? '나, 파티장' : '나', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w600)),
+                              ),
+                            ],
+                          ],
+                        ),
+                        // 16번: 저장 수 (서버가 줄 때만). 0곳이면 그 사람 취향은 추천에 들어가지 않는다
+                        if (m.savedPlaceCount case final count?)
+                          Text(
+                            count == 0 ? '저장한 곳이 없어서 추천에 안 들어가요' : '저장 $count곳',
+                            style: AppTypography.caption.copyWith(color: AppColors.textTertiary),
+                          ),
+                      ],
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),
