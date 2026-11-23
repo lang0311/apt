@@ -42,8 +42,11 @@ extension PartyMemberNames on List<PartyMember> {
 }
 
 class InviteLink {
-  const InviteLink({required this.url});
+  const InviteLink({required this.url, this.expiresIn});
   final String url;
+
+  /// 링크가 열리는 시간 (서버 `expires_in`, 지금 24시간). 서버 링크는 한 사람이 참여하면 바로 지워진다
+  final Duration? expiresIn;
 }
 
 /// 초대 수락 화면 데이터

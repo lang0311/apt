@@ -718,12 +718,19 @@ class PlatformPartyRepository implements PartyRepository {
   @override
   Future<InviteLink> createInviteLink(String id) async {
     final invite = await _platform.post('/parties/$id/invites');
-    return InviteLink(url: webAppLink('/invites/${invite['code']}'));
+    final seconds = invite['expires_in'];
+    return InviteLink(url: webAppLink('/invites/${invite['code']}'), expiresIn: seconds is int ? Duration(seconds: seconds) : null);
   }
 
   @override
   Future<Invitation> fetchInvitation(String token) async {
-    final invite = await _platform.get('/mobile/invites/$token');
+    final Json invite;
+    try {
+      invite = Map<String, dynamic>.from(await _platform.get('/mobile/invites/$token') as Map);
+    } on NotFoundFailure {
+      // 서버 초대 링크는 한 사람이 참여하면 지워지고 24시간 뒤에 끝난다 — 둘 다 404
+      throw const InviteFailure(InviteFailureKind.expired);
+    }
     // 이미 8명이면 참여 버튼을 누르기 전에 알린다 (서버는 참여할 때 409로 막는다)
     if ((invite['member_count'] as int) >= Party.maxMembers) throw const InviteFailure(InviteFailureKind.full);
     return Invitation(
@@ -747,6 +754,10 @@ class PlatformPartyRepository implements PartyRepository {
     } on ValidationFailure {
       // 참여 API의 409는 인원 초과뿐이다(초대를 연 뒤 다른 사람이 먼저 들어온 경우)
       throw const InviteFailure(InviteFailureKind.full);
+    }
+    on NotFoundFailure {
+      // 초대를 연 뒤 다른 사람이 그 링크로 먼저 들어왔거나 시간이 지났다
+      throw const InviteFailure(InviteFailureKind.expired);
     }
   }
 

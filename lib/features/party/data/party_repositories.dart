@@ -43,7 +43,7 @@ class MockPartyRepository implements PartyRepository {
 
   @override
   Future<InviteLink> createInviteLink(String partyId) =>
-      _store.behavior.mutate(() => InviteLink(url: 'https://apt.example.com/invites/demo-$partyId'));
+      _store.behavior.mutate(() => InviteLink(url: 'https://apt.example.com/invites/demo-$partyId', expiresIn: const Duration(hours: 24)));
 
   @override
   Future<Invitation> fetchInvitation(String token) => _store.behavior.query(() {
