@@ -13,9 +13,9 @@
 | 기능 | 기준 | 서버 엔드포인트 / 엑셀 참고 | 앱 연동 |
 |------|------|-----------------------------|---------|
 | 가입·로그인·로그아웃 | **서버** | `POST /auth/register`, `/auth/login`, `/auth/logout` (아이디·비밀번호 쿠키 세션). 소셜 로그인은 서버에 없음 → `NEEDS BACKEND` | ✅ 아이디 가입 · 로그인 · 로그아웃(소셜은 앱 안 Mock, 07 D28) |
-| 내 정보·사용량 | **서버** | `GET /me`, `/me/usage` | ✅ `/me` · `/me/usage`는 안 씀 |
+| 내 정보·사용량 | **서버** | `GET /me`, `/me/usage` | ✅ `/me` · `/me/usage`는 3/4에서 오늘 한도를 다 썼는지만 본다(`call_count` ≥ `daily_call_limit` 또는 `cost_usd + reserved_usd` + 0.1 > `daily_usd_limit`, 초기화 `reset_at`, 07 D68) |
 | 홈 요약 | **서버** | `GET /mobile/summary` | ✅ |
-| 장소 검색 | **서버** | `GET /places/search` (카카오 키 필요) | ✅ 지도에서 검색하기(07 D32) |
+| 장소 검색 | **서버** | `GET /places/search` (카카오 키 필요). `q`만 = 전국 이름 검색, `q` + `lat` · `lon` = 그 주변 1.5km, `q`가 비면 `category`(CE7 · FD6 · CT1 · AT4) + `lat` · `lon` 필수, 최대 15곳 | ✅ 지도에서 검색하기(07 D32) + 업종 칩 4개로 지도 가운데 주변(07 D68). 좌표가 국외면 카카오가 반경을 무시해 앱이 2km 밖 결과를 뺀다 |
 | 내 장소 저장·삭제 | **서버** | `POST /me/places`, `DELETE /me/places/{key}` | ✅ 저장 · 해제(해제는 장소 상세의 `저장됨` 버튼, 07 D41). 저장됨에서 여러 곳 삭제는 한 곳씩 `DELETE`를 보낸다(한꺼번에 지우는 API 없음, 07 D45) |
 | 저장됨 AI 추천 탭 | **서버** | `GET /me`의 `places[].action_type`, `GET /courses`(+ 파티별 `?party_id=`)의 확정 코스 `itinerary[].saved` | ✅ 코스 확정 때 서버가 넣은 `course_confirmed` 장소 중 일정에서 AI 추천(`saved`가 아님)인 곳을 AI 추천 탭으로 나눈다. 저장됨의 개수 · 카테고리는 `/mobile/summary`가 이 장소까지 세서 서버 모드는 앱이 직접 저장한 곳만 센다(`NEEDS BACKEND`: 요약을 `action_type`별로, 07 D44). AI 추천 탭의 필터 개수도 앱이 센다. 이 장소들은 코스 장소 고르기에도 함께 나오고 고정 장소로 보낼 수 있다(선택 토큰 있음, 07 D47) |
 | 코스 목록·상세 | **서버** | `GET /courses`, `/courses/{course}`, `POST /mobile/courses/{course}` | ✅ |
@@ -70,13 +70,13 @@
 
 | # | 질문 | 서버 답 | 앱 처리 |
 |---|------|---------|---------|
-| 1 | 입력 | `POST /jobs`(= `/recommend`): `area`(필수) · `place_tokens`(고른 장소, 최대 6) · `excluded_place_tokens`(최대 60) · `party_id` · `place_count`(1~6) · `visit_date`(선택, 최대 40자) · `start_time`(선택, `HH:mm`). 날짜 · 출발 시간은 팀 서버 `c29137a`(2026-11-15)부터 추천 입력으로 받아 출발 시간 기준으로 식사 · 술집 수와 방문 순서를 정한다(없으면 12:00 기준). 앱은 1/4에서 받은 값을 `2026-11-21` · `13:30` 형식으로 보낸다(2026-11-21 연결). 코스 이름과 저장 시점의 날짜 · 시간은 저장할 때(`POST /mobile/courses/{id}`) 다시 보낸다. 분위기는 입력에 없다 | 분위기 옵션은 서버 모드에서 노출하지 않는다. `place_count`는 `고른 수 + 3`으로 고정(안 붙인 옵션) |
+| 1 | 입력 | `POST /jobs`(= `/recommend`): `area`(필수) · `place_tokens`(고른 장소, 최대 6) · `excluded_place_tokens`(최대 60) · `party_id` · `place_count`(1~6) · `visit_date`(선택, 최대 40자) · `start_time`(선택, `HH:mm`). 날짜 · 출발 시간은 팀 서버 `c29137a`(2026-11-15)부터 추천 입력으로 받아 출발 시간 기준으로 식사 · 술집 수와 방문 순서를 정한다(없으면 12:00 기준). 앱은 1/4에서 받은 값을 `2026-11-21` · `13:30` 형식으로 보낸다(2026-11-21 연결). 코스 이름과 저장 시점의 날짜 · 시간은 저장할 때(`POST /mobile/courses/{id}`) 다시 보낸다. 분위기는 입력에 없다 | 분위기 옵션은 서버 모드에서 노출하지 않는다. `place_count`는 3/4의 `코스 장소 수` −/+로 보낸다(처음 값 `고른 수 + 3`, 고른 수 ~ 6, 07 D68) |
 | 2 | 재추천의 의미 | `POST /courses/{id}/replace`: 내가 고른(`saved`) 장소는 두고 AI 장소만 새로 뽑는다. `place_key`를 주면 그 한 곳만 바꾼다. **초안(draft)에서만** 되고 확정한 코스는 409 | A6 가정과 같음 |
 | 3 | 제외 목록 | 코스에 `excluded_places`가 서버에 쌓인다(빼기 · 바꾸기 때). 차단(`block_future`)은 계정 단위로 `/me/blocks`에 저장되고 추천 때 서버가 자동으로 뺀다. **파티 추천은 파티원 모두의 차단 목록을 뺀다**(`store.blocks(ids)`) | 이번만 = 서버 코스의 제외 목록, 차단 = `/me/blocks` |
-| 4 | 세션 · 상태 | 추천이 끝나면 결과가 **초안 코스로 서버에 남고**(`id`가 코스 id) `GET /courses/{id}`로 다시 읽을 수 있다 | 앱을 껐다 켜면 초안을 이어 보지 않음 |
+| 4 | 세션 · 상태 | 추천이 끝나면 결과가 **초안 코스로 서버에 남고**(`id`가 코스 id) `GET /courses/{id}`로 다시 읽을 수 있다 | 이 기기에서 받은 마지막 초안 id · 받은 시각을 기기에 남겨 홈 맨 위 `저장 안 한 추천이 있어요`로 이어 본다(아직 `draft` · 내 것 · 날짜가 안 지났을 때, 07 D68). 서버는 초안의 만든 시각 · 이름을 주지 않는다 |
 | 5 | 응답 방식 | 비동기: `POST /jobs` → `job_id`, `GET /jobs/{job}` 폴링(`status` · `stage`), `POST /jobs/{job}/cancel` | 단계 표시 · 취소(07 D33) |
-| 6 | 응답 내용 | 장소별 `description`(추천 이유, 빈 문자열일 수 있음) · `temporal` · `novelty_score` · `web_evidence`, 코스 `recommendation_reason` · `warnings` · `distance_km`(직선) · `taste_profile`(11-21부터 `route_optimization.estimated_schedule` 예상 도착 시각 — 머묾 시간 가정 + 직선 4km/h). **실제 길 기준 이동 시간 · 취향 반영 비율은 없다** | 이유는 장소 시트에서만(D40), 비율 대신 취향 단어 한 줄(D46), 예상 시각 · 직선거리 이동 줄(D66). `recommendation_reason` · `warnings`는 내부 표현이 섞여 쓰지 않음 |
-| 7 | 한도 | 하루 24회 · 10달러(`GET /me/usage`, 서버 환경변수 `APT_DAILY_CALL_LIMIT` · `APT_DAILY_USD_LIMIT`로 조정). 넘으면 추천 job이 `failed`로 끝나고 오류 문장에 `한도`가 들어 있다 | 한도 안내 화면은 아직 없음 |
+| 6 | 응답 내용 | 장소별 `description`(추천 이유, 빈 문자열일 수 있음) · `temporal` · `novelty_score` · `web_evidence`, 코스 `recommendation_reason` · `warnings` · `distance_km`(직선) · `taste_profile`(11-21부터 `route_optimization.estimated_schedule` 예상 도착 시각 — 머묾 시간 가정 + 직선 4km/h). **실제 길 기준 이동 시간 · 취향 반영 비율은 없다** | 이유는 장소 시트에서만(D40), 비율 대신 취향 단어 한 줄(D46), 예상 시각 · 직선거리 이동 줄(D66). `web_evidence`(`url` · `quote` · `published`)는 4/4 장소 시트 `추천에 쓴 글 n개` → 다음 시트(D68). `recommendation_reason` · `warnings`는 내부 표현이 섞여 쓰지 않음 |
+| 7 | 한도 | 하루 24회 · 10달러(`GET /me/usage`, 서버 환경변수 `APT_DAILY_CALL_LIMIT` · `APT_DAILY_USD_LIMIT`로 조정). 넘으면 추천 job이 `failed`로 끝나고 오류 문장에 `한도`가 들어 있다 | 3/4에서 이미 다 썼으면 버튼을 막고 `내일 오전 9시부터 다시 받을 수 있어요`, 추천 중에 걸리면 4/4 자리에 전용 안내(07 D68) |
 | 8 | 트렌디함 | `temporal`(팝업 · 행사 · 신규 개업 기간) · `novelty_score` · `web_evidence`. **실제 응답에는 아직 값이 온 적이 없다**(11-13 연남동 3명 파티 추천도 비어 있었음) | 표시하지 않음 |
 
 남은 질문:
