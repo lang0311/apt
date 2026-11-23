@@ -16,6 +16,7 @@ class CourseDraft {
     this.partyId,
     this.rejectedPlaceIds = const {},
     this.recommendationRound = 0,
+    this.placeCount,
   });
 
   final String name;
@@ -33,6 +34,18 @@ class CourseDraft {
   final Set<String> rejectedPlaceIds;
   final int recommendationRound;
 
+  /// 코스 전체 장소 수 (11번, 3/4 −/+). null이면 기본값 고른 수 + 3 (서버는 1~6곳, 고른 수보다 적으면 422)
+  final int? placeCount;
+
+  /// 서버가 받는 코스 장소 수 범위
+  static const maxPlaceCount = 6;
+
+  /// 고른 수 이상, 6 이하로 맞춘 코스 장소 수
+  int get coursePlaceCount {
+    final floor = places.length.clamp(1, maxPlaceCount);
+    return (placeCount ?? places.length + 3).clamp(floor, maxPlaceCount);
+  }
+
   bool get infoComplete => name.trim().isNotEmpty && date != null && startTime != null;
   bool get hasPlaces => places.isNotEmpty;
   Set<String> get placeIds => places.map((p) => p.id).toSet();
@@ -48,6 +61,7 @@ class CourseDraft {
     bool clearPartyId = false,
     Set<String>? rejectedPlaceIds,
     int? recommendationRound,
+    int? placeCount,
   }) {
     return CourseDraft(
       name: name ?? this.name,
@@ -59,6 +73,7 @@ class CourseDraft {
       partyId: clearPartyId ? null : (partyId ?? this.partyId),
       rejectedPlaceIds: rejectedPlaceIds ?? this.rejectedPlaceIds,
       recommendationRound: recommendationRound ?? this.recommendationRound,
+      placeCount: placeCount ?? this.placeCount,
     );
   }
 

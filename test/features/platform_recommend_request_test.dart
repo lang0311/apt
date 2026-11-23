@@ -70,4 +70,14 @@ void main() {
     expect(jobBody()['visit_date'], isNull);
     expect(jobBody()['start_time'], isNull);
   });
+
+  test('코스 장소 수는 3/4에서 고른 값을 보내고, 안 고르면 고른 수 + 3 (11번)', () async {
+    final picked = [client.place(Map.of(place), saved: true)];
+    await expectLater(repository.recommend(draft: CourseDraft(places: picked)), throwsA(anything));
+    expect(jobBody()['place_count'], 4);
+
+    server.requests.clear();
+    await expectLater(repository.recommend(draft: CourseDraft(places: picked, placeCount: 2)), throwsA(anything));
+    expect(jobBody()['place_count'], 2);
+  });
 }

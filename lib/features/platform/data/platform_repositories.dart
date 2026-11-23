@@ -506,7 +506,7 @@ class PlatformCourseRepository implements CourseRepository {
         'area': courseArea(draft.places),
         'place_tokens': tokens,
         'excluded_place_tokens': exclusionTokens,
-        'place_count': (draft.places.length + 3).clamp(1, 6),
+        'place_count': draft.coursePlaceCount,
         'party_id': draft.companion == Companion.party ? draft.partyId : null,
         // 서버가 출발 시간으로 식사 · 술집 수와 방문 순서를 정한다(없으면 12:00 기준)
         'visit_date': draft.date?.toIso8601String().substring(0, 10),
