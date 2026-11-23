@@ -268,8 +268,23 @@ class PlatformClient {
         place: place(Map<String, dynamic>.from(stop as Map)),
         source: stop['saved'] == true ? PlaceSource.user : PlaceSource.ai,
         aiReason: stop['saved'] == true ? null : _reason(stop['description']),
+        evidence: stop['saved'] == true ? const [] : evidence(stop['web_evidence']),
       ),
   ];
+
+  /// 서버 `web_evidence` [{url, quote, published, ...}] → 글 목록. 주소가 없거나 같은 주소는 뺀다 (2번)
+  static List<PlaceEvidence> evidence(Object? raw) {
+    final seen = <String>{};
+    return [
+      for (final row in raw is List ? raw : const [])
+        if (row is Map && row['url'] is String && (row['url'] as String).isNotEmpty && seen.add(row['url'] as String))
+          PlaceEvidence(
+            url: row['url'] as String,
+            quote: _reason(row['quote']) ?? _reason(row['text']),
+            publishedAt: DateTime.tryParse((row['published'] ?? '').toString()),
+          ),
+    ];
+  }
 
   /// 서버가 추천 이유를 빈 문자열로 줄 수 있다(팀 8b58c46~). 빈 값은 null로 넘겨 '추천 이유 보기' 줄이 안 뜨게 한다 (07 D40).
   static String? _reason(Object? description) {

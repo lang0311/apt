@@ -5,6 +5,7 @@ import 'package:apt/core/widgets/spark_icon.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../core/utils/external_link.dart';
 import '../../../../core/widgets/overlays.dart';
 import '../../../saved/presentation/widgets/place_image.dart';
 import '../../domain/course_models.dart';
@@ -261,10 +262,112 @@ Future<void> showResultStopSheet(
           ),
         _removeAi(onRemove),
         info,
+        if (stop.evidence.isNotEmpty)
+          StopSheetAction(
+            label: '추천에 쓴 글 ${stop.evidence.length}개',
+            icon: LucideIcons.fileText,
+            chevron: true,
+            // 뒤로(‹)를 누르면 이 시트로 돌아온다
+            onTap: () => showEvidenceSheet(
+              context,
+              stop: stop,
+              onBack: () => showResultStopSheet(context, stop: stop, onInfo: onInfo, onRemove: onRemove, onSwap: onSwap, onBlock: onBlock),
+            ),
+          ),
       ],
       if (onBlock != null) [_block(onBlock)],
     ],
   );
+}
+
+/// 추천에 쓴 글 (2번 B안): 장소 시트의 '추천에 쓴 글 n개'를 누르면 뜨는 다음 시트. 글을 누르면 원문을 연다
+Future<void> showEvidenceSheet(BuildContext context, {required CourseStop stop, VoidCallback? onBack}) {
+  return showAppBottomSheet<void>(
+    context,
+    builder: (ctx) => ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.75),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(AppSpacing.xs, 0, AppSpacing.screenH, AppSpacing.xxs),
+            child: Row(
+              children: [
+                IconButton(
+                  tooltip: '뒤로',
+                  icon: const Icon(LucideIcons.chevronLeft, size: 22),
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    onBack?.call();
+                  },
+                ),
+                Expanded(
+                  child: Text('${stop.place.name} · 추천에 쓴 글', style: AppTypography.header, maxLines: 1, overflow: TextOverflow.ellipsis),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, 0, AppSpacing.screenH, AppSpacing.xs),
+            child: Text('AI가 이 장소를 고를 때 찾아본 글이에요. 누르면 원문을 열어요.', style: AppTypography.meta),
+          ),
+          Flexible(
+            child: ListView.separated(
+              shrinkWrap: true,
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              itemCount: stop.evidence.length,
+              separatorBuilder: (_, _) => const Divider(height: 1, indent: AppSpacing.screenH, endIndent: AppSpacing.screenH, color: AppColors.divider),
+              itemBuilder: (_, i) => _EvidenceRow(evidence: stop.evidence[i]),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _EvidenceRow extends StatelessWidget {
+  const _EvidenceRow({required this.evidence});
+  final PlaceEvidence evidence;
+
+  @override
+  Widget build(BuildContext context) {
+    final date = evidence.publishedAt;
+    return InkWell(
+      onTap: () => openExternalLink(context, evidence.url),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH, vertical: AppSpacing.sm),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    [evidence.host, if (date != null) '${date.year}년 ${date.month}월 ${date.day}일'].join(' · '),
+                    style: AppTypography.caption,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (evidence.quote != null) ...[
+                    const SizedBox(height: 2),
+                    Text(evidence.quote!, style: AppTypography.bodySmall, maxLines: 3, overflow: TextOverflow.ellipsis),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            const Padding(
+              padding: EdgeInsets.only(top: 2),
+              child: Icon(LucideIcons.externalLink, size: 16, color: AppColors.textHint),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// 편집 화면에서 장소 타일을 누를 때: 앞으로 · 뒤로 · 이 코스에서 빼기 / (AI 장소만) 앞으로 추천하지 않기

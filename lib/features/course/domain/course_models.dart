@@ -46,9 +46,32 @@ class RouteLeg {
   }
 }
 
+/// AI가 추천할 때 찾아본 글 (서버 장소별 `web_evidence`, 2번). 장소 시트 '추천에 쓴 글 n개'에서 보여 준다
+class PlaceEvidence {
+  const PlaceEvidence({required this.url, this.quote, this.publishedAt});
+  final String url;
+
+  /// 글에서 따온 한 줄
+  final String? quote;
+  final DateTime? publishedAt;
+
+  /// 'blog.naver.com' (주소 앞 www.는 뺀다)
+  String get host {
+    final host = Uri.tryParse(url)?.host ?? '';
+    return (host.isEmpty ? url : host).replaceFirst(RegExp(r'^www\.'), '');
+  }
+}
+
 /// 코스의 한 장소
 class CourseStop {
-  const CourseStop({required this.place, required this.source, this.aiReason, this.arrivalTime, this.nextLeg});
+  const CourseStop({
+    required this.place,
+    required this.source,
+    this.aiReason,
+    this.arrivalTime,
+    this.nextLeg,
+    this.evidence = const [],
+  });
 
   final Place place;
   final PlaceSource source;
@@ -57,6 +80,9 @@ class CourseStop {
   final String? aiReason;
   final TimeOfDay? arrivalTime;
   final RouteLeg? nextLeg;
+
+  /// 추천에 쓴 글 (AI 장소만, 서버가 주면)
+  final List<PlaceEvidence> evidence;
 
   bool get isAi => source == PlaceSource.ai;
 }

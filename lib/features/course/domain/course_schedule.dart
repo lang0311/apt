@@ -31,6 +31,7 @@ List<CourseStop> withEstimatedTimes(List<CourseStop> stops, {TimeOfDay? start, E
         place: stops[i].place,
         source: stops[i].source,
         aiReason: stops[i].aiReason,
+        evidence: stops[i].evidence,
         arrivalTime: arrivals?[i],
         nextLeg: i == stops.length - 1 ? null : _straight(stops[i].place, stops[i + 1].place),
       ),
