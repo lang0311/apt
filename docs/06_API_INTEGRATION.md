@@ -24,7 +24,7 @@
 | AI 추천 (job) | **서버** | `POST /jobs`, `GET /jobs/{job}`(status · stage → 화면 단계, 07 D33), `POST /jobs/{job}/cancel`, `GET /jobs`(진행 중 job, 취소 중이면 끝나길 기다림), `POST /recommend` | ✅ job 폴링 · 단계 · 취소(`/recommend`는 안 씀) |
 | 코스 장소 바꾸기·빼기·확정 | **서버** | `POST /courses/{course}/replace`, `DELETE /courses/{course}/places`, `GET .../places/{key}/selection`, `POST .../confirm` | ✅ (`.../selection`은 안 씀). 확정(`confirm`)한 코스는 수정 · 다시 추천이 모두 409라 서버 모드 저장 코스는 편집을 숨김 — 서버 수정 요청 중(§7, 07 §3) |
 | 추천하지 않는 장소(차단) | **서버** | `GET /me/blocks`, `DELETE /me/blocks/{key}` | ✅ |
-| 파티·초대 | **서버** | `POST /parties`, `/parties/join`, `GET /parties/{party}`, `POST /parties/{party}/invites`, `GET /mobile/invites/{code}`, 내 파티 목록 = `GET /me`의 `parties`(멤버 포함, 07 D34). 앱은 파티 이름을 `{만든 사람}님의 파티`로 보낸다(07 D38). 초대 링크는 파티장만 만들 수 있어(파티원 403) `parties[].owner`가 나일 때만 `초대하기`를 보여 준다(07 D43). 이름 수정 · 나가기 · 숨기기 · 삭제 · 푸시는 없음 | ✅ 만들기 · 초대 · 참여 · 기존 파티 고르기 |
+| 파티·초대 | **서버** | `POST /parties`, `/parties/join`, `GET /parties/{party}`, `POST /parties/{party}/invites`, `GET /mobile/invites/{code}`, 내 파티 목록 = `GET /me`의 `parties`(멤버 포함, 07 D34). 앱은 파티 이름을 `{만든 사람}님의 파티`로 보낸다(07 D38). 초대 링크는 파티장만 만들 수 있어(파티원 403) `parties[].owner`가 나일 때만 `초대하기`를 보여 준다(07 D43). 파티는 8명까지(9번째 참여는 409), 초대 링크는 `expires_in`(24시간) 뒤에 끝나고 한 사람이 참여하면 지워진다(쓰인 링크는 404). `GET /parties/{party}`의 `members[].saved_place_count`, 코스의 `owner`. 이름 수정 · 나가기 · 숨기기 · 삭제 · 푸시는 없음 | ✅ 만들기 · 초대 · 참여 · 기존 파티 고르기. 8명 안내 · 저장 수 · 링크 안내 · 만든 사람(07 D67) |
 | 릴스 링크 추출 | 엑셀 참고 · `NEEDS BACKEND` | `POST /api/v1/places/share-link` | — Mock(서버 없음) |
 | 보관함 | 엑셀 참고 · `NEEDS BACKEND` | `/api/v1/user-lists` (만들기·내 목록·상세) | — Mock(서버 없음, 서버 모드는 준비 중 안내) |
 | 근처 저장 장소 (저장 지도) | 엑셀 참고 · `NEEDS BACKEND` | `GET /api/v1/places/nearby` | ◐ 서버 모드는 `/me` 장소를 앱에서 거리로 거름 |
@@ -131,6 +131,8 @@ FeatureRepository (interface)
 - [ ] 프로필 수정 · 사진 업로드 · 약관 동의 기록 · 취향 직접 설정 · 홈 추천 코스 — 서버에 없어 Mock 유지
 
 ### 있으면 좋은 값 (앱이 대신 처리하거나 숨기는 중)
+
+- [ ] 여러 명이 쓰는 초대 링크 — 지금 링크는 한 사람이 참여하면 지워져서 단톡방에 하나만 올리면 첫 사람만 들어온다. 앱은 안내 한 줄과 `새 링크`로 대신한다(07 D67). 인원이 다 찬 파티의 링크 만들기도 서버에서 막으면 좋다(지금은 만들어지고 참여 때 409).
 
 - [ ] `taste_profile.group_blend`에 장소 `key` — 지금은 이름으로만 와서 같은 이름의 장소를 구분하지 못한다. 편집 뒤에도 추천 당시 값이 남는 것도 공유한다(07 D46).
 - [ ] `/mobile/summary`를 `action_type`(직접 저장 · 코스 확정)별로 — 지금 요약은 코스 확정으로 들어온 AI 추천 장소까지 세어, 저장됨은 앱이 `/me` 목록으로 직접 센다(07 D44).
