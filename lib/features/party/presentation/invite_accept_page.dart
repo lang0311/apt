@@ -110,7 +110,7 @@ class _InviteAcceptPageState extends ConsumerState<InviteAcceptPage> {
     final alreadyJoined = error.kind == InviteFailureKind.alreadyJoined;
     return Center(
       child: AppEmptyState(
-        icon: LucideIcons.mail,
+        icon: error.kind == InviteFailureKind.full ? LucideIcons.users : LucideIcons.mail,
         title: error.kind.title,
         description: error.kind.description,
         actionLabel: alreadyJoined ? '코스 목록 보기' : '홈으로',

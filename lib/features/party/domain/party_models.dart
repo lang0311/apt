@@ -15,6 +15,11 @@ class Party {
 
   /// 내가 파티장인지 (서버 값). 파티장만 초대 링크를 만들 수 있다 (07 D43)
   final bool isOwner;
+
+  /// 한 파티에 들어갈 수 있는 사람 수 (팀 서버 `platform_store.py` join — 9번째는 409)
+  static const maxMembers = 8;
+
+  bool get isFull => members.length >= maxMembers;
 }
 
 extension PartyMemberNames on List<PartyMember> {
@@ -62,7 +67,7 @@ class Invitation {
 enum InviteFailureKind {
   expired('초대가 만료됐어요', '초대한 친구에게 새 링크를 요청해주세요.'),
   alreadyJoined('이미 참여한 코스예요', '코스 목록의 모임/파티 코스에서 확인할 수 있어요.'),
-  full('참여 인원이 가득 찼어요', '코스를 만든 친구에게 문의해주세요.');
+  full('인원이 다 찼어요', '파티에는 8명까지 들어갈 수 있어요.');
 
   const InviteFailureKind(this.title, this.description);
   final String title;

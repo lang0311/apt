@@ -723,6 +723,8 @@ class PlatformPartyRepository implements PartyRepository {
   @override
   Future<Invitation> fetchInvitation(String token) async {
     final invite = await _platform.get('/mobile/invites/$token');
+    // 이미 8명이면 참여 버튼을 누르기 전에 알린다 (서버는 참여할 때 409로 막는다)
+    if ((invite['member_count'] as int) >= Party.maxMembers) throw const InviteFailure(InviteFailureKind.full);
     return Invitation(
       token: token,
       inviterName: invite['inviter'] as String,
@@ -739,7 +741,12 @@ class PlatformPartyRepository implements PartyRepository {
     if (!shareMyPreferences) {
       throw const ValidationFailure('현재 서버의 파티 추천은 참여자 저장 취향을 함께 사용해요.');
     }
-    await _platform.post('/parties/join', {'code': token});
+    try {
+      await _platform.post('/parties/join', {'code': token});
+    } on ValidationFailure {
+      // 참여 API의 409는 인원 초과뿐이다(초대를 연 뒤 다른 사람이 먼저 들어온 경우)
+      throw const InviteFailure(InviteFailureKind.full);
+    }
   }
 
   @override

@@ -8,7 +8,6 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
-import '../../../../core/widgets/buttons.dart';
 import '../../../../core/widgets/headers.dart';
 import '../../../../core/widgets/overlays.dart';
 import '../../../../core/widgets/states.dart';
@@ -23,6 +22,7 @@ import '../widgets/applied_taste_section.dart';
 import '../widgets/course_route_map.dart';
 import '../widgets/course_share_sheet.dart';
 import '../widgets/course_timeline.dart';
+import '../widgets/party_members_sheet.dart';
 import '../../domain/course_schedule.dart';
 
 /// #32 코스 상세 (보는 상태). 고치기는 일정 카드의 "편집" 하나로 들어간다(코스 편집 화면).
@@ -175,7 +175,7 @@ class _CrewStrip extends ConsumerWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.medium)),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppRadius.medium),
-        onTap: members == null ? null : () => _showMembers(context, members, partyId!, canInvite: party!.isOwner),
+        onTap: party == null ? null : () => _showMembers(context, party),
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 48),
           child: Padding(
@@ -198,76 +198,20 @@ class _CrewStrip extends ConsumerWidget {
     );
   }
 
-  /// 나를 맨 위에, 초대하기 · 코스 알리기는 사람 목록과 나눠 아래 버튼 두 개로.
-  /// 초대 링크는 파티장만 만들 수 있어서(서버 403) 파티원에게는 초대하기를 보이지 않는다 (07 D43)
-  void _showMembers(BuildContext context, List<PartyMember> members, String partyId, {required bool canInvite}) {
-    final ordered = [...members.where((m) => m.isMe), ...members.where((m) => !m.isMe)];
-    final canShare = members.any((m) => !m.isMe);
+  /// 파티원 시트 (`PartyMembersSheet`: 초대하기 · 코스 알리기, 8명이면 안내)
+  void _showMembers(BuildContext context, Party party) {
     showAppBottomSheet<void>(
       context,
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, AppSpacing.xxs, AppSpacing.screenH, AppSpacing.md),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('함께하는 사람 ${members.length}명', style: AppTypography.cardTitle),
-            const SizedBox(height: AppSpacing.xs),
-            for (final m in ordered)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Row(
-                  children: [
-                    // 얼굴 색은 서버 순서 그대로 (상세의 얼굴 묶음과 같은 색)
-                    PartyAvatarStack(members: [m], size: 36, max: 1, colorOffset: members.indexOf(m)),
-                    const SizedBox(width: AppSpacing.sm),
-                    Flexible(
-                      child: Text(m.nickname, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    ),
-                    if (m.isMe) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.tiny)),
-                        child: Text(canInvite ? '나, 파티장' : '나', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w600)),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            if (canInvite || canShare) ...[
-              const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  if (canInvite)
-                    Expanded(
-                      child: AppButton(
-                        label: '초대하기',
-                        variant: canShare ? AppButtonVariant.white : AppButtonVariant.primary,
-                        height: 48,
-                        onPressed: () {
-                          Navigator.of(ctx).pop();
-                          showInviteModal(context, partyId: partyId);
-                        },
-                      ),
-                    ),
-                  if (canInvite && canShare) const SizedBox(width: AppSpacing.xs),
-                  if (canShare)
-                    Expanded(
-                      child: AppButton(
-                        label: '코스 알리기',
-                        height: 48,
-                        onPressed: () {
-                          Navigator.of(ctx).pop();
-                          showCourseShareSheet(context, course: course, members: members);
-                        },
-                      ),
-                    ),
-                ],
-              ),
-            ],
-          ],
-        ),
+      builder: (ctx) => PartyMembersSheet(
+        party: party,
+        onInvite: () {
+          Navigator.of(ctx).pop();
+          showInviteModal(context, partyId: party.id);
+        },
+        onShare: () {
+          Navigator.of(ctx).pop();
+          showCourseShareSheet(context, course: course, members: party.members);
+        },
       ),
     );
   }
