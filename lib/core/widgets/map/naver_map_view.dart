@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 
@@ -191,7 +192,7 @@ class _NaverMapViewState extends State<NaverMapView> implements AptMapCommands {
     // 처음 맞춘 뒤에는 viewport 조회 화면이면 안 움직이고, 그 밖에는 마커 구성이 바뀔 때만 다시 맞춘다
     final firstFit = _fittedIds.isEmpty;
     final viewportDriven = widget.onCameraIdle != null;
-    if (!firstFit && (viewportDriven || _sameSet(ids, _fittedIds))) return;
+    if (!firstFit && (viewportDriven || setEquals(ids, _fittedIds))) return;
     _fittedIds = ids;
 
     await c.updateCamera(_fitUpdate([...widget.markers.map((m) => m.point), ...widget.route]));
@@ -223,6 +224,4 @@ class _NaverMapViewState extends State<NaverMapView> implements AptMapCommands {
   }
 
   static NLatLng _latLng(GeoPoint p) => NLatLng(p.lat, p.lng);
-
-  static bool _sameSet(Set<String> a, Set<String> b) => a.length == b.length && a.containsAll(b);
 }

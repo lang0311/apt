@@ -155,7 +155,7 @@ class RecommendationController extends Notifier<RecommendationState> {
   /// 이전 결과가 무효화됐으면 true.
   Future<bool> syncWithDraft() async {
     final ids = ref.read(courseDraftProvider).placeIds;
-    final stale = state.hasResult && !_sameSet(state.basedOnPlaceIds, ids);
+    final stale = state.hasResult && !setEquals(state.basedOnPlaceIds, ids);
     if (!state.hasResult || stale) {
       await _request(keepPrevious: false);
       _initialIds = [for (final s in state.stops) s.place.id];
@@ -350,8 +350,6 @@ class RecommendationController extends Notifier<RecommendationState> {
     ];
     _draft.update((d) => d.copyWith(places: order));
   }
-
-  static bool _sameSet(Set<String>? a, Set<String> b) => a != null && a.length == b.length && a.containsAll(b);
 }
 
 final recommendationProvider = NotifierProvider<RecommendationController, RecommendationState>(RecommendationController.new);
