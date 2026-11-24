@@ -115,20 +115,7 @@ class SavedPlaceRow extends StatelessWidget {
                         ),
                         if (fromCourse) ...[
                           const SizedBox(height: 3),
-                          Row(
-                            children: [
-                              const SparkIcon(size: 12, color: AppColors.ai),
-                              const SizedBox(width: 3),
-                              Flexible(
-                                child: Text(
-                                  recommendedLabel(recommendedIn),
-                                  style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w600),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
+                          RecommendedLine(recommendedIn),
                         ],
                         if (hasThird) ...[
                           const SizedBox(height: 3),
@@ -714,6 +701,32 @@ class _CategoryOption extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// "✦ ○○ 코스에서 추천" — 추천받아 저장된 곳 표시 (07 D44). 저장됨 목록 · 저장 지도 · 코스 만들기 3/4가 같이 쓴다
+class RecommendedLine extends StatelessWidget {
+  const RecommendedLine(this.recommendedIn, {super.key});
+
+  /// 추천한 코스 이름 (모르면 null → '코스에서 추천')
+  final String? recommendedIn;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const SparkIcon(size: 11, color: AppColors.ai),
+        const SizedBox(width: 3),
+        Flexible(
+          child: Text(
+            SavedPlaceRow.recommendedLabel(recommendedIn),
+            style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w600),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }

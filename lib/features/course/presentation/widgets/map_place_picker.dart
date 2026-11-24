@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:apt/core/widgets/spark_icon.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -734,7 +733,7 @@ class _PlaceCard extends StatelessWidget {
                     children: [
                       Text(place.name, style: AppTypography.label, maxLines: 1, overflow: TextOverflow.ellipsis),
                       Text(_areaAndCategory(place), style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
-                      if (recommended != null) _RecommendedLine(recommended!),
+                      if (recommended != null) RecommendedLine(recommended!.recommendedIn),
                     ],
                   ),
                 ),
@@ -885,7 +884,7 @@ class _ListPanel extends StatelessWidget {
                   children: [
                     Text(p.name, style: AppTypography.bodyStrong, maxLines: 1, overflow: TextOverflow.ellipsis),
                     Text(_areaAndCategory(p), style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    if (recommended) _RecommendedLine(item),
+                    if (recommended) RecommendedLine(item.recommendedIn),
                   ],
                 ),
               ),
@@ -919,30 +918,6 @@ class _ListMessage extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// "✦ ○○ 코스에서 추천" — 저장됨 AI 추천 탭과 같은 표시 (07 D44)
-class _RecommendedLine extends StatelessWidget {
-  const _RecommendedLine(this.item);
-  final SavedPlaceItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const SparkIcon(size: 11, color: AppColors.ai),
-        const SizedBox(width: 3),
-        Flexible(
-          child: Text(
-            SavedPlaceRow.recommendedLabel(item.recommendedIn),
-            style: AppTypography.caption.copyWith(color: AppColors.aiText, fontWeight: FontWeight.w600),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
     );
   }
 }
