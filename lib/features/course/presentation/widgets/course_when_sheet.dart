@@ -37,30 +37,46 @@ class CourseDayChips extends StatelessWidget {
     final lastChip = today.add(const Duration(days: _chipDays - 1));
     final far = picked != null && picked.isAfter(lastChip);
 
+    // v2-7: 날짜 칩은 가로로 넘기고, 달력 칩은 오른쪽에 고정해 늘 보이게 한다
     return SizedBox(
       height: MediaQuery.textScalerOf(context).scale(62),
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: padding,
+      child: Row(
         children: [
-          if (far) ...[
-            _DayChip(top: '${picked.month}월 ${weekdayLabel(picked)}', date: picked, selected: true, wide: true, onTap: () {}),
-            const SizedBox(width: AppSpacing.xs),
-          ],
-          for (var i = 0; i < _chipDays; i++) ...[
-            _DayChip(
-              top: switch (i) {
-                0 => '오늘',
-                1 => '내일',
-                _ => weekdayLabel(today.add(Duration(days: i))),
-              },
-              date: today.add(Duration(days: i)),
-              selected: picked == today.add(Duration(days: i)),
-              onTap: () => onPick(today.add(Duration(days: i))),
+          Expanded(
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.only(left: padding.left, right: AppSpacing.xs),
+              children: [
+                if (far) ...[
+                  _DayChip(top: '${picked.month}월 ${weekdayLabel(picked)}', date: picked, selected: true, wide: true, onTap: () {}),
+                  const SizedBox(width: AppSpacing.xs),
+                ],
+                for (var i = 0; i < _chipDays; i++) ...[
+                  if (i > 0) const SizedBox(width: AppSpacing.xs),
+                  _DayChip(
+                    top: switch (i) {
+                      0 => '오늘',
+                      1 => '내일',
+                      _ => weekdayLabel(today.add(Duration(days: i))),
+                    },
+                    date: today.add(Duration(days: i)),
+                    selected: picked == today.add(Duration(days: i)),
+                    onTap: () => onPick(today.add(Duration(days: i))),
+                  ),
+                ],
+              ],
             ),
-            const SizedBox(width: AppSpacing.xs),
-          ],
-          _CalendarChip(onTap: () => _openCalendar(context, today)),
+          ),
+          // 넘어가는 칩이 달력 칩 밑으로 자연스럽게 사라지게 왼쪽에 흰 그림자
+          DecoratedBox(
+            decoration: const BoxDecoration(
+              boxShadow: [BoxShadow(color: Colors.white, blurRadius: 12, spreadRadius: 4, offset: Offset(-10, 0))],
+            ),
+            child: Padding(
+              padding: EdgeInsets.only(right: padding.right),
+              child: _CalendarChip(onTap: () => _openCalendar(context, today)),
+            ),
+          ),
         ],
       ),
     );
