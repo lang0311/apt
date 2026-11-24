@@ -40,7 +40,13 @@ class CourseRouteMap extends StatelessWidget {
         child: Stack(
           children: [
             Positioned.fill(
-              child: AptMap(markers: markers, route: [for (final s in stops) ?s.place.location]),
+              child: AptMap(
+                markers: markers,
+                route: [for (final s in stops) ?s.place.location],
+                compact: true,
+                // '크게 보기' 자리(오른쪽 아래)에는 핀을 두지 않는다 (v2-7)
+                clearCorner: canOpen ? const Size(112, 54) : null,
+              ),
             ),
             // 작은 지도에서는 움직이지 않고, 어디를 눌러도 큰 지도가 열린다
             if (canOpen)

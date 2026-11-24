@@ -86,6 +86,8 @@ class AptMap extends StatelessWidget {
     this.topPadding = 0,
     this.controller,
     this.fitMarkersOnLoad = true,
+    this.clearCorner,
+    this.compact = false,
   });
 
   final List<MapMarker> markers;
@@ -109,6 +111,12 @@ class AptMap extends StatelessWidget {
   /// 처음 마커가 생기면 전체가 보이게 맞출지. false면 화면이 [controller]로 카메라를 정한다
   /// (저장됨 지도: 내 위치에서 시작).
   final bool fitMarkersOnLoad;
+
+  /// 오른쪽 아래 떠 있는 버튼 자리(여백 포함). 미리보기 지도는 핀을 이 밖에 둔다 (v2-7)
+  final Size? clearCorner;
+
+  /// 움직이지 않는 작은 지도(코스 · 장소 상세). 미리보기 이름표를 왼쪽 위 작은 칩으로
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +155,8 @@ class AptMap extends StatelessWidget {
               selectedId: selectedId,
               bottomPadding: bottomPadding,
               topPadding: topPadding,
+              clearCorner: clearCorner,
+              compact: compact,
             ),
     );
   }

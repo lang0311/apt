@@ -349,6 +349,8 @@ class _LocationMap extends StatelessWidget {
             Positioned.fill(
               child: AptMap(
                 markers: [MapMarker(id: place.id, point: place.location!, kind: MapPinKind.drop, icon: style.icon, color: style.color)],
+                compact: true,
+                clearCorner: url != null ? const Size(176, 52) : null,
               ),
             ),
             // 작은 지도는 움직이지 않고 누르면 카카오맵으로
