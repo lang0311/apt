@@ -1,5 +1,11 @@
 /// 기능 플래그. (docs/02_APP_DEVELOPMENT.md §4)
 abstract final class FeatureFlags {
+  /// 로그인 화면의 `회원가입`. 배포 웹 앱은 공개 가입을 닫아 false로 빌드한다(팀 `deploy/build_mobile.ps1`, 계정은 운영자가 발급).
+  static const publicSignup = bool.fromEnvironment('PUBLIC_SIGNUP', defaultValue: true);
+
+  /// 로그인 화면의 간편 로그인(카카오 · Google). 배포 웹 앱은 서버에 실제 소셜 로그인이 없어 false로 빌드한다.
+  static const socialAuth = bool.fromEnvironment('SOCIAL_AUTH', defaultValue: true);
+
   /// 이메일 로그인. 기본 false — 꺼져 있으면 진입점을 화면에 노출하지 않는다.
   static const emailAuthEnabled = bool.fromEnvironment('EMAIL_AUTH', defaultValue: false);
 

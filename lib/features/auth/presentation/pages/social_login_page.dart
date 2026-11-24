@@ -152,49 +152,48 @@ class _SocialLoginPageState extends ConsumerState<SocialLoginPage> {
                           const SizedBox(height: AppSpacing.sm),
                           AppButton(label: '로그인', loading: _submitting, onPressed: canSubmit ? _submit : null),
                           const SizedBox(height: AppSpacing.xs),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('처음이에요?', style: AppTypography.bodySmall),
-                              AppTextLink(
-                                label: '회원가입',
-                                color: AppColors.primary,
-                                onPressed: _busy ? null : () => ref.read(authControllerProvider.notifier).startIdSignup(),
-                              ),
-                            ],
-                          ),
+                          if (FeatureFlags.publicSignup)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('처음이에요?', style: AppTypography.bodySmall),
+                                AppTextLink(
+                                  label: '회원가입',
+                                  color: AppColors.primary,
+                                  onPressed: _busy ? null : () => ref.read(authControllerProvider.notifier).startIdSignup(),
+                                ),
+                              ],
+                            ),
                           // 이메일 로그인은 flag가 켜졌을 때만 노출 (가정 A1)
                           if (FeatureFlags.emailAuthEnabled)
                             Center(
                               child: AppTextLink(label: '이메일로 로그인', onPressed: () => context.push(AppRoutes.loginEmail)),
                             ),
-                          const SizedBox(height: AppSpacing.md),
-                          Row(
-                            children: [
-                              const Expanded(child: Divider(color: AppColors.divider, height: 1)),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                                child: Text('간편 로그인', style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
-                              ),
-                              const Expanded(child: Divider(color: AppColors.divider, height: 1)),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              for (final p in SocialProvider.values)
-                                if (p != SocialProvider.apple || FeatureFlags.appleAuthEnabled)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                                    child: SocialIconButton(
-                                      provider: p,
-                                      loading: _signingInWith == p,
-                                      onPressed: _busy ? null : () => _signIn(p),
+                          if (FeatureFlags.socialAuth) ...[
+                            const SizedBox(height: AppSpacing.md),
+                            Row(
+                              children: [
+                                const Expanded(child: Divider(color: AppColors.divider, height: 1)),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                                  child: Text('간편 로그인', style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
+                                ),
+                                const Expanded(child: Divider(color: AppColors.divider, height: 1)),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                for (final p in SocialProvider.values)
+                                  if (p != SocialProvider.apple || FeatureFlags.appleAuthEnabled)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                                      child: SocialIconButton(provider: p, loading: _signingInWith == p, onPressed: _busy ? null : () => _signIn(p)),
                                     ),
-                                  ),
-                            ],
-                          ),
+                              ],
+                            ),
+                          ],
                         ],
                       ),
                     ),
