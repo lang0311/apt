@@ -396,7 +396,7 @@ class CourseEditButton extends StatelessWidget {
 }
 
 /// 장소 번호 원. 내가 고른 장소 = 진한 번호, AI 추천 = 주황 ✦.
-Widget _marker(CourseStop stop, int? number) => StopMarker(source: stop.source, number: number);
+Widget _marker(CourseStop stop, int number) => StopMarker(source: stop.source, number: number);
 
 /// 장소 이름 아래 줄: 카테고리 · 지역. AI 추천 여부는 번호 원(주황 ✦)으로 구분하고,
 /// 추천 이유는 장소를 눌렀을 때 시트의 '추천 이유 보기'에서 보여 준다 (07 D40).
@@ -563,7 +563,7 @@ class _ViewTile extends StatelessWidget {
   final DateTime? courseDate;
   final bool lineAbove;
   final bool lineBelow;
-  final int? number;
+  final int number;
   final bool showTime;
   final bool highlighted;
   final VoidCallback? onTap;
@@ -884,7 +884,7 @@ class _EditTile extends StatelessWidget {
 
   final CourseStop stop;
   final int index;
-  final int? number;
+  final int number;
   final bool added;
   final bool highlighted;
   final bool enabled;
