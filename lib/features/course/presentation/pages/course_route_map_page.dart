@@ -34,11 +34,9 @@ class _CourseRouteMapPageState extends State<CourseRouteMapPage> {
 
   final _map = AptMapController();
   final _pages = PageController(viewportFraction: 0.64);
-  late final List<CourseStop> _stops = [
-    for (final s in widget.args.stops)
-      if (s.place.location != null) s,
-  ];
-  late final List<int> _numbers = userStopNumbers(_stops);
+  late final _mappable = mappableStops(widget.args.stops);
+  late final List<CourseStop> _stops = [for (final (s, _) in _mappable) s];
+  late final List<int> _numbers = [for (final (_, n) in _mappable) n];
   String? _focusedId;
 
   @override

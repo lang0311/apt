@@ -23,13 +23,11 @@ class CourseRouteMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var userNo = 0;
-    final markers = <MapMarker>[];
-    for (final s in stops) {
-      if (s.place.location == null) continue;
-      // 번호는 일정 순서 그대로(AI 추천 곳 포함), AI 추천은 주황 번호 + ✦
-      markers.add(MapMarker(id: s.place.id, point: s.place.location!, kind: s.isAi ? MapPinKind.ai : MapPinKind.numbered, number: ++userNo));
-    }
+    // 번호는 일정 순서 그대로(AI 추천 곳 포함), AI 추천은 주황 번호 + ✦
+    final markers = [
+      for (final (s, number) in mappableStops(stops))
+        MapMarker(id: s.place.id, point: s.place.location!, kind: s.isAi ? MapPinKind.ai : MapPinKind.numbered, number: number),
+    ];
     final canOpen = markers.isNotEmpty;
     void open() => context.push(
       AppRoutes.courseMap,
@@ -93,3 +91,12 @@ class _ExpandPill extends StatelessWidget {
 
 /// 일정 순번. AI 추천 곳도 번호를 매겨 1부터 끊기지 않게 한다 (색과 ✦로만 구분)
 List<int> userStopNumbers(List<CourseStop> stops) => [for (var i = 0; i < stops.length; i++) i + 1];
+
+/// 지도에 그릴 수 있는(위치 있는) 곳과 그 일정 번호. 위치 없는 곳은 빠져도 번호는 일정과 같다
+List<(CourseStop, int)> mappableStops(List<CourseStop> stops) {
+  final numbers = userStopNumbers(stops);
+  return [
+    for (final (i, s) in stops.indexed)
+      if (s.place.location != null) (s, numbers[i]),
+  ];
+}
