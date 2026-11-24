@@ -40,7 +40,7 @@ class PlaceListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final content = Row(
       children: [
-        AppNetworkImage(url: place.imageUrl, width: thumbSize, height: thumbSize, radius: AppRadius.thumb),
+        AppNetworkImage(url: place.imageUrl, width: thumbSize, height: thumbSize, radius: AppRadius.medium),
         const SizedBox(width: AppSpacing.md),
         Expanded(
           child: Column(

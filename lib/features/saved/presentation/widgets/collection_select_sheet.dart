@@ -91,7 +91,7 @@ class _CollectionSelectState extends ConsumerState<_CollectionSelect> {
                     leading: Container(
                       width: 44,
                       height: 44,
-                      decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.sm)),
+                      decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.small)),
                       child: const Icon(LucideIcons.plus, color: AppColors.textSecondary),
                     ),
                     title: '새 보관함',

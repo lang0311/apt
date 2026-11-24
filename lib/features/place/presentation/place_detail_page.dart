@@ -343,7 +343,7 @@ class _LocationMap extends StatelessWidget {
     return SizedBox(
       height: _height,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.card),
+        borderRadius: BorderRadius.circular(AppRadius.large),
         child: Stack(
           children: [
             Positioned.fill(

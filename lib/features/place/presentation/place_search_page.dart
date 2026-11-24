@@ -350,7 +350,7 @@ class _PlaceSearchPageState extends ConsumerState<PlaceSearchPage> {
                   bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.md,
                   child: Material(
                     color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(AppRadius.card),
+                    borderRadius: BorderRadius.circular(AppRadius.large),
                     elevation: 3,
                     shadowColor: AppColors.shadow,
                     clipBehavior: Clip.antiAlias,

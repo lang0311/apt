@@ -453,7 +453,7 @@ class _ListSheetState extends State<_ListSheet> {
             builder: (context, scroll) => DecoratedBox(
               decoration: const BoxDecoration(
                 color: AppColors.surface,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.card)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.large)),
                 boxShadow: [BoxShadow(color: AppColors.shadowFloat, blurRadius: 16, offset: Offset(0, -4))],
               ),
               child: widget.builder(scroll),

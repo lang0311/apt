@@ -21,7 +21,7 @@ class CourseThumb extends StatelessWidget {
     final url = course.thumbnailUrl;
     final keys = course.stopCategoryKeys;
     if ((url != null && url.isNotEmpty) || keys.isEmpty) {
-      return AppNetworkImage(url: url, width: size, height: size, radius: size >= 60 ? AppRadius.thumb : 12, placeholderIcon: LucideIcons.route);
+      return AppNetworkImage(url: url, width: size, height: size, radius: size >= 60 ? AppRadius.medium : 12, placeholderIcon: LucideIcons.route);
     }
     final half = (size - _gap) / 2;
     Widget tile(String key, double w, double h) {

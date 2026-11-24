@@ -305,7 +305,7 @@ class CollectionGridCard extends StatelessWidget {
 
 /// 썸네일 최대 4장, 모자라면 회색 칸, 0장이면 폴더 아이콘
 class MiniCollage extends StatelessWidget {
-  const MiniCollage({super.key, required this.urls, this.size = 56, this.radius = AppRadius.thumb});
+  const MiniCollage({super.key, required this.urls, this.size = 56, this.radius = AppRadius.medium});
   final List<String> urls;
   final double size;
   final double radius;

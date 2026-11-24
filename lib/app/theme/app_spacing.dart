@@ -35,17 +35,9 @@ abstract final class AppRadius {
   static const sheet = 24.0; // v2 시안 .sheet 위 모서리 24
   static const pill = 999.0;
 
-  // 예전 이름 — 위 네 단계로 모았다
-  static const xs = small;
-  static const sm = small;
-  static const input = medium;
-  static const button = medium;
-  static const thumb = medium;
-  static const card = large;
-
-  static final inputAll = BorderRadius.circular(input);
-  static final buttonAll = BorderRadius.circular(button);
-  static final cardAll = BorderRadius.circular(card);
+  static final inputAll = BorderRadius.circular(medium);
+  static final buttonAll = BorderRadius.circular(medium);
+  static final cardAll = BorderRadius.circular(large);
   static final pillAll = BorderRadius.circular(pill);
 }
 

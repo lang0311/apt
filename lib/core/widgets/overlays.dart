@@ -139,7 +139,7 @@ Future<bool> showConfirmDialog(
     barrierColor: AppColors.scrim,
     builder: (ctx) => Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.card)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.large)),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(

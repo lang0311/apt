@@ -164,7 +164,7 @@ class _CompanionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(AppRadius.thumb);
+    final radius = BorderRadius.circular(AppRadius.medium);
     return Semantics(
       selected: selected,
       inMutuallyExclusiveGroup: true,

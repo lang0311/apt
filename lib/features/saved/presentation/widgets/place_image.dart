@@ -12,7 +12,7 @@ class PlaceImage extends StatelessWidget {
     required this.place,
     required this.width,
     required this.height,
-    this.radius = AppRadius.thumb,
+    this.radius = AppRadius.medium,
     this.iconSize = 22,
     this.iconAlignment = Alignment.center,
   });

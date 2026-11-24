@@ -36,7 +36,7 @@ class CourseRouteMap extends StatelessWidget {
     return SizedBox(
       height: height,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.card),
+        borderRadius: BorderRadius.circular(AppRadius.large),
         child: Stack(
           children: [
             Positioned.fill(

@@ -133,7 +133,7 @@ class AppCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(AppSpacing.md),
     this.color = AppColors.surface,
     this.onTap,
-    this.radius = AppRadius.card,
+    this.radius = AppRadius.large,
   });
 
   final Widget child;

@@ -792,7 +792,7 @@ class _PhotoTile extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadius.thumb),
+          borderRadius: BorderRadius.circular(AppRadius.medium),
           child: SizedBox(
             width: width,
             height: height,

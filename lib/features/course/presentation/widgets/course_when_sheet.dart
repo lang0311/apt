@@ -148,10 +148,10 @@ class _DayChip extends StatelessWidget {
       // v2: 회색 채움 칸, 고른 날은 잉크 채움 (테두리 없음)
       child: Material(
         color: selected ? AppColors.ink : AppColors.fill,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.input)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.medium)),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(AppRadius.input),
+          borderRadius: BorderRadius.circular(AppRadius.medium),
           child: SizedBox(
             width: wide ? 76 : 56,
             child: Column(
@@ -181,10 +181,10 @@ class _CalendarChip extends StatelessWidget {
       excludeSemantics: true,
       child: Material(
         color: AppColors.fill,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.input)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.medium)),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(AppRadius.input),
+          borderRadius: BorderRadius.circular(AppRadius.medium),
           child: const SizedBox(
             width: 56,
             child: Center(child: Icon(LucideIcons.calendar, size: 22, color: AppColors.textPrimary)),
@@ -282,7 +282,7 @@ class _TimeWheelState extends State<_TimeWheel> {
         children: [
           Container(
             height: _extent,
-            decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.sm)),
+            decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadius.small)),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

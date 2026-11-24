@@ -134,10 +134,10 @@ class _PickerField extends StatelessWidget {
         const SizedBox(height: AppSpacing.xs),
         Material(
           color: AppColors.fill,
-          borderRadius: BorderRadius.circular(AppRadius.input),
+          borderRadius: BorderRadius.circular(AppRadius.medium),
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(AppRadius.input),
+            borderRadius: BorderRadius.circular(AppRadius.medium),
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: AppSpacing.inputHeight),
               child: Padding(
