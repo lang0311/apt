@@ -1,0 +1,65 @@
+# iOS 설치 파일(IPA)을 클라우드 Mac에서 만든다. 서명하지 않은 IPA라 Sideloadly 등으로 무료 Apple ID 서명 후 설치한다.
+# 실행: GitHub 레포 → Actions → "iOS build" → Run workflow. 결과는 실행 화면 아래 Artifacts의 apt-ios(1일 뒤 삭제).
+# 키: 레포 Settings → Secrets and variables → Actions의 DEV_JSON(= config/dev.json 내용). 레포에는 키를 두지 않는다(09).
+# 서버: 팀 Azure 배포(팀 docs/DEPLOY_AZURE.md), 배포 웹 앱과 같이 회원가입 · 간편 로그인을 숨긴다.
+name: iOS build
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: 팀 서버 주소
+        default: https://20-196-152-204.nip.io
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.35.5
+          channel: stable
+          cache: true
+
+      - name: 빌드 설정 파일 만들기 (키 값은 출력하지 않음)
+        env:
+          DEV_JSON: ${{ secrets.DEV_JSON }}
+          API_BASE_URL: ${{ inputs.api_base_url }}
+        run: |
+          python3 - <<'EOF'
+          import json, os
+          raw = os.environ.get('DEV_JSON', '').strip()
+          if not raw:
+              print('::warning::DEV_JSON secret이 없어 네이버 지도 키 없이 빌드합니다 (지도는 미리보기 위젯으로 대체)')
+          d = json.loads(raw) if raw else {}
+          d.update(USE_MOCK=False, APT_BACKEND=True, API_BASE_URL=os.environ['API_BASE_URL'],
+                   PUBLIC_SIGNUP=False, SOCIAL_AUTH=False)
+          path = os.path.join(os.environ['RUNNER_TEMP'], 'defines.json')
+          with open(path, 'w') as f:
+              json.dump(d, f)
+          print('keys:', ', '.join(sorted(d)))
+          EOF
+
+      - run: flutter pub get
+
+      - name: iOS 빌드 (서명 없음)
+        run: flutter build ios --release --no-codesign --dart-define-from-file="$RUNNER_TEMP/defines.json"
+
+      - name: IPA로 묶기
+        run: |
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qry apt.ipa Payload
+          ls -lh apt.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apt-ios
+          path: apt.ipa
+          retention-days: 1
