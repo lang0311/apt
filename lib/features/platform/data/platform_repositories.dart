@@ -117,11 +117,7 @@ class PlatformAuthRepository implements AuthRepository {
 
   /// 새 로그인 — 이전 사용자 캐시를 비운다.
   void _startSession(dynamic userJson) {
-    _platform.places.clear();
-    _platform.courses.clear();
-    _platform.partySizes.clear();
-    _platform.partyOwners.clear();
-    _platform.lastCourseId = null;
+    _platform.clearSession();
     _platform.currentUserId = userJson['id'] as String;
   }
 
@@ -137,10 +133,7 @@ class PlatformAuthRepository implements AuthRepository {
       await _platform.post('/auth/logout');
     } finally {
       // 요청이 실패해도 앱에 남은 이 계정의 데이터는 지운다.
-      _platform.places.clear();
-      _platform.courses.clear();
-      _platform.lastCourseId = null;
-      _platform.currentUserId = null;
+      _platform.clearSession();
     }
   }
 

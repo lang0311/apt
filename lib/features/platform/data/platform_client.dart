@@ -26,6 +26,16 @@ class PlatformClient {
   String? lastCourseId;
   String? currentUserId;
 
+  /// 로그인 · 로그아웃 때 이전 계정의 캐시를 모두 비운다. 캐시를 새로 두면 여기에도 넣는다.
+  void clearSession() {
+    places.clear();
+    courses.clear();
+    partySizes.clear();
+    partyOwners.clear();
+    lastCourseId = null;
+    currentUserId = null;
+  }
+
   Future<dynamic> get(String path, [Json? query]) => client.run(
     (d) async => (await d.get<dynamic>(path, queryParameters: query)).data,
   );
