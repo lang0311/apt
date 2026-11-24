@@ -297,6 +297,7 @@ class PlatformPlaceRepository implements PlaceRepository {
     await _platform.me();
     final place = _platform.places[placeId];
     if (place == null) throw const NotFoundFailure();
+    await _platform.recordPlaceView(placeId);
     return PlaceDetail(place: _platform.place(place));
   }
 }

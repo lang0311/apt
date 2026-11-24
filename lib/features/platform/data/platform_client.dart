@@ -138,6 +138,15 @@ class PlatformClient {
     throw const ValidationFailure('장소를 다시 검색하거나 저장 목록을 새로고침해주세요.');
   }
 
+  Future<bool> recordPlaceView(String id) async {
+    try {
+      await post('/me/interactions', {'token': await token(id), 'action': 'place_view'});
+      return true;
+    } on AppFailure {
+      return false;
+    }
+  }
+
   Future<void> save(String id) async {
     await post('/me/places', {'token': await token(id)});
   }
