@@ -166,7 +166,7 @@ void main() {
     await tapText(tester, '카페 온더뷰');
     await tapText(tester, '연남식당');
     await waitFor(tester, find.text('고른 곳 2'));
-    await tapText(tester, '2곳으로 코스 추천받기', scroll: false);
+    await tapFinder(tester, find.textContaining('곳 코스 추천받기'), scroll: false);
 
     // 4/4 기다리는 중 — 단계 표시(파티 코스는 파티원 취향 단계) → 추천 취소 → 3/4로, 고른 장소 유지
     await waitFor(tester, find.text('후보 장소 찾기'));
@@ -174,7 +174,7 @@ void main() {
     await tapText(tester, '추천 취소', scroll: false);
     await expectSnack(tester, '추천을 취소했어요');
     await waitFor(tester, find.text('고른 곳 2'));
-    await tapText(tester, '2곳으로 코스 추천받기', scroll: false);
+    await tapFinder(tester, find.textContaining('곳 코스 추천받기'), scroll: false);
 
     // 4/4
     await waitFor(tester, find.text('코스 저장'), timeout: const Duration(seconds: 20));
@@ -299,7 +299,7 @@ void main() {
     await tapFinder(tester, find.textContaining('목록 '), scroll: false);
     await tapText(tester, '카페 온더뷰');
     await tapText(tester, '연남식당');
-    await tapText(tester, '2곳으로 코스 추천받기', scroll: false);
+    await tapFinder(tester, find.textContaining('곳 코스 추천받기'), scroll: false);
     await waitFor(tester, find.text('코스 저장'), timeout: const Duration(seconds: 25));
     await tester.scrollUntilVisible(find.text('이 코스에 담긴 곳'), 300, scrollable: find.byType(Scrollable).first);
     await tester.pump(const Duration(seconds: 1));
