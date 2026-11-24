@@ -197,6 +197,7 @@ class _CategoryTab extends ConsumerWidget {
       regions.isEmpty || regions.contains(_regionOf(i)) || regions.contains('${_regionOf(i)} ${_dongOf(i)}');
 
   /// 지역 필터 시트용 요약: 지역마다 곳 수 (많은 순, 동네 정보 없음은 맨 아래)
+  // NEEDS BACKEND: 서버 요약에 지역별 곳 수가 없어 앱이 센다(07 D53, D44와 같은 예외)
   static SavedSummary _regionSummary(List<SavedPlaceItem> all) {
     final counts = <String, int>{};
     for (final i in all) {
