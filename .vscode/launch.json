@@ -4,6 +4,22 @@
     "version": "0.2.0",
     "configurations": [
         {
+            // 팀 배포 서버(Azure, 팀 docs/DEPLOY_AZURE.md)에 연결. 계정은 운영자가 발급(공개 가입 막힘)이라
+            // 배포 웹 앱(deploy/build_mobile.ps1)과 같이 회원가입 · 간편 로그인을 숨긴다.
+            "name": "apt (배포 서버)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "toolArgs": [
+                "--dart-define-from-file=config/dev.json",
+                "--dart-define=APT_BACKEND=true",
+                "--dart-define=USE_MOCK=false",
+                "--dart-define=API_BASE_URL=https://20-196-152-204.nip.io",
+                "--dart-define=PUBLIC_SIGNUP=false",
+                "--dart-define=SOCIAL_AUTH=false"
+            ]
+        },
+        {
             "name": "apt (dev)",
             "request": "launch",
             "type": "dart",
