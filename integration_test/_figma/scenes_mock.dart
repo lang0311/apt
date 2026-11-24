@@ -57,7 +57,7 @@ void main() {
     routerOf(tester).pop();
     await tester.pump(const Duration(milliseconds: 600));
     await step('a03', () async {
-      await tapFinder(tester, find.byTooltip('카카오로 로그인'), scroll: false);
+      await tapFinder(tester, find.byTooltip('카카오로 로그인'));
       await waitFor(tester, find.text('서비스 이용에 동의해 주세요'));
       await shot(tester, 'a03_terms');
       await tapText(tester, '전체 동의');
@@ -68,6 +68,11 @@ void main() {
       await tapText(tester, '가입 완료');
       await waitFor(tester, find.textContaining('가입이 끝났어요'));
       await shot(tester, 'a06_signup_done');
+    });
+    await step('b03', () async {
+      await tapText(tester, '시작하기');
+      await waitFor(tester, find.text('홈'));
+      await shot(tester, 'b03_home_first_use');
     });
   });
 
@@ -83,7 +88,8 @@ void main() {
       final fields = find.byType(TextField);
       await typeInto(tester, fields.at(0), 'taken');
       await typeInto(tester, fields.at(1), 'password1');
-      await typeInto(tester, fields.at(2), '여행하는 지상');
+      await findOrScroll(tester, find.text('파티원에게 보이는 이름이에요.')); // 작은 화면에서는 닉네임 칸이 키보드 아래라 스크롤해서 찾는다
+      await typeInto(tester, fields.last, '여행하는 지상'); // 스크롤로 아이디 칸이 사라지면 개수가 줄어서 마지막 칸으로
       await tapText(tester, '가입하기');
       await waitFor(tester, find.text('이미 사용 중인 아이디예요.'));
       await shot(tester, 'a07_id_signup');
@@ -136,7 +142,8 @@ void main() {
       await waitFor(tester, find.bySemanticsLabel('맛집 필터 해제'));
       await shot(tester, 'c03_saved_filtered');
       await tapText(tester, '연남식당');
-      await waitFor(tester, find.text('장소 정보'));
+      // 작은 화면에서는 '장소 정보'가 첫 화면 아래라 아직 안 그려져 있어, 하단 고정 버튼으로 열린 걸 확인한다
+      await waitFor(tester, find.text('이 장소로 코스 만들기'));
       await shot(tester, 'c04_place_detail');
       await scrollDown(tester, dy: -900);
       await shot(tester, 'c05_place_detail_bottom', settleSec: 1);
@@ -144,6 +151,11 @@ void main() {
       await tapText(tester, '변경');
       await waitFor(tester, find.text('보관함 변경하기'));
       await shot(tester, 'c06_collection_change_sheet', settleSec: 1);
+    });
+    await step('c12', () async {
+      routerOf(tester).push(AppRoutes.place('p9'));
+      await waitFor(tester, find.text('성수 아트 갤러리'));
+      await shot(tester, 'c12_place_detail_photo_popup');
     });
   });
 
@@ -270,6 +282,16 @@ void main() {
       await scrollDown(tester, dy: -900);
       await shot(tester, 'e13_ai_result_bottom', settleSec: 1);
       await scrollDown(tester, dy: 900);
+      try {
+        final ai = find.text('AI 추천');
+        await tapFinder(tester, ai);
+        await waitFor(tester, find.text('다른 곳으로 바꾸기'));
+        await shot(tester, 'e20_stop_sheet', settleSec: 1);
+        await tester.tapAt(const Offset(20, 120));
+        await tester.pump(const Duration(milliseconds: 800));
+      } catch (e) {
+        debugPrint('STEPFAIL e20: $e');
+      }
       await tapText(tester, '코스 저장', scroll: false);
       await waitFor(tester, find.text('코스가 저장되었어요'));
       await waitFor(tester, find.text('민지, 랑이에게 알릴까요?'));
@@ -287,6 +309,13 @@ void main() {
     await tapText(tester, '서울 카페 투어');
     await waitFor(tester, find.textContaining(RegExp(r'^일정 \d+곳$')));
     await shot(tester, 'e16_course_detail_saved');
+    await step('e21', () async {
+      await tapFinder(tester, find.bySemanticsLabel('코스 지도 크게 보기'), scroll: false);
+      await waitFor(tester, find.textContaining('직선으로'));
+      await shot(tester, 'e21_course_map_full');
+      routerOf(tester).pop();
+      await tester.pump(const Duration(seconds: 1));
+    });
     await step('e17', () async {
       await tapText(tester, '편집');
       await waitFor(tester, find.text('코스 편집'));

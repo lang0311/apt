@@ -89,7 +89,8 @@ Future<void> launchApp(WidgetTester tester) async {
 /// 기존 회원(Mock: Google)으로 로그인 → 홈
 Future<void> signInExisting(WidgetTester tester) async {
   await launchApp(tester);
-  await tapFinder(tester, find.byTooltip('Google로 로그인'), scroll: false);
+  // 작은 화면(360×640)에서는 간편 로그인이 아래로 밀려 있어 스크롤해서 누른다
+  await tapFinder(tester, find.byTooltip('Google로 로그인'));
   await waitFor(tester, find.byType(HomePage));
 }
 

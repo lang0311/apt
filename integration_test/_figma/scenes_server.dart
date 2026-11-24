@@ -62,7 +62,8 @@ void main() {
       final fields = find.byType(TextField);
       await typeInto(tester, fields.at(0), _user); // 이미 있는 아이디 → 서버가 거절 (계정은 만들어지지 않는다)
       await typeInto(tester, fields.at(1), 'password1');
-      await typeInto(tester, fields.at(2), '여행하는 지상');
+      await findOrScroll(tester, find.text('파티원에게 보이는 이름이에요.')); // 작은 화면에서는 닉네임 칸이 키보드 아래라 스크롤해서 찾는다
+      await typeInto(tester, fields.last, '여행하는 지상'); // 스크롤로 아이디 칸이 사라지면 개수가 줄어서 마지막 칸으로
       await tapText(tester, '가입하기');
       await settle(tester, seconds: 4);
       await shot(tester, 'a07_id_signup');
