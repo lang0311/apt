@@ -348,18 +348,9 @@ class PlatformCourseRepository implements CourseRepository {
     stopNames: [for (final stop in course['itinerary'] as List) ((stop as Map)['name'] ?? '').toString()],
     // 내가 고른 곳은 saved: true (나머지는 AI 추천)
     stopIsAi: [for (final stop in course['itinerary'] as List) (stop as Map)['saved'] != true],
-    startTime: _time(course['start_time']),
+    startTime: PlatformClient.clock(course['start_time']),
     distanceKm: (course['distance_km'] as num?)?.toDouble(),
   );
-
-  /// '11:00' 또는 '11:00:00' → TimeOfDay
-  static TimeOfDay? _time(Object? value) {
-    final parts = (value ?? '').toString().split(':');
-    if (parts.length < 2) return null;
-    final h = int.tryParse(parts[0]);
-    final m = int.tryParse(parts[1]);
-    return h == null || m == null ? null : TimeOfDay(hour: h, minute: m);
-  }
 
   /// 지역 줄: 첫 장소 주소의 구 · 시 ('서울 강서구 화곡로 416' → '강서구'). 주소가 없으면 비운다.
   static String? _region(List itinerary) {

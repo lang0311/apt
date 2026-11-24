@@ -162,16 +162,13 @@ class PlatformClient {
 
   Course course(Json json) {
     courses[json['id'] as String] = json;
-    final time = (json['start_time'] as String?)?.split(':');
     return Course(
       id: json['id'] as String,
       title: (json['title'] ?? '추천 코스').toString(),
       date: DateTime.tryParse((json['date'] ?? '').toString()),
       isParty: json['party_id'] != null,
       partyId: json['party_id'] as String?,
-      startTime: time == null
-          ? null
-          : TimeOfDay(hour: int.parse(time[0]), minute: int.parse(time[1])),
+      startTime: clock(json['start_time']),
       memberCount: json['party_id'] == null ? 1 : partySizes[json['party_id']] ?? 1,
       // NEEDS BACKEND: 서버가 확정한 코스의 수정을 409로 막아 저장한 코스는 편집을 숨긴다.
       // 확정 후 수정이 허용되면 연다 (07 §3, 06 §7)
@@ -188,20 +185,20 @@ class PlatformClient {
   static EstimatedSchedule? estimatedSchedule(Object? tasteProfile) {
     final audit = tasteProfile is Map ? tasteProfile['route_optimization'] : null;
     if (audit is! Map) return null;
-    final start = _clock(audit['start_time']);
+    final start = clock(audit['start_time']);
     final rows = audit['estimated_schedule'];
     if (start == null || rows is! List || rows.isEmpty) return null;
     final stops = <({String name, TimeOfDay arrival})>[];
     for (final row in rows) {
-      final arrival = row is Map ? _clock(row['estimated_arrival']) : null;
+      final arrival = row is Map ? clock(row['estimated_arrival']) : null;
       if (arrival == null) return null;
       stops.add((name: (row as Map)['name'].toString(), arrival: arrival));
     }
     return EstimatedSchedule(start: start, stops: stops, usedDefaultStart: audit['used_default_start'] == true);
   }
 
-  /// 'HH:mm' → TimeOfDay
-  static TimeOfDay? _clock(Object? value) {
+  /// '11:00' 또는 '11:00:00' → TimeOfDay. 값이 없거나 모양이 다르면 null (코스 · 목록 · 예상 일정이 같이 쓴다)
+  static TimeOfDay? clock(Object? value) {
     final parts = (value ?? '').toString().split(':');
     if (parts.length < 2) return null;
     final h = int.tryParse(parts[0]), m = int.tryParse(parts[1]);
