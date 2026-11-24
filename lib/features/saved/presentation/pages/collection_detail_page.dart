@@ -96,7 +96,7 @@ class _CollectionDetailPageState extends ConsumerState<CollectionDetailPage> {
       onPressed: onPressed,
     );
     final empty = collection.placeCount == 0;
-    final updated = collection.updatedAt == null ? null : formatRelative(collection.updatedAt!);
+    final updated = collection.updatedAt == null ? null : formatRecentDate(collection.updatedAt!);
     final urls = collection.thumbnailUrls;
     Widget tile(int i) => i < urls.length ? AppNetworkImage(url: urls[i], radius: 0) : const ColoredBox(color: AppColors.fill);
     return Column(

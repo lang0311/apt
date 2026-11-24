@@ -253,9 +253,9 @@ class _DetailRow extends StatelessWidget {
   );
 }
 
-/// "10월 22일 (목) · 오전 11:00 출발"
+/// "11.24 (월) · 오후 12:00 출발" (v2-7, 요약 칸과 같은 날짜 모양)
 String courseMetaLine({DateTime? date, TimeOfDay? start}) =>
-    [if (date != null) formatMonthDayWeekday(date), if (start != null) '${formatTimeOfDay(start)} 출발'].join(' · ');
+    [if (date != null) formatShortDate(date), if (start != null) '${formatTimeOfDay(start)} 출발'].join(' · ');
 
 /// 장소 사이 직선 거리 합(m). 팀 서버 `distance_km`와 같은 방식(`route_type: straight_line`)이라 편집 뒤에도 앱에서 다시 센다.
 /// 좌표가 있는 장소가 둘보다 적으면 null
@@ -283,7 +283,7 @@ class CourseStats extends StatelessWidget {
   Widget build(BuildContext context) {
     final meters = straightDistanceMeters(stops);
     final cells = <(String, String)>[
-      if (date != null) ('날짜', '${date!.month}.${date!.day} (${weekdayLabel(date!)})'),
+      if (date != null) ('날짜', formatShortDate(date!)),
       if (start != null) ('출발', formatTimeOfDay(start!)),
       if (meters != null) ('직선 거리', formatDistance(meters)),
     ];
