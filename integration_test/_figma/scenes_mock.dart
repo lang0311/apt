@@ -262,7 +262,7 @@ void main() {
       await tapText(tester, '연남식당');
       await waitFor(tester, find.text('고른 곳 2'));
       await shot(tester, 'e10_places_list', settleSec: 2);
-      await tapText(tester, '2곳으로 코스 추천받기', scroll: false);
+      await tapFinder(tester, find.textContaining('코스 추천받기'), scroll: false);
       await waitFor(tester, find.text('후보 장소 찾기'));
       await shot(tester, 'e11_ai_waiting', settleSec: 0);
       await waitFor(tester, find.text('코스 저장'), timeout: const Duration(seconds: 25));
