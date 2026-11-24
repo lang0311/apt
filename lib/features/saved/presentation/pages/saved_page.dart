@@ -192,6 +192,13 @@ class _CategoryTab extends ConsumerWidget {
     return a.isEmpty || a == i.place.district ? _noArea : a;
   }
 
+  /// 묶음 순서: 곳 수가 많은 쪽 먼저, '동네 정보 없음'은 개수와 상관없이 맨 끝
+  static int _manyFirstNoAreaLast(String aKey, int aCount, String bKey, int bCount) => aKey == _noArea
+      ? 1
+      : bKey == _noArea
+      ? -1
+      : bCount.compareTo(aCount);
+
   /// 지역 필터 값은 '마포구' 또는 동네까지 '마포구 연남동' (동네 줄을 눌렀을 때, 07 D59)
   static bool _inRegions(SavedPlaceItem i, Set<String> regions) =>
       regions.isEmpty || regions.contains(_regionOf(i)) || regions.contains('${_regionOf(i)} ${_dongOf(i)}');
@@ -204,13 +211,7 @@ class _CategoryTab extends ConsumerWidget {
       counts.update(_regionOf(i), (n) => n + 1, ifAbsent: () => 1);
     }
     final keys = counts.keys.toList()
-      ..sort(
-        (a, b) => a == _noArea
-            ? 1
-            : b == _noArea
-            ? -1
-            : counts[b]!.compareTo(counts[a]!),
-      );
+      ..sort((a, b) => _manyFirstNoAreaLast(a, counts[a]!, b, counts[b]!));
     return SavedSummary(
       totalCount: all.length,
       categories: [for (final k in keys) PlaceCategory(key: k, label: k, count: counts[k]!)],
@@ -419,13 +420,7 @@ class _GroupedRowsState extends State<_GroupedRows> {
     for (final i in items) {
       map.putIfAbsent(_CategoryTab._dongOf(i), () => []).add(i);
     }
-    return map.entries.toList()..sort(
-      (a, b) => a.key == _CategoryTab._noArea
-          ? 1
-          : b.key == _CategoryTab._noArea
-          ? -1
-          : b.value.length.compareTo(a.value.length),
-    );
+    return map.entries.toList()..sort((a, b) => _CategoryTab._manyFirstNoAreaLast(a.key, a.value.length, b.key, b.value.length));
   }
 
   @override
@@ -452,13 +447,7 @@ class _GroupedRowsState extends State<_GroupedRows> {
           map.putIfAbsent(key, () => []).add(i);
         }
         final groups = map.entries.toList()
-          ..sort(
-            (a, b) => a.key == _CategoryTab._noArea
-                ? 1
-                : b.key == _CategoryTab._noArea
-                ? -1
-                : b.value.length.compareTo(a.value.length),
-          );
+          ..sort((a, b) => _CategoryTab._manyFirstNoAreaLast(a.key, a.value.length, b.key, b.value.length));
         // 묶음이 하나면 제목 없이 목록만
         if (groups.length == 1) {
           return DividedRows(
